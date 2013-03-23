@@ -1,3 +1,3 @@
 core
 ====
-main comodojo core repo
+Main comodojo core repo

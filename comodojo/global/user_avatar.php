@@ -3,11 +3,11 @@
 /** 
  * user_avatar.php
  * 
- * Return image url/binary from gravatar
+ * Returns user avatar as image link
  *
  * @package		Comodojo PHP Backend
  * @author		comodojo.org
- * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3 (all but gravatar func)
  */
@@ -37,12 +37,27 @@ function get_gravatar( $email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts
 	return $url;
 }
 
+/**
+ * Get avatar for current user
+ * 
+ * @param string $size The image size
+ * @return String containing avatar's url
+ */
 function get_current_user_avatar($size=64) {
 	
 	return get_user_avatar(COMODOJO_USER_NAME,COMODOJO_USER_EMAIL,COMODOJO_USER_GRAVATAR,$size);
 	
 }
 
+/**
+ * Get avatar for generic user (if any)
+ *
+ * @param string $userName The user name
+ * @param string $userEmail The user email
+ * @param bool $gravatar If true, avatar will be generated via Gravatar
+ * @param string $size The image size
+ * @return String containing avatar's url
+ */
 function get_user_avatar($userName, $userEmail, $gravatar, $size=64) {
 	$userImage = COMODOJO_SITE_PATH . COMODOJO_HOME_FOLDER . COMODOJO_USERS_FOLDER . $userName . '/._avatar.png';
 	if ($gravatar) {
@@ -52,13 +67,11 @@ function get_user_avatar($userName, $userEmail, $gravatar, $size=64) {
 		comodojo_load_resource('image_tools');
 		$it = new image_tools();
 		$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . $it->thumbnail($userImage,$size);
-		//$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER . COMODOJO_USERS_FOLDER . $userName . '._avatar.png';
 	}
 	else {
 		comodojo_load_resource('image_tools');
 		$it = new image_tools();
 		$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$it->thumbnail(COMODOJO_SITE_PATH . 'comodojo/images/logo.png',$size);
-		//$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . 'comodojo/icons/64x64/logo.png';
 	}
 	
 	return $image;

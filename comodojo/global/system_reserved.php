@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Reserved "comodojo" application and mehtod.
+ * Reserved "system" application and mehtod.
  * 
- * It serves requests in the reserver comodojo application space, such as comodojo.login or comodojo.version
- *
  * @package		Comodojo ServerSide Core Packages
  * @author		comodojo.org
- * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */

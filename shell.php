@@ -1,7 +1,9 @@
 <?php
 
 /** 
- * shell.php
+ * startup.php
+ * 
+ * backend class in charge of building environment & controls for a new instance of Comodojo;
  *
  * @package		Comodojo ServerSide Core Packages
  * @author		comodojo.org
@@ -42,10 +44,19 @@ class shell extends comodojo_basic {
 			<link rel=\"stylesheet\" type=\"text/css\" href=\"comodojo/javascript/dijit/themes/" . COMODOJO_SITE_THEME_DOJO . "/" . COMODOJO_SITE_THEME_DOJO . ".css\" />
 			<script type=\"text/javascript\">
 				var dojoConfig = {
-					async: false,
+					async: true,
 					parseOnLoad: false,
-					baseUrl: '" . COMODOJO_JS_BASE_URL . "',
-					waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',
+					baseUrl: '" . COMODOJO_JS_BASE_URL . "',";
+		if (COMODOJO_JS_XD_LOADING) {
+		$loader .= "
+					dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
+					packages: [{
+						name: 'comodojo',
+						location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
+					}],
+					waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
+		}
+		$loader .= "
 					locale: '" . $this->locale . "',
 					has: {
 						'dojo-amd-factory-scan': false,
@@ -57,10 +68,7 @@ class shell extends comodojo_basic {
 			</script>
 			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js') . "\"></script>
 			<script type=\"text/javascript\">
-				dojo.registerModulePath('custom', '../custom');
-			</script>
-			<script type=\"text/javascript\">
-				require([\"dojo/ready\",\"custom/Shell\"], function(ready,shell){
+				require([\"dojo/ready\",\"comodojo/Shell\"], function(ready,shell){
 					ready(function(){
 						var s = new shell({
 							shellNode: 'shell_main',
@@ -93,10 +101,19 @@ class shell extends comodojo_basic {
 			<link rel=\"stylesheet\" type=\"text/css\" href=\"comodojo/javascript/dijit/themes/" . COMODOJO_SITE_THEME_DOJO . "/" . COMODOJO_SITE_THEME_DOJO . ".css\" />
 			<script type=\"text/javascript\">
 				var dojoConfig = {
-					async: false,
+					async: true,
 					parseOnLoad: false,
-					baseUrl: '" . COMODOJO_JS_BASE_URL . "',
-					waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',
+					baseUrl: '" . COMODOJO_JS_BASE_URL . "',";
+		if (COMODOJO_JS_XD_LOADING) {
+			$loader .= "
+					dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
+					packages: [{
+						name: 'comodojo',
+						location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
+					}],
+					waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
+		}
+		$loader .= "
 					locale: '" . $this->locale . "',
 					has: {
 						'dojo-amd-factory-scan': false,

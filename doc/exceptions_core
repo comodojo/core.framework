@@ -1,0 +1,167 @@
+1000 DATABASE
+	01 Unknown database datamodel
+	02 Invalid parameters for database::store
+	03 Invalid parameters for database::update
+	04 Invalid parameters for database::read
+	05 Invalid parameters for database::delete
+	06 Invalid parameters for database::deleteAll
+	07 Invalid parameters for database::createTable
+	08 Invalid parameters for database::dropTable
+	09 Missing keychain account name for auto_database
+	10 Invalid table name
+1100 filesystem
+	01 Invalid file or directory reference
+	02 No file founded or no acl for this directory
+	03 Cannot write permissions even if current user has enough privileges
+	04 Error creating new file
+	05 File cannot be readed or it is a directory
+	06 File cannot be removed
+	07 File cannot be copied
+	08 Error creating new directory
+	09 File cannot be moved
+	10 Cannot create user home without username
+	11 Error listing resource
+1200 CACHE
+	01 Error writing to cache folder
+	02 Cannot cache something different from array or string
+	03 Error reading from cache file
+	04 Unsupported cache decoding
+1300 ROLE_MAPPER
+	01 Error mapping roles (bootstrapping)
+1400 LDAP
+	01 Invalid LDAP parameters
+	02 Invalid LDAP user/pass
+	03 Unable to connect to ldap server
+	04 Unable to list directory
+	05 Invalid user to search for
+	06 Invalid filter to search for
+1500 HTTPTALK
+	01 Cannot init data channel
+	02 Invalid remote host address
+	03 Invalid data
+	04 Cannot exec http request
+	05 NTLM auth with FSOCKS not supported
+1600 SSH
+	01 Invalid address, user or password
+	02 Failed authentication or network unavailable
+	03 Invalid command
+	04 Invalid remote file
+	05 Error retrieving remote file
+	05 Error writing remote file
+	07 Error writing local file
+1700 MAIL
+	00 [generic]
+	01 Invalid mail server or mail disabled
+	02 Invalid mail RCPT TO or CC
+	03 Invalid mail address: __ADDRESS__
+1800 IMAGE_TOOLS
+	01 No GD or EXIF extensions; image tools not available
+	02 Invalid image type to read exif
+	03 Invalid image reference
+	04 Invalid image
+	05 Invalid image dimensions
+	06 Cannot resample image
+	07 Cannot save image
+	08 Invalid percentage
+	09 Invalid output format
+1900 AUTHENTICATION
+	01 Invalid username or password provided
+	02 Unsupported authentication model
+2000 RPC_CLIENT
+	01 Unknown transport
+	02 Cannot init sender:
+	03 RPC Conversation error:
+2100 KERNEL
+	01 Inconsistent request: application not registered or not allowed
+	02 Request not sustainable: wrong class implementation.
+	03 Unsustainable request: method not registered
+	04 Unsustainable request: relative method not declared
+	05 Unsustainable request: parameters mismatch
+	06 Inconsistent request: application or method not specified
+	07 Session lost
+2200 SERVICES (codes are used as status code, so no explicit error code for services
+	services disabled
+	unknown service or service disabled
+	conversation error
+	Origin not allowed
+	Internal Server Error
+2300 RPC_SERVER
+	/* RPC server has it's own error code. Visit http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php for more info */
+	/* In addition, comodojo COULD return it's own error code (one of the following messages)
+	-32098 Server Error - RPC closed
+	-32097 Unallowed Transport
+	-32096 Encrypted transport not available
+	-32095 PlainText transport not available
+2400 KEYCHAIN
+	01 Undefined or invalid account in system keychain
+	02 Not enough privileges to delete selected account
+	03 Undefined or invalid account to delete
+	04 Not enough privileges to access selected account
+	05 Undefined or invalid account
+	06 Not enough privileges to create or edit account in selected keychain
+	07 Missing account name or password
+	08 Missing system account name
+	09 Missing account keyname or keypass
+	10 Wrong password
+2500 CRON & CRONJOBS
+	01 Could not fork job
+	02 Could not create work log
+	03 Could not close work log
+	04 cron disabled
+	05 No jobs to process, exiting
+	//06 Cron extender runs only in php-cli
+	07 
+	08 
+	09 
+	10 Could not get job list
+2600 USER_MANAGEMENT
+	01 Invalid username, wrong old password or empty new password provided
+	02 Password can be changed only by user
+	03 Unknown user
+	04 Invalid username
+	05 Only administrators can manage users
+	06 Wrong password provided
+	07 Same password provided or error changing password
+	08 Error resetting password
+	09 Invalid user identifier
+	10 Error enabling/disabling user
+	11 Error deleting user
+	12 
+	13 
+	14 
+	15 
+	16 
+	17 
+	18 
+	19 
+	20 
+2700 ROLES_MANAGEMENT
+	01 Invalid reference or description
+	02 Invalid role identifier
+	03 Cannot modify a protected role
+	04 Only administrators can manage roles
+	05 Invalid role reference
+	06 
+	07 
+	08 
+	09	
+2800 REGISTRATION
+	01 Registrations are closed
+	02 Cannot register: userName is in use
+	03 Cannot find request id
+	04 Only administrators can manage requests
+	05 
+	06 
+	07 
+	08 
+	09
+2900 SERVICE_MANAGEMENT
+	01 Unreadable service properties file
+	02 Cannot find service properties file
+	03 Cannot delete service file
+	04 
+	05 
+	06 
+	07 
+	08 
+	09

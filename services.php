@@ -15,6 +15,8 @@
 require 'comodojo/global/comodojo_basic.php';
 
 class services extends comodojo_basic {
+
+	public $script_name = 'services.php';
 	
 	public $use_session_transport = false;
 	

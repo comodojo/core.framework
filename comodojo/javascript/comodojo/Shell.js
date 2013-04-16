@@ -595,7 +595,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			history: function() {
 				var i,o = '';
 				for (i=0;i<myself.commandHistory.length-1;i++) { o += '<li>'+myself.commandHistory[i]+'</li>'; }
-					myself.resultOnScreen(lang.replace('<p> + Commands history:<ul>{0}</ul></p>',[o]));
+					myself.resultOnScreen(lang.replace('<p> + Commands history:<ol>{0}</ol></p>',[o]));
 			},
 			
 			output: function(params) {

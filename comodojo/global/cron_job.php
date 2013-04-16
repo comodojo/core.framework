@@ -174,11 +174,11 @@ class cron_job {
 		
 		try{
 			$db = new database();
-			$db->setTable("cron_worklog");
-			$db->returnId = true;
-			$db->setKeys(Array("pid","name","job","status","start"));
-			$db->setValues(Array($this->should_get_pid ? getmypid() : $this->pid,$this->job_name,$this->job_class,'STARTED',$this->start_timestamp));
-			$result = $db->store();
+			$result = $db->table("cron_worklog")
+				->return_id()
+				->keys(Array("pid","name","job","status","start"))
+				->values(Array($this->should_get_pid ? getmypid() : $this->pid,$this->job_name,$this->job_class,'STARTED',$this->start_timestamp))
+				->store();
 		}
 		catch (Exception $e) {
 			unset($db);
@@ -200,11 +200,12 @@ class cron_job {
 		
 		try{
 			$db = new database();
-			$db->setTable("cron_worklog");
-			$db->setKeys(Array("status","success","result","end"));
-			$db->setValues(Array("FINISHED",$this->job_success,$this->job_result,$this->end_timestamp));
-			$db->setWhere(Array("id","=",$this->worklog_id));
-			$result = $db->update();
+			$result = $db
+				->table("cron_worklog")
+				->keys(Array(Array("status","success","result","end"))
+				->values(Array("FINISHED",$this->job_success,$this->job_result,$this->end_timestamp))
+				->where("id","=",$this->worklog_id)
+				->update();
 		}
 		catch (Exception $e) {
 			unset($db);

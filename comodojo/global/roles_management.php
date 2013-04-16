@@ -43,14 +43,8 @@ class roles_management {
 		comodojo_load_resource('database');
 		
 		try {
-			
 			$db = new database();
-			
-			$db->setTable('roles');
-			$db->setKeys(Array("id","reference","description"));
-			
-			$result = $db->read();
-			
+			$result = $db->table("roles")->keys(Array("id","reference","description"))->get();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -79,12 +73,7 @@ class roles_management {
 		try {
 			
 			$db = new database();
-			
-			$db->setTable('roles');
-			$db->setKeys(Array("reference","description"));
-			$db->setWhere(Array("id","=",$id));
-			$result = $db->read();
-			
+			$result = $db->table("roles")->keys(Array("reference","description"))->where("id","=",$id)->get();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -117,16 +106,8 @@ class roles_management {
 		}		
 		
 		try {
-			
 			$db = new database();
-			
-			$db->setTable('roles');
-			$db->setKeys(Array("reference","description"));
-			$db->setValues(Array($reference, $description));
-			$db->returnId = true;
-			
-			$result = $db->store();
-			
+			$result = $db->return_id()->table("roles")->keys(Array("reference","description"))->values(Array($reference, $description))->store();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -165,16 +146,8 @@ class roles_management {
 		}
 		
 		try {
-			
 			$db = new database();
-			
-			$db->setTable('roles');
-			$db->setKeys(Array("reference","description"));
-			$db->setValues(Array($reference, $description));
-			$db->setWhere(Array("id","=",$id));
-			
-			$result = $db->update();
-			
+			$result = $db->table("roles")->keys(Array("reference","description"))->values(Array($reference, $description))->where("id","=",$id)->update();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -211,14 +184,8 @@ class roles_management {
 		}
 		
 		try {
-			
 			$db = new database();
-			
-			$db->setTable('roles');
-			$db->setWhere(Array('id','=',$id));
-			
-			$result = $db->delete();
-			
+			$result = $db->table("roles")->where("id","=",$id)->delete();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -245,15 +212,8 @@ class roles_management {
 		comodojo_load_resource('database');
 		
 		try {
-			
 			$db = new database();
-			
-			$db->setTable('roles');
-			$db->setKeys(Array("id"));
-			$db->setWhere(Array('reference','=',$reference));			
-			
-			$result = $db->read();
-			
+			$result = $db->table("roles")->keys("id")->where('reference','=',$reference)->get();
 		}
 		catch (Exception $e){
 			throw $e;

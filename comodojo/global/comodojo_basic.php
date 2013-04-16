@@ -363,10 +363,7 @@ class comodojo_basic {
 		comodojo_load_resource('database');
 		try {
 			$db = new database();
-			$db->setTable("options");
-			$db->setKeys("*");
-			$db->setWhere(Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER));
-			$result = $db->read();
+			$result = $db->table("options")->keys("*")->where("siteId","=",COMODOJO_UNIQUE_IDENTIFIER)->get();
 		} catch (Exception $e) {
 			comodojo_debug('Error retrieving base configuration: '.$e->getMessage(),'ERROR','comodojo_basic');
 			return false;

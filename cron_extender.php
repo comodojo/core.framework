@@ -132,10 +132,7 @@ class cron_extender extends comodojo_basic {
 		
 		try{
 			$db = new database();
-			$db->setTable("cron");
-			$db->setKeys("*");
-			$db->setWhere(Array("enabled","=",true));
-			$result = $db->read();
+			$db->table("cron")->keys("*")->where("enabled","=",true)->get();
 		}
 		catch (Exception $e) {
 			comodojo_debug($e->getMessage(),'ERROR','cron');
@@ -174,25 +171,19 @@ class cron_extender extends comodojo_basic {
 		
 		if (empty($this->jobs)) return;
 		
-		$where = Array();
-		
-		foreach ($this->jobs as $job) {
-			if (empty($where)) {
-				array_push($where,Array('id','=',$job['id']));
-			}
-			else {
-				array_push($where,"OR");
-				array_push($where,Array('id','=',$job['id']));
-			}
-		}
-		
+		$run = false;
+
 		try{
 			$db = new database();
-			$db->setTable("cron");
-			$db->setKeys(Array('last_run'));
-			$db->setValues(Array($this->timestamp));
-			$db->setWhere($where);
-			$result = $db->update();
+			$result = $db->table("cron")->keys("last_run")->values($this->timestamp);
+			foreach ($this->jobs as $job) {
+				if (!$run) {
+					$result = $result->where('id','=',$job['id']);
+					$run = true;
+				}
+				else $result = $result->or_where('id','=',$job['id']);
+			}
+			$result = $result->update();
 		}
 		catch (Exception $e) {
 			unset($db);

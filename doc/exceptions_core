@@ -2,13 +2,30 @@
 	01 Unknown database datamodel
 	02 Invalid parameters for database::store
 	03 Invalid parameters for database::update
-	04 Invalid parameters for database::read
+	04 Invalid parameters for database::get
 	05 Invalid parameters for database::delete
 	06 Invalid parameters for database::deleteAll
 	07 Invalid parameters for database::createTable
 	08 Invalid parameters for database::dropTable
 	09 Missing keychain account name for auto_database
 	10 Invalid table name
+	11 Invalid key/s
+	12 Invalid order by column
+	13 
+	14 
+	15 
+	16 Invalid parameters for database::empty
+	17 Invalid syntax for a where clause
+	18 Invalid parameters for database::delete
+	19 Invalid parameters for database::join
+	20 Invalid parameters for database::using
+	21 Invalid syntax for a on clause
+	22 Invalid parameters for database::transform
+	23 Invalid parameters for database::drop
+	24 Invalid parameters for database::update
+	25 Could not update multiple values with database::update
+	26 Invalid syntax for column definition
+	27 Invalid parameters for database::create_table
 1100 filesystem
 	01 Invalid file or directory reference
 	02 No file founded or no acl for this directory

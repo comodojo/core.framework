@@ -61,10 +61,11 @@ class keychain {
 		
 		try {
 			$db = new database();
-			$db->setTable('keychains');
-			$db->setKeys(Array('account_name','description','keychain','keyUser','keyPass','type','name','host','port','model','prefix','custom'));
-			$db->setWhere(Array(Array("account_name","=",$account_name),"AND",Array("keychain","=",$keychain)));
-			$result = $db->read();
+			$result = $db->table('keychains')
+				->keys(Array('account_name','description','keychain','keyUser','keyPass','type','name','host','port','model','prefix','custom'))
+				->where("account_name","=",$account_name)
+				->and_where("keychain","=",$keychain)
+				->get();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -118,10 +119,9 @@ class keychain {
 		
 		try {
 			$db = new database();
-			$db->setTable('keychains');
-			$db->setKeys(Array('id','account_name','type','keychain'));
-			if (COMODOJO_USER_ROLE != 1) $db->setWhere(Array("keychain","=",COMODOJO_USER_NAME));
-			$result = $db->read();
+			$result = $db->table('keychains')->keys(Array('id','account_name','type','keychain'));
+			if (COMODOJO_USER_ROLE != 1) $result = $result->where("keychain","=",COMODOJO_USER_NAME);
+			$result = $result->get();
 		}
 		catch (Exception $e){
 			throw $e;
@@ -191,22 +191,27 @@ class keychain {
 		//Check if account exists
 		try {
 			$db = new database();
-			$db->setTable('keychains');
-			$db->setKeys(Array('keyUser','keyPass','type','name','host','port','model','prefix','custom'));
-			$db->setWhere(Array(Array("account_name","=",$account_name),"AND",Array("keychain","=",$keychain)));
-			$result = $db->read();
+			$result = $db->table('keychains')
+				->keys(Array('keyUser','keyPass','type','name','host','port','model','prefix','custom'))
+				->where("account_name","=",$account_name)
+				->and_where("keychain","=",$keychain)
+				->get();
 			
-			//$db->cleanup()
+			$db->clean();
+
 			if ($result['resultLength'] == 0) {
-				$db->setKeys(Array('account_name','description','keyUser','keyPass','type','name','host','port','model','prefix','custom','keychain'));
-				$db->setValues(Array($account_name,$description,$encrypted_keyUser,$encrypted_keyPass,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom,$keychain));
-				$result = $db->store();
+				$result = $db->table('keychains')
+					->keys(Array('account_name','description','keyUser','keyPass','type','name','host','port','model','prefix','custom','keychain'))
+					->values(Array($account_name,$description,$encrypted_keyUser,$encrypted_keyPass,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom,$keychain))
+					->store();
 			}
 			else {
-				$db->setKeys(Array('description','keyUser','keyPass','type','name','host','port','model','prefix','custom'));
-				$db->setValues(Array($description,$encrypted_keyUser,$encrypted_keyPass,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom));
-				$db->setWhere(Array(Array('account_name','=',$account_name), 'AND', Array('keychain','=',$keychain)));
-				$result = $db->update();
+				$result = $db->table('keychains')
+					->keys(Array('description','keyUser','keyPass','type','name','host','port','model','prefix','custom'))
+					->values(Array($description,$encrypted_keyUser,$encrypted_keyPass,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
+					->where('account_name','=',$account_name)
+					->and_where('keychain','=',$keychain)
+					->update();
 			}
 			
 		}
@@ -242,9 +247,10 @@ class keychain {
 		
 		try {
 			$db = new database();
-			$db->setTable('keychains');
-			$db->setWhere(Array(Array("account_name","=",$account_name),"AND",Array("keychain","=",$keychain)));
-			$result = $db->delete();
+			$result = $db->table('keychains')
+				->where("account_name","=",$account_name)
+				->and_where("keychain","=",$keychain)
+				->delete();
 		}
 		catch (Exception $e){
 			$events->record('keychain_delete_account', $account_name.':'.$keychain, false);
@@ -277,10 +283,7 @@ class keychain {
 		else {
 			try {
 				$db = new database();
-				$db->setTable('keychains');
-				$db->setKeys(Array("keychain"));
-				$db->setGroup("keychain");
-				$result = $db->read();
+				$result = $db->table('keychains')->keys("keychain")->group_by("keychain")->get();
 			}
 			catch (Exception $e){
 				throw $e;
@@ -308,10 +311,11 @@ class keychain {
 		
 		try {
 			$db = new database();
-			$db->setTable('keychains');
-			$db->setKeys(Array('keyUser','keyPass','type','name','host','port','model','prefix','custom'));
-			$db->setWhere(Array(Array("account_name","=",$system_account_name),"AND",Array("keychain","=","SYSTEM")));
-			$result = $db->read();
+			$result = $db->table('keychains')
+				->keys(Array('keyUser','keyPass','type','name','host','port','model','prefix','custom'))
+				->where("account_name","=",$system_account_name)
+				->and_where("keychain","=","SYSTEM")
+				->get();
 		}
 		catch (Exception $e){
 			$events->record('keychain_use_system_account', $account_name.':'.$keychain, false);

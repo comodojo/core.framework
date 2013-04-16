@@ -92,52 +92,24 @@ class events {
 			}
 		}
 		
-		// compute where
-		$_where = array();
-		
-		if (@$params['type'] != false) {
-			array_push($_where,Array("type","=",$params['type']));
-		}
-		if (@$params['referTo'] != false) {
-			if(sizeof($_where) != 0) array_push($_where,"AND");
-			array_push($_where,Array("referTo","=",$params['referTo']));
-		}
-		if (@$params['success'] != false) {
-			if(sizeof($_where) != 0) array_push($_where,"AND");
-			array_push($_where,Array("success","=",$params['success']));
-		}
-		if (@$params['userName'] != false) {
-			if(sizeof($_where) != 0) array_push($_where,"AND");
-			array_push($_where,Array("userName","=",$params['userName']));
-		}
-		if (@$params['host'] != false) {
-			if(sizeof($_where) != 0) array_push($_where,"AND");
-			array_push($_where,Array("host","=",$params['host']));
-		}
-		if (@$params['browser'] != false) {
-			if(sizeof($_where) != 0) array_push($_where,"AND");
-			array_push($_where,Array("browser","=",$params['browser']));
-		}
-		if (@$params['OS'] != false) {
-			if(sizeof($_where) != 0) array_push($_where,"AND");
-			array_push($_where,Array("OS","=",$params['OS']));
-		}
-		if (@$params['start'] != false AND @$params['end'] != false) {
-			//if(sizeof($_where) != 0) array_push($_where,"AND");
-			//array_push($_where,Array("OS","=",$params['OS']));
-		}
-		
+		$run = false;
+
 		try {
 			$db = new database();
-			$db->setTable("events");
-			$db->setKeys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"));
-			$db->addOrder("timestamp","DESC");
-			if(sizeof($_where) != 0) $db->setWhere($_where);
-			if ($limit != 0) {
-				if ($offset == 0) $db->setLimit(intval($limit,10));
-				else $db->setLimit(intval($offset,10),intval($limit,10));
+			$result = $db
+				->table("events")
+				->keys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"))
+				->order("timestamp","DESC");
+			foreach ($this->params as $param->$value) {
+				if (!$run) {
+					$result = $result->where($param,'=',$value);
+					$run = true;
+				}
+				else {
+					$result = $result->and_where($param,'=',$value);
+				}
 			}
-			$result = $db->read();
+			$result = $result->get($limit,$offset);
 		}
 		catch (Exception $e) {
 			comodojo_debug('Error retrieving events: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','events');
@@ -154,15 +126,12 @@ class events {
 		
 		try {
 			$db = new database();
-			$db->setTable("events");
-			$db->setKeys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"));
-			$db->addOrder("timestamp","DESC");
-			$db->setWhere(Array("sessionId","=",$session_id));
-			if ($limit !== false) {
-				if ($offset == 0) $db->setLimit(intval($limit,10));
-				else $db->setLimit(intval($offset,10),intval($limit,10));
-			}
-			$result = $db->read();
+			$result = $db
+				->table("events")
+				->keys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"))
+				->order_by("timestamp","DESC")
+				->where("sessionId","=",$session_id)
+				->get($limit,$offset);
 		}
 		catch (Exception $e) {
 			comodojo_debug('Error following session: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','events');
@@ -247,9 +216,7 @@ class events {
 		
 		try {
 			$db = new database();
-			$db->setTable("events");
-			$db->addValues($sArray);
-			$result = $db->store();
+			$result = $db->table("events")->values($sArray)->store();
 		} catch (Exception $e) {
 			comodojo_debug('Error recording event ',$sArray[1].' about session '.session_id(),'ERROR','events');
 			throw $e;
@@ -270,19 +237,27 @@ class events {
 		
 		try {
 			$db = new database();
-			$db->setTable("events");
-			$db->setKeys(Array('userAgent'));
-			$db->setWhere(Array(Array('browser','IS',NULL), 'AND', Array('OS','IS',NULL)));
-			$db->setGroup('userAgent');
-			$result = $db->read();
+			
+			$result = $db
+				->table("events")
+				->keys("userAgent")
+				->where("browser","IS",NULL)
+				->and_where("OS","IS",NULL)
+				->group_by("userAgent")
+				->get();
+			
 			comodojo_debug('There are '.$result['resultLength'].' user agent class to consolidate.','INFO','events');
+			
 			foreach ($result['result'] as $ua) {
 				$db->cleanup();
-				$db->setTable("events");
-				$db->setKeys(Array('browser','OS'));
-				$db->setWhere(Array(Array('userAgent','=',$ua['userAgent']), 'AND', Array('browser','IS',NULL), 'AND', Array('OS','IS',NULL)));
-				$db->setValues($this->get_details($ua['userAgent']));
-				$db->update();
+				$new_result = $db
+					->table("events")
+					->keys(Array('browser','OS'))
+					->where('userAgent','=',$ua['userAgent'])
+					->and_where('browser','IS',NULL)
+					->and_where('OS','IS',NULL)
+					->values($this->get_details($ua['userAgent']))
+					->update();
 			}
 			
 		} catch (Exception $e) {

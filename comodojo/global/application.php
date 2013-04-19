@@ -5,16 +5,14 @@
  * 
  * Standard extendable method for comodojo apps.
  * 
- * Every new application that would be called via kernel should extend this class.
+ * Every new application SHOULD extend this class.
  *
- * The constant COMODOJO_APPLICATION_BASIC is defined by kernel at runtime. 
- * 
  * @package		Comodojo ServerSide Core Packages
  * @author		comodojo.org
  * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
-*/
+ */
 
 class application {
 	

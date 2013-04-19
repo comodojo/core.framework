@@ -83,7 +83,7 @@ class shell extends comodojo_basic {
 			</script>
 		";
 		
-		$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/shell.html");
+		$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/web_shell.html");
 		
 		$index = str_replace("*_SITETITLE_*",COMODOJO_SITE_TITLE,$index);
 		$index = str_replace("*_DEFAULTENCODING_*",strtolower(COMODOJO_DEFAULT_ENCODING),$index);
@@ -133,7 +133,7 @@ class shell extends comodojo_basic {
 			</script>
 		";
 		
-		$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/shell.html");
+		$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/web_shell.html");
 		
 		$index = str_replace("*_SITETITLE_*",COMODOJO_SITE_TITLE,$index);
 		$index = str_replace("*_DEFAULTENCODING_*",strtolower(COMODOJO_DEFAULT_ENCODING),$index);

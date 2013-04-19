@@ -72,7 +72,7 @@ function throwErrorEvent() {
 		
 	include COMODOJO_SITE_PATH.'comodojo/global/qotd.php';
 		
-	$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/error.html");
+	$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/web_error.html");
 	
 	$index = str_replace("*_ERRORNAME_*",'THERE WAS AN ERROR!',$index);
 	$index = str_replace("*_ERRORDETAILS_*",'<strong>It seems that CoMoDojo is already installed; Remember to remove configuration files to proceede with a new installation.</strong>',$index);

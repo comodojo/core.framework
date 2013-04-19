@@ -309,7 +309,7 @@ class comodojo_basic {
 		
 		include COMODOJO_BOOT_PATH.'comodojo/global/qotd.php';
 		
-		$index = file_get_contents(COMODOJO_BOOT_PATH . "comodojo/templates/error.html");
+		$index = file_get_contents(COMODOJO_BOOT_PATH . "comodojo/templates/web_error.html");
 		
 		$index = str_replace("*_ERRORNAME_*",$error_name,$index);
 		$index = str_replace("*_ERRORDETAILS_*",$error_detail,$index);

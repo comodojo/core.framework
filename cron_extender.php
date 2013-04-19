@@ -232,12 +232,12 @@ class cron_extender extends comodojo_basic {
 		}
 		
 		try {
-			$mail = new mail;
-			$mail->htmlTemplate = 'mail_cron.html';
-			$mail->to = COMODOJO_CRON_NOTIFICATION_ADDRESSES;
-			$mail->subject = COMODOJO_SITE_TITLE." - Cron Jobs Report";
-			$mail->message = $message;
-			$mail->sendHtmlMail();
+			$mail = new mail();
+			$mail->template('mail_cron.html')
+				 ->to(COMODOJO_CRON_NOTIFICATION_ADDRESSES)
+				 ->subject("Cron Extender Jobs Report")
+				 ->message($message)
+				 ->send();
 		}
 		catch (Exception $e) {
 			comodojo_debug("Error notifying jobs: ".$e->getCode().'-'.$e->getMessage(),'ERROR','cron');

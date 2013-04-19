@@ -34,7 +34,7 @@ class fourzerofour extends comodojo_basic {
 		
 		include COMODOJO_BOOT_PATH.'comodojo/global/qotd.php';
 		
-		$index = file_get_contents(COMODOJO_BOOT_PATH . "comodojo/templates/error.html");
+		$index = file_get_contents(COMODOJO_BOOT_PATH . "comodojo/templates/web_error.html");
 				
 		$index = str_replace("*_ERRORNAME_*","This page could not be found",$index);
 		$index = str_replace("*_ERRORDETAILS_*",'The content you are looking for does not exist or it has been removed... go back, friend, go back.',$index);

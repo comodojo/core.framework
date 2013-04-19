@@ -67,10 +67,14 @@
 	05 Error writing remote file
 	07 Error writing local file
 1700 MAIL
-	00 [generic]
 	01 Invalid mail server or mail disabled
-	02 Invalid mail RCPT TO or CC
-	03 Invalid mail address: __ADDRESS__
+	02 Invalid RCPT TO
+	03 Invalid CC
+	04 Invalid BCC
+	05 Invalid REPLY TO
+	06 Invalid mail priority
+	07 No RCPT TO or CC specified
+	08 Invalid tag to replace
 1800 IMAGE_TOOLS
 	01 No GD or EXIF extensions; image tools not available
 	02 Invalid image type to read exif

@@ -74,7 +74,7 @@ class comodojo_startup extends comodojo_basic {
 		
 		if (COMODOJO_SITE_SUSPENDED AND COMODOJO_USER_ROLE != 1) {
 			
-			$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/suspended.html");
+			$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/templates/web_suspended.html");
 			
 			$index = str_replace("*_SITETITLE_*",COMODOJO_SITE_TITLE,$index);
 			$index = str_replace("*_META_*",$this->meta,$index);

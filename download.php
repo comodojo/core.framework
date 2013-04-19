@@ -16,7 +16,7 @@ require 'comodojo/global/comodojo_basic.php';
 
 class download extends comodojo_basic {
 	
-	public $script_name = 'get_content.php';
+	public $script_name = 'download.php';
 	
 	public $use_session_transport = true;
 	

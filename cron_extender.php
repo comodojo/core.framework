@@ -21,6 +21,8 @@ require 'comodojo/global/cron.phar';
 date_default_timezone_set('Europe/Berlin');
 
 class cron_extender extends comodojo_basic {
+
+	public $script_name = 'cron_extender.php';
 	
 	public $use_session_transport = false; //CRON cannot use session
 	

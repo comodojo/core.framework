@@ -1243,7 +1243,7 @@ class database {
 
 			case ("MYSQLI"):
 				$this->dbHandler = new mysqli($this->dbHost, $this->dbUserName, $this->dbUserPass, $this->dbName, $this->dbPort);
-				if ($this->dbHandler->connect_error) throw new Exception($mysqli->connect_error,$mysqli->connect_errno); 
+				if ($this->dbHandler->connect_error) throw new Exception($this->dbHandler->connect_error,$this->dbHandler->connect_errno); 
 			break;
 			
 			case ("MYSQL_PDO"):

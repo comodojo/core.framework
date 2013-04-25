@@ -592,7 +592,7 @@ class database {
 
 		if (empty($having_clause_or_array)) {
 			comodojo_debug('Invalid having clause','ERROR','database');
-			throw new Exception('Invalid having clause',1016);
+			throw new Exception('Invalid having clause',1028);
 		}
 		elseif (is_array($having_clause_or_array)) {
 			foreach ($having_clause_or_array as $key=>$key_val) {

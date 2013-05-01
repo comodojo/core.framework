@@ -1,0 +1,180 @@
+.comodojo_form_mainForm_tundra {
+	padding: 5px;
+	/*background: #fcfcfc;*/
+	background: #e9ecec;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+
+.comodojo_form_mainForm_soria {
+	padding: 5px;
+	background: #e1ebfb;
+	border: 1px solid #b1badf;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;	
+}
+
+.comodojo_form_mainForm_nihilo {
+	padding: 5px;
+	background: #fcfcfc;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;	
+}
+
+.comodojo_form_mainForm_claro {
+	padding: 5px;
+	background: #f9f9f9;
+	border: 1px solid #F0F0F0;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;	
+}
+
+.comodojo_form_clearer {
+	clear: both;
+}
+
+/*** SPLIT_LABEL_LEFT ***/
+.comodojo_form_inputContainer_SPLIT_LABEL_LEFT {
+	padding: 10px;
+	margin: 5px;
+	background: #fff;
+	/*border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;*/
+}
+.comodojo_form_inputLabel_SPLIT_LABEL_LEFT {
+	width: 30%;
+	text-align: left;
+}
+.comodojo_form_inputField_SPLIT_LABEL_LEFT {
+	width: 68% !important;
+	float: right !important;
+	text-align: right;
+}
+.comodojo_form_selectField_SPLIT_LABEL_LEFT {
+	float: right !important;
+	text-align: right;
+}
+.comodojo_form_radioField_SPLIT_LABEL_LEFT {
+	float: right !important;
+}
+.comodojo_form_checkField_SPLIT_LABEL_LEFT {
+	float: right !important;
+}
+.comodojo_form_buttonContainer_SPLIT_LABEL_LEFT {
+	width: 90%;
+	margin: 0 auto;
+	text-align: right;
+}
+.comodojo_form_button_SPLIT_LABEL_LEFT {
+	padding: 2px;
+}
+/*** SPLIT_LABEL_RIGHT ***/
+.comodojo_form_inputContainer_SPLIT_LABEL_RIGHT {
+	padding: 10px;
+	margin: 5px;
+	background: #fff;
+	/*border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;*/
+}
+.comodojo_form_inputLabel_SPLIT_LABEL_RIGHT {
+	width: 30% !important;
+	float: right;
+	text-align: right;
+}
+.comodojo_form_inputField_SPLIT_LABEL_RIGHT {
+	width: 68% !important;
+	float: left;
+	text-align: left;
+}
+.comodojo_form_selectField_SPLIT_LABEL_RIGHT {
+	float: left !important;
+	text-align: right;
+}
+.comodojo_form_radioField_SPLIT_LABEL_RIGHT {
+	float: left !important;
+}
+.comodojo_form_checkField_SPLIT_LABEL_RIGHT {
+	float: left !important;
+}
+.comodojo_form_buttonContainer_SPLIT_LABEL_RIGHT {
+	width: 90%;
+	margin: 0 auto;
+	text-align: left;
+}
+.comodojo_form_button_SPLIT_LABEL_RIGHT {
+	padding: 2px;
+}
+/*** LABEL_ON_INPUT ***/
+.comodojo_form_inputContainer_LABEL_ON_INPUT {
+	padding: 10px;
+	margin: 5px;
+	background: #fff;
+	/*border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;*/
+}
+.comodojo_form_inputLabel_LABEL_ON_INPUT {
+	width: 98% !important;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+.comodojo_form_inputField_LABEL_ON_INPUT {
+	width: 98% !important;
+	text-align: left; 
+}
+.comodojo_form_selectField_LABEL_ON_INPUT {
+	
+}
+.comodojo_form_radioField_LABEL_ON_INPUT {
+	
+}
+.comodojo_form_checkField_LABEL_ON_INPUT {
+	
+}
+.comodojo_form_buttonContainer_LABEL_ON_INPUT {
+	
+}
+.comodojo_form_button_LABEL_ON_INPUT {
+	
+}
+/*** INPUT_ON_LABEL ***/
+.comodojo_form_inputContainer_INPUT_ON_LABEL {
+	padding: 10px;
+	margin: 5px;
+	background: #fff;
+	/*border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;*/
+}
+.comodojo_form_inputLabel_INPUT_ON_LABEL {
+	width: 98% !important;
+	margin-right: 5px;
+	margin-top: 5px;
+}
+.comodojo_form_inputField_INPUT_ON_LABEL {
+	width: 98% !important;
+	text-align: left; 
+}
+.comodojo_form_selectField_INPUT_ON_LABEL {
+	
+}
+.comodojo_form_radioField_INPUT_ON_LABEL {
+	
+}
+.comodojo_form_checkField_INPUT_ON_LABEL {
+	
+}
+.comodojo_form_buttonContainer_INPUT_ON_LABEL {
+	
+}
+.comodojo_form_button_INPUT_ON_LABEL {
+	
+}

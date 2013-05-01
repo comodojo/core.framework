@@ -1,0 +1,42 @@
+/** DIALOGS AND LOADER **/
+#errorDialog_underlay { background-color: red; }
+
+#comodojoLoader_underlay {
+	background-color: black;
+}
+#comodojoLoader {
+	overflow: hidden;
+	padding: 0px;
+}
+#comodojoLoader div.comodojoLoaderImageContainer {
+	margin: 0 auto;
+	max-height: 30px;
+	text-align: center;
+}
+#comodojoLoader img.comodojoLoaderImage {
+	margin: 0;
+	padding: 0;
+}
+#comodojoLoader div.comodojoLoaderMessage {
+	margin: 0 auto;
+	max-height: 50px;
+	padding: 5px;
+	text-align: center;
+	font-weight: bold;
+	font-size:110%;
+}
+
+#warningDialog_underlay {
+	background-color: #ff9900;
+}
+
+#actionDialog_underlay {
+	background-color: #bbfabb;
+}
+
+.claro .dijitContentPane {
+  padding: 0px !important;
+}
+.claro .dijitBorderContainer-dijitContentPane {
+  padding: 5px !important;
+}

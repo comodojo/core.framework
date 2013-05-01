@@ -23,24 +23,30 @@ function isInstalled() {
 
 function makeIndex() {
 	
+	require(COMODOJO_SITE_PATH . "comodojo/installer/customization.php");
+
 	$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/installer/installer.html");
 
-	if (is_readable(COMODOJO_SITE_PATH . "comodojo/javascript/dojo/dojo.js")) {
-		$jsLoader = '
+	$js_via_cdn = !is_readable(COMODOJO_SITE_PATH . "comodojo/javascript/dojo/dojo.js");
+
+	if (!$js_via_cdn) {
+		$loader = '
 			<link rel="stylesheet" type="text/css" href="comodojo/javascript/dojo/resources/dojo.css" />
 			<link rel="stylesheet" type="text/css" href="comodojo/javascript/dijit/themes/claro/claro.css" />
 			<script type="text/javascript" src="comodojo/javascript/dojo/dojo.js" ></script>
 		';
 	}
 	else {
-		$jsLoader = '
+		require(COMODOJO_SITE_PATH . "comodojo/others/available_cdn");
+		$loader = '
 			<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/resources/dojo.css" />
 			<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css" />
-			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/dojo.js" ></script>
+			<script type="text/javascript" src="'.$available_cdn[0]["value"].'"></script>
 		';
 	}
-	
-	$index = str_replace("*_DOJOLOADER_*",$jsLoader,$index);
+
+	$index = str_replace("*_DOJOLOADER_*",$loader,$index);
+	$index = str_replace("*_BANNER_*",$comodojoCustomization['banner'],$index);
 	$index = str_replace("*_SERVERLOCALE_*",$_SESSION[SITE_UNIQUE_IDENTIFIER]['PHP_LOCALE'],$index);
 	$index = str_replace("*_COMODOJOVERSION_*",comodojo_version('VERSION'),$index);
 	

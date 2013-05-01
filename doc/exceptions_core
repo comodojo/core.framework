@@ -39,6 +39,7 @@
 	09 File cannot be moved
 	10 Cannot create user home without username
 	11 Error listing resource
+	12 Not enough privileges
 1200 CACHE
 	01 Error writing to cache folder
 	02 Cannot cache something different from array or string
@@ -76,6 +77,8 @@
 	06 Invalid mail priority
 	07 No RCPT TO or CC specified
 	08 Invalid tag to replace
+	09 Invalid object to embed
+	10 Invalid file to attach
 1800 IMAGE_TOOLS
 	01 No GD or EXIF extensions; image tools not available
 	02 Invalid image type to read exif
@@ -148,9 +151,9 @@
 	09 Invalid user identifier
 	10 Error enabling/disabling user
 	11 Error deleting user
-	12 
-	13 
-	14 
+	12 Invalid user parameters
+	13 User already registered
+	14 Unsupported action
 	15 
 	16 
 	17 
@@ -181,9 +184,9 @@
 	01 Unreadable service properties file
 	02 Cannot find service properties file
 	03 Cannot delete service file
-	04 
-	05 
-	06 
+	04 Invalid properties for a service
+	05 Service name is used
+	06 Error writing service properties
 	07 
 	08 
 	09

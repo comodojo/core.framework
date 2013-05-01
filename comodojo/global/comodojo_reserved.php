@@ -19,6 +19,7 @@ class comodojo_reserved extends application {
 	public function init() {
 		$this->add_application_method('login', 'login', Array('userName','userPass'), '',false);
 		$this->add_application_method('logout', 'logout', Array(), '',false);
+		$this->add_application_method('confirmRegistration', 'confirm_registration', Array('id','code'), '',false);
 		$this->add_application_method('applications', 'applications', Array(), '',false);
 		$this->add_application_method('version', 'version', Array(), '',false);
 	}
@@ -38,6 +39,17 @@ class comodojo_reserved extends application {
 		);
 	}
 	
+	public function confirm_registration($params) {
+		comodojo_load_resource("registration");
+		try {
+			$re = new registration();
+			$result = $re->confirm_request($params['id'],$params['code']);
+		} catch (Exception $e) {
+			throw $e;
+		}
+		return $result;
+	}
+
 	public function logout($params) {
 		return true;
 	}

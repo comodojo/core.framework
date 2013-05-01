@@ -239,6 +239,7 @@ class cron_extender extends comodojo_basic {
 				 ->to(COMODOJO_CRON_NOTIFICATION_ADDRESSES)
 				 ->subject("Cron Extender Jobs Report")
 				 ->message($message)
+				 ->embed(COMODOJO_SITE_PATH."comodojo/images/logo.png","COMODOJO_LOGO","logo")
 				 ->send();
 		}
 		catch (Exception $e) {

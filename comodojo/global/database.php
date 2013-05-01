@@ -39,7 +39,7 @@ class database {
 	 * 
 	 * @var	bool
 	 */
-	private $log_whole_query = false;
+	private $log_whole_query = true;
 
 	/**
 	 * The hostname of the database to connect to
@@ -205,7 +205,7 @@ class database {
 
 	public final function table($table_name_or_array) {
 
-		$table_pattern = in_array($this->dbDataModel, Array('MYSQL','MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
+		$table_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
 
 		if (empty($table_name_or_array)) {
 			comodojo_debug('Invalid table name','ERROR','database');
@@ -220,10 +220,10 @@ class database {
 			}
 		}
 		else {
-			$this->table = sprintf($table_pattern,$table_value);
+			$this->table = sprintf($table_pattern,trim($table_name_or_array));
 		}
 
-		comodojo_debug('Using table: '.$table,'INFO','database');
+		comodojo_debug('Using table: '.$this->table,'INFO','database');
 
 		return $this;
 
@@ -444,14 +444,14 @@ class database {
 			throw new Exception('Invalid parameters for database::join',1019);
 		}
 
-		if (is_null($this->join) $this->join = sprintf($join_pattern,$join." ",$table)
-		else $this->join .= " ".sprintf($join_pattern,$join." ",$table)
+		if (is_null($this->join)) $this->join = sprintf($join_pattern,$join." ",$table);
+		else $this->join .= " ".sprintf($join_pattern,$join." ",$table);
 		
 		return $this;
 
 	}
 
-	public function using($column_name_or_array)) {
+	public function using($column_name_or_array) {
 
 		$using_pattern = "USING (%s)";
 
@@ -615,16 +615,16 @@ class database {
 
 		$type = strtoupper($type);
 
-		$length = isset($extra_params['length']) ? $extra_params['length'] : nulll;
-		$unsigned = isset($extra_params['unsigned']) ? $extra_params['unsigned'] : nulll;
-		$zerofill = isset($extra_params['zerofill']) ? $extra_params['zerofill'] : nulll;
-		$charset = isset($extra_params['charset']) ? $extra_params['charset'] : nulll;
-		$collate = isset($extra_params['collate']) ? $extra_params['collate'] : nulll;
-		$null = isset($extra_params['notnull']) ? $extra_params['notnull'] : nulll;
-		$default = isset($extra_params['default']) ? $extra_params['default'] : nulll;
-		$auto_increment = isset($extra_params['autoincrement']) ? $extra_params['autoincrement'] : nulll;
-		$unique = isset($extra_params['unique']) ? $extra_params['unique'] : nulll;
-		$primary_key = isset($extra_params['primary']) ? $extra_params['primary'] : nulll;
+		$length = isset($extra_params['length']) ? $extra_params['length'] : null;
+		$unsigned = isset($extra_params['unsigned']) ? $extra_params['unsigned'] : null;
+		$zerofill = isset($extra_params['zerofill']) ? $extra_params['zerofill'] : null;
+		$charset = isset($extra_params['charset']) ? $extra_params['charset'] : null;
+		$collate = isset($extra_params['collate']) ? $extra_params['collate'] : null;
+		$null = isset($extra_params['null']) ? $extra_params['null'] : null;
+		$default = isset($extra_params['default']) ? $extra_params['default'] : null;
+		$autoincrement = isset($extra_params['autoincrement']) ? $extra_params['autoincrement'] : null;
+		$unique = isset($extra_params['unique']) ? $extra_params['unique'] : null;
+		$primary_key = isset($extra_params['primary']) ? $extra_params['primary'] : null;
 
 		$supported_types = Array('STRING','INTEGER','FLOAT','DECIMAL','BOOL','TIME','DATE','TIMESTAMP','TEXT','BLOB');
 
@@ -860,20 +860,20 @@ class database {
 					comodojo_debug('ERROR: '.$error,'ERROR','database');
 					throw new Exception($error,$error_no);
 				}
-				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->returnId ? mysql_insert_id($this->dbHandler) : false, @mysql_affected_rows($this->dbHandler));
+				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->return_id ? mysql_insert_id($this->dbHandler) : false, @mysql_affected_rows($this->dbHandler));
 			break;
 
 			case 'MYSQLI':
 				$response = $this->dbHandler->query($query);
 				if (!$response) {
-					$error_no = $this->dbHandler->errno();
-					$error = $this->dbHandler->error();
+					$error_no = $this->dbHandler->errno;
+					$error = $this->dbHandler->error;
 					comodojo_debug('Cannot perform query!','ERROR','database');
 					comodojo_debug('ERROR_NO: '.$error_no,'ERROR','database');
 					comodojo_debug('ERROR: '.$error,'ERROR','database');
 					throw new Exception($error,$error_no);
 				}
-				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->returnId ? $this->dbHandler->insert_id : false, $this->dbHandler->affected_rows);
+				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->return_id ? $this->dbHandler->insert_id : false, $this->dbHandler->affected_rows);
 			break;
 			
 			case "MYSQL_PDO":
@@ -897,7 +897,7 @@ class database {
 					comodojo_debug('ERROR: '.$error,'ERROR','database');
 					throw new Exception($error,$error_no);
 				}
-				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->returnId ? $this->dbHandler->lastInsertId() : false, @$response->rowCount());
+				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->return_id ? $this->dbHandler->lastInsertId() : false, @$response->rowCount());
 			break;
 			
 			case 'DB2':
@@ -910,7 +910,7 @@ class database {
 					comodojo_debug('ERROR: '.$error,'ERROR','database');
 					throw new Exception($error,$error_no);
 				}
-				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->returnId ? db2_last_insert_id($this->dbHandler) : false, @db2_num_rows($data));
+				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->return_id ? db2_last_insert_id($this->dbHandler) : false, @db2_num_rows($data));
 			break;
 
 			case 'POSTGRESQL':
@@ -922,7 +922,7 @@ class database {
 					comodojo_debug('ERROR: '.$error,'ERROR','database');
 					throw new Exception($error,$error_no);
 				}
-				$result = $this->buildResultSet($response, $this->returnId ? pg_last_oid($response) : false, @pg_affected_rows($response));
+				$result = $this->buildResultSet($response, $this->return_id ? pg_last_oid($response) : false, @pg_affected_rows($response));
 			break;
 			
 			default:
@@ -938,7 +938,7 @@ class database {
 		if (isset($_SESSION[COMODOJO_PUBLIC_IDENTIFIER]['QUERIES'])) $_SESSION[COMODOJO_PUBLIC_IDENTIFIER]['QUERIES']++;
 		
 		return $result;
-		switch ($this->dbDataModel)
+
 	}
 
 	
@@ -1138,12 +1138,15 @@ class database {
 			throw new Exception('Invalid parameters for database::create_table',1027);
 		}
 
+		$table_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`*_DBPREFIX_*%s`" : "*_DBPREFIX_*%s";
+		$table = sprintf($table_pattern,trim($name));
+
 		switch ($this->dbDataModel) {
 			case 'MYSQL':
 			case 'MYSQLI':
 			case 'MYSQL_PDO':
-				$query_pattern = "CREATE TABLE%s $s (%s)%s";
-				$query = sprintf($query_pattern,!$if_not_exists ? null : " IF NOT EXISTS",$name,implode(',',$this->columns),!$engine ? null : ' ENGINE '.$engine);
+				$query_pattern = "CREATE TABLE%s %s (%s)%s";
+				$query = sprintf($query_pattern,!$if_not_exists ? null : " IF NOT EXISTS",$table,implode(',',$this->columns),!$engine ? null : ' ENGINE '.$engine);
 			break;
 			case 'INFORMIX_PDO':
 			case 'POSTGRESQL':
@@ -1152,8 +1155,8 @@ class database {
 			case 'ORACLE_PDO':
 			case 'SQLITE_PDO':
 			default:
-				$query_pattern = "CREATE TABLE%s $s (%s)";
-				$query = sprintf($query_pattern,!$if_not_exists ? null : " IF NOT EXISTS",$name,implode(',',$this->columns));
+				$query_pattern = "CREATE TABLE%s %s (%s)";
+				$query = sprintf($query_pattern,!$if_not_exists ? null : " IF NOT EXISTS",$table,implode(',',$this->columns));
 			break;
 		}
 
@@ -1356,7 +1359,7 @@ class database {
 
 			$clause_pattern = "(%s %s %s)";
 
-			if (!in_array($operator, Array('AND','OR')) {
+			if (!in_array($operator, Array('AND','OR'))) {
 				comodojo_debug('Invalid syntax for a where clause: wrong operator for a nested clause','ERROR','database');
 				throw new Exception('Invalid syntax for a where clause',1017);
 			}
@@ -1403,7 +1406,7 @@ class database {
 			if ($operator == 'IS') {
 				$_column = $column;
 				$_operator = $operator;
-				$_value = (is_null($value) OR $value == 'NULL') ? 'IS NULL' . 'IS NOT NULL';
+				$_value = (is_null($value) OR $value == 'NULL') ? 'IS NULL' : 'IS NOT NULL';
 			}
 			elseif ($operator == 'LIKE' OR $operator == 'NOT LIKE') {
 				$_column = $column;

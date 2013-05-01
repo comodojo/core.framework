@@ -249,7 +249,7 @@ class events {
 			comodojo_debug('There are '.$result['resultLength'].' user agent class to consolidate.','INFO','events');
 			
 			foreach ($result['result'] as $ua) {
-				$db->cleanup();
+				$db->clean();
 				$new_result = $db
 					->table("events")
 					->keys(Array('browser','OS'))

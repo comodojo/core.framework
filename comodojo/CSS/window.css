@@ -1,0 +1,264 @@
+.soria .comodojoWindow {
+	background-color:#eee;
+	position:relative;
+	border: 1px solid #cbcbcb;
+	-webkit-box-shadow: 0 5px 10px #adadad;
+	padding: 0;
+	overflow: hidden;
+}
+.nihilo .comodojoWindow {
+	background-color: #eee;
+	position:relative;
+	border: 1px solid #d3d3d3;
+	-webkit-box-shadow: 0 5px 10px #adadad;
+	padding: 0;
+	overflow: hidden;
+}
+.tundra .comodojoWindow {
+	background-color:#fff;
+	position:relative;
+	border: 1px solid #7eabcd;
+	-webkit-box-shadow: 0 5px 10px #adadad;
+	padding: 0;
+	overflow: hidden;
+}
+.claro .comodojoWindow {
+	background-color: #fff;
+	position:relative;
+	border: 1px solid #769dc0;
+/**/
+	-webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+	-moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+/**/
+	-webkit-box-shadow: 0px 5px 10px #adadad;
+	padding: 0;
+	overflow: hidden;
+}
+
+.comodojoWindowFg {
+	-webkit-box-shadow: 0px 8px 20px #525252;
+}
+
+.soria .comodojoWindowTitle {
+	padding:4px 4px 2px 4px;
+	cursor: pointer;
+	white-space: nowrap;
+	background:#fff url("../javascript/dijit/themes/soria/images/titleBar.png") repeat-x top left;
+	border:1px solid #b1badf;
+	height: 18px;
+}
+.nihilo .comodojoWindowTitle {
+	background: #cccccc;
+	background:#fafafa repeat-x bottom left;
+	border:1px solid #bfbfbf;
+	padding:4px 4px 2px 4px;
+	cursor: pointer;
+	white-space: nowrap;
+	height: 18px;
+}
+.tundra .comodojoWindowTitle {
+	background:#fafafa url("../javascript/dijit/themes/tundra/images/titleBarBg.gif") repeat-x bottom left;
+	border:1px solid #bfbfbf;
+	color:#000;
+	padding:4px 4px 2px 4px;
+	cursor: pointer;
+	white-space: nowrap;
+	height: 18px;
+}
+.claro .comodojoWindow .comodojoWindowTitle {
+	border: 1px solid #ffffff;
+	border-top: none;
+	background-color: #abd6ff;
+	background-image: url("../javascript/dijit/themes/claro/images/standardGradient.png");
+	background-repeat: repeat-x;
+	background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+	background-image: -webkit-linear-gradient(rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+	background-image: -o-linear-gradient(rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+	background-image: -ms-linear-gradient(rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 100%);
+	_background-image: none;
+	padding: 5px 7px 4px 7px;
+	cursor: pointer;
+	white-space: nowrap;	
+}
+
+.claro .comodojoWindow .comodojoWindowTitleNode {
+	padding: 0 2px;
+	font-size: 1.091em;
+	margin-left: 4px;
+}
+.soria .comodojoWindow .comodojoWindowTitleNode{
+	padding: 0 2px;
+	font-size: 0.9em;
+	font-weight: bold;
+	line-height:1.2em;
+	margin-left: 4px;
+}
+.tundra .comodojoWindow .comodojoWindowTitleNode{
+	padding: 0 2px;
+	font-size: 0.9em;
+	font-weight: bold;
+	line-height:1.2em;
+	margin-left: 4px;
+}
+.nihilo .comodojoWindow .comodojoWindowTitleNode{
+	padding: 0 2px;
+	font-size: 0.9em;
+	font-weight: bold;
+	line-height:1.2em;
+	margin-left: 4px;
+}
+
+/* Icons */
+
+.comodojoWindow .comodojoWindowIconNode {
+	float: left;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	overflow:hidden;
+}
+
+
+.claro .comodojoWindow .comodojoWindowCloseIcon {
+	background: url("../javascript/dijit/themes/claro/images/dialogCloseIcon.png");
+	background-repeat: no-repeat;
+	right: 5px;
+	height: 15px;
+	width: 21px;
+	overflow:hidden;
+	float:right; 
+}
+.dj_ie6 .claro .comodojoWindow .comodojoWindowCloseIcon {
+  background-image: url("../javascript/dijit/themes/claro/images/dialogCloseIcon8bit.png");
+}
+.claro .comodojoWindow .comodojoWindowCloseIcon:hover {
+  background-position: -21px;
+}
+.claro .comodojoWindow .comodojoWindowCloseIconActive {
+  background-position: -42px;
+}
+
+.soria .comodojoWindow .comodojoWindowCloseIcon {
+	background:url('../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png') no-repeat -60px top;
+	width:16px;
+	height:16px; 
+	overflow:hidden;
+	float:right; 
+}
+.soria .comodojoWindow .comodojoWindowCloseIcon:hover {
+	background:url('../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png') no-repeat -60px bottom;
+}
+
+.tundra .comodojoWindow .comodojoWindowCloseIcon {
+	background:url('../javascript/dijit/themes/tundra/images/tabClose.png') no-repeat center center;
+	width:16px;
+	height:16px; 
+	overflow:hidden;
+	float:right; 
+}
+.tundra .comodojoWindow .comodojoWindowCloseIcon:hover {
+	background:url('../javascript/dijit/themes/tundra/images/tabCloseHover.png') no-repeat center center;
+}
+.nihilo .comodojoWindow .comodojoWindowCloseIcon {
+	background:url('../javascript/dijit/themes/nihilo/images/spriteRoundedIconsSmall.png') no-repeat -60px top;
+	width:16px;
+	height:16px; 
+	overflow:hidden;
+	float:right; 
+}
+.nihilo .comodojoWindow .comodojoWindowCloseIcon:hover {
+	background:url('../javascript/dijit/themes/nihilo/images/spriteRoundedIconsSmall.png') no-repeat -60px center;
+}
+
+.comodojoWindowMinimizeIcon {
+	background:url('../javascript/dijit/themes/tundra/images/spriteArrows.png') no-repeat 0px center; 
+	width:7px;
+	margin: 0px 4px;
+	overflow:hidden;
+	float:right; 
+}
+.soria .comodojoWindowMinimizeIcon {
+	background:url("../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png") no-repeat -15px top;
+	width: 14px;
+	margin: 0px 2px;
+}
+.claro .comodojoWindowMinimizeIcon {
+	background:url("../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png") no-repeat -15px top;
+	width: 14px;
+	margin: 0px 2px;
+}
+
+.comodojoWindowMaximized .comodojoWindowMaximizeIcon { display:none; }
+.comodojoWindowMaximizeIcon {
+	background:url('../javascript/dijit/themes/tundra/images/spriteArrows.png') no-repeat -21px center;
+	width:7px;
+	margin: 0px 4px;
+	overflow:hidden;
+	float:right;	
+}
+.soria .comodojoWindowMaximizeIcon {
+	background:url("../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png") no-repeat -45px top;
+	width:14px;
+}
+.claro .comodojoWindowMaximizeIcon {
+	background:url("../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png") no-repeat -45px top;
+	width:14px;
+	height: 15px;
+}
+
+
+.comodojoWindowMaximized .comodojoWindowRestoreIcon { display:inline; }
+.comodojoWindowRestoreIcon {
+	background:url('../javascript/dijit/themes/tundra/images/spriteArrows.png') no-repeat 0px center; 
+	width:7px;
+	margin: 0px 4px;
+	float:right;
+	display:none;
+}
+.soria .comodojoWindowRestoreIcon {
+	background:url("../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png") no-repeat -15px top;
+	width: 14px;
+}
+.claro .comodojoWindowRestoreIcon {
+	background:url("../javascript/dijit/themes/soria/images/spriteRoundedIconsSmallBl.png") no-repeat -15px top;
+	width:14px;
+	height: 15px;
+}
+
+
+.comodojoWindowResizeHandle {
+	background:url('../javascript/dojox/layout/resources/icons/resize.png') no-repeat bottom right;
+	position:absolute; 
+	right:0; 
+	bottom:0; 	
+	width:16px;
+	height:16px; 
+	cursor:nw-resize;
+}
+
+.comodojoWindowContent {
+	background: #ffffff repeat-x top left;
+	padding: 0px !important;
+}
+
+.claro .comodojoWindowContent{
+	border-top: 1px solid #769dc0;
+}
+
+.soria .comodojoWindowContent {
+	padding: 0px !important;
+}
+
+.tundra .comodojoWindowContent {
+	padding: 0px !important;
+}
+
+.nihilo .comodojoWindowContent {
+	padding: 0px !important;
+}
+
+.comodojoWindowCanvas {
+	background-color:#fff;
+	overflow: auto !important;
+}

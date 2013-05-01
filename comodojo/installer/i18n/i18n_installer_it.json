@@ -1,0 +1,36 @@
+/** 
+ * i18n_installer_it.json
+ * 
+ * this file contain global JSON messages database (i18n) for language: italian (it); if you want to add your custom messages please edit array according to original schema
+ *
+ * @package		Comodojo i18n Core Packages
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ * 
+ */
+{ 
+	'10000'	:	'',
+	'10003'	:	'Si',
+	'10004'	:	'No',
+	'10005'	:	'Seleziona',
+	'10006'	:	'Elimina',
+	'10007'	:	'Sto caricando...',
+	'10008'	:	'Esegui',
+	'10009'	:	'Nome Utente',
+	'10010'	:	'Password',
+	'10011'	:	'Chiudi',
+	'10012'	:	'Uomo',
+	'10013'	:	'Donna',
+	'10015'	:	'Altro',
+	'10017'	:	'Acceso',
+	'10018'	:	'Spento',
+	'10018'	:	'Procedi',
+	'10018'	:	'Annulla',
+	'10019'	:	'Salva',
+	'10020'	:	'Indietro',
+	'10026'	:	'',
+	'10027'	:	'',
+	'10028'	:	'',
+	'10029'	:	'',
+	'10030'	:	'${0}'
+}

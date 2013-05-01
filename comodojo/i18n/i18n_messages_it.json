@@ -1,0 +1,45 @@
+/** 
+ * i18n_messages_it.json
+ * 
+ * this file contain global JSON messages database (i18n) for language: italian (it); if you want to add your custom messages please edit array according to original schema
+ *
+ * @package		Comodojo i18n Core Packages
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ * 
+ */
+{ 
+
+	'10000'	:	'',
+	'10001'	:	'Accesso riuscito! Ricarico il sito...',
+	'10002'	:	'Registrati',
+	'10003'	:	'Si',
+	'10004'	:	'No',
+	'10005'	:	'Seleziona',
+	'10006'	:	'Elimina',
+	'10007'	:	'Sto caricando...',
+	'10008'	:	'Esegui',
+	'10009'	:	'Nome Utente',
+	'10010'	:	'Password',
+	'10011'	:	'Chiudi',
+	'10012'	:	'Uomo',
+	'10013'	:	'Donna',
+	'10014'	:	'Reimposta Password',
+	'10015'	:	'Altro',
+	'10017'	:	'Acceso',
+	'10018'	:	'Spento',
+	'10019'	:	'Procedi',
+	'10020'	:	'Annulla',
+	'10021'	:	'Salva',
+	'10022'	:	'Indietro',
+	'10023'	:	'Avvia applicazione',
+	'10024'	:	'Riavvia applicazione',
+	'10025'	:	'Ciao ${0}, benvenuto su ${1}!<br />Il tuo account è stato attivato ed associato al tuo indirizzo di posta (${2}), ora puoi utilizzare i tuoi dati per accedere.<br />Buon divertimento!',
+	'10026'	:	'C\'è stato un problema con la validazione della tua registrazione, contatta l\'amministratore del portale o il supporto tecnico. ${0}',
+	'10027'	:	'Dati di registrazione sconosciuti',
+	'10028'	:	'E\' necessario completare tutti i campi richiesti (<span style="color:red;">*</span>)',
+	'10029'	:	'',
+	'10030'	:	'',
+	'10031'	:	'',
+	'10032'	:	'${0}'
+}

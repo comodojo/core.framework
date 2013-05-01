@@ -169,7 +169,7 @@ class authentication {
 		if ($result["resultLength"] == 1 AND $result["result"]['ldap'] == 0) {
 			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
 			try {
-				$db->cleanup();
+				$db->clean();
 				$result = $db->table('users')
 				->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url"))
 				->where("userName","=",$this->userName)
@@ -245,7 +245,7 @@ class authentication {
 		if ($result["resultLength"] == 1 AND $result["result"]['ldap'] == 0) {
 			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
 			try {
-				$db->cleanup();
+				$db->clean();
 				$result = $db->table('users')
 				->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url"))
 				->where("userName","=",$this->userName)
@@ -363,7 +363,7 @@ class authentication {
 		if ($result["resultLength"] == 1 AND $result["result"]['rpc'] == 0) {
 			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
 			try {
-				$db->cleanup();
+				$db->clean();
 				$result = $db->table('users')
 				->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url"))
 				->where("userName","=",$this->userName)

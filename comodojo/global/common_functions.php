@@ -35,11 +35,11 @@ function comodojo_load_resource($resource) {
  * This behaviour will be changed in future releases.
  */
 function _write_log_string($log) {
-	if (is_null(COMODOJO_DEBUG_FILE)){
+	if (is_null(COMODOJO_GLOBAL_DEBUG_FILE)){
 		error_log($log);
 	}
 	else {
-		$file = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_TEMP_FOLDER.COMODOJO_DEBUG_FILE;
+		$file = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_TEMP_FOLDER.COMODOJO_GLOBAL_DEBUG_FILE;
 		$file_handler = fopen($file, 'a');
 		if (!$file_handler) return false;
 		fwrite($file_handler, date(DATE_RFC822)." - ".$log."\n");
@@ -282,7 +282,7 @@ if (!function_exists('hex2bin')) {
  * Generate random alphanumerical string
  * 
  * @param	int		$length	[optional] The random string length; default 128
- * @return	string	$locale	Serverside active locale
+ * @return	string	
  */
 function random($length=128) {
 	

@@ -84,6 +84,16 @@ class mail {
 	 * @var	bool|array
 	 */
 	private $extra_tags = false;
+
+	/**
+	 * Array of object to embed
+	 */
+	private $embed = Array();
+
+	/**
+	 * Array of object to attach
+	 */
+	private $attach = Array();
 /*********************** PRIVATE VARS *********************/
 
 
@@ -231,6 +241,34 @@ class mail {
 
 	}
 
+	public function embed($file_name, $cid, $name) {
+
+		if (empty($file_name) OR empty($cid) OR empty($name)) {
+			comodojo_debug('Invalid object to embed','ERROR','mail');
+			throw new Exception('Invalid object to embed',1709);
+		}
+		else {
+			array_push($this->embed, Array("filename"=>$file_name,"cid"=>$cid,"name"=>$name));
+		}
+
+		return $this;
+
+	}
+
+	public function attach($path, $name = '', $encoding = 'base64', $type = 'application/octet-stream') {
+
+		if (empty($path)) {
+			comodojo_debug('Invalid file to attach','ERROR','mail');
+			throw new Exception('Invalid file to attach',1710);
+		}
+		else {
+			array_push($this->attach, Array("path"=>$path,"name"=>$name,"encoding"=>$encoding,"type"=>$type));
+		}
+
+		return $this;
+
+	}
+
 	public function send() {
 
 		if (empty($this->to) OR empty($this->cc)) {
@@ -246,6 +284,7 @@ class mail {
 			$body = file_get_contents($this->html_template);
 			$body = str_replace("*_MESSAGE_*",$this->message,$body);
 			$body = str_replace("*_SUBJECT_*",$this->subject,$body);
+			$body = str_replace("*_SITEURL_*",COMODOJO_SITE_URL,$body);
 			$body = str_replace("*_SITETITLE_*",COMODOJO_SITE_TITLE,$body);
 			$body = str_replace("*_SITEAUTHOR_*",COMODOJO_SITE_AUTHOR,$body);
 			$body = str_replace("*_SITEDATE_*",COMODOJO_SITE_DATE,$body);
@@ -263,6 +302,8 @@ class mail {
 			foreach($this->cc as $cc) { $this->mail->AddCC($cc); }
 			foreach($this->bcc as $bcc) { $this->mail->AddBCC($bcc); }
 			if (!empty($this->reply_to)) $this->mail->AddReplyTo($this->reply_to);
+			foreach($this->embed as $embed) { $this->mail->AddEmbeddedImage($embed['filename'],$embed['cid'],$embed['name']); }
+			foreach($this->attach as $attach) { $this->mail->AddAttachment($attach['path'],$attach['name'],$attach['encoding'],$attach['type']); }
 			$this->mail->Send();
 		}
 		catch (phpmailerException $e) {
@@ -329,7 +370,12 @@ class mail {
 			break;
 		}
 		
-		$this->mail->SetFrom(!$address ? (empty(COMODOJO_MAIL_ADDRESS) ? 'comodojo@localhost' : COMODOJO_MAIL_ADDRESS) : $address);
+		
+		$default_from_address = is_null(COMODOJO_MAIL_ADDRESS) ? 'comodojo@localhost' : COMODOJO_MAIL_ADDRESS;
+
+		$_address = $address == false ? $default_from_address : $address;
+
+		$this->mail->SetFrom($_address);
 		
 	}
 /********************* PUBLIC METHODS *********************/

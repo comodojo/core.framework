@@ -516,8 +516,7 @@ comodojo.form = function(params) {
 				}, preField);
 				dojo.addClass(myField.domNode,this._selectFieldClass);
 				myField.containerNode.setAttribute('style',this.selectExtraCss);
-				//escape for dojo 1.6 (?!?)
-				//myField.set('value',hierarchyElement.value);
+				myField.set('value',hierarchyElement.value);
 			break;
 			
 			case "GenderSelect": 

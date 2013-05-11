@@ -107,8 +107,17 @@ class comodojo_startup extends comodojo_basic {
 			var dojoConfig = {
 				async: false,
 				parseOnLoad: false,
-				baseUrl: '" . COMODOJO_JS_BASE_URL . "',
-				waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',
+				baseUrl: '" . COMODOJO_JS_BASE_URL . "',";
+		if (COMODOJO_JS_XD_LOADING) {
+		$myJsLoader .= "
+				dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
+				packages: [{
+					name: 'comodojo',
+					location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
+				}],
+				waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
+		}
+		$myJsLoader .= "
 				locale: '" . $this->locale . "',
 				has: {
 					'dojo-amd-factory-scan': false,
@@ -140,11 +149,12 @@ class comodojo_startup extends comodojo_basic {
 		$myJsLoader .="
 				}
 			</script>
+			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js') . "\"></script>
 		";
 		//************************
 		
 		//****** DOJO.JS ******
-		if (COMODOJO_JS_XD_LOADING) {
+		/*if (COMODOJO_JS_XD_LOADING) {
 			$myJsLoader .= '
 			<script type="text/javascript" src="' . COMODOJO_JS_XD_LOCATION . '"></script>
 			<script type="text/javascript">
@@ -159,7 +169,7 @@ class comodojo_startup extends comodojo_basic {
 				dojo.registerModulePath("custom", "../custom");
 			</script>
 			';
-		}
+		}*/
 		//*********************
 		
 		//****** DOJO REQUIRES ******

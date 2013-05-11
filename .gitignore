@@ -1,1 +1,4 @@
 .DS_Store
+comodojo/configuration/static_configuration.php
+comodojo/javascript/comodojo/Kernel.js
+home/*

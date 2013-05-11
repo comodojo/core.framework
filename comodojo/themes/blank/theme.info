@@ -1,0 +1,11 @@
+<?php
+
+$theme = Array(
+	"name"		=>	"blank",
+	"createdBy"	=>	"comodojo",
+	"version"	=>	"1.0-beta",
+	"framework"	=>	"1",
+	"comment"	=>	"Blank comodojo theme"
+);
+
+?>

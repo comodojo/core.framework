@@ -1,0 +1,54 @@
+/*		------------------------------------------------------------------
+		|                       This is CoMoDojo                         |
+		|  Copyright 2008 CoMoDojo Development Team (info@comodojo.org)  |
+		|----------------------------------------------------------------|
+		|    Please read "comodojo/others/about.txt" for full details    |
+		|       and "conodojo/others/license.txt for full license        |
+		------------------------------------------------------------------
+*/
+
+body {
+	width: 100%;
+	height: 100%;
+}
+/*
+body.tundra div.comodojoMenubar {
+	width: 100%;
+	border-bottom: 1px solid #939393;
+	background: #eaeaea url(../../javascript/dijit/themes/tundra/images/titleBar.png) repeat;
+}
+
+body.soria div.comodojoMenubar {
+	width: 100%;
+	border-bottom: 1px solid #939393;
+	background: #eaeaea url(../../javascript/dijit/themes/soria/images/titleBar.png) repeat-x;
+}
+
+body.nihilo div.comodojoMenubar {
+	width: 100%;
+	border-bottom: 1px solid #939393;
+	background: #eaeaea url(../../javascript/dijit/themes/nihilo/images/titleBar.png) repeat-x;
+}
+
+body.claro div.comodojoMenubar {
+	width: 100%;
+	border-bottom: 1px solid #939393;
+	background: #eaeaea url(../../javascript/dijit/themes/claro/images/titleBar.png) repeat-x;
+}
+
+.comodojoMenubar_inner {
+	font-weight: bold;
+	background: inherit;
+	border: 0px !important;
+}
+*/
+span.userbar{
+	margin-top:10px;
+    float: right;
+	width: 250px;
+    font-size: large;
+    font-weight: bold;
+    padding-top: 5px;
+    padding-right: 5px;
+    text-align: right;
+}

@@ -96,20 +96,19 @@ class events {
 
 		try {
 			$db = new database();
-			$result = $db
-				->table("events")
+			$db ->table("events")
 				->keys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"))
 				->order("timestamp","DESC");
 			foreach ($this->params as $param->$value) {
 				if (!$run) {
-					$result = $result->where($param,'=',$value);
+					$db->where($param,'=',$value);
 					$run = true;
 				}
 				else {
-					$result = $result->and_where($param,'=',$value);
+					$db->and_where($param,'=',$value);
 				}
 			}
-			$result = $result->get($limit,$offset);
+			$result = $db->get($limit,$offset);
 		}
 		catch (Exception $e) {
 			comodojo_debug('Error retrieving events: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','events');

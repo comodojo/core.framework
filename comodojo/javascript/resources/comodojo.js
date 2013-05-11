@@ -8,7 +8,7 @@
  * 
  * @package		Comodojo ClientSide Core Packages
  * @author		comodojo.org
- * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
@@ -843,12 +843,7 @@ var comodojo = {
 			else {
 				console.log(' - Localized messages db correctly preloaded');
 			}
-			if (!comodojo._localizedErrorsResult) {
-				console.log(' - There was an error loading errors locale, please check your configuration.');
-			}
-			else {
-				console.log(' - Localized errors db correctly preloaded');
-			}
+
 			console.log('*************************************************************************');
 			console.info('Comodojo basic javascript chains correctly loaded!');
 		}
@@ -890,40 +885,6 @@ var comodojo = {
 	},
 	
 	/**
-	 * Load localization for site errors from relative json file.
-	 * If localization file could not be imported, load default (en) one.
-	 * 
-	 * @private
-	 */
-	_loadErrors: function() {
-		
-		var myErrorsLocaleTry = {
-			url: 'comodojo/i18n/i18n_errors_'+comodojo.locale+'.json',
-			handleAs: 'json',
-			sync: true,
-			load: function(data){
-				comodojo.localizedErrors = data;
-				comodojo._localizedErrorsResult = true;
-			},
-			error: function(error){
-				comodojo.debug('failed to understand your locale or localized errors file doesn\'t exists!');
-				comodojo.debug('Reason was: '+ error );
-				if (this.url == 'comodojo/i18n/i18n_errors_en.json') {
-					comodojo.debug('Standard messages localization file doesn\'t exists, messages unavailable.');
-					comodojo._localizedErrorsResult = false;
-				}
-				else {
-					comodojo.debug('Falling back to default errors locale (en).');
-					this.url = 'comodojo/i18n/i18n_errors_en.json';
-					dojo.xhrGet(myErrorsLocaleTry);
-				}
-			}
-		};
-		dojo.xhrGet(myErrorsLocaleTry);
-		
-	},
-	
-	/**
 	 * Start the CoMoDojo environment!
 	 * 
 	 */
@@ -938,7 +899,6 @@ var comodojo = {
 		comodojo.timezone = comodojo.date.getUserTimezone(); 
 		
 		comodojo._loadMessages();
-		comodojo._loadErrors();
 		comodojo._debugBootstrap();
 		
 		comodojo.loadScriptFile('comodojo/javascript/resources/environment.js',{
@@ -1162,19 +1122,9 @@ var comodojo = {
 			widget.destroyRecursive();
 		});
 		
-		//logout current user
-		//dojo.xhrGet ({
-		//	url: 'comodojo/applications/userBar/userBar.php?logout=true',
-		//	sync: true
-		//});
-		
 		//destroy page body
 		comodojo.debugDeep('Page body will be changed');
 		dojo.body().parentNode.replaceChild(document.createElement("body"),dojo.body());
-		//dojo.body().appendChild(dojo.create("div",{
-		//	innerHTML: comodojo.getLocalizedError("99998"),
-		//	style: "margin: 0 auto; text-align: center; font-size: large; color: red; padding: 10px;"
-		//}));
 		
 		//unload scripts
 		comodojo.debugDeep('And every script unloaded.');
@@ -1312,116 +1262,6 @@ var comodojo = {
 			BuiltObject.startup();
 		}
 		return BuiltObject;
-	},
-	
-	//******************************
-	//******NOT YET WORKING!!!******
-	//******************************
-	/*
-	fromHierachy: function (jsonHierachy) {
-		
-		var myNode, myConstructor, myObject;
-		
-		if (jsonHierachy.type == "dom") {
-			myNode = dojo.create(jsonHierachy.object,{}, dojo.body());
-		}
-		else {
-			myNode = dojo.create("div",{}, dojo.body());
-			myConstructor = eval(jsonHierachy.object);
-		}
-		
-		if(jsonHierachy.style){
-			myNode.style.cssText = jsonHierachy.style;
-		}
-		if(jsonHierachy.cssClass){
-			dojo.addClass(myNode, jsonHierachy.cssClass);
-		}
-		if(jsonHierachy.innerHTML){
-			myNode.innerHTML=jsonHierachy.innerHTML;
-		}
-		
-		if (jsonHierachy.type == "widget") {
-			myObject = new myConstructor(jsonHierachy.params, myNode);
-		}
-		
-		if(jsonHierachy.children){
-			dojo.forEach(jsonHierachy.children,
-				function(child){
-					if (myObject.isContainer) {
-						myObject.addChild( child.type == "dom" ? comodojo.createHierarchy(child) : (comodojo.createHierarchy(child)).domNode );
-					}
-					else if (!myObject.domNode){
-						myObject.appendChild( child.type == "dom" ? comodojo.createHierarchy(child) : (comodojo.createHierarchy(child)).domNode );
-					}
-					else {
-						myObject.domNode.appendChild( child.type == "dom" ? comodojo.createHierarchy(child) : (comodojo.createHierarchy(child)).domNode );
-					}
-				});
-		}
-		
-		if (jsonHierachy.type == "widget") {
-			myObject.startup();
-		}
-		else {
-			myObject = myNode;
-		}
-		
-		return myObject;
-		
-	},
-	*/
-	
-	/**
-	 * Get a localized error message (as defined in i18n_errors_[locale].json files)
-	 *
-	 * @param 	string	errorId	The error identifier
-	 * @return	string			The message requested (localized)
-	 */
-	getLocalizedError: function(errorId) {
-		
-		if (!comodojo.localizedErrors[errorId] && comodojo.locale != "en") {
-           	var c;
-			dojo.xhrGet({
-                url: 'comodojo/i18n/i18n_errors_en.json',
-                handleAs: 'json',
-				sync: true,
-                load: function(data){
-					comodojo.debug('Cannot find ('+comodojo.locale+') translation for error num: '+errorId+', fallback to standard locale.');
-					if (!data[errorId]) {
-						comodojo.debug('Cannot find any translation for error num: '+errorId+', returning _?_');
-	                    c = "_?_";
-					}
-					else {
-						c = data[errorId];
-					}
-                },
-                error: function(error){
-					comodojo.debug('Impossible to load error messages db, please check your configuration!');
-                }
-            });
-			return c;
-        }
-		else if (!comodojo.localizedErrors[errorId] && comodojo.locale == "en") {
-			comodojo.debug('Cannot find any translation for error num: '+errorId+', returning _?_');
-			return "_?_";
-		}
-		else {
-			return comodojo.localizedErrors[errorId];
-		}
-		
-	},
-	
-	/**
-	 * Get a localized, mutable error message (as defined in i18n_errors_[locale].json files)
-	 * Function will substitute each ${INT} pattern in localized string with parameters passed
-	 *
-	 * @param 	string	errorCode	The error identifier
-	 * @param 	array	params		Values to substitute to patterns in string
-	 * @return	string				The error message requested (localized)
-	 */
-	getLocalizedMutableError: function(errorCode, params) {
-		var err = comodojo.getLocalizedError(errorCode);
-		return err != '__?('+errorCode+')?__' ? dojo.string.substitute(err, params) : err;
 	},
 	
 	/**

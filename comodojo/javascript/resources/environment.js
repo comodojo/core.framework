@@ -651,7 +651,7 @@ comodojo.error = {
 	_replaceBody: function() {
 		
 		dojo.body().appendChild(dojo.create("div",{
-			innerHTML: comodojo.getLocalizedError("99998"),
+			innerHTML: comodojo.getLocalizedMessage("10033"),
 			style: "margin: 0 auto; text-align: center; font-size: large; color: red; padding: 10px;"
 		}));
 		

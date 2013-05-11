@@ -260,7 +260,7 @@ class database {
 	public function values($value_or_array) {
 
 		$value_string_pattern = "'%s'";
-		$value_null_pattern = NULL;
+		$value_null_pattern = 'NULL';
 
 		if (is_null($this->values)) {
 			$this->values = array();
@@ -272,8 +272,10 @@ class database {
 		}
 		elseif (is_array($value_or_array)) {
 			foreach ($value_or_array as $key=>$key_val) {
-				if		(is_array($key_val))	$value_or_array[$key] = sprintf($value_string_pattern,array2json($key_val));
-				elseif	(is_bool($key_val) === true) {
+				if (is_array($key_val)) {
+					$value_or_array[$key] = sprintf($value_string_pattern,array2json($key_val));
+				}
+				elseif (is_bool($key_val) === true) {
 					switch ($this->dbDataModel) {
 						case 'MYSQL':
 						case 'MYSQLI':
@@ -1434,8 +1436,8 @@ class database {
 							break;
 					}
 				}
-				elseif	(is_numeric($key_val))	$_value = $value;
-				elseif	(is_null($key_val))		$_value = "NULL";
+				elseif	(is_numeric($value))	$_value = $value;
+				elseif	(is_null($value))		$_value = "NULL";
 				else {
 					/*
 					switch ($this->dbDataModel) {
@@ -1516,21 +1518,6 @@ class database {
 				$i++;
 			}			
 		}
-		if (is_resource($data) AND is_a($data, 'mysqli_result')) {
-			switch ($_fetch) {
-				case 'NUM': $fetch = MYSQLI_NUM; break;
-				case 'ASSOC': $fetch = MYSQLI_ASSOC; break;
-				default: $fetch = MYSQLI_BOTH; break;
-			}
-			$i = 0;
-			$myResult = array();
-			$myResultLength = $data->num_rows;
-			while($i < $myResultLength) {
-				$myResult[$i] = $data->fetch_array($fetch);
-				$i++;
-			}
-			$data->free();
-		}
 		elseif (is_resource($data) AND @get_resource_type($data) == "pgsql result") {
 			$i = 0;
 			$myResult = array();
@@ -1553,7 +1540,22 @@ class database {
 				default: 		while ($row = db2_fetch_both($data)) array_push($myResult, $row);	break;
 			}
 		}
-		elseif(is_object($data)) {
+		elseif (is_object($data) AND is_a($data, 'mysqli_result')) {
+			switch ($_fetch) {
+				case 'NUM': $fetch = MYSQLI_NUM; break;
+				case 'ASSOC': $fetch = MYSQLI_ASSOC; break;
+				default: $fetch = MYSQLI_BOTH; break;
+			}
+			$i = 0;
+			$myResult = array();
+			$myResultLength = $data->num_rows;
+			while($i < $myResultLength) {
+				$myResult[$i] = $data->fetch_array($fetch);
+				$i++;
+			}
+			$data->free();
+		}
+		elseif (is_object($data)) {
 			$myResult = array();
 			foreach($data as $key=>$val) $myResult[$key] = $val;
 			$myResultLength = sizeof($myResult);

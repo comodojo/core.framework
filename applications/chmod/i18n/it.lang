@@ -1,0 +1,25 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Modifica permessi per la risorsa: ${0}',
+	'0001'	=>	'Seleziona una risorsa',
+	'0002'	=>	'Aggiungi utente',
+	'0003'	=>	'Nessuna risorsa selezionata',
+	'0004'	=>	'Salva permessi',
+	'0005'	=>	'Permessi salvati correttamente',
+	'0006'	=>	'Impossibile salvare i permessi sulla risorsa',
+	'0007'	=>	'Utente',
+	'0008'	=>	'Accesso'
+);
+
+?>

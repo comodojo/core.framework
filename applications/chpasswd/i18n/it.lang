@@ -1,0 +1,26 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Password attuale',
+	'0001'	=>	'Nuova password',
+	'0002'	=>	'Nuova password (ripeti)',
+	'0003'	=>	'Inserisci la tua password attuale e la nuova, poi clicca "Cambia Password" per continuare.',
+	'0004'	=>	'Password modificata correttamente',
+	'0005'	=>	'Cambia Password',
+	'0006'	=>	'Completa tutti i campi richiesti',
+	'0007'	=>	'Cambio la password...',
+	'0008'	=>	'Password modificata correttamente',
+	'0009'	=>	'La nuova password non corrisponde'
+);
+
+?>

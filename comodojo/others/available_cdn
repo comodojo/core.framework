@@ -1,10 +1,10 @@
 <?php
 
 $available_cdn = Array(
-	Array("name"=>"Google Code (1.8.3) [default]","value"=>"//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"),
-	Array("name"=>"Google Code (1.8.3-uncompressed)","value"=>"//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js.uncompressed.js"),
-	Array("name"=>"Yandex EU CDN (1.8.3)","value"=>"//yandex.st/dojo/1.8.3/dojo/dojo.js"),
-	Array("name"=>"Yandex EU CDN (1.8.3-uncompressed)","value"=>"//yandex.st/dojo/1.8.3/dojo/dojo.js.uncompressed.js")
+	Array("name"=>"Google Code (1.9.0) [default]","value"=>"//ajax.googleapis.com/ajax/libs/dojo/1.9.0/dojo/dojo.js"),
+	Array("name"=>"Google Code (1.9-0-uncompressed)","value"=>"//ajax.googleapis.com/ajax/libs/dojo/1.9.0/dojo/dojo.js.uncompressed.js"),
+	Array("name"=>"Yandex EU CDN (1.8.3)","value"=>"//yandex.st/dojo/1.9.0/dojo/dojo.js"),
+	Array("name"=>"Yandex EU CDN (1.8.3-uncompressed)","value"=>"//yandex.st/dojo/1.9.0/dojo/dojo.js.uncompressed.js")
 );
  
 ?>

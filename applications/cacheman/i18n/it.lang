@@ -1,0 +1,23 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Per la configurazione della cache utilizzare il pannello di controllo.',
+	'0001'	=>	'Numero di pagine attive: ',
+	'0002'	=>	'Numero di pagine scadute: ',
+	'0003'	=>	'Tempo di refresh della cache: ',
+	'0004'	=>	'La pagina più vecchia risale al: ',
+	'0005'	=>	'Cancella la cache',
+	'0006'	=>	'Cache cancellata'
+);
+
+?>

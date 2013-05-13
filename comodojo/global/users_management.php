@@ -283,11 +283,11 @@ class users_management {
 			'userPass'	=>	!$this->do_not_encrypt_userPass ? md5($userPass) : $userPass,
 			'email'		=>	$email,
 			'userRole'	=>	!isset($params['userRole']) ? COMODOJO_REGISTRATION_DEFAULT_ROLE : (is_numeric($params['userRole']) ? $params['userRole'] : COMODOJO_REGISTRATION_DEFAULT_ROLE),
-			'enabled'	=>	!isset($params['enabled']) ? false : (!$params['enabled']) ? false : true),
-			'ldap'		=>	!isset($params['ldap']) ? false : (!$params['ldap']) ? false : true),
-			'rpc'		=>	!isset($params['rpc']) ? false : (!$params['rpc']) ? false : true),
+			'enabled'	=>	!isset($params['enabled']) ? false : (!$params['enabled'] ? false : true),
+			'ldap'		=>	!isset($params['ldap']) ? false : (!$params['ldap'] ? false : true),
+			'rpc'		=>	!isset($params['rpc']) ? false : (!$params['rpc'] ? false : true),
 			'completeName'	=> !isset($params['completeName']) ? null : (is_scalar($params['completeName']) ? $params['completeName'] : null),
-			'gravatar'	=>	!isset($params['gravatar']) ? false : (!$params['gravatar']) ? false : true),
+			'gravatar'	=>	!isset($params['gravatar']) ? false : (!$params['gravatar'] ? false : true),
 			'birthday'	=>	!isset($params['birthday']) ? null : (is_scalar($params['birthday']) ? $params['birthday'] : null),
 			'gender'	=>	!isset($params['gender']) ? null : (is_scalar($params['gender']) ? $params['gender'] : null),
 			'url'		=>	!isset($params['url']) ? null : (filter_var($params['url'], FILTER_VALIDATE_URL) === FALSE ? null : $params['url']),
@@ -299,7 +299,7 @@ class users_management {
 			$db = new database();
 			$result = $db->return_id()
 			->table('users')
-			->keys(Array("userName","userPass","email","userRole","enabled","ldap","rpc","completeName","gravatar","birthday","gender","url","private_identifier","public_identifier")
+			->keys(Array("userName","userPass","email","userRole","enabled","ldap","rpc","completeName","gravatar","birthday","gender","url","private_identifier","public_identifier"))
 			->values($_params)
 			->store();
 			$fs = new filesystem();

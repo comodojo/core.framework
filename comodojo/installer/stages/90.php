@@ -20,7 +20,7 @@ class stage extends stage_base {
 
 	public function check_home_folder_e() {
 		$dir =  COMODOJO_SITE_PATH . $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['HOME_FOLDER'];
-		return (count(scandir($dir)) == 2);
+		return (count(@scandir($dir)) == 2);
 	}
 
 	public function check_conf_folder_w() {

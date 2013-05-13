@@ -1,0 +1,157 @@
+<?php
+
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+
+	'0000'	=>	'Torna al menu principale',
+	'0001'	=>	'Preferenze salvate correttamente!',
+	'0002'	=>	'E\' necessario riavviare il portale per rendere le modifiche operative.<br>${0}Clicca qui${1} per riavviare comodojo; le informazioni non salvate verranno perse.',
+	'0003'	=>	'',
+	'0004'	=>	'',
+	'0005'	=>	'',
+	'0006'	=>	'',
+	'0007'	=>	'',
+	'0008'	=>	'',
+	'0009'	=>	'',
+	
+	//GENERAL.PHP
+	'0100'	=>	'Impostazioni Generali',
+	'0101'	=>	'Titolo del sito',
+	'0102'	=>	'Descrizione del sito',
+	'0103'	=>	'Autore',
+	'0104'	=>	'Data di pubblicazione del sito',
+	'0105'	=>	'Livello di rating Gravatar (<a href="https://en.gravatar.com/site/implement/images/#rating" target="_blank">maggiori informazioni</a>)',
+	'0106'	=>	'Codifica di default',
+	'0107'	=>	'Localizzazione',
+	
+	//ADVANCED.PHP
+	'0110'	=>	'Impostazioni Avanzate',
+	'0111'	=>	'Percorso locale del sito',
+	'0112'	=>	'URL completo del sito',
+	'0113'	=>	'URL esterno del sito (se differente da quello completo)',
+	'0114'	=>	'Id dell\'oggetto DOM di base',
+	'0115'	=>	'Abilita il trasporto della sessione',
+	'0116'	=>	'Autentica ogni sessione (ATTENZIONE! Se abilitato, non verranno preservate le sessioni autenticate tramite LDAP!)',
+	'0117'	=>	'Percorso di base dei javascript',
+	'0118'	=>	'Componenti javascript da caricare automaticamente',
+	
+	//PERFORMANCE.PHP
+	'0120'	=>	'Prestazioni',
+	'0121'	=>	'Abilita cache',
+	'0122'	=>	'Tempo di refresh della cache',
+	'0123'	=>	'Abilita il caricamento delle risorse in modalità cross-domain',
+	'0124'	=>	'Cross-domain repository',
+	'0125'	=>	'Cross domain timeout',
+	
+	//DEBUG.PHP
+	'0130'	=>	'Debug',
+	'0131'	=>	'Abilita console di debug',
+	'0132'	=>	'Apri la console in una finestra separata',
+	'0133'	=>	'Mostra tutti i messaggi di debug',
+	'0134'	=>	'Questi parametri controllano il livello di debug lato client (javascript). Per abilitare il debug lato server modificare il file static_configuration.php.',
+	
+	//MAINTENANCE.PHP
+	'0140'	=>	'Manutenzione',
+	'0141'	=>	'Abilita modalità di manutenzione',
+	'0142'	=>	'Messaggio personalizzato',
+	
+	//THEMES.PHP
+	'0150'	=>	'Temi',
+	'0151'	=>	'Tema del portale',
+	'0152'	=>	'Tema di dojo',
+	'0153'	=>	'Nome',
+	'0154'	=>	'Creato da',
+	'0155'	=>	'Versione',
+	'0156'	=>	'Framework',
+	'0157'	=>	'Commento',
+	
+	//SMTP.PHP
+	'0160'	=>	'SMTP',
+	'0161'	=>	'Indirizzo del server di posta',
+	'0162'	=>	'Porta del server di posta',
+	'0163'	=>	'Motore SMTP da utilizzare',
+	'0164'	=>	'Autenticazione al servizio di posta',
+	'0165'	=>	'Protocollo di sicurezza',
+	'0166'	=>	'Utente',
+	'0167'	=>	'Password',
+	'0168'	=>	'Indirizzo da cui inoltrare le mail',
+	
+	//EVENTS.PHP
+	'0170'	=>	'Eventi',
+	'0171'	=>	'Abilita registrazione eventi',
+	'0172'	=>	'Se abilitata verranno memorizzati tutti gli eventi selezionati nel file events_recording.php',
+	
+	//SERVICES.PHP
+	'0180'	=>	'Servizi REST',
+	'0181'	=>	'Abilita interfaccia REST',
+	'0182'	=>	'Se abilitata, sarà possibile utilizzare la pubblicazione di servizi REST tramite l\'URL <a href="'.getSiteUrl().'services.php">'.getSiteUrl().'services.php</a>',
+	
+	//SHELL.PHP
+	'0190'	=>	'Shell',
+	'0191'	=>	'Abilita shell',
+	'0192'	=>	'Verrà abilitato l\'accesso locale alla shell; la shell remota utilizza i protocolli RPC.',
+	
+	//CRON.PHP
+	'0200'	=>	'Cron Jobs',
+	'0201'	=>	'Abilita cron extender',
+	'0202'	=>	'Abilita multithreading',
+	'0203'	=>	'Notifica via mail',
+	'0204'	=>	'Indirizzi email a cui inviare le notifiche (separati da ";" o ",")',
+	
+	//LDAP.PHP
+	'0210'	=>	'LDAP',
+	'0211'	=>	'Indirizzo del server ldap',
+	'0212'	=>	'Porta su cui è in ascolto il server ldap',
+	'0213'	=>	'dc(s) separati da virgola (ex. "dc=company, dc=net" per @company.net)',
+	'0214'	=>	'Altri DN (ex. "cn=users")',
+	'0215'	=>	'Filtro di default per la ricerca utenti su ldap',
+	'0216'	=>	'Utente che può effettuare il listing dell\'alberatura (lascia vuoto se ogni utente può farlo)',
+	'0217'	=>	'Password dell\'utente che può listare l\'alberatura',
+	'0218'	=>	'Usa modalità compatibile (seleziona se hai incontrato problemi, per esempio con Active Directory)',
+	
+	//LOCAL_RPC.PHP
+	'0220'	=>	'RPC locale',
+	'0221'	=>	'Abilita server RPC locale',
+	'0222'	=>	'Modalità del server RPC',
+	'0223'	=>	'Metodo di trasporto dati',
+	'0224'	=>	'SharedKey',
+	
+	//AUTHENTICATION.PHP
+	'0230'	=>	'Autenticazione',
+	'0231'	=>	'Modalità di autenticazione',
+	'0232'	=>	'Abilita la cache per autenticazione esternal',
+	'0233'	=>	'Tempo di refresh della cache di autenticazione',
+	
+	//REGISTRATION.PHP
+	'0240'	=>	'Registrazione utenti',
+	'0241'	=>	'Permetti a nuovi utenti di registrarsi autonomamente',
+	'0242'	=>	'Ogni nuova registrazione deve essere autorizzata da un amministratore',
+	'0243'	=>	'Ruolo di default per nuovi utenti',
+	'0244'	=>	'Tempo di scadenza delle richieste di registrazione',
+	
+	//EXTERNAL_RPC.PHP
+	'0250'	=>	'RPC esterno',
+	'0251'	=>	'Indirizzo del server RPC',
+	'0252'	=>	'Porta del server RPC',
+	'0253'	=>	'Modalità di funzionamento',
+	'0254'	=>	'Trasporto',
+	'0255'	=>	'SharedKey',
+	
+	//META.PHP
+	'0260'	=>	'Meta tags',
+	
+	//BOOTSTRAP.PHP
+	'0270'	=>	'Ruoli e applicazioni'
+
+);
+
+?>

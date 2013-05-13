@@ -116,7 +116,7 @@ $comodojoCustomization = array(
 		"JS_XD_LOADING"				=>	0,
 		"JS_XD_LOCATION"			=>	'http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/dojo.js',
 		"JS_XD_TIMEOUT"				=>	10,
-		"JS_DEBUG"					=>	0,
+		"JS_DEBUG"					=>	1,
 		"JS_DEBUG_POPUP"			=>	0,
 		"JS_DEBUG_DEEP"				=>	0,
 		/**
@@ -136,7 +136,7 @@ $comodojoCustomization = array(
 		/**
 		 * Shell
 		 */
-		"SHELL_ENABLED"				=>	0,
+		"SHELL_ENABLED"				=>	1,
 		/**
 		 * REST Services
 		 */
@@ -229,15 +229,15 @@ $comodojoCustomization["defaultBaseValues"]["SITE_TAGS"] = array(
 
 $comodojoCustomization["defaultBaseValues"]["BOOTSTRAP"] = array(
 
-	0				=>	array("usersubscription"),
+	0				=>	array(),
 
-	1				=>	array("browser","chmod","chpasswd","controlpanel","events","filePicker","folderPicker","imageSelector","info","profileEditor","runApplication","runCode","taskManager","testAuthentication","testFilesystem","testForms","testGeo","testKernelIO","testKernelSubscription","testMailSend","testRegistration","testDatabase","testSSH","testMetaWeblog","uploader","usersmanager","writer"),
+	1				=>	array("chpasswd","filepicker","folderpicker","chmod","cacheman","controlpanel"),
 
-	2				=>	array("browser","chmod","chpasswd","filePicker","folderPicker","imageSelector","profileEditor","uploader","writer"),
+	2				=>	array("chpasswd","filepicker","folderpicker","chmod"),
 
-	3				=>	array("browser","chmod","chpasswd","filePicker","folderPicker","imageSelector","profileEditor","uploader","writer"),
+	3				=>	array("chpasswd","filepicker","folderpicker","chmod"),
 
-	"persistent"	=>	array("aboutComodojo","comodojoMenubar","helloWorld","license","runMeFirst","userbar","setLocale")
+	"persistent"	=>	array("about","comodojo_menubar","set_locale","license","helloworld","qotd")
 
 );
 	

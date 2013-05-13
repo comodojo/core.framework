@@ -1,0 +1,23 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'For cache configuration use the controlpanel app.',
+	'0001'	=>	'Active pages: ',
+	'0002'	=>	'Expired pages: ',
+	'0003'	=>	'Current cache TTL: ',
+	'0004'	=>	'Oldest cache page: ',
+	'0005'	=>	'Purge cache',
+	'0006'	=>	'Cache cleaned'
+);
+
+?>

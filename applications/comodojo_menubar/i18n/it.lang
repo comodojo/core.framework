@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * it.lang
+ * application i18n - 'it' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ */
+
+$lang = Array(
+	'0000'	=>	'Applicazioni',
+	'0001'	=>	'Sistema',
+	'0002'	=>	'Informazioni',
+	'0003'	=>	'Sessione',
+	'0004'	=>	'Informazioni sulla sessione',
+	'0005'	=>	'Chiudi sessione',
+	'0006'	=>	'Sviluppo',
+	'0007'	=>	'Altro',
+	'0008'	=>	'Domenica',
+	'0009'	=>	'Lunedì',
+	'0010'	=>	'Martedì',
+	'0011'	=>	'Mercoledì',
+	'0012'	=>	'Giovedì',
+	'0013'	=>	'Venerdì',
+	'0014'	=>	'Sabato',
+	'0015'	=>	'Nessuna applicazione in esecuzione',
+	'0016'	=>	'Passa a',
+	'0017'	=>	'Termina',
+	'0018'	=>	'Test',
+	'0019'	=>	'Accedi o registrati',
+	'0020'	=>	'Accedi',
+	'0021'	=>	'Benvenuto ${0}!',
+	'0022'	=>	'Nome Utente',
+	'0023'	=>	'Password',
+	'0024'	=>	'Non ricordi la password?',
+	'0025'	=>	'Applicazioni in esecuzione',
+	'0026'	=>	'Inserisci le tue credenziali per accedere',
+	'0027'	=>	'E\' necessario completare tutti i campi richiesti',
+	'0028'	=>	'Autenticazione in corso...',
+	'0029'	=>	'Accesso riuscito!',
+	'0030'	=>	'Impossibile accedere: username sconosciuto o password non valida',
+	'0031'	=>	'Si è verificato un errore nel caricamento delle informazioni utente',
+	'0032'	=>	'Esci',
+	'0033'	=>	'Modifica il tuo profilo',
+	'0034'	=>	'Modifica localizzazione',
+	'0035'	=>	'Cambia password',
+	'0036'	=>	'Vai a comodojo.org'
+);
+
+?>

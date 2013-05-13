@@ -119,10 +119,10 @@ class database {
 	 * @var	string
 	 */
 	private $keys = null;
-	private $keys_array = [];
+	private $keys_array = Array();
 
 	private $values = null;
-	private $values_array = [];
+	private $values_array = Array();
 
 	private $group_by = null;
 
@@ -231,7 +231,7 @@ class database {
 
 	public function keys($key_name_or_array) {
 
-		$keys_pattern = in_array($this->dbDataModel, Array('MYSQL','MYSQL_PDO')) ? "`%s`" : "%s";
+		$keys_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`%s`" : "%s";
 		
 		if (empty($key_name_or_array)) {
 			comodojo_debug('Invalid key/s','ERROR','database');
@@ -240,10 +240,10 @@ class database {
 		elseif (is_array($key_name_or_array)) {
 			foreach ($key_name_or_array as $key=>$key_val) {
 				$_key_val = sprintf($keys_pattern,$key_val);
-				$key_name_or_array[$key] = sprintf($keys_pattern,$_key_val);
+				$key_name_or_array[$key] = $_key_val;
 				array_push($this->keys_array,$_key_val);
 			}
-			$this->keys = "(".implode(',',$key_name_or_array).")";
+			$this->keys = implode(',',$key_name_or_array);
 		}
 		else {
 			$k = trim($key_name_or_array);
@@ -262,15 +262,16 @@ class database {
 		$value_string_pattern = "'%s'";
 		$value_null_pattern = 'NULL';
 
+		if (is_null($value_or_array) OR !isset($value_or_array)) {
+			comodojo_debug('Invalid value (empty)','ERROR','database');
+			throw new Exception('Invalid value',1014);
+		}
+		
 		if (is_null($this->values)) {
 			$this->values = array();
 		}
 
-		if (empty($value_or_array)) {
-			comodojo_debug('Invalid value','ERROR','database');
-			throw new Exception('Invalid value',1014);
-		}
-		elseif (is_array($value_or_array)) {
+		if (is_array($value_or_array)) {
 			foreach ($value_or_array as $key=>$key_val) {
 				if (is_array($key_val)) {
 					$value_or_array[$key] = sprintf($value_string_pattern,array2json($key_val));
@@ -815,9 +816,9 @@ class database {
 		
 		$this->table = null;
 		$this->keys = null;
-		$this->keys_array = [];
+		$this->keys_array = Array();
 		$this->values = null;
-		$this->values_array = [];
+		$this->values_array = Array();
 		$this->group_by = null;
 		$this->order_by = null;
 		$this->having = null;
@@ -1014,8 +1015,9 @@ class database {
 		}
 
 		if (sizeof($this->values) == 1) {
-			$query_pattern = "INSERT INTO%s%s VALUES%s";
-			$query = sprintf($query_pattern,(" ".$this->table),(" ".($this->keys == "*" ? NULL : $this->keys)),(" ".$this->values[0]));
+			$query_pattern = "INSERT INTO %s%s VALUES %s";
+			$_keys = ( $this->keys == "*" OR is_null($this->keys) ) ? NULL : "(".$this->keys.")";
+			$query = sprintf($query_pattern,$this->table," ".$_keys,($this->values[0]));
 		}
 		else {
 			switch ($this->dbDataModel) {
@@ -1025,18 +1027,23 @@ class database {
 				case ("POSTGRESQL"):
 				case ("DB2"):
 				case ("DBLIB_PDO"):
-					$query_pattern = "INSERT INTO%s%s VALUES%s";
-					$query = sprintf($query_pattern,(" ".$this->table),(" ".($this->keys == "*" ? NULL : $this->keys)),(" ".implode(',', $this->values)));
+					$query_pattern = "INSERT INTO %s%s VALUES%s";
+					$_keys = ( $this->keys == "*" OR is_null($this->keys) ) ? NULL : "(".$this->keys.")";
+					$query = sprintf($query_pattern,$this->table," ".$_keys," ".implode(',', $this->values));
 				break;
 				
 				case ("SQLITE_PDO"):
-					$query_pattern = "INSERT INTO%s%s SELECT %s";
-					$query = sprintf($query_pattern,(" ".$this->table),(" ".($this->keys == "*" ? NULL : $this->keys)),(" ".implode(' UNION SELECT ', $this->values)));
+					$query_pattern = "INSERT INTO %s%s SELECT %s";
+					$_keys = ( $this->keys == "*" OR is_null($this->keys) ) ? NULL : "(".$this->keys.")";
+					$_values = implode(' UNION SELECT ', $this->values);
+					$query = sprintf($query_pattern,$this->table," ".$_keys,$_values);
 				break;
 					
 				case ("ORACLE_PDO"):
-					$query_pattern = "INSERT INTO%s%s SELECT %s";
-					$query = sprintf($query_pattern,(" ".$this->table),(" ".($this->keys == "*" ? NULL : $this->keys)),(" ".implode(' FROM DUAL UNION ALL SELECT ', $this->values)." FROM DUAL"));
+					$query_pattern = "INSERT INTO %s%s SELECT %s";
+					$_keys = ( $this->keys == "*" OR is_null($this->keys) ) ? NULL : "(".$this->keys.")";
+					$_values = implode(' FROM DUAL UNION ALL SELECT ', $this->values)." FROM DUAL";
+					$query = sprintf($query_pattern,$this->table," ".$_keys,$_values);
 				break;
 
 				case ("INFORMIX_PDO"):
@@ -1069,7 +1076,7 @@ class database {
 			throw new Exception('Could not update multiple values with database::update',1025);
 		}
 
-		$query_pattern = "UPDATE %s SET %s";
+		$query_pattern = "UPDATE %s SET %s%s";
 
 		$query_content_array = Array();
 
@@ -1077,7 +1084,7 @@ class database {
 			array_push($query_content_array,$key.'='.$this->values_array[$position]);
 		}
 
-		$query = sprintf($query_pattern,$this->table,implode(',',$query_content_array));
+		$query = sprintf($query_pattern,$this->table,implode(',',$query_content_array),is_null($this->where) ? null : " ".$this->where);
 
 		try {
 			$queryResult = $this->query($query);
@@ -1386,12 +1393,12 @@ class database {
 
 			switch($operator) {
 				case 'IN':
-					$clause_pattern = "%s IN (%s)";
+					$clause_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`%s` IN (%s)" : "%s IN (%s)";
 					$_value = "'".implode("','", $value)."'";
 					$to_return = sprintf($clause_pattern, $column, $_value);
 					break;
 				case 'BETWEEN':
-					$clause_pattern = "%s BETWEEN %s AND %s";
+					$clause_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`%s` BETWEEN %s AND %s" : "%s BETWEEN %s AND %s";
 					$to_return = sprintf($clause_pattern, $value[0], $value[1]);
 					break;
 				default:
@@ -1403,7 +1410,7 @@ class database {
 		}
 		elseif (is_scalar($column) AND is_scalar($value)) {
 			
-			$clause_pattern = "%s %s %s";
+			$clause_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`%s` %s %s" : "%s %s %s";
 
 			if ($operator == 'IS') {
 				$_column = $column;

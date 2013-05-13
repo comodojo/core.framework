@@ -1,0 +1,106 @@
+.comodojoMenubar_clearer {
+	clear: both;
+}
+
+.comodojo_menubar_docker_dock {
+	position: relative;
+	width: 220px;
+	overflow: hidden;
+}
+
+.comodojo_menubar_docker_dock_inner {
+	max-height: 300px;
+	overflow: auto;
+}
+
+.comodojo_menubar_docker_indicator {
+	float: right;
+}
+
+.comodojo_menubar_session_menu_container {
+	/*background-color: #FFFFFF;
+	width: 308px;*/
+}
+
+.comodojo_menubar_session_menu {
+	float: right;
+}
+
+.comodojoMenubar_dockAppContainer {
+	width: 180px;
+	height: 76px;
+	padding: 5px 0px 0px 0px;
+	border-bottom: 1px solid #b6b6b6;
+	
+}
+.comodojoMenubar_dockAppImage {
+	width: 64px;
+	height: 64px;
+}
+.comodojoMenubar_dockAppTextBox {
+	width: 100px;
+	float: right;
+}
+.comodojoMenubar_dockAppName_visible {
+	text-align: center;
+	font-weight: bold;
+	height: 35px;
+}
+.comodojoMenubar_dockAppName_hidden {
+	text-align: center;
+	color: #b6b6b6;
+	height: 35px;
+}
+.comodojoMenubar_dockAppExec {
+	text-align: center;
+	font-size: x-small;
+	height: 20px;
+}
+.comodojoMenubar_dockAppTerminate {
+	width: 16px;
+	height: 16px;
+	float: right;
+	cursor: pointer;
+	margin-right: 10px;
+}
+.comodojoMenubar_dockAppSwitch {
+	width: 16px;
+	height: 16px;
+	float: right;
+	cursor: pointer;
+	margin-right: 30px;
+}
+
+.comodojoMenubar_userInfo_container {
+	width: 300px;
+	height: 70px;
+}
+
+.comodojoMenubar_userInfo_name {
+	text-align: center;
+	font-weight: bold;
+	font-size: 16px;
+	width: 230px;
+	float: right;
+	height: 69px;
+	padding-top: 28px;
+}
+
+.comodojoMenubar_userInfo_avatar{
+	width: 66px;
+	height: 66px;
+	border: 1px solid #444444;
+	float: left;
+	/*margin: 2px;*/
+}
+
+.comodojoMenubar_userAction_container {
+	width: 300px;
+	text-align: center;
+}
+
+.comodojoMenubar_userAction_button {
+	width: 300px;
+	display: block;
+	margin-top: 10px;
+}

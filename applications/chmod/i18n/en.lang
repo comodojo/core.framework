@@ -1,0 +1,25 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Change ACL for resource: ${0}',
+	'0001'	=>	'Select resource',
+	'0002'	=>	'Add user',
+	'0003'	=>	'No resource selected',
+	'0004'	=>	'Save',
+	'0005'	=>	'Acl correctly saved',
+	'0006'	=>	'There was an error saving acl on selected resource',
+	'0007'	=>	'User',
+	'0008'	=>	'Access level'
+);
+
+?>

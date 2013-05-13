@@ -1,0 +1,26 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Current password',
+	'0001'	=>	'New password',
+	'0002'	=>	'New password (again)',
+	'0003'	=>	'Fill fields with your current and new password, then click "Change Password" per continue.',
+	'0004'	=>	'Password changed correctly',
+	'0005'	=>	'Change Password',
+	'0006'	=>	'Fill and check all fields first',
+	'0007'	=>	'Changing password...',
+	'0008'	=>	'Password changed correctly',
+	'0009'	=>	''
+);
+
+?>

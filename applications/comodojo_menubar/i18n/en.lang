@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * en.lang
+ * application i18n - 'en' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ */
+ 
+$lang = Array(
+	'0000'	=>	'Applications',
+	'0001'	=>	'System',
+	'0002'	=>	'Informations',
+	'0003'	=>	'Session',
+	'0004'	=>	'Session Informations',
+	'0005'	=>	'Close Session',
+	'0006'	=>	'Developments',
+	'0007'	=>	'Other',
+	'0008'	=>	'Sunday',
+	'0009'	=>	'Monday',
+	'0010'	=>	'Tuesday',
+	'0011'	=>	'Wednesday',
+	'0012'	=>	'Thursday',
+	'0013'	=>	'Friday',
+	'0014'	=>	'Saturday',
+	'0015'	=>	'No application running',
+	'0016'	=>	'Switch to',
+	'0017'	=>	'Close',
+	'0018'	=>	'Test',
+	'0019'	=>	'Sign In or Register',
+	'0020'	=>	'Sign In',
+	'0021'	=>	'Welcome ${0}!',
+	'0022'	=>	'User Name',
+	'0023'	=>	'Password',
+	'0024'	=>	'Password lost?',
+	'0025'	=>	'Running applications',
+	'0026'	=>	'Please insert your credential',
+	'0027'	=>	'Fill all required fields first',
+	'0028'	=>	'Logging in...',
+	'0029'	=>	'Login succeed!',
+	'0030'	=>	'Error logging in: unknown username or wrong password',
+	'0031'	=>	'Error retrieving user informations',
+	'0032'	=>	'Logout'
+	'0033'	=>	'Edit your profile',
+	'0034'	=>	'Change localizzation',
+	'0035'	=>	'Change password',
+	'0036'	=>	'Go to comodojo.org'
+);
+
+?>

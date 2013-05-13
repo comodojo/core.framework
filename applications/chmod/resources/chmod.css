@@ -1,0 +1,16 @@
+.chmod_loadingState_image{
+	margin-top: 20%;
+	text-align: center;
+}
+.chmod_loadingState_text{
+	text-align: center;
+	font-weight: bold;
+}
+.chmod_resource_text {
+	display: block;
+	margin-top: 10px;
+	margin-left: 10px;
+	margin-bottom: 20px;
+	font-size: 110%;
+	font-weight: bold;
+}

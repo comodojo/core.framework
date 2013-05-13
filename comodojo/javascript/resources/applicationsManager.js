@@ -236,7 +236,7 @@ comodojo.app = {
 			var applicationSpace = false;
 			var loadingState = dojo.create('div',{
 				id: pid+'_loadingState',
-				innerHTML: comodojo.bus._registeredApplications[appExec].properties.runMode == "system" ? '<span><img src="comodojo/images/smallLoader.gif" />' + comodojo.getLocalizedMessage("10007") + '</span>' : '<p style="text-align: center; padding: 10px;" ><img src="comodojo/images/smallLoader.gif" /></p><p style="font-weight: bold; font-size: large; text-align: center;">'+comodojo.bus._registeredApplications[appExec].properties.title+'</p><p style="text-align: center;">'+comodojo.bus._registeredApplications[appExec].properties.description+'</p>'	
+				innerHTML: comodojo.bus._registeredApplications[appExec].properties.runMode == "system" ? '<span><img src="comodojo/images/small_loader.gif" />' + comodojo.getLocalizedMessage("10007") + '</span>' : '<p style="text-align: center; padding: 10px;" ><img src="comodojo/images/small_loader.gif" /></p><p style="font-weight: bold; font-size: large; text-align: center;">'+comodojo.bus._registeredApplications[appExec].properties.title+'</p><p style="text-align: center;">'+comodojo.bus._registeredApplications[appExec].properties.description+'</p>'	
 			});
 			
 			//icon support

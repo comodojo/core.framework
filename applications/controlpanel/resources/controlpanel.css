@@ -1,0 +1,64 @@
+.controlpanel_loadingState_image {
+	margin: 20% auto;
+	text-align: center;
+	padding: 4px;
+}
+.controlpanel_loadingState_text {
+	text-align: center;
+	font-weight: bold;
+	font-size: 120%;
+}
+
+.controlpanel_top_iconContainer {
+	width: 16px;
+	height: 16px;
+	margin: 7px;
+	float: left;
+}
+.controlpanel_top_textContainer {
+	width: 200px;
+	height: 20px;
+	float: left;
+	font-weight: bold;
+	font-size: 110%;
+	text-align: left;
+	padding: 5px;
+	padding-top: 5px;
+}
+
+.controlpanel_theme_image {
+	width: 200px;
+	height: 200px;
+	margin-bottom: 5px;
+	border: 2px solid #F0F0F0;
+}
+.controlpanel_theme_name {
+	width: 350px;
+	float: left;
+	margin-left: 220px;
+	margin-top: 20px;
+}
+.controlpanel_theme_createdBy {
+	width: 350px;
+	float: left;
+	margin-left: 220px;
+	margin-top: 5px;
+}
+.controlpanel_theme_version {
+	width: 350px;
+	float: left;
+	margin-left: 220px;
+	margin-top: 5px;
+}
+.controlpanel_theme_framework {
+	width: 350px;
+	float: left;
+	margin-left: 220px;
+	margin-top: 5px;
+}
+.controlpanel_theme_comment {
+	width: 350px;
+	float: left;
+	margin-left: 220px;
+	margin-top: 5px;
+}

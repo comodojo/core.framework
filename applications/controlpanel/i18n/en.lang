@@ -1,0 +1,156 @@
+<?php
+
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+ 
+$lang = Array(
+
+	'0000'	=>	'Back to Main Menu',
+	'0001'	=>	'Preferences saved correctly!',
+	'0002'	=>	'To apply new preferences you should restart comodojo.<br>${0}Click here${1} to restart; unsaved changes will be lost.',
+	'0003'	=>	'',
+	'0004'	=>	'',
+	'0005'	=>	'',
+	'0006'	=>	'',
+	'0007'	=>	'',
+	'0008'	=>	'',
+	'0009'	=>	'',
+
+	//GENERAL.PHP
+	'0100'	=>	'General Options',
+	'0101'	=>	'Site Title',
+	'0102'	=>	'Site Description',
+	'0103'	=>	'Author',
+	'0104'	=>	'Date of site\'s first sight',
+	'0105'	=>	'Gravatar rating level (<a href="https://en.gravatar.com/site/implement/images/#rating" target="_blank">more info</a>)',
+	'0106'	=>	'Default encoding',
+	'0107'	=>	'Locale',
+	
+	//ADVANCED.PHP
+	'0110'	=>	'Advanced Options',
+	'0111'	=>	'Local site path',
+	'0112'	=>	'Complete site URL',
+	'0113'	=>	'External site URL (if different from comlete one)',
+	'0114'	=>	'Base DOM object id',
+	'0115'	=>	'Enable session transport',
+	'0116'	=>	'Re-authenticate each session (WARNING! If enabled, session will not be preserved if LDAP authentication enabled!)',
+	'0117'	=>	'Javascript base url',
+	'0118'	=>	'Javascript components to load at startup',
+	
+	//PERFORMANCES.PHP
+	'0120'	=>	'Performances',
+	'0121'	=>	'Enable cache',
+	'0122'	=>	'Cache time to live',
+	'0123'	=>	'Enable cross-domain resource loading',
+	'0124'	=>	'Cross-domain repository',
+	'0125'	=>	'Cross domain timeout',
+	
+	//DEBUG.PHP
+	'0130'	=>	'Debug',
+	'0131'	=>	'Enable debug console',
+	'0132'	=>	'Open console in a new window',
+	'0133'	=>	'Enable deep debug',
+	'0134'	=>	'These parameters will change client-side debug (javascript). To enable server-side debug, edit the static_configuration.php file.',
+	
+	//MAINTENANCE.PHP
+	'0140'	=>	'Maintenance',
+	'0141'	=>	'Enable maintenance mode',
+	'0142'	=>	'Custo message',
+	
+	//THEMES.PHP
+	'0150'	=>	'Themes',
+	'0151'	=>	'Site theme',
+	'0152'	=>	'Dojo theme',
+	'0153'	=>	'Name',
+	'0154'	=>	'Created by',
+	'0155'	=>	'Version',
+	'0156'	=>	'Framework',
+	'0157'	=>	'Comment'
+	
+	//SMTP.PHP
+	'0160'	=>	'SMTP',
+	'0161'	=>	'Mail server address',
+	'0162'	=>	'Mail server port',
+	'0163'	=>	'SMTP engine',
+	'0164'	=>	'User protected authentication',
+	'0165'	=>	'Security Protocol',
+	'0166'	=>	'Username',
+	'0167'	=>	'Password',
+	'0168'	=>	'Address from which send emails'
+	
+	//EVENTS.PHP
+	'0170'	=>	'Events',
+	'0171'	=>	'Enable events recording',
+	'0172'	=>	'If enabled, events will be stored according to what selected in events_recording.php file',
+	
+	//SERVICES.PHP
+	'0180'	=>	'REST Services',
+	'0181'	=>	'Enable REST service interface',
+	'0182'	=>	'If enabled, REST services will be accessible via <a href="'.getSiteUrl().'services.php">'.getSiteUrl().'services.php</a>',
+	
+	//SHELL.PHP
+	'0190'	=>	'Shell',
+	'0191'	=>	'Enable shell',
+	'0192'	=>	'This enable the local shell; remote shell uses RPC protocols to operate.',
+	
+	//CRON.PHP
+	'0200'	=>	'Cron Jobs',
+	'0201'	=>	'Enable cron extender',
+	'0202'	=>	'Enable multithreading',
+	'0203'	=>	'Send email notification',
+	'0204'	=>	'Email addresses to notify (";" or "," separated)',
+	
+	//LDAP.PHP
+	'0210'	=>	'LDAP',
+	'0211'	=>	'Ldap server address',
+	'0212'	=>	'Ldap port',
+	'0213'	=>	'Comma separated dc(s) (i.e. "dc=company, dc=net" for @company.net)',
+	'0214'	=>	'Other DN(s) (i.e. "cn=users")',
+	'0215'	=>	'Ldap default search filter',
+	'0216'	=>	'Username that can list ldap tree (leave blank if every user can do that)',
+	'0217'	=>	'Password for user that can list tree',
+	'0218'	=>	'Use compatible mode (check this if you experienced problems, i.e. in Active Directory domain)',
+
+	//LOCAL_RPC.PHP
+	'0220'	=>	'Local RPC',
+	'0221'	=>	'Enable local RPC server',
+	'0222'	=>	'RPC server working mode',
+	'0223'	=>	'Allowed transport',
+	'0224'	=>	'SharedKey',
+	
+	//AUTHENTICATION.PHP
+	'0230'	=>	'Authentication',
+	'0231'	=>	'Authentication mode',
+	'0232'	=>	'Enable cache for remote authentication',
+	'0233'	=>	'Authentication cache time to live',
+	
+	//REGISTRATION.PHP
+	'0240'	=>	'Users registration',
+	'0241'	=>	'Allow new users to register autonomously',
+	'0242'	=>	'Every new registration should be authorized by administrators',
+	'0243'	=>	'New users default role',
+	'0244'	=>	'Registration requests time to live',
+	
+	//EXTERNAL_RPC.PHP
+	'0250'	=>	'RPC server address',
+	'0251'	=>	'RPC server port',
+	'0252'	=>	'Server working mode',
+	'0253'	=>	'Transport',
+	'0254'	=>	'SharedKey',
+	
+	//META.PHP
+	'0260'	=>	'Meta tags',
+	
+	//BOOTSTRAP.PHP
+	'0270'	=>	'Ruoli e applicazioni'
+	
+);
+
+?>

@@ -179,7 +179,7 @@ class users_management {
 				$to_return = array();
 				
 				$db = new database();
-				$db->table('users')
+				$results = $db->table('users')
 				->keys(Array("userName","completeName","email","gravatar"))
 				->where("enabled","=",1)
 				->get();

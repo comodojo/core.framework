@@ -1,0 +1,47 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'',
+	'0001'	=>	'Query al DB (in sessione)',
+	'0002'	=>	'Registrazione eventi',
+	'0003'	=>	'Chache di avvio',
+	'0004'	=>	'Debug (PHP)',
+	'0005'	=>	'Livello debug (PHP)',
+	'0006'	=>	'Encoding di default',
+	'0007'	=>	'Lingua (PHP)',
+	'0008'	=>	'Lingue supportate',
+	'0009'	=>	'Versione PHP',
+	'0010'	=>	'DB DataModel',
+	'0011'	=>	'Cache',
+	'0012'	=>	'Cache ttl',
+	'0013'	=>	'Debug (JS)',
+	'0014'	=>	'Debug popup (JS)',
+	'0015'	=>	'Debug deep (JS)',
+	'0016'	=>	'Shell',
+	'0017'	=>	'Services (REST)',
+	'0018'	=>	'RPC Server',
+	'0019'	=>	'CRON Processor',
+	'0020'	=>	'Versione comodojo',
+	'0021'	=>	'Nome utente',
+	'0022'	=>	'Ruolo utente',
+
+	'0030'	=>	'Lingua (JS)',
+	'0031'	=>	'Timezone',
+	'0032'	=>	'Versione Framework',
+	'0033'	=>	'Versione Dojo Toolkit',
+	
+	'0050'	=>	'Parametro',
+	'0051'	=>	'Stato/Valore'
+);
+
+?>

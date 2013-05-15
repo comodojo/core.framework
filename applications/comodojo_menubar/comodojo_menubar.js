@@ -123,24 +123,15 @@ $c.app.load("comodojo_menubar",
 		
 		this._createLocalizationMenu = function() {
 			
-			var langButton = new dijit.MenuItem({
-				//label: '<img style="width:12px;height:12px; padding:0;margin:0;" src="'+$c.icons.getLocaleIcon()+'">',
+			var langButton = new dijit.MenuBarItem({
+				label: '<img src="'+$c.icons.getLocaleIcon()+'" style="width:15px;height:13px;" />',
 				iconClass: 'dijitIcon',
 				onClick: function(){
 					$c.app.start('set_locale');
 				},
-				//style: 'padding: 4px 9px 6px !important;',
 				disabled: !$c.app.isRegistered('set_locale')
 			});
-			langButton.iconNode.setAttribute('src',$c.icons.getLocaleIcon());
-			langButton.iconNode.setAttribute('width',13);
-			langButton.iconNode.setAttribute('heigth',13);
 			$d.addClass(langButton.domNode,'comodojo_menubar_docker_indicator');
-			langButton.containerNode.style.display = "none";
-			langButton.arrowWrapper.style.display = "none";
-			
-			//langButton.focusNode.style.cssText = "background-image: url("+$c.icons.getLocaleIcon()+"); width: 16px, height: 16px";
-			
 			this.comodojoMenubar.domNode.appendChild(langButton.domNode);
 			
 		};

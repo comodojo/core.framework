@@ -47,6 +47,11 @@ class registration {
 	  *
 	  */
 	 private $use_localized_email_templates = true;
+
+	 /**
+	  * Reserved usernames (same as users_management)
+	  */
+	 private $reserved_usernames = Array('admin','administrator','root','toor','comodojo','guest');
 /********************** PRIVATE VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -59,6 +64,11 @@ class registration {
 	 */
 	public function check_userName($userName) {
 		
+		if (in_array(strtolower($userName), $this->reserved_usernames)) {
+			comodojo_debug('Invalid user parameters: reserved username '.$userName,'ERROR','registration');
+			return true;
+		}
+
 		comodojo_load_resource('database');
 		$found = false;
 		try {
@@ -120,7 +130,7 @@ class registration {
 			$ev = new events();
 			
 			$result = $db->return_id()->table('users_registration')
-			->eys(Array(
+			->keys(Array(
 				"timestamp",
 				"userName",
 				"userPass",
@@ -140,7 +150,7 @@ class registration {
 				$birthday,
 				$gender,
 				$registration_code,
-				!COMODOJO_REGISTRATION_AUTHORIZATION
+				!COMODOJO_REGISTRATION_AUTHORIZATION ? 1 : 0
 			))->store();
 			
 			if (COMODOJO_REGISTRATION_AUTHORIZATION == 0) { $this->send_registration_email($userName, is_null($completeName) ? $userName : $completeName, $email, $result["transactionId"], $registration_code);}
@@ -483,7 +493,7 @@ class registration {
 			
 		}
 		catch (Exception $e) {
-			$ev->record('user_authorized', $requestId, false);
+			//$ev->record('user_authorized', $requestId, false);
 			throw $e;
 		}
 	}

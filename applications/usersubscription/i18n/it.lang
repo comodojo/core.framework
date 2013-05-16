@@ -1,0 +1,30 @@
+<?php
+ 
+/**
+ * it.lang
+ * application i18n - 'it' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ */
+
+$lang = Array(
+	'0000'	=>	'Siamo spiacenti, ma il servizio di registrazione non è al momento disponibile.',
+	'0001'	=>	'Inserisci i tuoi dati per registrarti al portale',
+	'0002'	=>	'Nome Utente',
+	'0003'	=>	'Password',
+	'0004'	=>	'Nome completo',
+	'0005'	=>	'Email',
+	'0006'	=>	'Sesso',
+	'0007'	=>	'Data di nascita',
+	'0008'	=>	'Completa la registrazione',
+	'0009'	=>	'',
+	'0010'	=>	'Il Nome Utente da te scelto è già registrato sul sistema, scegline un altro',
+	'0011'	=>	'La tua richiesta di registrazione è stata inserita correttamente',
+	'0012'	=>	'E\' stata spedita una mail all\'indirizzo da te indicato contenente un link di verifica',
+	'0013'	=>	'Riceverai una mail contenente il link di verifica appena un amministratore approverà la tua richiesta',
+	'0014'	=>	'C\'è stato un problema con la tua registrazione; contatta l\'amministratore del portale o il supporto per maggiori informazioni'
+);
+
+?>

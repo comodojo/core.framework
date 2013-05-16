@@ -14,10 +14,9 @@ function get_bootstrap() {
 	comodojo_load_resource("roles_management");
 	$r = new roles_management();
 	$roles = $r->get_roles();
-	//array_push($roles, Array('id'=>'persistent','description'=>'persistent'));
+	array_push($roles, Array('id'=>'0','description'=>'Guest','reference'=>'0'));
 	$applications = Array();
 	$handler = opendir(COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER);
-	$themes_available = Array();
 	while (false !== ($item = readdir($handler))) {
 		if (is_readable(COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER.$item."/".$item.".properties")) {
 			array_push($applications,$item);

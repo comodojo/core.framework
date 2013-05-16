@@ -1,0 +1,30 @@
+<?php
+ 
+/**
+ * en.lang
+ * application i18n - 'en' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ */
+ 
+$lang = Array(
+	'0000'	=>	'We are sorry, but sign-up service is currently unavailable.',
+	'0001'	=>	'Insert your personal information sign up',
+	'0002'	=>	'User Name',
+	'0003'	=>	'User Password',
+	'0004'	=>	'Complete Name',
+	'0005'	=>	'Email',
+	'0006'	=>	'Gender',
+	'0007'	=>	'Birth date',
+	'0008'	=>	'Complete sign-up',
+	'0009'	=>	'',
+	'0010'	=>	'The username you chose is already registered on the system, please choose another',
+	'0011'	=>	'Your request for sign-up was correctly registered',
+	'0012'	=>	'A mail was sent to your email address; please confirm your registration clicking on the verification link contained',
+	'0013'	=>	'You will receive a mail containing verification link as soon as an administrator approove your request',
+	'0014'	=>	'There was a problem with your registration. Please contact portal administrator or support'
+);
+
+?>

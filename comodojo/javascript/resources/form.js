@@ -218,11 +218,11 @@ comodojo.form = function(params) {
 				if (!this._firstNode) {
 					this._firstNode = this._fieldsCount;
 				}
-				myBox = $d.create("div",{ className: (this.hierarchy[i].type == "Button" ? this._buttonContainerClass : this._inputContainerClass), style: this.inputContainerExtraCss });
+				myBox = $d.create("div",{ className: ((this.hierarchy[i].type == "Button" || this.hierarchy[i].type == "BusyButton" || this.hierarchy[i].type == "ToggleButton") ? this._buttonContainerClass : this._inputContainerClass), style: this.inputContainerExtraCss });
 				
 				myField = this._makeHierarchyHelper(this.hierarchy[i]);
 				
-				myLabel = this.hierarchy[i].type == "Button" ? false : $d.create("div",{className:this.baseCssClass+"_inputLabel_"+this.template,innerHTML:this.hierarchy[i].label+(this.hierarchy[i].required ? '<span style="color:red;font-weight:bold;"> *</span>' : ''), style: this.labelExtraCss});
+				myLabel = (this.hierarchy[i].type == "Button" || this.hierarchy[i].type == "BusyButton" || this.hierarchy[i].type == "ToggleButton") ? false : $d.create("div",{className:this.baseCssClass+"_inputLabel_"+this.template,innerHTML:this.hierarchy[i].label+(this.hierarchy[i].required ? '<span style="color:red;font-weight:bold;"> *</span>' : ''), style: this.labelExtraCss});
 				
 				if (this.template == 'SPLIT_LABEL_LEFT' || this.template == 'INPUT_ON_LABEL') {
 					myBox.appendChild(myField.domNode);
@@ -563,7 +563,7 @@ comodojo.form = function(params) {
 					href: !hierarchyElement.href ? 'javascript:;' : hierarchyElement.href,
 					onClick: dojo.isFunction(hierarchyElement.onClick) ? function(){hierarchyElement.onClick();} : (typeof(hierarchyElement.onClick)=='string' ? function() {eval(hierarchyElement.onClick);} : function(){}),
 					style: this.buttonExtraCss,
-					timeout: !hierarchyElement.disabled ? null : hierarchyElement.disabled
+					timeout: !hierarchyElement.timeout ? null : hierarchyElement.timeout
 				});
 				dojo.addClass(myField.domNode,this._buttonClass);
 			break;

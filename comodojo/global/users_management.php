@@ -21,6 +21,11 @@ class users_management {
 	 * @default false;
 	 */
 	 private $restrict_management_to_administrators = false;
+
+	  /**
+	  * Reserved usernames (same as users_management)
+	  */
+	 private $reserved_usernames = Array('admin','administrator','root','toor','comodojo','guest');
 /********************** PRIVATE VARS *********************/
 
 /********************** PUBLIC VARS *********************/
@@ -29,7 +34,7 @@ class users_management {
 	 *
 	 * @default false;
 	 */
-	 private $do_not_encrypt_userPass = false;
+	 public $do_not_encrypt_userPass = false;
 /********************** PUBLIC VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -268,6 +273,11 @@ class users_management {
 		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
 			comodojo_debug('Only administrators can manage users','ERROR','user_management');
 			throw new Exception("Only administrators can manage users", 2605);
+		}
+
+		if (in_array(strtolower($userName), $this->reserved_usernames)) {
+			comodojo_debug('Invalid user parameters: reserved username '+$userName,'ERROR','user_management');
+			throw new Exception("User already registered", 2613);
 		}
 
 		comodojo_load_resource('database');

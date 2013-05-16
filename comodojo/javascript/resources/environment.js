@@ -3,10 +3,11 @@
  * 
  * Give to CoMoDojo some environmental control such as dialogs, errors, ...
  *
- * @package		Comodojo ClientSide Core Packages
+ * @package		Comodojo ServerSide Core Packages
  * @author		comodojo.org
- * @copyright	2011 comodojo.org (info@comodojo.org)
- * 
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
  */
 
 comodojo.loadCss('comodojo/CSS/environment.css');
@@ -177,16 +178,7 @@ comodojo.dialog = {
 				}).placeAt(this.actionBar);
 				if (this.closeOnCancel) { dojo.connect(actionCancelButton, 'onClick', function(){ that._dialog.hide(); }); }
 			}
-			/*
-			if (!!(this.actionCancel && this.actionCancel.constructor && this.actionCancel.call && this.actionCancel.apply)) {
-			//if ($d.isFunction(this.actionCancel)) {
-				var actionCancelButton = new dijit.form.Button({
-					label: comodojo.getLocalizedMessage('10004'),
-					onClick: this.actionOk
-				}).placeAt(this.actionBar);
-				if (this.closeOnCancel) { dojo.connect(actionCancelButton, 'onClick', function(){ myDialog.hide(); }); }
-			}			
-			*/
+
 			if (this.secondaryCloseButton) {
 				new dijit.form.Button({
 					label: comodojo.getLocalizedMessage('10011'),
@@ -214,6 +206,7 @@ comodojo.dialog = {
 			return this.buildDialog();
 			
 		};
+
 	},
 	
 	/**
@@ -664,15 +657,9 @@ comodojo.error = {
 	 *
 	 * @private	Use comodojo.error.[errorType] instead.
 	 */
-	_forceUserLogout: function() {
+	_forceUserLogout: function(callback) {
 		
-		dojo.xhrPost({
-			url: 'comodojo/global/kernel.php?callTo=authentication&language=JSON&selector=logout&contentIsEncoded=false',
-			handleAs: 'json',
-			sync: true,
-			preventCache: true,
-			content: {}
-		});
+		comodojo.session.logout(callback);
 		
 	},
 	
@@ -711,22 +698,22 @@ comodojo.error = {
 	 * @param	string	detachedId		The detached object id in wich error will be displayed (it could be boto DOM or WIDGET object)
 	 * @return	object					DOM node that contain new error
 	 */
-	local: function(errorCode, errorDetails, id) {
+	local: function(errorCode, errorDetails, node_or_id) {
 		
-		var node = comodojo.isSomething(id);
-		var nodeReference;
-		if (!node.success) {
-			comodojo.debug('Hey, node id you served is not existent! (id: '+id+')');
-		}
-		else if (node.type == "WIDGET"){
-			nodeReference = (!node.resource.containerNode) ? node.resource.domNode : node.resource.containerNode;
-		}
+		var node;
+
+		if (typeof node_or_id==="object") {node = node_or_id;}
 		else {
-			nodeReference = node.resource;
+			node = dojo.byId(node_or_id);
+			if (!node) {
+				comodojo.debug('Invalid node or id: ('+id+')');
+				return false;
+			}
 		}
-		nodeReference.innerHTML = '<div class="box error"><p><strong>('+errorCode+') '+comodojo.getLocalizedError(errorCode)+'</strong></p><p>'+errorDetails+'</p></div>';
-		return nodeReference;
-		
+
+		node.innerHTML = '<div class="box error"><p><strong>('+errorCode+')</strong></p><p>'+errorDetails+'</p></div>';
+		return true;
+
 	},
 	
 	/**
@@ -738,7 +725,7 @@ comodojo.error = {
 	 */
 	global: function(errorCode, errorDetails) {
 		
-		return comodojo.error._createErrorDialog(comodojo.getLocalizedError('99999'), '<h2>('+errorCode+') '+comodojo.getLocalizedError(errorCode)+'</h2><p>'+errorDetails+'</p>');
+		return comodojo.error._createErrorDialog(comodojo.getLocalizedMessage('10034'), '<div class="box error"><p><strong>('+errorCode+')</strong></p><p>'+errorDetails+'</p></div>');
 		
 	},
 	

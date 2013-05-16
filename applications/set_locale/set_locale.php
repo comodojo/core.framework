@@ -1,11 +1,11 @@
 <?php
 
 /**
- * [APP DESCRIPTION]
+ * Set locale and timezone (user-specific)
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
- * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */

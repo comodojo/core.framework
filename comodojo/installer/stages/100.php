@@ -210,14 +210,14 @@ define('COMODOJO_GLOBAL_DEBUG_FILE',null);
 			array_push($this->out, array("type"=>!$block ? 'warning' : 'error',"content"=>$failure));
 			if ($block) {
 				$this->next_button_disabled = true;
-				$this->next_button_label = $this->i18n['0120'];
+				$this->next_button_label = $this->i18n['01 20'];
 			}
 		}
 		else {
 			array_push($this->out, array("type"=>'success',"content"=>$success));
 			if ($block) {
-				$this->next_button_disabled = false;
-				$this->next_button_label = $this->i18n['0122'];
+				$this->next_button_disabled = true;
+				$this->next_button_label = $this->i18n['0123'];
 				array_push($this->out, array(
 					"type"			=>	"Button",
 					"label"			=>	$this->i18n["0122"],

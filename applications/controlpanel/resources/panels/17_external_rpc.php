@@ -64,7 +64,7 @@ $options = Array(
 		"label"		=>	"0254",
 		"required"	=>	false,
 		"onclick"	=>	false,
-		"options"	=>	get_local_allowed_transport()
+		"options"	=>	get_external_rpc_transport()
 	),
 	"EXTERNAL_RPC_KEY"	=>	Array(
 		"type"		=>	"TextBox",

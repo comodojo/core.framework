@@ -9,61 +9,59 @@
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
-$c.app.loadCss('comodojo_menubar');
-$d.require("dijit.Menu");
-$d.require("dijit.MenuBar");
-$d.require("dijit.MenuBarItem");
-$d.require("dijit.PopupMenuBarItem");
-$d.require("dijit.TooltipDialog");
-$d.require("dojox.html.styles");
-$c.loadComponent('form', ['Button','ValidationTextBox']);
-					
-$c.app.load("comodojo_menubar",
+ $c.app.loadCss('comodojo_menubar');
+ $d.require("dijit.Menu");
+ $d.require("dijit.MenuBar");
+ $d.require("dijit.MenuBarItem");
+ $d.require("dijit.PopupMenuBarItem");
+ $d.require("dijit.TooltipDialog");
+ $d.require("dojox.html.styles");
+ $c.loadComponent('form', ['Button','ValidationTextBox']);
 
-	function(pid, applicationSpace, status){
-	
-		this.showSessionMenu = true;
-		
-		this.showLocalizationMenu = true;
-		
-		this.showTaskManager = true;
-		
-		this.showPid = false;
-		
-		this.showExec = false;
-		
-		$d.mixin(this,status);
-	
-		this._menu_applications = false;
-		this._menu_system = false;
-		this._menu_info = false;
-		this._menu_other = false;
-		this._menu_devel = false;
-		this._menu_test = false;
-		
-		var myself = this;
-		
-		this.init = function(){
+ $c.app.load("comodojo_menubar",
 
-			this.comodojoMenubar = new dijit.MenuBar({}, applicationSpace);
-			
-			if (this.showSessionMenu !== false) {
-				this._createSessionMenu();				
-			}
-			
-			if (this.showLocalizationMenu !== false) {
-				this._createLocalizationMenu();				
-			}
-			
-			if (this.showTaskManager !== false) {
-				this._createTaskManager();				
-			}
-			
-			//this._createMenu('applications');
+ 	function(pid, applicationSpace, status){
+
+ 		this.showSessionMenu = true;
+
+ 		this.showLocalizationMenu = true;
+
+ 		this.showTaskManager = true;
+
+ 		this.showPid = false;
+
+ 		this.showExec = false;
+
+ 		$d.mixin(this,status);
+
+ 		this._menu_applications = false;
+ 		this._menu_system = false;
+ 		this._menu_info = false;
+ 		this._menu_other = false;
+ 		this._menu_devel = false;
+ 		this._menu_test = false;
+
+ 		var myself = this;
+
+ 		this.init = function(){
+
+ 			this.comodojoMenubar = new dijit.MenuBar({}, applicationSpace);
+
+ 			if (this.showSessionMenu !== false) {
+ 				this._createSessionMenu();				
+ 			}
+
+ 			if (this.showLocalizationMenu !== false) {
+ 				this._createLocalizationMenu();				
+ 			}
+
+ 			if (this.showTaskManager !== false) {
+ 				this._createTaskManager();				
+ 			}
+
 			this._createMenu('comodojo');
 			this._menu_comodojo.addChild(new dijit.MenuItem({label:'Comodojo '+$c.comodojoVersion, disabled:true}));
 			this._menu_comodojo.addChild(new dijit.MenuSeparator());
-			//this._menu_comodojo.addChild(new dijit.MenuItem({label:this.getLocalizedMessage('0036'), onClick: function() {}, disabled:false}));
 			
 			var ae;
 			for (ae in $c.bus._registeredApplications) {
@@ -73,7 +71,7 @@ $c.app.load("comodojo_menubar",
 			this.comodojoMenubar.startup();
 			
 			$d.place($d.create('div',{className:'comodojoMenubar_clearer', id: 'comodojoMenubar_clearer'}), $d.byId(pid), 'after');
-						
+
 			$c.bus.addConnection('applicationStartLoading','applicationStartLoading',function(){
 				myself.indicator.set('label','<img id="comodojoMenubar_innerIndicator" src="comodojo/images/small_loader.gif" style="width:13px;height:13px;">');
 			});
@@ -105,15 +103,8 @@ $c.app.load("comodojo_menubar",
 			this.indicator = new dijit.PopupMenuBarItem({
 				label: '<img src="'+$c.icons.getIcon('info',16)+'" alt="'+this.getLocalizedMessage('0025')+'" style="width:13px;height:13px;" />',
 				popup: this.dock
-				//style: 'padding-top: 2px !important;'
 			});
 			$d.addClass(this.indicator.domNode,'comodojo_menubar_docker_indicator');
-			//this.indicator.containerNode.style.cssText = "background-image: url("+$c.icons.getIcon('info',16)+"); width: 16px, height: 16px";
-			//this.indicator.iconNode.setAttribute('src',$c.icons.getIcon('info',16));
-			//this.indicator.iconNode.setAttribute('width',13);
-			//this.indicator.iconNode.setAttribute('heigth',13);
-			//this.indicator.containerNode.style.padding = "0";
-			//this.indicator.arrowWrapper.style.display = "none";
 			
 			this.comodojoMenubar.domNode.appendChild(this.indicator.domNode);
 			
@@ -141,7 +132,7 @@ $c.app.load("comodojo_menubar",
 			var content = !$c.userRole ? this._createLoginForm() : this._createUserInfo();
 			
 			this.sessionMenuButton = new dijit.PopupMenuBarItem({
-				label: !$c.userRole ? (!$c.registrationMode ? this.getLocalizedMessage('0020') : this.getLocalizedMessage('0019') ) : $c.userName,
+				label: !$c.userRole ? ((!comodojoConfig.registrationMode || !$c.app.isRegistered('usersubscription')) ? this.getLocalizedMessage('0020') : this.getLocalizedMessage('0019') ) : $c.userName,
 				popup: content
 			});
 			$d.addClass(this.sessionMenuButton.domNode,'comodojo_menubar_session_menu');
@@ -161,33 +152,38 @@ $c.app.load("comodojo_menubar",
 				formWidth: 400,
 				hierarchy:[{
 					name: "session_login_form_info",
-	                type: "info",
-	                content: this.getLocalizedMessage('0026')
-	            },{
-	                name: "userName",
-	                value: "",
-	                type: "ValidationTextBox",
-	                label: this.getLocalizedMessage('0022'),
-	                required: true
-	            }, {
-	                name: "userPass",
-	                value: "",
-	                type: "PasswordTextBox",
-	                label: this.getLocalizedMessage('0023'),
-	                required: true
-	            }, {
-	                name: "login",
-	                type: "Button",
-	                label: this.getLocalizedMessage('0020'),
-	                onClick: function() {
+					type: "info",
+					content: this.getLocalizedMessage('0026')
+				},{
+					name: "userName",
+					value: "",
+					type: "ValidationTextBox",
+					label: this.getLocalizedMessage('0022'),
+					required: true
+				}, {
+					name: "userPass",
+					value: "",
+					type: "PasswordTextBox",
+					label: this.getLocalizedMessage('0023'),
+					required: true
+				}, {
+					name: "login",
+					type: "Button",
+					label: this.getLocalizedMessage('0020'),
+					onClick: function() {
 						myself.tryLogin();
-	                }
-	            },{
+					}
+				},{
 					name: "pwd_recover",
-	                type: "info",
-	                content: '<a href="javascript:;" onClick="$c.app.start(\'password_recover\')">'+this.getLocalizedMessage('0024')+'</a>',
-	                hidden: $c.app.isRegistered('password_recover') ? false : true
-	            }],
+					type: "info",
+					content: '<a href="javascript:;" onClick="$c.app.start(\'passwordrecover\')">'+this.getLocalizedMessage('0024')+'</a>',
+					hidden: $c.app.isRegistered('password_recover') ? false : true
+				},{
+					name: "usr_registration",
+					type: "info",
+					content: '<a href="javascript:;" onClick="$c.app.start(\'usersubscription\')">'+this.getLocalizedMessage('0021')+'</a>',
+					hidden: ($c.app.isRegistered('usersubscription') && comodojoConfig.registrationMode != 0) ? false : true
+				}],
 				attachNode: container.containerNode
 			}).build();
 			
@@ -227,7 +223,7 @@ $c.app.load("comodojo_menubar",
 					className: "comodojoMenubar_userInfo_name",
 					innerHTML: result.url == null ? result.completeName : ('<a href="'+result.url+'" target="_blank">'+result.completeName+'</a>')
 				}));
-					
+
 				userInfoContainer.appendChild($d.create('div', {
 					className: "comodojoMenubar_userInfo_avatar",
 					style: 'background-image: url('+result.avatar+'); background-repeat: no-repeat; background-position: center center; width: 64px; height: 64px;'
@@ -281,7 +277,7 @@ $c.app.load("comodojo_menubar",
 		};
 		
 		this._createMenu = function(menuType){
-		
+
 			var myLabel, myPopupMenu, myCssIcon, myCssIconClass;
 			
 			switch (menuType) {
@@ -292,27 +288,22 @@ $c.app.load("comodojo_menubar",
 				case 'other': myLabel = this.getLocalizedMessage('0007'); break;
 				case 'devel': myLabel = this.getLocalizedMessage('0006'); break;
 				case 'test': myLabel = this.getLocalizedMessage('0018'); break;
-					
+
 			}
 			
 			this['_menu_'+menuType] = new dijit.Menu({});
 			
-			//if (myCssIconClass !== false) {
-			//	dojox.html.insertCssRule('.'+myCssIconClass, 'background-image: url('+$c.icons.getIcon(myCssIcon,16)+'); background-repeat: no-repeat; background-position: center center; width: 16px; height: 16px;');
-			//}
-			
 			myPopupMenu = new dijit.PopupMenuBarItem({
 				label: myLabel,
-				popup: this['_menu_'+menuType]//,
-				//iconClass: myCssIconClass
+				popup: this['_menu_'+menuType]
 			});
-						
+
 			this.comodojoMenubar.addChild(myPopupMenu);
 			
 		};
 		
 		this._appendStyleSheet = function(appExec, iconSrc) {
-		
+
 			if (iconSrc == 'default'){
 				dojox.html.insertCssRule('.comodojo_menu_applications_'+appExec, 'background-image: url(comodojo/icons/16x16/run.png); background-repeat: no-repeat; background-position: center center; width: 16px; height: 16px;');
 			}
@@ -328,7 +319,7 @@ $c.app.load("comodojo_menubar",
 		this._populateMenu = function(appExec, appProp) {
 			
 			if (appProp.runMode == 'user') {
-							
+
 				this._appendStyleSheet(appExec, appProp.iconSrc);
 				
 				var parentMenu;
@@ -336,37 +327,37 @@ $c.app.load("comodojo_menubar",
 				switch (appProp.parentMenu) {
 					
 					case "comodojo":
-						parentMenu = this._menu_comodojo;
+					parentMenu = this._menu_comodojo;
 					break;
 					
 					case "applications":
-						if (!this._menu_applications) { this._createMenu('applications'); }
-						parentMenu = this._menu_applications;
+					if (!this._menu_applications) { this._createMenu('applications'); }
+					parentMenu = this._menu_applications;
 					break;
 					
 					case "system":
-						if (!this._menu_system) { this._createMenu('system'); }
-						parentMenu = this._menu_system;
+					if (!this._menu_system) { this._createMenu('system'); }
+					parentMenu = this._menu_system;
 					break;
 					
 					case "info":
-						if (!this._menu_info) { this._createMenu('info'); }
-						parentMenu = this._menu_info;
+					if (!this._menu_info) { this._createMenu('info'); }
+					parentMenu = this._menu_info;
 					break;
 					
 					case "devel":
-						if (!this._menu_devel) { this._createMenu('devel'); }
-						parentMenu = this._menu_devel;
+					if (!this._menu_devel) { this._createMenu('devel'); }
+					parentMenu = this._menu_devel;
 					break;
 					
 					case "test":
-						if (!this._menu_test) { this._createMenu('test'); }
-						parentMenu = this._menu_test;
+					if (!this._menu_test) { this._createMenu('test'); }
+					parentMenu = this._menu_test;
 					break;
 					
 					default:
-						if (!this._menu_other) { this._createMenu('other'); }
-						parentMenu = this._menu_other;
+					if (!this._menu_other) { this._createMenu('other'); }
+					parentMenu = this._menu_other;
 					break;
 					
 				}
@@ -384,7 +375,7 @@ $c.app.load("comodojo_menubar",
 		};
 
 		this.populateDock = function() {
-		
+
 			this.dock.set("content","");
 			var cont, boxCont, count=0, i=0;
 			
@@ -408,7 +399,7 @@ $c.app.load("comodojo_menubar",
 							innerHTML: (this.showPid ? '('+ comodojo.bus._runningApplications[i][0] + ') ' : "") + comodojo.bus._runningApplications[i][1]
 						}));
 					}
-												
+
 					boxCont.appendChild($d.create('img', {
 						src: $c.icons.getIcon('right_arrow',16),
 						className: "comodojoMenubar_dockAppSwitch",
@@ -424,7 +415,7 @@ $c.app.load("comodojo_menubar",
 					}));
 					
 					cont.appendChild(boxCont);
-				
+
 					if (comodojo.bus._registeredApplications[comodojo.bus._runningApplications[i][1]].properties.iconSrc == 'default'){
 						cont.appendChild($d.create('img', { className: "comodojoMenubar_dockAppImage", src: $c.icons.getIcon('run',64), alt: comodojo.bus._runningApplications[i][1]}));
 					}
@@ -434,9 +425,9 @@ $c.app.load("comodojo_menubar",
 					else {
 						cont.appendChild($d.create('img', { className: "comodojoMenubar_dockAppImage", src: $c.icons.getIcon(comodojo.bus._registeredApplications[comodojo.bus._runningApplications[i][1]].properties.iconSrc,64), alt: comodojo.bus._runningApplications[i][1]}));
 					}
-				
+
 					this.dock.containerNode.appendChild(cont);
-				
+
 					count++;
 					
 				}
@@ -444,7 +435,7 @@ $c.app.load("comodojo_menubar",
 			}
 			
 			if (!count) { this.dock.set("content",this.getLocalizedMessage("0015")); }
-					
+
 		};
 		
 		this.tryLogin = function() {

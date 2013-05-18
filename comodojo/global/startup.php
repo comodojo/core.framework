@@ -149,7 +149,7 @@ class comodojo_startup extends comodojo_basic {
 		$myJsLoader .="
 				}
 			</script>
-			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js') . "\"></script>
+			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js.uncompressed.js') . "\"></script>
 		";
 		//************************
 		
@@ -175,6 +175,7 @@ class comodojo_startup extends comodojo_basic {
 		//****** DOJO REQUIRES ******
 		$myJsLoader .= "
 			<script type=\"text/javascript\">
+				dojo.require('comodojo.Notification');
 		";
 		
 		$myDojoRequires = json2array(COMODOJO_JS_REQUIRES);

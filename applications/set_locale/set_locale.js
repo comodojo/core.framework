@@ -127,6 +127,8 @@ $c.app.load("set_locale",
 			$c.timezone = values.timezone;
 			//return message
 			myself.localeForm.fields.note.changeContent(this.getLocalizedMutableMessage('0003',['<a href="javascript:window.location.reload();">','</a>']));
+			myself.localeForm.fields.go.set('label',$c.getLocalizedMessage('10011'));
+			myself.localeForm.fields.go.onClick = function() {myself.stop();}
 		};
 		
 	}

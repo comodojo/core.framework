@@ -1,0 +1,19 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Inserisci il tuo indirizzo email e clicca su "Invia Nuova Mail" per inviare una nuova email di validazione',
+	'0001'	=>	'Invia Nuova Mail',
+	'0002'	=>	'Una nuova email di validazione è stata inviata al tuo indirizzo email'
+);
+
+?>

@@ -67,6 +67,12 @@ class comodojo_basic {
 	public $unsupported_locale = false;
 
 	/**
+	 * Notication that should be raised to user (each script can implement how to notify independently)
+	 * @var string
+	 */
+	public $notification = null;
+
+	/**
 	 * Internal pointer to basic values 
 	 */
 	private $comodojo_basic_values = false;
@@ -196,7 +202,23 @@ class comodojo_basic {
 			$this->auth_logout(isset($_SESSION[COMODOJO_PUBLIC_IDENTIFIER]['COMODOJO_USER_NAME']) ? $_SESSION[COMODOJO_PUBLIC_IDENTIFIER]['COMODOJO_USER_NAME'] : false);
 		}
 		/*
-		 * If no auth is requested, set unauthenticated session
+		 * Do user registration if requested
+		 */
+		/*elseif ($this->do_authehtication AND
+			isset($attributes['application']) AND @$attributes['application'] == 'comodojo' AND
+			isset($attributes['method']) AND @$attributes['method'] == 'logout' AND
+			isset($attributes['id']) AND isset($attributes['code'])
+		) {
+			comodojo_load_resource("registration");
+			try {
+				$re = new registration();
+				$this->notification = $re->confirm_request($params['id'],$params['code']);
+			} catch (Exception $e) {
+				throw $e;
+			}
+		}
+		/*
+		 * If no auth or pwd reset or sign up was requested, set unauthenticated session
 		 */
 		else {
 			comodojo_debug(' * No authentication found or requested: CLEANING AUTH PARAMETERS','INFO','comodojo_basic');

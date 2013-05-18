@@ -176,12 +176,12 @@
 				},{
 					name: "pwd_recover",
 					type: "info",
-					content: '<a href="javascript:;" onClick="$c.app.start(\'passwordrecover\')">'+this.getLocalizedMessage('0024')+'</a>',
-					hidden: $c.app.isRegistered('password_recover') ? false : true
+					content: '<a href="javascript:;" onClick="$c.app.start(\'pwdrecover\')">'+this.getLocalizedMessage('0024')+'</a>',
+					hidden: $c.app.isRegistered('pwdrecover') ? false : true
 				},{
 					name: "usr_registration",
 					type: "info",
-					content: '<a href="javascript:;" onClick="$c.app.start(\'usersubscription\')">'+this.getLocalizedMessage('0021')+'</a>',
+					content: $c.app.isRegistered('regrecover') ? (this.getLocalizedMutableMessage('0036',['<a href="javascript:;" onClick="$c.app.start(\'usersubscription\')">','</a>','<a href="javascript:;" onClick="$c.app.start(\'regrecover\')">','</a>'])) : ('<a href="javascript:;" onClick="$c.app.start(\'usersubscription\')">'+this.getLocalizedMessage('0021')+'</a>'),
 					hidden: ($c.app.isRegistered('usersubscription') && comodojoConfig.registrationMode != 0) ? false : true
 				}],
 				attachNode: container.containerNode

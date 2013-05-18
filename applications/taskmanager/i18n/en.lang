@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * en.lang
+ * application i18n - 'en' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ */
+ 
+$lang = Array(
+	'0000'	=>	'Show system processes',
+	'0001'	=>	'Pid',
+	'0002'	=>	'Name',
+	'0003'	=>	'Exec',
+	'0004'	=>	'Type',
+	'0005'	=>	'User',
+	'0006'	=>	'System',
+	'0007'	=>	'Select',
+	'0008'	=>	'Kill',
+	'0009'	=>	'System load: ${0},${1},${2}'
+);
+
+?>

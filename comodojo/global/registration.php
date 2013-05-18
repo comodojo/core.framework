@@ -476,7 +476,7 @@ class registration {
 			->where("email","=",$email)
 			->and_where("expired","!=",1)
 			->and_where("confirmed","!=",1)
-			->and_where("authorized","!=",1)
+			->and_where("authorized","=",1)
 			->get();
 			
 			if ($r["resultLength"] != 1) {

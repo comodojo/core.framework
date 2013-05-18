@@ -31,7 +31,7 @@ $lang = Array(
 	'0018'	=>	'Test',
 	'0019'	=>	'Sign In or Register',
 	'0020'	=>	'Sign In',
-	'0021'	=>	'Register to portal',
+	'0021'	=>	'Sign up',
 	'0022'	=>	'User Name',
 	'0023'	=>	'Password',
 	'0024'	=>	'Password lost?',
@@ -46,7 +46,7 @@ $lang = Array(
 	'0033'	=>	'Edit your profile',
 	'0034'	=>	'Change localizzation',
 	'0035'	=>	'Change password',
-	'0036'	=>	'Go to comodojo.org'
+	'0036'	=>	'${0}Sign up${1} or ${2}resend validation email${3}'
 );
 
 ?>

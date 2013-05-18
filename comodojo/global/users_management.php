@@ -567,6 +567,17 @@ class users_management {
 		}
 		return $id;
 	}
+
+	public final function user_recovery_request($email) {}
+
+	public final function user_recovery_confirm($email,$code) {}
+
+	public final function user_recovery_expire() {
+		//Check if request is expired (will use registration TTL as max request lifetime)
+		//->where("timestamp","<=",$timestamp-COMODOJO_REGISTRATION_TTL)
+	}
+
+
 /********************* PUBLIC METHODS ********************/
 
 /********************* PRIVATE METHODS *******************/

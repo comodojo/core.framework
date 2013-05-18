@@ -1,6 +1,6 @@
 <?php
 
-$drop = Array('options','users','users_cache','users_registration','roles','cron','cron_worklog','events','keychains','services','test');
+$drop = Array('options','users','users_cache','users_registration','users_recovery','roles','cron','cron_worklog','events','keychains','services','test');
 
 $create = Array(
 	'roles'	=>	Array(
@@ -50,6 +50,16 @@ $create = Array(
 			Array('gender','STRING',Array('length'=>1,'default'=>null)),
 			Array('code','STRING',Array('length'=>128,'null'=>false)),
 			Array('authorized','BOOL',Array('default'=>0)),
+			Array('confirmed','BOOL',Array('default'=>0)),
+			Array('expired','BOOL',Array('default'=>0))
+			)
+		),
+	'users_recovery'	=>	Array(
+		'columns'	=>	Array(
+			Array('id','INTEGER',Array('unsigned'=>true,'null'=>false,'autoincrement'=>true,'primary'=>true)),
+			Array('timestamp','INTEGER',Array('length'=>64,'null'=>false)),
+			Array('email','STRING',Array('length'=>32,'null'=>false)),
+			Array('code','STRING',Array('length'=>128,'null'=>false)),
 			Array('confirmed','BOOL',Array('default'=>0)),
 			Array('expired','BOOL',Array('default'=>0))
 			)

@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * it.lang
+ * application i18n - 'it' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2011 comodojo.org (info@comodojo.org)
+ */
+
+$lang = Array(
+	'0000'	=>	'Visualizza processi di sistema',
+	'0001'	=>	'Pid',
+	'0002'	=>	'Nome processo',
+	'0003'	=>	'Eseguibile',
+	'0004'	=>	'Tipo',
+	'0005'	=>	'Utente',
+	'0006'	=>	'Sistema',
+	'0007'	=>	'Seleziona',
+	'0008'	=>	'Termina',
+	'0009'	=>	'Carico sistema: ${0},${1},${2}'
+);
+
+?>

@@ -18,7 +18,7 @@ define("comodojo/Notification", [
             domAttr, domClass, domConstruct, domGeo, style,
              fx, win, _WidgetBase, _TemplatedMixin){
 
-var Notification = declare("comodojo_temp.Notification", [_WidgetBase, _TemplatedMixin], {
+var Notification = declare("comodojo.Notification", [_WidgetBase, _TemplatedMixin], {
 	// summary:
 	//	A notification widget for comodojo startup process. It's in a temp namespace due to transition of comodojo
 	//	to AMD format.

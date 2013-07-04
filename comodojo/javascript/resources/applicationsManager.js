@@ -20,28 +20,22 @@ comodojo.app = {
 	
 	_unregister: function(pid) {},
 	
+	//***
 	_pushRunning: function(pid, appExec, appName, runMode, applicationLink) {
 		comodojo.debugDeep('Registering in running register the application: '+appName+' ('+appExec+') with pid: '+pid.split('_')[1]);
-		var l = comodojo.bus._runningApplications.push(Array(pid, appExec, appName, runMode, applicationLink));
-		comodojo.bus.callEvent("applicationsRunningTableChange");
-		return l-1;
+		return comodojo.Bus.pushRunningApplication(pid, appExec, appName, runMode, applicationLink);
 	},
 	
+	//***
 	_pullRunning: function(pid) {
-		comodojo.debugDeep('Removing application pid: '+pid+' from running register.');
-		var i;
-		for (i in comodojo.bus._runningApplications) {
-			if (comodojo.bus._runningApplications[i][0] == pid) {
-				comodojo.bus._runningApplications.splice(i,1);
-				comodojo.bus.callEvent("applicationsRunningTableChange");
-				return true;
-			}
-			else {
-				continue;
-			}
+		var p = comodojo.Bus.pullRunningApplication(pid);
+		if (!p) {
+			comodojo.debugDeep('Failed to unregister application with pid: '+pid);
 		}
-		comodojo.debugDeep('Failed to unregister selected application, or application yet closed: pid was: '+pid);
-		return false;
+		else {
+			comodojo.debugDeep('Application with pid: '+pid+' removed from running register');
+		}
+		return p;
 	},
 	
 	_start: function(appExec, pid, applicationSpace, status) {

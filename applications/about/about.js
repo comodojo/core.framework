@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.app.load("about",
+$c.App.load("about",
 
 	function(pid, applicationSpace, status){
 	

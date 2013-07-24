@@ -1,90 +1,11 @@
 define(["dojo/_base/lang","dojo/has","dojo/aspect","dojo/dom-construct","dojo/request","dojo/ready","dojo/query",
-	"comodojo/Utils","comodojo/Bus","comodojo/Kernel","comodojo/Notification","comodojo/Loader","comodojo/Dialog","comodojo/Error","comodojo/Session","comodojo/Window","comodojo/App"
+	"comodojo/Utils","comodojo/Bus","comodojo/Kernel","comodojo/Notification","comodojo/Loader","comodojo/Dialog","comodojo/Error","comodojo/Session","comodojo/Window","comodojo/App",
 	"dojo/_base/sniff"],
 function(lang,has,aspect,domConstruct,request,ready,query,
 	utils,bus,kernel,notification,loader,dialog,error,session,Window,app){
 
 // module:
 // 	comodojo/Basic
-
-// define the keys function to object if not implemented
-if (!Object.keys) {
-	// http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-	var hasDontEnumBug = true, dontEnums = [
-			"toString", "toLocaleString",
-			"valueOf", "hasOwnProperty",
-			"isPrototypeOf",
-			"propertyIsEnumerable", "constructor" ], dontEnumsLength = dontEnums.length;
-
-	for ( var key in {
-		"toString" : null
-	}) {
-		hasDontEnumBug = false;
-	}
-
-	Object.keys = function keys(object) {
-
-		if ((typeof object != "object" && typeof object != "function")
-				|| object === null) {
-			throw new TypeError(
-					"Object.keys called on a non-object");
-		}
-
-		var keys = [];
-		for ( var name in object) {
-			if (owns(object, name)) {
-				keys.push(name);
-			}
-		}
-
-		if (hasDontEnumBug) {
-			for ( var i = 0, ii = dontEnumsLength; i < ii; i++) {
-				var dontEnum = dontEnums[i];
-				if (owns(object, dontEnum)) {
-					keys.push(dontEnum);
-				}
-			}
-		}
-		return keys;
-	};
-};
-
-// Current user name
-// String
-lang.setObject("comodojo.userName", comodojoConfig.userName);
-	
-// Current user role
-// String
-lang.setObject("comodojo.userRole", comodojoConfig.userRole);
-
-// Current user complete name
-// String
-lang.setObject("comodojo.userCompleteName", comodojoConfig.userCompleteName);
-	
-// Current locale
-// String
-lang.setObject("comodojo.locale", comodojoConfig.phpLocale);
-	
-// Current locale (i18n)
-// String
-lang.setObject("comodojo.timezone", false);
-	
-// Framework version
-// Integer
-lang.setObject("comodojo.frameworkVersion", 1);
-	
-// Comodojo version
-// String
-lang.setObject("comodojo.comodojoVersion", comodojoConfig.version);
-
-// Seed for pids
-// String
-lang.setObject("comodojo.pidSeed", 100);
-
-// Applications path
-// String
-lang.setObject("comodojo.applicationsPath", "applications/");
-//lang.setObject("comodojo._applicationsPath", "devel/applications/");
 
 var loadScript = function (scr) {
 	// summary:
@@ -110,18 +31,22 @@ var loadScriptFile = function (src, params, callback) {
 	//		Array of parameters
 	var _params = {
 		preventCache: false,
-		skipXhr: false,
-		forceReload: false
+		skipXhr: true,
+		forceReload: false,
+		sync: false
 	}
 	lang.mixin(_params,params);
 	
 	if (!lang.isFunction(callback)) { 
-		callback = function() { return; }; 
+		callback = function() { 
+			comodojo.debugDeep('Loaded script file '+src+', no callback defined');
+		}; 
 	};
-	
+
 	var q = query("script[src='"+src+"']");
-	if (q.length != 0) }{
+	if (q.length != 0) {
 		if (!_params.forceReload) {
+			console.log('skip touchcallback');
 			callback();
 		}
 		else {
@@ -149,10 +74,12 @@ var loadScriptFile = function (src, params, callback) {
 		else {
 			request.get(src,{
 				handleAs: 'javascript',
-				preventCache: _params.preventCache
-			}).then(/*load*/function(data,status){
+				preventCache: _params.preventCache,
+				sync: _params.sync
+			}).then(/*loadfunction(){
+				console.log('touchcallback');
 				callback();
-			},/*error*/function(error){
+			}*/callback,/*error*/function(error){
 				comodojo.debug('Unable to load script: '+src+' (error was: '+e+')');
 			});
 		}
@@ -161,57 +88,6 @@ var loadScriptFile = function (src, params, callback) {
 };
 lang.setObject("comodojo.loadScriptFile", loadScriptFile);
 
-var loadCss = function (cssFile) {
-	// summary:
-	//		Create a css link object into document head
-	// cssFile: String
-	//		CSS file path
-	// returns: Object
-	//		The newly created link object
-	return domConstruct.create("link", {
-		rel: 'stylesheet',
-		type: 'text/css',
-		href: cssFile
-	}, utils.head());
-};
-lang.setObject("comodojo.loadCss", loadCss);
-
-var debug = function (message) {
-	// summary:
-	//		Debug to console
-	// message: String
-	//		Message to debug
-	if (comodojoConfig.debug) { console.log(message); }
-};
-lang.setObject("comodojo.debug", debug);
-
-var debugDeep = function (message) {
-	// summary:
-	//		Debug to console (deep level)
-	// message: String
-	//		Message to debug
-	if (comodojoConfig.debugDeep) { console.log(message); }
-};
-lang.setObject("comodojo.debugDeep", debugDeep);
-
-var deprecated = function (module, newModule) {
-	// summary:
-	//		Raise a standard message in console if deprecated module is called
-	// module: String
-	//		Deprecated module
-	// newModule: String
-	//		New module to use instead (if any)
-	if (comodojoConfig.debug) {
-		if (!newModule) {
-			console.warn("Module '"+module+"' is deprecated."); }
-		}
-		else {
-			console.warn("Module '"+module+"' is deprecated. Consider using '"+newModule+"' instead."); }
-		}
-	}	
-};
-lang.setObject("comodojo.deprecated", deprecated);
-	
 var bootstrap = function() {
 	// summary:
 	//		Bootstrap the comodojo environment (and load applications)
@@ -225,7 +101,7 @@ var bootstrap = function() {
 		});
 	}
 	else {
-		loadScriptFile(bootstrapFile);
+		loadScriptFile(bootstrapFile,{sync:true},comodojo.App.autostart);
 	}
 };
 
@@ -243,54 +119,14 @@ var debugStartup = function() {
 		console.log(' - Comodojo version: ' + comodojoConfig.version);
 		console.log(' - Dojo version loaded: ' + dojo.version);
 
-		if (utils.defined(localized_messages)) { console.log('Localized messages loaded successfully'); }
+		if (utils.defined(comodojo.localized_messages)) { console.log('Localized messages loaded successfully'); }
 		else { console.error('Unable to load localized messages'); }
 
-		if (utils.defined(localized_errors)) { console.log('Localized errors loaded successfully'); }
+		if (utils.defined(comodojo.localized_errors)) { console.log('Localized errors loaded successfully'); }
 		else { console.error('Unable to load localized errors'); }
 		
 		console.log('*************************************************************************');
 	}
-};
-	
-var loadMessages = function(forceLocale) {
-	// summary:
-	//		Load localized messages from json file (i18n)
-	// forceLocale: String
-	//		Force to load specific localization
-	request.get('comodojo/i18n/i18n_messages_'+(!forceLocale ? comodojoConfig.phpLocale : forceLocale)+'.json',{
-		data: data,
-		handleAs: 'json',
-		sync: true
-	}).then(
-		/*load*/function(data) {
-			lang.setObject("comodojo.localized_messages", data);
-		},
-		/*error*/function(error) {
-			debug('Failed to load locale, fallback to default. Error: '+error);
-			loadMessages('en');
-		}
-	);
-};
-
-var loadErrors = function(forceLocale) {
-	// summary:
-	//		Load localized errors from json file (i18n)
-	// forceLocale: String
-	//		Force to load specific localization
-	request.get('comodojo/i18n/i18n_errors_'+(!forceLocale ? comodojoConfig.phpLocale : forceLocale)+'.json',{
-		data: data,
-		handleAs: 'json',
-		sync: true
-	}).then(
-		/*load*/function(data) {
-			lang.setObject("comodojo.localized_errors", data);
-		},
-		/*error*/function(error) {
-			debug('Failed to load locale, fallback to default. Error: '+error);
-			loadErrors('en');
-		}
-	);
 };
 
 var setShortcuts = function() {
@@ -305,14 +141,21 @@ var setShortcuts = function() {
 	});
 };
 
+var loadDefaultCSS = function() {
+	comodojo.loadCss('comodojo/CSS/environment.css');
+	comodojo.loadCss('comodojo/CSS/window.css');
+	comodojo.loadCss('comodojo/javascript/dojox/layout/resources/ResizeHandle.css');
+};
+
 var startup = function() {
 	// summary:
 	//		Startup the comodojo environment
 	loader.start();
+	loadDefaultCSS();
 	bus.callEvent('comodojo_startup_start');
 	lang.setObject("comodojo.timezone", utils.getUserTimezone());
-	loadMessages();
-	loadErrors();
+	//loadMessages();
+	//loadErrors();
 	debugStartup();
 	setShortcuts();
 	bootstrap();
@@ -349,9 +192,12 @@ var icons = {
 };
 lang.setObject("comodojo.icons", icons);
 
-var getLocalizedMessage = function(message) {
-	if (utils.defined(comodojo.localized_messages[message])) {
-		return comodojo.localized_messages[message];
+var getLocalizedMessage = function(message, messageObj) {
+	if (!messageObj) {
+		messageObj = comodojo.localized_messages;
+	}
+	if (utils.defined(messageObj[message])) {
+		return messageObj[message];
 	}
 	else {
 		return '__?('+message+')?__';
@@ -359,20 +205,25 @@ var getLocalizedMessage = function(message) {
 };
 lang.setObject("comodojo.getLocalizedMessage", getLocalizedMessage);
 
-var getLocalizedMutableMessage = function(message, params) {
-	var _message = getLocalizedMessage(message);
-	if (_message != '__?('+message+')?__') {
-		return lang.replace(_message,params);
+var getLocalizedMutableMessage = function(message, params, messageObj) {
+	if (!messageObj) {
+		messageObj = comodojo.localized_messages;
+	}
+	if (utils.defined(messageObj[message])) {
+		return lang.replace(messageObj[message],params);
 	}
 	else {
-		return _message;
+		return '__?('+message+')?__';
 	}
 };
 lang.setObject("comodojo.getLocalizedMutableMessage", getLocalizedMutableMessage);
 
-var getLocalizedError = function(error) {
-	if (utils.defined(comodojo.localized_errors[error])) {
-		return comodojo.localized_errors[error];
+var getLocalizedError = function(error, errorObj) {
+	if (!errorObj) {
+		errorObj = comodojo.localized_errors;
+	}
+	if (utils.defined(errorObj[error])) {
+		return errorObj[error];
 	}
 	else {
 		return '__?('+error+')?__';
@@ -380,23 +231,30 @@ var getLocalizedError = function(error) {
 };
 lang.setObject("comodojo.getLocalizedError", getLocalizedError);
 
-var getLocalizedMutableError = function(error, params) {
-	var _message = getLocalizedError(error);
-	if (_message != '__?('+error+')?__') {
-		return lang.replace(_message,params);
+var getLocalizedMutableError = function(error, params, errorObj) {
+	if (!errorObj) {
+		errorObj = comodojo.localized_errors;
+	}
+	if (utils.defined(errorObj[error])) {
+		return lang.replace(errorObj[error],params);
 	}
 	else {
-		return _message;
+		return '__?('+error+')?__';
 	}
 };
 lang.setObject("comodojo.getLocalizedMutableError", getLocalizedMutableError);
 
-var getPid = function() {
-	var pid = comodojo.pidSeed;
-	comodojo.pidSeed++;
-	return 'pid_'+pid;
+var loadComponent = function(componentName, params) {
+		
+	if (lang.isObject(params)) {
+		comodojo.Bus._modules[componentName] = params;
+	}
+	return comodojo.loadScriptFile('comodojo/javascript/resources/'+componentName+'.js',{sync:true});
+	
 };
-lang.setObject("comodojo.getPid", getPid);
+lang.setObject("comodojo.loadComponent", loadComponent);
+
+
 
 return comodojo;
 

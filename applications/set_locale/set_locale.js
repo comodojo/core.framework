@@ -11,7 +11,7 @@
 $c.loadComponent('form', ['Button','Select']);
 $d.require("dojo.cookie");
 
-$c.app.load("set_locale",
+$c.App.load("set_locale",
 
 	function(pid, applicationSpace, status){
 	

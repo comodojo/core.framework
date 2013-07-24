@@ -24,7 +24,7 @@ class bootstrap extends comodojo_basic {
 	
 	public function logic($attributes) {
 		
-		$to_return = "comodojo.debug('Starting comodojo bootstrap process');\n";
+		$to_return = "comodojo.debug('Starting comodojo bootstrap process. There are:');\n";
 		
 		try {
 			comodojo_load_resource('role_mapper');
@@ -43,13 +43,23 @@ class bootstrap extends comodojo_basic {
 		
 		$autostart = $mapper->get_autostart();
 		
-		$to_return .= "comodojo.bus._registeredApplications = " . array2json($properties) . "; \n";
-		$to_return .= "comodojo.bus._runningApplications = []; \n";
+		$to_return .= "comodojo.Bus._registeredApplications = " . array2json($properties) . "; \n";
+		$to_return .= "comodojo.Bus._runningApplications = []; \n";
+		
+		$to_return .= "comodojo.debug(' - ".count($properties)." application/s to register');\n";
+		$to_return .= "comodojo.debug(' - ".count($autostart)." application/s to autostart');\n";
+
+		foreach($autostart as $key => $val) $to_return .= "comodojo.Bus.addAutostartApplication('" . $val . "');\n";
+		//$to_return .= "comodojo.Bus.addAutostartApplication('qotd');\n";
 		
 		$to_return .= "comodojo.debug('Comodojo bootstrap process completed');\n";
 		
-		foreach($autostart as $key => $val) $to_return .= "comodojo.app.start('" . $val . "');\n";
-		
+		//$to_return .= "dojo.ready(function() {\n";
+		//foreach($autostart as $key => $val) $to_return .= "comodojo.App.start('" . $val . "');\n";
+		//$to_return .= "comodojo.App.start('qotd');\n";
+		//$to_return .= "comodojo.debug(Comodojo bootstrap process completed);\n";
+		//$to_return .= "});";
+
 		return $to_return;
 		
 	}
@@ -57,7 +67,7 @@ class bootstrap extends comodojo_basic {
 	public function error($error_name, $error_detail) {
 		
 		$index = "comodojo.debug('".$error_name.": " . $error_detail . "');\n"; 
-		$index .= "comodojo.error.critical('".$error_name.": " . $error_detail . "');\n";
+		$index .= "comodojo.Error.critical('".$error_name.": " . $error_detail . "');\n";
 		
 		set_header(Array(
 			'statusCode'	=>	200,

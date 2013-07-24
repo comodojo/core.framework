@@ -9,12 +9,12 @@
  */
 
 $c.loadComponent('layout',['Grid']);
-$c.app.loadCss('chmod');
+$c.App.loadCss('chmod');
 
 $d.require("dijit.form.Button");
 $d.require("dijit.form.FilteringSelect");
 
-$c.app.load("chmod",
+$c.App.load("chmod",
 
 	function(pid, applicationSpace, status){
 	

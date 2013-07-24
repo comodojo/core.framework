@@ -8,26 +8,26 @@ $c.loadCss('comodojo/CSS/layout.css');
 /*
  * Load tab container if requested
  */
-$d.requireIf(comodojo.inArray('TabContainer',comodojo.bus._modules.layout), "dijit.layout.TabContainer");
+$d.requireIf(comodojo.inArray('TabContainer',comodojo.Bus._modules.layout), "dijit.layout.TabContainer");
 
 /*
  * Load accordion container if requested
  */
-$d.requireIf(comodojo.inArray('AccordionContainer',comodojo.bus._modules.layout), "dijit.layout.AccordionContainer");
+$d.requireIf(comodojo.inArray('AccordionContainer',comodojo.Bus._modules.layout), "dijit.layout.AccordionContainer");
 
 /*
  * Load expando pane if requested
  */
-$d.requireIf(comodojo.inArray('ExpandoPane',comodojo.bus._modules.layout), "dojox.layout.ExpandoPane");
-if (comodojo.inArray('ExpandoPane',comodojo.bus._modules.layout)) {	$c.loadCss('comodojo/javascript/dojox/layout/resources/ExpandoPane.css'); }
+$d.requireIf(comodojo.inArray('ExpandoPane',comodojo.Bus._modules.layout), "dojox.layout.ExpandoPane");
+if (comodojo.inArray('ExpandoPane',comodojo.Bus._modules.layout)) {	$c.loadCss('comodojo/javascript/dojox/layout/resources/ExpandoPane.css'); }
 
 /*
  * Load grid if requested
  */
-$d.requireIf(comodojo.inArray('Grid',comodojo.bus._modules.layout), "dojox.grid.DataGrid");
-$d.requireIf(comodojo.inArray('Grid',comodojo.bus._modules.layout), "dojo.data.ItemFileReadStore");
-$d.requireIf(comodojo.inArray('Grid',comodojo.bus._modules.layout), "dojo.data.ItemFileWriteStore");
-if (comodojo.inArray('Grid',comodojo.bus._modules.layout)) {
+$d.requireIf(comodojo.inArray('Grid',comodojo.Bus._modules.layout), "dojox.grid.DataGrid");
+$d.requireIf(comodojo.inArray('Grid',comodojo.Bus._modules.layout), "dojo.data.ItemFileReadStore");
+$d.requireIf(comodojo.inArray('Grid',comodojo.Bus._modules.layout), "dojo.data.ItemFileWriteStore");
+if (comodojo.inArray('Grid',comodojo.Bus._modules.layout)) {
 	//$c.loadCss('comodojo/javascript/dojox/grid/resources/Grid.css');
 	$c.loadCss('comodojo/javascript/dojox/grid/resources/'+comodojoConfig.dojoTheme+'Grid.css');
 }
@@ -35,17 +35,17 @@ if (comodojo.inArray('Grid',comodojo.bus._modules.layout)) {
 /*
  * Load tree if requestes
  */
-$d.requireIf(comodojo.inArray('Tree',comodojo.bus._modules.layout), "dijit.Tree");
-$d.requireIf(comodojo.inArray('Tree',comodojo.bus._modules.layout), "dijit.tree.ForestStoreModel");
+$d.requireIf(comodojo.inArray('Tree',comodojo.Bus._modules.layout), "dijit.Tree");
+$d.requireIf(comodojo.inArray('Tree',comodojo.Bus._modules.layout), "dijit.tree.ForestStoreModel");
 
 /*
  * Load a TreeGrid if requested
  */
-$d.requireIf(comodojo.inArray('TreeGrid',comodojo.bus._modules.layout), "dojox.grid.TreeGrid");
-$d.requireIf(comodojo.inArray('TreeGrid',comodojo.bus._modules.layout), "dojo.data.ItemFileReadStore");
-$d.requireIf(comodojo.inArray('TreeGrid',comodojo.bus._modules.layout), "dojo.data.ItemFileWriteStore");
-$d.requireIf(comodojo.inArray('TreeGrid',comodojo.bus._modules.layout), "dijit.tree.ForestStoreModel");
-if (comodojo.inArray('TreeGrid',comodojo.bus._modules.layout)) {
+$d.requireIf(comodojo.inArray('TreeGrid',comodojo.Bus._modules.layout), "dojox.grid.TreeGrid");
+$d.requireIf(comodojo.inArray('TreeGrid',comodojo.Bus._modules.layout), "dojo.data.ItemFileReadStore");
+$d.requireIf(comodojo.inArray('TreeGrid',comodojo.Bus._modules.layout), "dojo.data.ItemFileWriteStore");
+$d.requireIf(comodojo.inArray('TreeGrid',comodojo.Bus._modules.layout), "dijit.tree.ForestStoreModel");
+if (comodojo.inArray('TreeGrid',comodojo.Bus._modules.layout)) {
 	//$c.loadCss('comodojo/javascript/dojox/grid/resources/Grid.css');
 	$c.loadCss('comodojo/javascript/dojox/grid/resources/'+comodojoConfig.dojoTheme+'Grid.css');
 }

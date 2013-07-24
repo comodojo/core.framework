@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.app.load("pwdrecover",
+$c.App.load("pwdrecover",
 
 	function(pid, applicationSpace, status){
 	

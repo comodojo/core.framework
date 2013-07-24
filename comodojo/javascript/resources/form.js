@@ -15,46 +15,46 @@ $c.loadCss('comodojo/CSS/form.css');
 
 $d.require("dijit.form.Form");
 
-/**/$d.requireIf(comodojo.inArray('Button',comodojo.bus._modules.form), "dijit.form.Button"); /* OK */
-//$d.requireIf(comodojo.inArray('ComboButton',comodojo.bus._modules.form), "dijit.form.ComboButton");
-//$d.requireIf(comodojo.inArray('DropDownButton',comodojo.bus._modules.form), "dijit.form.DropDownButton");
-$d.requireIf(comodojo.inArray('ToggleButton',comodojo.bus._modules.form), "dijit.form.ToggleButton"); /* OK */
-$d.requireIf(comodojo.inArray('BusyButton',comodojo.bus._modules.form), "dojox.form.BusyButton"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('Button',comodojo.Bus._modules.form), "dijit.form.Button"); /* OK */
+//$d.requireIf(comodojo.Utils.inArray('ComboButton',comodojo.Bus._modules.form), "dijit.form.ComboButton");
+//$d.requireIf(comodojo.Utils.inArray('DropDownButton',comodojo.Bus._modules.form), "dijit.form.DropDownButton");
+$d.requireIf(comodojo.Utils.inArray('ToggleButton',comodojo.Bus._modules.form), "dijit.form.ToggleButton"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('BusyButton',comodojo.Bus._modules.form), "dojox.form.BusyButton"); /* OK */
 
-/**/$d.requireIf(comodojo.inArray('CheckBox',comodojo.bus._modules.form), "dijit.form.CheckBox"); /* OK */
-//$d.requireIf(comodojo.inArray('ComboBox',comodojo.bus._modules.form), "dijit.form.ComboBox");
-$d.requireIf(comodojo.inArray('CurrencyTextBox',comodojo.bus._modules.form), "dijit.form.CurrencyTextBox"); /* OK */
-/**/$d.requireIf(comodojo.inArray('DateTextBox',comodojo.bus._modules.form), "dijit.form.DateTextBox"); /* OK */
-/**/$d.requireIf(comodojo.inArray('ValidationTextBox',comodojo.bus._modules.form), "dijit.form.ValidationTextBox"); /* OK */
-/**/$d.requireIf(comodojo.inArray('EmailTextBox',comodojo.bus._modules.form), "dijit.form.ValidationTextBox"); /* OK */
-/**/$d.requireIf(comodojo.inArray('PasswordTextBox',comodojo.bus._modules.form), "dijit.form.ValidationTextBox"); /* OK */
-/**/$d.requireIf(comodojo.inArray('TimeTextBox',comodojo.bus._modules.form), "dijit.form.TimeTextBox"); /* OK */
-/**/$d.requireIf(comodojo.inArray('TextBox',comodojo.bus._modules.form), "dijit.form.TextBox"); /* OK */
-$d.requireIf(comodojo.inArray('NumberTextBox',comodojo.bus._modules.form), "dijit.form.NumberTextBox"); /* OK */
-$d.requireIf(comodojo.inArray('NumberSpinner',comodojo.bus._modules.form), "dijit.form.NumberSpinner"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('CheckBox',comodojo.Bus._modules.form), "dijit.form.CheckBox"); /* OK */
+//$d.requireIf(comodojo.Utils.inArray('ComboBox',comodojo.Bus._modules.form), "dijit.form.ComboBox");
+$d.requireIf(comodojo.Utils.inArray('CurrencyTextBox',comodojo.Bus._modules.form), "dijit.form.CurrencyTextBox"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('DateTextBox',comodojo.Bus._modules.form), "dijit.form.DateTextBox"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('ValidationTextBox',comodojo.Bus._modules.form), "dijit.form.ValidationTextBox"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('EmailTextBox',comodojo.Bus._modules.form), "dijit.form.ValidationTextBox"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('PasswordTextBox',comodojo.Bus._modules.form), "dijit.form.ValidationTextBox"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('TimeTextBox',comodojo.Bus._modules.form), "dijit.form.TimeTextBox"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('TextBox',comodojo.Bus._modules.form), "dijit.form.TextBox"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('NumberTextBox',comodojo.Bus._modules.form), "dijit.form.NumberTextBox"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('NumberSpinner',comodojo.Bus._modules.form), "dijit.form.NumberSpinner"); /* OK */
 
-/**/$d.requireIf(comodojo.inArray('Select',comodojo.bus._modules.form), "dijit.form.Select"); /* OK */
-/**/$d.requireIf(comodojo.inArray('FilteringSelect',comodojo.bus._modules.form), "dijit.form.FilteringSelect"); /* OK */
-$d.requireIf(comodojo.inArray('MultiSelect',comodojo.bus._modules.form), "dijit.form.MultiSelect"); /* OK */
-/**/$d.requireIf(comodojo.inArray('OnOffSelect',comodojo.bus._modules.form), "dijit.form.Select"); /* OK */
-/**/$d.requireIf(comodojo.inArray('GenderSelect',comodojo.bus._modules.form), "dijit.form.Select"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('Select',comodojo.Bus._modules.form), "dijit.form.Select"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('FilteringSelect',comodojo.Bus._modules.form), "dijit.form.FilteringSelect"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('MultiSelect',comodojo.Bus._modules.form), "dijit.form.MultiSelect"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('OnOffSelect',comodojo.Bus._modules.form), "dijit.form.Select"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('GenderSelect',comodojo.Bus._modules.form), "dijit.form.Select"); /* OK */
 
-/**/$d.requireIf(comodojo.inArray('Textarea',comodojo.bus._modules.form), "dijit.form.Textarea"); /* OK */
-/**/$d.requireIf(comodojo.inArray('Editor',comodojo.bus._modules.form), "dijit.Editor"); /* OK */
-/**/$d.requireIf(comodojo.inArray('Editor',comodojo.bus._modules.form), "dijit.form.Textarea"); /* OK */
-/**/$d.requireIf(comodojo.inArray('SmallEditor',comodojo.bus._modules.form), "dijit.Editor"); /* OK */
-/**/$d.requireIf(comodojo.inArray('SmallEditor',comodojo.bus._modules.form), "dijit.form.Textarea"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('Textarea',comodojo.Bus._modules.form), "dijit.form.Textarea"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('Editor',comodojo.Bus._modules.form), "dijit.Editor"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('Editor',comodojo.Bus._modules.form), "dijit.form.Textarea"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('SmallEditor',comodojo.Bus._modules.form), "dijit.Editor"); /* OK */
+/**/$d.requireIf(comodojo.Utils.inArray('SmallEditor',comodojo.Bus._modules.form), "dijit.form.Textarea"); /* OK */
 
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit.Editor"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit.form.Textarea"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.FontChoice"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.FullScreen"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.TextColor"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.LinkDialog"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.Print"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.ViewSource"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dijit._editor.plugins.TabIndent"); /* OK */
-$d.requireIf(comodojo.inArray('FullEditor',comodojo.bus._modules.form), "dojox.editor.plugins.ToolbarLineBreak"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit.Editor"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit.form.Textarea"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.FontChoice"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.FullScreen"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.TextColor"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.LinkDialog"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.Print"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.ViewSource"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dijit._editor.plugins.TabIndent"); /* OK */
+$d.requireIf(comodojo.Utils.inArray('FullEditor',comodojo.Bus._modules.form), "dojox.editor.plugins.ToolbarLineBreak"); /* OK */
 //dojo.require("dijit._editor.plugins.AlwaysShowToolbar");
 
 /*

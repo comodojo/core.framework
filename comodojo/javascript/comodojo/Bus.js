@@ -30,6 +30,10 @@ Bus._registeredApplications = {};
 // Array
 Bus._runningApplications = [];
 
+// Autostart application registry
+// Array
+Bus._autostartApplications = [];
+
 Bus.addTrigger = function(trigger, functionString, time) {
 	// summary:
 	//		Add a trigger to the bus
@@ -39,7 +43,7 @@ Bus.addTrigger = function(trigger, functionString, time) {
 	//		The function called on each trigger start
 	// time: Int
 	//		Time interval
-	comodojo.Bus._triggers[trigger] = setInterval(functionString, time);
+	Bus._triggers[trigger] = setInterval(functionString, time);
 };
 
 Bus.removeTrigger = function(trigger) {
@@ -47,7 +51,7 @@ Bus.removeTrigger = function(trigger) {
 	//		Remove a trigger from the bus
 	// trigger: String
 	//		The trigger name
-	clearInterval(comodojo.Bus._triggers[trigger]);
+	clearInterval(Bus._triggers[trigger]);
 };
 
 Bus.addConnection = function(connection, evt, func) {
@@ -59,8 +63,8 @@ Bus.addConnection = function(connection, evt, func) {
 	//		The event connected
 	// func: Function
 	//		The function to connect to event
-	comodojo.Bus.addEvent(evt);
-	comodojo.Bus._connections[connection] = aspect.after(comodojo.Bus._events, evt, func);
+	Bus.addEvent(evt);
+	Bus._connections[connection] = aspect.after(comodojo.Bus._events, evt, func);
 };
 
 Bus.removeConnection = function(connection) {
@@ -128,11 +132,11 @@ Bus.getTimestamp = function(service, selector) {
 	//		The selector reference (see kernel part)
 	// returns:
 	//		Timestamp, as recorded, in case of success, false otherwise
-	if (!lang.isString(service) || !lang.isString(selector) || !lang.isArray(comodojo.Bus._timestamps[service]) || isNaN(comodojo.Bus._timestamps[service][selector])) {
+	if (!lang.isString(service) || !lang.isString(selector) || !lang.isArray(Bus._timestamps[service]) || isNaN(Bus._timestamps[service][selector])) {
 		return false;
 	}
 	else {
-		return comodojo.bus._timestamps[service][selector];
+		return Bus._timestamps[service][selector];
 	}
 };
 
@@ -145,7 +149,7 @@ Bus.getTimestampAndUpdate = function(service, selector) {
 	//		The selector reference (see kernel part)
 	// returns:
 	//		Timestamp, as recorded, in case of success, false otherwise
-	if (!dojo.isString(service) || !dojo.isString(selector) || !dojo.isArray(comodojo.Bus._timestamps[service]) || isNaN(comodojo.Bus._timestamps[service][selector])) {
+	if (!lang.isString(service) || !lang.isString(selector) || !lang.isArray(comodojo.Bus._timestamps[service]) || isNaN(comodojo.Bus._timestamps[service][selector])) {
 		return false;
 	}
 	else {
@@ -190,9 +194,9 @@ Bus.callEvent = function(evt){
 	//		Call an event
 	// evt: String
 	//		The event name
-	if (lang.isFunction(comodojo.bus._events[evt])) {
-		comodojo.debugDeep("Called event: " + event + ", raising...");
-		comodojo.bus._events[evt]();
+	if (lang.isFunction(Bus._events[evt])) {
+		comodojo.debugDeep("Called event: " + evt + ", raising...");
+		Bus._events[evt]();
 	}
 	else {
 		comodojo.debugDeep("Event: " + evt + " is not registered");
@@ -209,10 +213,14 @@ Bus.registerApplication = function(appExec, application) {
 	// returns:
 	//		True in case of success, false otherwise
 	var r;
-	if (!utils.defined(comodojo.Bus._registeredApplications[appExec])) {
-		comodojo.Bus._registeredApplications[appExec] = {};
-		comodojo.Bus._registeredApplications[appExec].exec = application;
-		comodojo.Bus.callEvent("comodojo_app_registered_registry_change");
+	if (!utils.defined(Bus._registeredApplications[appExec])) {
+		Bus._registeredApplications[appExec] = {};
+		Bus._registeredApplications[appExec].exec = application;
+		Bus.callEvent("comodojo_app_registered_registry_change");
+		r = true;
+	}
+	else if (!lang.isFunction(Bus._registeredApplications[appExec].exec)) {
+		Bus._registeredApplications[appExec].exec = application;
 		r = true;
 	}
 	else {
@@ -229,12 +237,12 @@ Bus.unregisterApplication = function(appExec) {
 	// returns:
 	//		True in case of success, false otherwise
 	var r;
-	if (!utils.defined(comodojo.Bus._registeredApplications[appExec])) {
+	if (!utils.defined(Bus._registeredApplications[appExec])) {
 		r = false;
 	}
 	else {
-		delete comodojo.Bus._registeredApplications[appExec];
-		comodojo.Bus.callEvent("comodojo_app_registered_registry_change");
+		delete Bus._registeredApplications[appExec];
+		Bus.callEvent("comodojo_app_registered_registry_change");
 		r = true;
 	}
 	return r;
@@ -248,11 +256,11 @@ Bus.getRegisteredApplication = function(appExec) {
 	// returns:
 	//		Application in case of success, false otherwise
 	var r;
-	if (!utils.defined(comodojo.Bus._registeredApplications[appExec])) {
+	if (!utils.defined(Bus._registeredApplications[appExec])) {
 		r = false;
 	}
 	else {
-		r = comodojo.Bus._registeredApplications[appExec];
+		r = Bus._registeredApplications[appExec];
 	}
 	return r;
 };
@@ -262,7 +270,7 @@ Bus.getRegisteredApplications = function() {
 	//		Get a list of registered applications
 	// returns:
 	//		Array of applications (array of names)
-	return comodojo.Bus._registeredApplications.keys();
+	return Bus._registeredApplications.keys();
 };
 
 Bus.pushRunningApplication = function(pid, appExec, appName, runMode, applicationLink) {
@@ -280,8 +288,8 @@ Bus.pushRunningApplication = function(pid, appExec, appName, runMode, applicatio
 	//		Application link
 	// returns: Integer
 	//		Application index in running registry
-	var l = comodojo.Bus._runningApplications.push(Array(pid, appExec, appName, runMode, applicationLink));
-	comodojo.Bus.callEvent("comodojo_app_running_registry_change");
+	var l = Bus._runningApplications.push(Array(pid, appExec, appName, runMode, applicationLink));
+	Bus.callEvent("comodojo_app_running_registry_change");
 	return l-1;
 };
 
@@ -293,10 +301,10 @@ Bus.pullRunningApplication = function(pid) {
 	// returns: Bool
 	//		True in case of success, false otherwise
 	var i, r=false;
-	for (i in comodojo.Bus._runningApplications) {
-		if (comodojo.Bus._runningApplications[i][0] == pid) {
-			comodojo.Bus._runningApplications.splice(i,1);
-			comodojo.Bus.callEvent("comodojo_app_running_registry_change");
+	for (i in Bus._runningApplications) {
+		if (Bus._runningApplications[i][0] == pid) {
+			Bus._runningApplications.splice(i,1);
+			Bus.callEvent("comodojo_app_running_registry_change");
 			r=true;
 		}
 		else {
@@ -312,9 +320,9 @@ Bus.getRunningApplication = function(pid) {
 	// returns:
 	//		Object containing application name, exec, link or false if app not found
 	var app = false;
-	for (var i in comodojo.Bus._runningApplications) {
-		if (comodojo.Bus._runningApplications[i][0] == pid) {
-			app = {name:comodojo.Bus._runningApplications[i][2],exec:comodojo.Bus._runningApplications[i][1],link:comodojo.Bus._runningApplications[i][4]};
+	for (var i in Bus._runningApplications) {
+		if (Bus._runningApplications[i][0] == pid) {
+			app = {name:Bus._runningApplications[i][2],exec:Bus._runningApplications[i][1],link:Bus._runningApplications[i][4]};
 		}
 		else {
 			continue;
@@ -329,10 +337,14 @@ Bus.getRunningApplications = function(pids_only) {
 	// returns:
 	//		Object containing applications name, exec, link referenced by pid
 	var apps = {};
-	for (var i in comodojo.Bus._runningApplications) {
-		apps[comodojo.Bus._runningApplications[i][0]] = {name:comodojo.Bus._runningApplications[i][2],exec:comodojo.Bus._runningApplications[i][1],link:comodojo.Bus._runningApplications[i][4]};
+	for (var i in Bus._runningApplications) {
+		apps[Bus._runningApplications[i][0]] = {name:Bus._runningApplications[i][2],exec:Bus._runningApplications[i][1],link:Bus._runningApplications[i][4]};
 	};
 	return apps;
+};
+
+Bus.addAutostartApplication = function(appExec) {
+	Bus._autostartApplications.push(appExec);
 };
 
 //Add std events to the bus:

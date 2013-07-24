@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.app.load("chpasswd",
+$c.App.load("chpasswd",
 
 	function(pid, applicationSpace, status){
 	

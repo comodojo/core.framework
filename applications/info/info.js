@@ -10,7 +10,7 @@
 
 $c.loadComponent('layout',["Grid"]);
 
-$c.app.load("info",
+$c.App.load("info",
 
 	function(pid, applicationSpace, status){
 	

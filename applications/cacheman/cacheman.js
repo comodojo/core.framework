@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.app.load("cacheman",
+$c.App.load("cacheman",
 
 	function(pid, applicationSpace, status){
 	

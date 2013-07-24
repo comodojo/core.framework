@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.app.load("license",
+$c.App.load("license",
 
 	function(pid, applicationSpace, status){
 	
@@ -17,11 +17,9 @@ $c.app.load("license",
 		var myself = this;
 		
 		this.init = function(){
-			$c.kernel.newCall(myself.initCallback,{
+			$c.Kernel.newCall(myself.initCallback,{
 				application: "license",
-				method: "get_info",
-				preventCache: false,
-				content: {}
+				method: "get_info"
 			});
 		};
 		
@@ -31,7 +29,7 @@ $c.app.load("license",
 			}
 			else {
 				myself.stop();
-				$c.error.global(result.code,result.name);
+				$c.Error.generic(result.code,result.name,'');
 			}
 		};
 			

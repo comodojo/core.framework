@@ -21,18 +21,18 @@ Loader.node = new dialogBase({
 	persistent: true,
 	hided: true,
 	draggable: false
-});
+})._dialog;
 
 Loader.message = domConstruct.create("div",{className: "comodojoLoaderMessage"});
 Loader.image_container = domConstruct.create("div",{className: "comodojoLoaderImageContainer"});
-Loader.image = domConstruct.create("img",{src: imageReference, className: "comodojoLoaderImage"});
+Loader.image = domConstruct.create("img",{className: "comodojoLoaderImage"});
 
 Loader.image_container.appendChild(Loader.image);
 Loader.node.containerNode.appendChild(Loader.image_container);
 Loader.node.containerNode.appendChild(Loader.message);
 
 Loader.populate = function(image, message) {
-	domAttr.set(Lconcorsi comune romaoader.image, "src", !image ? "comodojo/images/bar_loader.gif" : image);
+	domAttr.set(Loader.image, "src", !image ? "comodojo/images/bar_loader.gif" : image);
 	domAttr.set(Loader.message, "innerHTML", !message ? comodojo.getLocalizedMessage('10007') : message);
 };
 

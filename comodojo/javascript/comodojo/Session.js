@@ -1,5 +1,5 @@
-define(["dojo/_base/lang",/*"comodojo/Basic",*/"comodojo/Bus","comodojo/Kernel"/*,"comodojo/App"*/],
-function(lang,basic,bus,kernel,app){
+define(["dojo/_base/lang",/*"comodojo/Basic",*/"comodojo/Bus","comodojo/Kernel","comodojo/App"],
+function(lang,/*basic,*/bus,kernel,app){
 
 // module:
 // 	comodojo/Kernel
@@ -74,7 +74,7 @@ Session.loginCallback = function(success, result) {
 			comodojo.app.stopAll(true);
 		}, 1500);
 		setTimeout(function() {
-			comodojo.basic.startup();
+			comodojo.startup();
 		}, 3000);
 	}
 };
@@ -116,7 +116,7 @@ Session.logoutCallback = function(success, result) {
 			comodojo.app.stopAll(true);
 		}, 1500);
 		setTimeout(function() {
-			comodojo.basic.startup();
+			comodojo.startup();
 		}, 3000);
 	}
 };
@@ -127,7 +127,7 @@ Session.status = function() {
 	//		
 	return {
 		user_logged_in: comodojo.userRole == 0 ? false : true,
-		in_session_from: bus.getTimestamp('comodojo','login_logout_action');
+		in_session_from: bus.getTimestamp('comodojo','login_logout_action')
 	}
 };
 

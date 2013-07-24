@@ -14,19 +14,19 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 	closable: true,
 
 	// minimizable: Boolean
-	//		Allow minimizing of pane if true
+	//		Allow minimizing of Window if true
 	minimizable: true,
 
 	// resizable: Boolean
-	//		Allow resizing of pane true if true
+	//		Allow resizing of Window true if true
 	resizable: false,
 
 	// maxable: Boolean
-	//		Horrible param name for "Can you maximize this floating pane?"
+	//		Horrible param name for "Can you maximize this floating Window?"
 	maxable: false,
 
 	// resizeAxis: String
-	//		One of: x | xy | y to limit pane's sizing direction
+	//		One of: x | xy | y to limit Window's sizing direction
 	resizeAxis: "xy",
 
 	// title: String
@@ -146,7 +146,7 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 
 	hide: function(/* Function? */ callback){
 		// summary:
-		//		Close, but do not destroy this FloatingPane
+		//		Close, but do not destroy this Window
 		baseFx.fadeOut({
 			node:this.domNode,
 			duration:this.duration,
@@ -162,7 +162,7 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 
 	show: function(/* Function? */callback){
 		// summary:
-		//		Show the FloatingPane
+		//		Show the Window
 		var anim = baseFx.fadeIn({node:this.domNode, duration:this.duration,
 			beforeBegin: lang.hitch(this,function(){
 				this.domNode.style.display = "";
@@ -174,15 +174,21 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 		this._onShow(); // lazy load trigger
 	},
 
+	focusOn: function() {
+		// summary:
+		//		Alias for show
+		this.show();
+	},
+
 	minimize: function(){
 		// summary:
-		//		Hide and dock the FloatingPane
+		//		Hide and dock the Window
 		if(!this._isMinimized){ this.hide(lang.hitch(this,"_minimize")); }
 	},
 
 	maximize: function(){
 		// summary:
-		//		Make this FloatingPane full-screen (viewport)
+		//		Make this Window full-screen (viewport)
 		if(this._maximized){ return; }
 		this._naturalState = domGeom.position(this.domNode);
 		if(this._isMinimized){
@@ -218,7 +224,7 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 		//console.log('resizing called to:');
 		//console.log(dim);
 		// summary:
-		//		Size the FloatingPane and place accordingly
+		//		Size the Window and place accordingly
 		dim = dim || this._naturalState;
 		this._currentState = dim;
 
@@ -245,7 +251,7 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 	
 	bringToTop: function(){
 		// summary:
-		//		bring this FloatingPane above all other panes
+		//		bring this Window above all other Windows
 		var windows = arrayUtil.filter(
 			this._allFPs,
 			function(i){
@@ -266,7 +272,7 @@ var Window = declare("comodojo.Window-base", [ ContentPane, TemplatedMixin ],{
 	
 	destroy: function(){
 		// summary:
-		//		Destroy this FloatingPane completely
+		//		Destroy this Window completely
 		this._allFPs.splice(arrayUtil.indexOf(this._allFPs, this), 1);
 		if(this._resizeHandle){
 			this._resizeHandle.destroy();

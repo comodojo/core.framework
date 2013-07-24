@@ -11,7 +11,7 @@
  */
 
 $lang = Array(
-	'0000'	=>	'<p>Il tuo messaggio del giorno:<pre>${0}</pre></p>'
+	'0000'	=>	'<p>Il tuo messaggio del giorno:<pre>{0}</pre></p>'
 );
 
 ?>

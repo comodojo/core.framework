@@ -38,7 +38,7 @@ Win.newWindow = function(params) {
 
 	comodojo.debugDeep("Launching new window, id will be: " + this.id);
 		
-	var myNewWin = new comodojo.WindowBase({
+	var myNewWin = new WindowBase({
 		title: p.title,
 		id : p.id,
 		icon: p.icon,

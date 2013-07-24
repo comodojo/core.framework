@@ -12,7 +12,7 @@
 
 $c.loadComponent('layout',['Grid']);
 			
-$c.app.load("taskmanager",
+$c.App.load("taskmanager",
 
 	function(pid, applicationSpace, status){
 		

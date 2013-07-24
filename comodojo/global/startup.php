@@ -175,7 +175,9 @@ class comodojo_startup extends comodojo_basic {
 		//****** DOJO REQUIRES ******
 		$myJsLoader .= "
 			<script type=\"text/javascript\">
-				dojo.require('comodojo.Notification');
+				//dojo.require('comodojo.Notification');
+				dojo.require('comodojo.Config');
+				dojo.require('comodojo.Basic');
 		";
 		
 		$myDojoRequires = json2array(COMODOJO_JS_REQUIRES);
@@ -191,13 +193,12 @@ class comodojo_startup extends comodojo_basic {
 				";
 			}
 		}
-		
+		//<script type=\"text/javascript\" src=\"comodojo/javascript/resources/comodojo.js\" ></script>
 		$myJsLoader .= "
 			</script>
-			<script type=\"text/javascript\" src=\"comodojo/javascript/resources/comodojo.js\" ></script>
 			<script type=\"text/javascript\">
 				dojo.ready(function() {
-					comodojo.initEnv();";
+					comodojo.startup();";
 		/*
 		if ($this->throwSiteMessage) {
 			$myJsLoader .= "

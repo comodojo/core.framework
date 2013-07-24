@@ -1,5 +1,16 @@
-define(["dojo/_base/declare","dijit/registry","dojo/aspect","dojo/on","dojo/_base/lang","dojo/dom-construct","dojo/dom-attr","dijit/Dialog","comodojo/Utils","dojo/domReady!"],
-function(declare,registry,aspect,on,lang,domConstruct,domAttr,dialog,utils){
+define([
+	"dojo/_base/declare",
+	"dojo/aspect",
+	"dojo/on",
+	"dojo/_base/lang",
+	"dojo/dom-construct",
+	"dojo/dom-attr",
+	"dijit/registry",
+	"dijit/Dialog",
+	"dijit/form/Button",
+	"comodojo/Utils",
+	"dojo/domReady!"],
+function(declare,aspect,on,lang,domConstruct,domAttr,registry,dialog,button,utils){
 
 // module:
 // 	comodojo/Dialog-base
@@ -7,57 +18,57 @@ function(declare,registry,aspect,on,lang,domConstruct,domAttr,dialog,utils){
 var dbase = declare(null, {
 
 	// Id (default )
-	id = "comodojo_dialog_"+comodojo.getPid(),
+	id : "comodojo_dialog_"+comodojo.getPid(),
 
 	// Title and content options
-	title = 'Dialog',
-	content = false,
-	href = false,
+	title : 'Dialog',
+	content : false,
+	href : false,
 
 	// Building options
-	parseOnLoad = true,
+	parseOnLoad : true,
 
-	templateString "dojo/aspect"= false,
+	templateString : false,
 
-	draggable = true,
+	draggable : true,
 
-	timer = false,
+	timer : false,
 
-	blocker = false,
+	blocker : false,
 
-	_isApplication = false,
+	_isApplication : false,
 
-	forced = false,
+	forced : false,
 
-	persistent = false,
+	persistent : false,
 
-	focusKilled = true,
+	focusKilled : true,
 
-	hided = false,
+	hided : false,
 
-	maxWidth = "600px",
+	maxWidth : "600px",
 
-	maxHeight = "600px",
+	maxHeight : "600px",
 
-	hideOverflow = false,
+	hideOverflow : false,
 
-	primaryCloseButton = true,
+	primaryCloseButton : true,
 
-	secondaryCloseButton = false,
+	secondaryCloseButton : false,
 
-	actionOk = null,
+	actionOk : null,
 
-	actionCancel = null,
+	actionCancel : null,
 
-	closeOnOk = false,
+	closeOnOk : false,
 
-	closeOnCancel = true,
+	closeOnCancel : true,
 
 	//this.forceWidth = false;
 	//this.forceHeight = false;
 
 	constructor: function(args) {
-			
+		
 		declare.safeMixin(this,args);
 
 		// Eval parameters and combinations
@@ -128,7 +139,8 @@ var dbase = declare(null, {
 			params.templateString = this.templateString;
 		}
 		
-		this._dialog = new dijit.Dialog(params);
+		this._dialog = new dialog(params);
+		var diag = this._dialog;
 		this._dialog.containerNode.style.maxWidth = this.maxWidth;
 		this._dialog.containerNode.style.maxHeight = this.maxHeight;
 		this._dialog.containerNode.style.overflow = !this.hideOverflow ? "auto" : "hidden";
@@ -161,21 +173,21 @@ var dbase = declare(null, {
 				onClick: this.actionOk
 			}).placeAt(this.actionBar);
 			if (this.closeOnOk) {
-				on(actionOkButton, 'click', function(){ this._dialog.hide(); });
+				on(actionOkButton, 'click', function(){ diag.hide(); });
 			}
 			var actionCancelButton = new dijit.form.Button({
 				label: comodojo.getLocalizedMessage('10004'),
 				onClick: lang.isFunction(this.actionCancel) ? this.actionCancel : function() {}
 			}).placeAt(this.actionBar);
 			if (this.closeOnCancel) { 
-				on(actionCancelButton, 'click', function(){ that._dialog.hide(); });
+				on(actionCancelButton, 'click', function(){ diag.hide(); });
 			}
 		}
 
 		if (this.secondaryCloseButton) {
-			new dijit.form.Button({
+			new button({
 				label: comodojo.getLocalizedMessage('10011'),
-				onClick: function() { this._dialog.hide(); }
+				onClick: function() { diag.hide(); }
 			}).placeAt(this.actionBar);
 		}
 		
@@ -188,7 +200,7 @@ var dbase = declare(null, {
 			this._dialog.show();
 		}
 		
-		return this._dialog;
+		//return this._dialog;
 	}
 
 });

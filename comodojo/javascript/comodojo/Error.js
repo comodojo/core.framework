@@ -8,7 +8,7 @@ var Error = {
 	// summary:
 	// description:
 };
-lang.setObject("comodojo.Error", Dialog);
+lang.setObject("comodojo.Error", Error);
 
 Error.generic = function(Code, Name, Detail) {
 
@@ -18,7 +18,7 @@ Error.generic = function(Code, Name, Detail) {
 		primaryCloseButton: false,
 		secondaryCloseButton: true,
 		parseOnLoad: false,
-		blocker: true
+		blocker: false
 	});
 
 };

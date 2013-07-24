@@ -12,7 +12,7 @@
 
 $c.loadComponent('form',['ValidationTextBox','Button','EmailTextBox','DateTextBox','GenderSelect','BusyButton']);
 
-$c.app.load("usersubscription",
+$c.App.load("usersubscription",
 
 	function(pid, applicationSpace, status){
 	

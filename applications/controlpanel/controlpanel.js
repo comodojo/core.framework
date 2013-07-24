@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.app.loadCss('controlpanel');
+$c.App.loadCss('controlpanel');
 $c.loadComponent('layout',["TreeGrid"]);
 $c.loadComponent('form', [
 	'Button',

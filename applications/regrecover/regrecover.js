@@ -10,7 +10,7 @@
 
 $c.loadComponent('form',['EmailTextBox','BusyButton']);
 
-$c.app.load("regrecover",
+$c.App.load("regrecover",
 
 	function(pid, applicationSpace, status){
 	

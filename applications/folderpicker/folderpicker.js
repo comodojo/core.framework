@@ -10,7 +10,7 @@
 
 $c.loadComponent('layout',['Tree']);
 
-$c.app.load("folderpicker",
+$c.App.load("folderpicker",
 
 	function(pid, applicationSpace, status){
 	

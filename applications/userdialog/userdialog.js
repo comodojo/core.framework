@@ -9,7 +9,7 @@
  */
 
 $c.loadComponent('form', ['Button','Select','TextBox','PasswordTextBox']);
-$c.app.load("userdialog",
+$c.App.load("userdialog",
 
 	function(pid, applicationSpace, status){
 	

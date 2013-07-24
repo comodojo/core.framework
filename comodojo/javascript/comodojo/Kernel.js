@@ -58,7 +58,7 @@ Kernel.callKernel = function(httpMethod, callback, params) {
 		}
 	},/*error*/function(error){
 		bus.callEvent("comodojo_kernel_error");
-		callback(false, {code:0,name:error);
+		callback(false, {code:0,name:error});
 	});
 }
 
@@ -91,7 +91,7 @@ Kernel.callKernelDatastore = function (application, method, isWriteStore, label,
 Kernel.newCall = function(callback, params) {
 	// summary:
 	//		It starts a new call to kernel
-	callKernel('POST',callback, params);
+	Kernel.callKernel('POST',callback, params);
 };
 
 Kernel.newDatastore = function(application, method, params) {
@@ -107,7 +107,7 @@ Kernel.newDatastore = function(application, method, params) {
 	
 	lang.mixin(_params, params);
 	
-	return callKernelDatastore(application, method, _params.isWriteStore, _params.label, _params.identifier, _params.urlPreventCache, _params.clearOnClose, _params.transport, _params.content);
+	return Kernel.callKernelDatastore(application, method, _params.isWriteStore, _params.label, _params.identifier, _params.urlPreventCache, _params.clearOnClose, _params.transport, _params.content);
 };	
 		
 Kernel.subscribe = function(name, callback, params, time) {

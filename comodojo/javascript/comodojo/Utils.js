@@ -118,7 +118,6 @@ Utils.getUserTimezone = function() {
 	if (!Utils.defined(ck)) {
 		var clientDate = new Date();
 		ck = -clientDate.getTimezoneOffset()/60;
-		return tShift; 
 	}
 	return ck;
 };
@@ -158,7 +157,7 @@ Utils.isNode = function(node) {
 	// 		Check if object in input is a valid js node
 	// returns:
 	//		true in case node or false otherwise
-	if (typeof Node === "object" ? node_or_id instanceof Node : node_or_id && typeof node_or_id === "object" && typeof node_or_id.nodeType === "number" && typeof node_or_id.nodeName==="string") {
+	if (typeof Node === "object" ? node instanceof Node : node && typeof node === "object" && typeof node.nodeType === "number" && typeof node.nodeName==="string") {
 		return true;
 	}
 	else {
@@ -184,7 +183,7 @@ Utils.elementOrId = function(element_or_id) {
 	return elem;
 }
 
-Utils.isElement = function(node) {
+Utils.isElement = function(element_or_id) {
 	// summary:
 	// 		Check if object in input is a valid html element
 	// returns:

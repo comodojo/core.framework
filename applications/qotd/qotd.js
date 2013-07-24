@@ -10,7 +10,9 @@
 
 $d.require("dijit.layout.ContentPane");
 
-$c.app.load("qotd",
+$d.require("comodojo.Form");
+
+$c.App.load("qotd",
 
 	function(pid, applicationSpace, status){
 	
@@ -19,7 +21,7 @@ $c.app.load("qotd",
 		var myself = this;
 		
 		this.init = function(){
-			$c.kernel.newCall(myself.initCallback,{
+			$c.Kernel.newCall(myself.initCallback,{
 				application: "qotd",
 				method: "get_message",
 				content: {}
@@ -28,7 +30,7 @@ $c.app.load("qotd",
 		
 		this.initCallback = function(success, result) {
 			if (!success) {
-				$c.error.local(result.code,result.name,applicationSpace.attr('id'));
+				$c.Error.local(applicationSpace,result.code,result.name);
 			}
 			else {
 				applicationSpace.attr('content',myself.getLocalizedMutableMessage('0000',[result]));

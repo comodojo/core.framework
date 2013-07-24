@@ -20,13 +20,13 @@ $c.loadComponent('form', [
 /**
  * Load also the css included, to show output message properly
  */
-$c.app.loadCss('helloworld');
+$c.App.loadCss('helloworld');
 
 /**
  * Now declare application, as a function defined in second member of $c.app.load.
  * First parameter should be always the app name.
  */
-$c.app.load("helloworld",
+$c.App.load("helloworld",
 
 	/**
 	 * The function will be invoked using tree paramenters:

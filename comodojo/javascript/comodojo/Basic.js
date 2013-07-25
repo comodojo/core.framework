@@ -46,7 +46,7 @@ var loadScriptFile = function (src, params, callback) {
 	var q = query("script[src='"+src+"']");
 	if (q.length != 0) {
 		if (!_params.forceReload) {
-			console.log('skip touchcallback');
+			console.log('REMIND TO REMOVE skipXhr! - skip touchcallback');
 			callback();
 		}
 		else {
@@ -94,7 +94,7 @@ var bootstrap = function() {
 	var bootstrapFile = 'bootstrap.php';
 	//var bootstrapFile = 'comodojo/global/bootstrap.php?applicationsDirectory='+comodojo._applicationsPath;
 	query("script[src='"+bootstrapFile+"']").forEach(function(s){domConstruct.destroy(s);});
-	if (has("webkit") || has("opera") || has("ie")) {
+	if (/*has("webkit") ||*/ has("opera") || has("ie")) {
 		request.get(bootstrapFile,{
 			headers: {'Content-Type':'application/x-javascript'},
 			handleAs: 'javascript'
@@ -182,7 +182,7 @@ var icons = {
 	},
 	
 	getSelfIcon: function(application, dim) {
-		return $c._applicationsPath+application+'/resources/icon_'+dim+'.png';
+		return $c.applicationsPath+application+'/resources/icon_'+dim+'.png';
 	},
 	
 	getLocaleIcon: function(locale) {

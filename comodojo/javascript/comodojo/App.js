@@ -115,7 +115,7 @@ App.getExec = function(pid) {
 App.preload = function(appExec, pid, applicationSpace, status) {
 	var appExecFile = comodojo.applicationsPath+appExec+"/"+appExec+".js";
 	
-	comodojo.loadScriptFile(appExecFile,{/*sync:true*/},function() {
+	comodojo.loadScriptFile(appExecFile,{forceReload:true/*,sync:true*/},function() {
 		comodojo.App.launch(appExec, pid, applicationSpace, status);
 	});
 };
@@ -179,7 +179,7 @@ App.start = function(appExec, status) {
 		
 		case 'windowed':
 
-			applicationSpace = new Window.application(pid,prop.title,prop.width,prop.height,prop.resizable,prop.maxable,icon);
+			applicationSpace = Window.application(pid,prop.title,prop.width,prop.height,prop.resizable,prop.maxable,icon);
 		
 			aspect.after(applicationSpace, 'close', function(){
 				applicationSpace.minNode.style.display = "none";
@@ -202,7 +202,7 @@ App.start = function(appExec, status) {
 
 		case 'modal':
 
-			applicationSpace = dialog.application(pid, prop.title, "", false);
+			applicationSpace = dialog.application(pid, prop.title, "", false)._dialog;
 
 			var reSize = {};
 			if (prop.width != false) {
@@ -218,14 +218,23 @@ App.start = function(appExec, status) {
 			applicationSpace.domNode.appendChild(applicationSpace.lockNode);
 			
 			if (utils.defined(reSize.w) || utils.defined(reSize.h)) {
-				applicationSpace._layout(false, resSize);
+				applicationSpace._layout(false, reSize);
 			}
 			
+			applicationSpace.close = function() {
+				applicationSpace.hide();
+			};
+
 			applicationSpace._position();
-				
-			applicationSpace.on('cancel',function() {
+			
+			aspect.after(applicationSpace, "hide", function(){
+				utils.destroyWidget(this.id);
 				comodojo.App.kill(pid);
 			});
+
+			//applicationSpace.on('close',function() {
+			//	comodojo.App.kill(pid);
+			//});
 
 		break;
 
@@ -243,31 +252,42 @@ App.start = function(appExec, status) {
 			}
 
 			var as_width,as_height;
-			if (prop.width == "auto") { as_width = (domGeom.getMarginBox(myNode).w - 2) + "px"; }
-			else if (isFinite(prop.width)) { as_width = prop.width + "px"; }
-			else { as_width = prop.width; }
-			if (prop.height == "auto") { as_height = (domGeom.getMarginBox(myNode).h - 2) + "px"; }
-			else if (isFinite(prop.height)) { as_height = prop.height + "px"; }
-			else { as_height = prop.height; }
+			
+			if (!prop.width) {as_width = '';}
+			else if (prop.width == "auto") { as_width = 'width:' + (domGeom.getMarginBox(myNode).w - 2) + "px"; }
+			else if (isFinite(prop.width)) { as_width = 'width:' + prop.width + "px"; }
+			else { as_width = 'width:' + prop.width; }
+
+			if (!prop.height) {as_height = '';}
+			if (prop.height == "auto") { as_height = 'height:' + (domGeom.getMarginBox(myNode).h - 2) + "px"; }
+			else if (isFinite(prop.height)) { as_height = 'height:' + prop.height + "px"; }
+			else { as_height = 'height:' + prop.height; }
 
 			if (!prop.requestSpecialNode) {
 				applicationSpace = new ContentPane({
 					id: pid,
 					preventCache: true,
-					style: 'width:'+as_width+'height:'+as_height
+					style: as_width + (as_width == '' ? as_height : (';'+as_height))
 				});
+				applicationSpace.close = function() {
+					applicationSpace.destroyRecursive();
+				};
 				applicationSpace.on('close',function() {comodojo.App.kill(pid);});
 			}
 			else {
 				applicationSpace = domConstruct.create(prop.requestSpecialNode, {
 					id: pid,
-					style: 'width:'+as_width+'height:'+as_height
+					style: 'width:'+as_width+';height:'+as_height
 				});
-				applicationSpace.domNode = applicationSpace;
+
 				applicationSpace.startup = function() {return;};
 				applicationSpace.close = function() {
+					if (typeof registry.byId(pid) !== "undefined") {
+						registry.byId(pid).destroyRecursive();
+					}
 					comodojo.App.kill(pid);
 				};
+
 				applicationSpace.containerNode = domConstruct.create(prop.requestSpecialNode, {
 					id: pid+"_containerNode"
 				});
@@ -276,9 +296,16 @@ App.start = function(appExec, status) {
 			applicationSpace.isComodojoApplication = "ATTACHED";
 			applicationSpace.containerNode.style.display = "none";
 			applicationSpace.lockNode = loadingState;
+
+			applicationSpace.domNode = applicationSpace;
 			applicationSpace.domNode.appendChild(applicationSpace.lockNode);
 
-			myNode.appendChild(applicationSpace.domNode);
+			if (utils.inArray(prop.placeAt.toLowerCase(),['before', 'after', 'replace', 'only', 'first', 'last'])) {
+				domConstruct.place(applicationSpace.domNode, myNode, prop.placeAt.toLowerCase());
+			}
+			else {
+				domConstruct.place(applicationSpace.domNode, myNode);
+			}
 
 		break;
 
@@ -330,6 +357,15 @@ App.launch = function(appExec, pid, applicationSpace, status) {
 	applicationSpace.containerNode.style.display = "block";
 	applicationSpace.lockNode.style.display = "none";
 
+	newApp.close = applicationSpace.close;
+
+	if (applicationSpace.isComodojoApplication == "WINDOWED") {
+		newApp.focus = function() {
+			if (applicationSpace._isMinimized) { applicationSpace.show(); }
+			applicationSpace.bringToTop();
+		}
+	}
+	
 	try {
 		newApp.init();
 		applicationSpace.startup();
@@ -374,13 +410,14 @@ App.stop = function(pid) {
 				comodojo.debug('Stopping windowed application: '+pid);
 			break;
 			case "MODAL":
-				app.onCancel();
+				//app.onCancel();
+				app.close();
 				comodojo.debug('Stopping modal application: '+pid);
 			break;
 			case "ATTACHED":
 				app.close();
 				comodojo.debug('Stopping attached application: '+pid);
-				domConstruct.destroy(pid);
+				//domConstruct.destroy(pid);
 			break;
 			default:
 				comodojo.debug('Could not stop application: invalid application format: '+pid);
@@ -406,7 +443,7 @@ App.stopAll = function(stopSystemApps, callback) {
 	
 	var i,o;
 	for (i in bus._runningApplications) {
-		if (bus._runningApplications[i][3] == 'system' && !stopAlsoSystemApps) {
+		if (bus._runningApplications[i][3] == 'system' && !stopSystemApps) {
 			continue;
 		}
 		else {
@@ -490,15 +527,15 @@ App.setFocus = function(pid) {
 	}
 
 	var a = App.byPid(pid);
-	if (a.isComodojoApplication == "WINDOWED") {
+	/*if (a.isComodojoApplication == "WINDOWED") {
 		if (a._isMinimized) {
 			a.show();
 		}
 		a.bringToTop();
 	}
-	else {
+	else {*/
 		a.focus();
-	}
+	/*}*/
 };
 
 });

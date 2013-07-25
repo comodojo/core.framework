@@ -3,7 +3,7 @@ comodojo.loadCss('comodojo/CSS/form.css');
 define("comodojo/Form", [
 	"dojo/_base/lang",
 	"dojo/_base/Deferred",
-	"dojo/has",
+	/*"dojo/has",*/
 	"dojo/_base/declare",
 	"dojo/dom-construct",
 	"dojo/dom-class",
@@ -11,7 +11,7 @@ define("comodojo/Form", [
 	"dojo/store/Memory",
 	"dijit/form/Form",
 	"dijit/layout/ContentPane"], 
-function(lang, Deferred, has, declare, domConstruct, domClass, ObjectStore, Memory, Form, ContentPane){
+function(lang, Deferred/*, has*/, declare, domConstruct, domClass, ObjectStore, Memory, Form, ContentPane){
 
 	// module:
 	// 	comodojo/Basic

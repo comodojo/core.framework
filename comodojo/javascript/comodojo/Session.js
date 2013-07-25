@@ -1,8 +1,8 @@
-define(["dojo/_base/lang",/*"comodojo/Basic",*/"comodojo/Bus","comodojo/Kernel","comodojo/App"],
-function(lang,/*basic,*/bus,kernel,app){
+define(["dojo/_base/lang","comodojo/Bus","comodojo/Kernel","comodojo/App"],
+function(lang,bus,Kernel,app){
 
 // module:
-// 	comodojo/Kernel
+// 	comodojo/Session
 	
 var Session = {
 	// summary:
@@ -33,7 +33,7 @@ Session.login = function(userName, userPass, callback) {
 	else if (comodojo.userRole != 0) {
 		comodojo.debug('User currently logged in, disconnecting...');
 		Session.logout(function() {
-			comodojo.Session.login(userName,userPass,callback);
+			Session.login(userName,userPass,callback);
 		});
 	}
 	else {
@@ -41,7 +41,7 @@ Session.login = function(userName, userPass, callback) {
 		if (lang.isFunction(callback)) {
 			Session._callback = callback;
 		}
-		kernel.newCall(Session.loginCallback,{
+		Kernel.newCall(Session.loginCallback,{
 			application: "comodojo",
 			method: "login",
 			preventCache: true,
@@ -57,21 +57,22 @@ Session.login = function(userName, userPass, callback) {
 Session.loginCallback = function(success, result) {
 	if (!success) {
 		bus.callEvent('comodojo_login_error');
-		Session._callback(data.success, data.result);
+		Session._callback(success, result);
 	}
 	else {
 		// Set user info in comodojo env
-		comodojo.userRole = data.result.userRole;
-		comodojo.userName = data.result.userName;
-		comodojo.userCompleteName = data.result.completeName;
+		comodojo.userRole = result.userRole;
+		comodojo.userName = result.userName;
+		comodojo.userCompleteName = result.completeName;
 		// Call event, update timestamp and return callback to application (if any)
 		bus.callEvent('comodojo_login_end');
+		//console.log(bus);
 		bus.updateTimestamp('comodojo','login_logout_action');
-		Session._callback(data.success, data.result);
+		Session._callback(success, result);
 		// Redefine internal callback and restart env
 		Session._callback = function(success, result) { return false; };
 		setTimeout(function() {
-			comodojo.app.stopAll(true);
+			comodojo.App.stopAll(true);
 		}, 1500);
 		setTimeout(function() {
 			comodojo.startup();
@@ -88,7 +89,7 @@ Session.logout = function(callback) {
 	if (lang.isFunction(callback)) {
 		Session._callback = callback;
 	}
-	kernel.newCall(Session.logoutCallback,{
+	Kernel.newCall(Session.logoutCallback,{
 		application: "comodojo",
 		method: "logout",
 		preventCache: true,
@@ -99,7 +100,7 @@ Session.logout = function(callback) {
 Session.logoutCallback = function(success, result) {
 	if (!success) {
 		bus.callEvent('comodojo_logout_error');
-		Session._callback(data.success, data.result);
+		Session._callback(success, result);
 	}
 	else {
 		// Set user info in comodojo env
@@ -109,11 +110,11 @@ Session.logoutCallback = function(success, result) {
 		// Call event, update timestamp and return callback to application (if any)
 		bus.callEvent('comodojo_logout_end');
 		bus.updateTimestamp('comodojo','login_logout_action');
-		Session._callback(data.success, data.result);
+		Session._callback(success, result);
 		// Redefine internal callback and restart env
 		Session._callback = function(success, result) { return false; };
 		setTimeout(function() {
-			comodojo.app.stopAll(true);
+			comodojo.App.stopAll(true);
 		}, 1500);
 		setTimeout(function() {
 			comodojo.startup();

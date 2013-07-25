@@ -1,5 +1,5 @@
-define(["dojo/_base/lang","dojo/request","dojo/dom-construct"],
-function(lang,request,domConstruct){
+define(["dojo/_base/lang","dojo/request","dojo/dom-construct","dojo/query"],
+function(lang,request,domConstruct,query){
 
 // module:
 // 	comodojo/Config
@@ -173,11 +173,14 @@ var loadCss = function (cssFile) {
 	//		CSS file path
 	// returns: Object
 	//		The newly created link object
-	return domConstruct.create("link", {
-		rel: 'stylesheet',
-		type: 'text/css',
-		href: cssFile
-	}, document.getElementsByTagName('head').item(0));
+	var q = query("link[href='"+cssFile+"']");
+	if (q.length === 0) {
+		return domConstruct.create("link", {
+			rel: 'stylesheet',
+			type: 'text/css',
+			href: cssFile
+		}, document.getElementsByTagName('head').item(0));
+	}
 };
 lang.setObject("comodojo.loadCss", loadCss);
 

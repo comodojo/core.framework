@@ -64,7 +64,7 @@ Bus.addConnection = function(connection, evt, func) {
 	// func: Function
 	//		The function to connect to event
 	Bus.addEvent(evt);
-	Bus._connections[connection] = aspect.after(comodojo.Bus._events, evt, func);
+	Bus._connections[connection] = aspect.after(Bus._events, evt, func);
 };
 
 Bus.removeConnection = function(connection) {
@@ -72,7 +72,7 @@ Bus.removeConnection = function(connection) {
 	//		Remove a connection from the bus
 	// connection: String
 	//		The connection name
-	comodojo.Bus._connections[connection].remove();
+	Bus._connections[connection].remove();
 };
 		
 Bus.addTimestamp = function(service, selector) {
@@ -86,10 +86,11 @@ Bus.addTimestamp = function(service, selector) {
 	//		Timestamp, as recorder
 	if (!service || !selector) {return false;}
 	var timestamp = Math.round(new Date().getTime()/1000);
-	if (!lang.isArray(comodojo.Bus._timestamps[service])) {
-		comodojo.Bus._timestamps[service] = [];
+	if (!lang.isArray(Bus._timestamps[service])) {
+		Bus._timestamps[service] = [];
 	}
-	comodojo.Bus._timestamps[service][selector] = timestamp;
+	Bus._timestamps[service][selector] = timestamp;
+	comodojo.debugDeep('Timestamp added to '+service+'/'+selector+': '+timestamp);
 	return timestamp;
 };
 
@@ -102,7 +103,8 @@ Bus.updateTimestamp = function(service, selector) {
 	//		The selector reference (see kernel part)
 	// returns:
 	//		Timestamp, as recorder
-	return comodojo.Bus.addTimestamp(service, selector);
+	comodojo.debugDeep('Timestamp updated to '+service+'/'+selector);
+	return Bus.addTimestamp(service, selector);
 };
 
 Bus.removeTimestamp = function(service, selector) {
@@ -115,10 +117,12 @@ Bus.removeTimestamp = function(service, selector) {
 	// returns: Bool
 	//		True in case of success, false otherwise
 	if (!lang.isString(service) || !lang.isString(selector) || !lang.isArray(comodojo.Bus._timestamps[service]) || isNaN(comodojo.Bus._timestamps[service][selector])) {
+		comodojo.debugDeep('Cannot remove timestamp from '+service+'/'+selector);
 		return false;
 	}
 	else {
 		delete comodojo.Bus._timestamps[service][selector];
+		comodojo.debugDeep('Removed timestamp from '+service+'/'+selector);
 		return true;
 	}
 };

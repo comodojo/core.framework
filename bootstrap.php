@@ -43,8 +43,12 @@ class bootstrap extends comodojo_basic {
 		
 		$autostart = $mapper->get_autostart();
 		
+		//Set registered applications
 		$to_return .= "comodojo.Bus._registeredApplications = " . array2json($properties) . "; \n";
+		
+		// Remove running applications and autostart registers
 		$to_return .= "comodojo.Bus._runningApplications = []; \n";
+		$to_return .= "comodojo.Bus._autostartApplications = []; \n";
 		
 		$to_return .= "comodojo.debug(' - ".count($properties)." application/s to register');\n";
 		$to_return .= "comodojo.debug(' - ".count($autostart)." application/s to autostart');\n";

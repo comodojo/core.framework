@@ -255,7 +255,8 @@ class comodojo_basic {
 			$au->loginFromSession = $fromSession;
 			$auth = $au->login($userName, $userPass);
 		} catch (Exception $e) {
-			die($this->error($e->getMessage()));
+			//die($this->error($e->getMessage()));
+			die($this->error($e->getCode(),$e->getMessage()));
 		}
 		if (!$auth) {
 			$this->set_auth_session();
@@ -271,7 +272,8 @@ class comodojo_basic {
 			$au = new authentication();
 			$auth = $au->logout($userName);
 		} catch (Exception $e) {
-			die($this->error($e->getMessage()));
+			//die($this->error($e->getMessage()));
+			die($this->error($e->getCode(),$e->getMessage()));
 		}
 		$this->set_auth_session();
 	}

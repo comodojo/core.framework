@@ -22,7 +22,8 @@ Dialog.application = function(Id, Title, Content, Forced) {
 		content: Content,
 		forced: Forced,
 		draggable: false,
-		_isApplication: true
+		_isApplication: true,
+		persistent: true
 	});
 
 };

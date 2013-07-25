@@ -327,14 +327,14 @@ Utils.destroyWidget = function(widget_or_id) {
 	// summary:
 	//		Destroy (recursive) a widget identified by reference or id
 	if (lang.isFunction(widget_or_id.destroyRecursive)) {
-		widget_or_id.destroyRendering();
+		//widget_or_id.destroyRendering();
 		widget_or_id.destroyRecursive();
 		comodojo.debugDeep('Widget was destroied');
 		return true;
 	}
 	else if (registry.byId(widget_or_id) != null) {
 		var w = registry.byId(widget_or_id);
-		w.destroyRendering();
+		//w.destroyRendering();
 		w.destroyRecursive();
 		comodojo.debugDeep('Widget '+widget_or_id+' was destroied');
 		return true;

@@ -72,24 +72,29 @@
 			
 			$d.place($d.create('div',{className:'comodojoMenubar_clearer', id: 'comodojoMenubar_clearer'}), $d.byId(pid), 'after');
 
-			$c.Bus.addConnection('applicationStartLoading','applicationStartLoading',function(){
-				myself.indicator.set('label','<img id="comodojoMenubar_innerIndicator" src="comodojo/images/small_loader.gif" style="width:13px;height:13px;">');
+			$c.Bus.addConnection('comodojo_menubar-comodojo_app_load_start','comodojo_app_load_start',function(){
+				myself.indicator.set('label','<img src="comodojo/images/small_loader.gif" style="width:13px;height:13px;">');
 			});
-			$c.Bus.addConnection('applicationFinishLoading','applicationFinishLoading',function(){
+			$c.Bus.addConnection('comodojo_menubar-comodojo_app_load_end','comodojo_app_load_end',function(){
 				myself.indicator.set('label','<img src="'+$c.icons.getIcon('info',16)+'" alt="'+myself.getLocalizedMessage('0025')+'" style="width:13px;height:13px;" />');
 			});
-			$c.Bus.addConnection('applicationGotError','applicationGotError',function(){
-				myself.indicator.set('label','<img id="comodojoMenubar_innerIndicator" src="comodojo/icons/16x16/warning.png"> style="width:13px;height:13px;"');
+			$c.Bus.addConnection('comodojo_menubar-comodojo_app_error','comodojo_app_error',function(){
+				myself.indicator.set('label','<img src="comodojo/icons/16x16/warning.png" style="width:13px;height:13px;" />');
 			});
-			$c.Bus.addConnection('comodojoMenubar_applicationsRunningTableChange','applicationsRunningTableChange',function(){
+			$c.Bus.addConnection('comodojo_menubar-comodojo_app_running_registry_change','comodojo_app_running_registry_change',function(){
 				myself.populateDock();
 			});
 			
-			dojo.connect(this.comodojoMenubar, 'uninitialize', function(){
-				$c.Bus.removeConnection("applicationStartLoading");
-				$c.Bus.removeConnection("applicationFinishLoading");
-				$c.Bus.removeConnection("applicationGotError");
-				$c.Bus.removeConnection('comodojoMenubar_applicationsRunningTableChange');
+			//dojo.connect(this.comodojoMenubar, 'uninitialize', function(){
+			dojo.aspect.before(this.comodojoMenubar, 'uninitialize', function(){
+				$c.Bus.removeConnection("comodojo_menubar-comodojo_app_load_start");
+				$c.Bus.removeConnection("comodojo_menubar-comodojo_app_load_end");
+				$c.Bus.removeConnection("comodojo_menubar-comodojo_app_error");
+				$c.Bus.removeConnection('comodojo_menubar-comodojo_app_running_registry_change');
+			});
+
+			dojo.aspect.after(this.comodojoMenubar, 'uninitialize', function(){
+				$c.Utils.destroyNode('comodojoMenubar_clearer');
 			});
 			
 		};
@@ -200,7 +205,7 @@
 			this.userInfoContainer = new dijit.TooltipDialog({}); 
 			$d.addClass(this.userInfoContainer.domNode,'comodojo_menubar_session_menu_container');
 			
-			$c.kernel.newCall(myself._createUserInfoCallback,{
+			$c.Kernel.newCall(myself._createUserInfoCallback,{
 				application: "comodojo_menubar",
 				method: "get_user_info",
 				preventCache: true,
@@ -265,7 +270,7 @@
 				userActionContainer.appendChild($d.create('button',{
 					className: 'ym-button ym-next comodojoMenubar_userAction_button',
 					onclick: function() {
-						$c.session.logout();
+						$c.Session.logout();
 					},
 					innerHTML: myself.getLocalizedMessage('0032')
 				}));
@@ -404,14 +409,14 @@
 					boxCont.appendChild($d.create('img', {
 						src: $c.icons.getIcon('right_arrow',16),
 						className: "comodojoMenubar_dockAppSwitch",
-						onClick: "comodojo.app.setFocus('"+comodojo.Bus._runningApplications[i][0]+"');",
+						onClick: "comodojo.App.setFocus('"+comodojo.Bus._runningApplications[i][0]+"');",
 						alt: this.getLocalizedMessage('0016')
 					}));
 					
 					boxCont.appendChild($d.create('img', {
 						src: $c.icons.getIcon('cancel',16),
 						className: "comodojoMenubar_dockAppTerminate",
-						onClick: "comodojo.app.stop('"+comodojo.Bus._runningApplications[i][0]+"');",
+						onClick: "comodojo.App.stop('"+comodojo.Bus._runningApplications[i][0]+"');",
 						alt: this.getLocalizedMessage('0017')
 					}));
 					
@@ -448,7 +453,7 @@
 				myself.sessionLoginForm.fields.session_login_form_info.changeType('info');
 				myself.sessionLoginForm.fields.session_login_form_info.changeContent(myself.getLocalizedMessage('0028'));
 				var values = myself.sessionLoginForm.get('value');
-				$c.session.login(values.userName, values.userPass, myself.tryLoginCallback);
+				$c.Session.login(values.userName, values.userPass, myself.tryLoginCallback);
 			}
 		};
 		

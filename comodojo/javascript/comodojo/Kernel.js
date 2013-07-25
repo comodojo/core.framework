@@ -60,7 +60,7 @@ Kernel.callKernel = function(httpMethod, callback, params) {
 		bus.callEvent("comodojo_kernel_error");
 		callback(false, {code:0,name:error});
 	});
-}
+};
 
 Kernel.callKernelDatastore = function (application, method, isWriteStore, label, identifier, urlPreventCache, clearOnClose, transport, content) {
 	// summary:

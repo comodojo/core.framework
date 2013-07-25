@@ -1,5 +1,5 @@
-define(["dojo/_base/lang","dojo/dom-construct","dojo/dom-attr","comodojo/Dialog-base","comodojo/Bus","comodojo/Utils","comodojo/Session","dojo/domReady!"],
-function(lang,domConstruct,domAttr,dialogBase,bus,utils,session){
+define(["dojo/_base/lang","dojo/dom-construct","dojo/dom-attr","comodojo/Dialog-base","comodojo/Bus","comodojo/Utils","dojo/domReady!"],
+function(lang,domConstruct,domAttr,dialogBase,bus,utils){
 
 // module:
 // 	comodojo/Error
@@ -19,6 +19,19 @@ Error.generic = function(Code, Name, Detail) {
 		secondaryCloseButton: true,
 		parseOnLoad: false,
 		blocker: false
+	});
+
+};
+
+Error.genericHang = function(Code, Name, Detail) {
+
+	return new dialogBase({
+		title: comodojo.getLocalizedMessage('10034'),
+		content: "<h3>("+Code+") - "+Name+"</h3><p>"+Detail+"</p>",
+		primaryCloseButton: false,
+		secondaryCloseButton: false,
+		parseOnLoad: false,
+		blocker: true
 	});
 
 };
@@ -54,7 +67,7 @@ Error.local = function(Node, Code, Detail) {
 
 Error.critical = function(Code, Detail) {
 	
-	session.logout();
+	comodojo.Session.logout();
 
 	utils.destroyAll(Detail);
 

@@ -54,7 +54,12 @@ Kernel.callKernel = function(httpMethod, callback, params) {
 			//}, 5000);
 		}
 		else {
-			callback(data.success, data.result);
+			try {
+				callback(data.success, data.result);
+			}
+			catch(e) {
+				error.generic('-','Kernel callback error',e);
+			}
 		}
 	},/*error*/function(error){
 		bus.callEvent("comodojo_kernel_error");
@@ -91,7 +96,13 @@ Kernel.callKernelDatastore = function (application, method, isWriteStore, label,
 Kernel.newCall = function(callback, params) {
 	// summary:
 	//		It starts a new call to kernel
-	Kernel.callKernel('POST',callback, params);
+	/*try{*/
+		Kernel.callKernel('POST',callback, params);
+	/*}
+	catch(e) {
+		comsole.log(e);
+	}*/
+	
 };
 
 Kernel.newDatastore = function(application, method, params) {

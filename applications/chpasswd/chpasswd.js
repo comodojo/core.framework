@@ -8,6 +8,8 @@
  * @license		GPL Version 3
  */
 
+$d.require("comodojo.Form");
+
 $c.App.load("chpasswd",
 
 	function(pid, applicationSpace, status){
@@ -18,7 +20,8 @@ $c.App.load("chpasswd",
 		
 		this.init = function(){
 			
-			this.chpasswdForm = new $c.form({
+			this.chpasswdForm = new $c.Form({
+				modules: ['PasswordTextBox','Button'],
 				formWidth: 500,
 				hierarchy:[{
 					name: "message",
@@ -74,7 +77,7 @@ $c.App.load("chpasswd",
 				myself.chpasswdForm.fields.message.changeType('info');
 				myself.chpasswdForm.fields.message.changeContent(myself.getLocalizedMessage('0007'));
 				myself.chpasswdForm.fields.go.set('disabled',true);
-				$c.kernel.newCall(myself.tryChpasswdCallback,{
+				$c.Kernel.newCall(myself.tryChpasswdCallback,{
 					application: "chpasswd",
 					method: "change_password",
 					preventCache: true,
@@ -98,7 +101,7 @@ $c.App.load("chpasswd",
 				myself.chpasswdForm.fields.message.changeContent(myself.getLocalizedMessage('0008'));
 				myself.chpasswdForm.fields.go.set('disabled',false);
 				myself.chpasswdForm.fields.go.set('innerHTML',$c.getLocalizedMessage('10011'));
-				myself.chpasswdForm.fields.go.set('onClick',function() {$c.app.stop(pid);});
+				myself.chpasswdForm.fields.go.set('onClick',function() {$c.App.stop(pid);});
 			}
 		};
 			

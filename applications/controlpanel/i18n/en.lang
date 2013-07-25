@@ -72,7 +72,7 @@ $lang = Array(
 	'0154'	=>	'Created by',
 	'0155'	=>	'Version',
 	'0156'	=>	'Framework',
-	'0157'	=>	'Comment'
+	'0157'	=>	'Comment',
 	
 	//SMTP.PHP
 	'0160'	=>	'SMTP',
@@ -83,7 +83,7 @@ $lang = Array(
 	'0165'	=>	'Security Protocol',
 	'0166'	=>	'Username',
 	'0167'	=>	'Password',
-	'0168'	=>	'Address from which send emails'
+	'0168'	=>	'Address from which send emails',
 	
 	//EVENTS.PHP
 	'0170'	=>	'Events',

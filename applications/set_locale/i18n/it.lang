@@ -14,7 +14,7 @@ $lang = Array(
 	'0000'	=>	'Seleziona qui la lingua che preferisci per il portale ed il tuo fuso orario.<br/>Queste informazioni verranno salvate in un cookie nel tuo browser e ricordate ogni volta che accedi al portale.',
 	'0001'	=>	'Lingua',
 	'0002'	=>	'Fuso orario',
-	'0003'	=>	'Le tue preferenze sono state salvate. Per renderle effettive ricordati di ${0} ricaricare il portale ${1}'
+	'0003'	=>	'Le tue preferenze sono state salvate. Per renderle effettive ricordati di {0} ricaricare il portale {1}'
 );
 
 ?>

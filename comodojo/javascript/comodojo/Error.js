@@ -36,6 +36,22 @@ Error.genericHang = function(Code, Name, Detail) {
 
 };
 
+Error.genericLocal = function(Node, Code, Name, Detail) {
+
+	var content = '<div class="box error"><p><strong>('+Code+') - '+Name+'</strong></p><p>'+Detail+'</p></div>';
+
+	if (utils.nodeOrId(Node) != false) {
+		utils.nodeOrId(Node).innerHTML = content;
+	}
+	else if (utils.elementOrId(Node) != false) {
+		utils.elementOrId(Node).innerHTML = content;
+	}
+	else {
+		comodojo.debug('Failed to notify error: ('+Code+') - '+Name);
+	}
+
+};
+
 Error.modal = function(Code, Detail) {
 
 	return new dialogBase({

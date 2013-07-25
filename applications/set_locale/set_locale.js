@@ -8,8 +8,8 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('form', ['Button','Select']);
 $d.require("dojo.cookie");
+$d.require("comodojo.Form");
 
 $c.App.load("set_locale",
 
@@ -21,7 +21,7 @@ $c.App.load("set_locale",
 		
 		this.init = function(){
 			
-			$c.kernel.newCall(myself.initCallback,{
+			$c.Kernel.newCall(myself.initCallback,{
 				application: "set_locale",
 				method: "get_locale_status",
 				preventCache: true,
@@ -33,7 +33,7 @@ $c.App.load("set_locale",
 		this.initCallback = function(success, result) {
 			
 			if (!success) {
-				$c.error.local('10001', result, applicationSpace);
+				$c.Error.local(applicationSpace,result.code, result.name);
 			}
 			else {
 				myself._buildForm(result);
@@ -44,38 +44,39 @@ $c.App.load("set_locale",
 			
 			var sLocales = [];
 			for (var i=0; i<result.supportedLocales.length; i++) {
-				sLocales.push({'name':'<img src="comodojo/icons/i18n/'+result.supportedLocales[i]+'.png">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+result.supportedLocales[i],'value':result.supportedLocales[i]});
+				sLocales.push({'label':'<img src="comodojo/icons/i18n/'+result.supportedLocales[i]+'.png">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+result.supportedLocales[i],'id':result.supportedLocales[i]});
 			}
 			var sTimezones = [
-				{'name':'UTC/GMT','value':0},
-				{'name':'GMT -12:00','value':-12},
-				{'name':'GMT -11:00','value':-11},
-				{'name':'GMT -10:00','value':-10},
-				{'name':'GMT -9:00','value':-9},
-				{'name':'GMT -8:00','value':-8},
-				{'name':'GMT -7:00','value':-7},
-				{'name':'GMT -6:00','value':-6},
-				{'name':'GMT -5:00','value':-5},
-				{'name':'GMT -4:00','value':-4},
-				{'name':'GMT -3:00','value':-3},
-				{'name':'GMT -2:00','value':-2},
-				{'name':'GMT -1:00','value':-1},
-				{'name':'GMT +1:00','value':+1},
-				{'name':'GMT +2:00','value':+2},
-				{'name':'GMT +3:00','value':+3},
-				{'name':'GMT +4:00','value':+4},
-				{'name':'GMT +5:00','value':+5},
-				{'name':'GMT +6:00','value':+6},
-				{'name':'GMT +7:00','value':+7},
-				{'name':'GMT +8:00','value':+8},
-				{'name':'GMT +9:00','value':+9},
-				{'name':'GMT +10:00','value':+10},
-				{'name':'GMT +11:00','value':+11},
-				{'name':'GMT +12:00','value':+12},
-				{'name':'GMT +13:00','value':+13}
+				{'label':'UTC/GMT','id':0},
+				{'label':'GMT -12:00','id':-12},
+				{'label':'GMT -11:00','id':-11},
+				{'label':'GMT -10:00','id':-10},
+				{'label':'GMT -9:00','id':-9},
+				{'label':'GMT -8:00','id':-8},
+				{'label':'GMT -7:00','id':-7},
+				{'label':'GMT -6:00','id':-6},
+				{'label':'GMT -5:00','id':-5},
+				{'label':'GMT -4:00','id':-4},
+				{'label':'GMT -3:00','id':-3},
+				{'label':'GMT -2:00','id':-2},
+				{'label':'GMT -1:00','id':-1},
+				{'label':'GMT +1:00','id':+1},
+				{'label':'GMT +2:00','id':+2},
+				{'label':'GMT +3:00','id':+3},
+				{'label':'GMT +4:00','id':+4},
+				{'label':'GMT +5:00','id':+5},
+				{'label':'GMT +6:00','id':+6},
+				{'label':'GMT +7:00','id':+7},
+				{'label':'GMT +8:00','id':+8},
+				{'label':'GMT +9:00','id':+9},
+				{'label':'GMT +10:00','id':+10},
+				{'label':'GMT +11:00','id':+11},
+				{'label':'GMT +12:00','id':+12},
+				{'label':'GMT +13:00','id':+13}
 			];
 			
-			this.localeForm = new $c.form({
+			this.localeForm = new $c.Form({
+				modules:['Select','Button'],
 				formWidth: 500,
 				hierarchy:[{
 					name: "note",

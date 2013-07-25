@@ -14,7 +14,7 @@ $lang = Array(
 	'0000'	=>	'Please select language you prefer and your timezone.<br/>Those informations will be stored in a cookie on you web browser and reminded each time you open this portal.',
 	'0001'	=>	'Language',
 	'0002'	=>	'Timezone',
-	'0003'	=>	'Correctly saved your preferences. Please remind to ${0} reload portal ${1} to enable your settings'
+	'0003'	=>	'Correctly saved your preferences. Please remind to {0} reload portal {1} to enable your settings'
 );
 
 ?>

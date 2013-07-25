@@ -8,6 +8,8 @@
  * @license		GPL Version 3
  */
 
+$d.require("comodojo.Form");
+
 $c.App.load("cacheman",
 
 	function(pid, applicationSpace, status){
@@ -15,7 +17,7 @@ $c.App.load("cacheman",
 		var myself = this;
 		
 		this.init = function(){
-			$c.kernel.newCall(myself.initCallback,{
+			$c.Kernel.newCall(myself.initCallback,{
 				application: "cacheman",
 				method: "get_stats"
 			});
@@ -23,28 +25,29 @@ $c.App.load("cacheman",
 		
 		this.initCallback = function(success,result) {
 			if (success) {
-				myself.form = new $c.form({
+				myself.form = new $c.Form({
+					modules: ['Button'],
 					autoFocus: false,
 					hierarchy: [{
-		              	"name": "tips",
-		                "type": "warning",
-		                "content": myself.getLocalizedMessage('0000')
+		              	name: "tips",
+		                type: "warning",
+		                content: myself.getLocalizedMessage('0000')
 		            },{
-		                "name": "active",
-		                "type": "info",
-		                "content": myself.getLocalizedMessage('0001')+result.active_pages
+		                name: "active",
+		                type: "info",
+		                content: myself.getLocalizedMessage('0001')+result.active_pages
 		            },{
-		                "name": "expired",
-		                "type": "info",
-		                "content": myself.getLocalizedMessage('0002')+result.expired_pages
+		                name: "expired",
+		                type: "info",
+		                content: myself.getLocalizedMessage('0002')+result.expired_pages
 		            },{
-		                "name": "ttl",
-		                "type": "info",
-		                "content": myself.getLocalizedMessage('0003')+result.cache_ttl+' sec'
+		                name: "ttl",
+		                type: "info",
+		                content: myself.getLocalizedMessage('0003')+result.cache_ttl+' sec'
 		            },{
-		                "name": "oldest",
-		                "type": "info",
-		                "content": myself.getLocalizedMessage('0004')+$c.date.fromServer(result.oldest_page)
+		                name: "oldest",
+		                type: "info",
+		                content: myself.getLocalizedMessage('0004')+$c.Utils.dateFromServer(result.oldest_page)
 		            },{
 		                name: "purge",
 		                type: "Button",
@@ -57,22 +60,22 @@ $c.App.load("cacheman",
 				}).build();
 			}
 			else {
-				$c.error.global(result.code,result.name);
+				$c.Error.modal(result.code,result.name);
 				myself.stop();
 			}
 		};
 		
 		this.purge = function() {
-			$c.loader.start();
-			$c.kernel.newCall(myself.purgeCallback,{
+			$c.Loader.start();
+			$c.Kernel.newCall(myself.purgeCallback,{
 				application: "cacheman",
 				method: "purge_cache"
 			});
 		};
 		
 		this.purgeCallback = function() {
-			$c.loader.changeMessage(myself.getLocalizedMessage('0006'),$c.icons.getIcon('apply',32));
-			$c.loader.stopIn(2000);
+			$c.Loader.changeContent($c.icons.getIcon('apply',32),myself.getLocalizedMessage('0006'));
+			$c.Loader.stopIn(2000);
 			myself.stop();
 		};
 		

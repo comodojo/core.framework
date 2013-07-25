@@ -122,6 +122,7 @@ lang.setObject("comodojo.deprecated", deprecated);
 var getPid = function() {
 	var pid = comodojo.pidSeed;
 	comodojo.pidSeed++;
+	comodojo.debugDeep('pidseed now: '+comodojo.pidSeed);
 	return 'pid_'+pid;
 };
 lang.setObject("comodojo.getPid", getPid);

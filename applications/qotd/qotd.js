@@ -10,8 +10,6 @@
 
 $d.require("dijit.layout.ContentPane");
 
-$d.require("comodojo.Form");
-
 $c.App.load("qotd",
 
 	function(pid, applicationSpace, status){

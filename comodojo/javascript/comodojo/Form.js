@@ -30,7 +30,7 @@ var form = declare(null,{
 
 	// The pid (unique) that form will have
 	// String
-	id: comodojo.getPid(),
+	id: false,
 
 	// Remapped tag "action" of html form
 	// String
@@ -79,6 +79,10 @@ var form = declare(null,{
 	constructor: function(args) {
 
 		declare.safeMixin(this,args);
+
+		if (!this.id) {
+			this.id = comodojo.getPid();
+		}
 
 		this.deferred_calls = [];
 
@@ -333,7 +337,7 @@ var form = declare(null,{
 			break;
 			
 			case "EmailTextBox": 
-				myField = new this.deferred_modules.ValidationTextBox ({
+				myField = new this.deferred_modules.EmailTextBox ({
 					name: hierarchyElement.name,
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
@@ -348,7 +352,7 @@ var form = declare(null,{
 			break;
 				
 			case "PasswordTextBox": 
-				myField = new this.deferred_modules.ValidationTextBox ({
+				myField = new this.deferred_modules.PasswordTextBox ({
 					name: hierarchyElement.name,
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
@@ -531,7 +535,7 @@ var form = declare(null,{
 			break;
 			
 			case "OnOffSelect": 
-				myField = new this.deferred_modules.Select ({
+				myField = new this.deferred_modules.OnOffSelect ({
 					name: hierarchyElement.name,
 					store: new ObjectStore({ 
 						objectStore: new Memory({ 
@@ -556,7 +560,7 @@ var form = declare(null,{
 			break;
 			
 			case "GenderSelect":
-				myField = new this.deferred_modules.Select ({
+				myField = new this.deferred_modules.GenderSelect ({
 					name: hierarchyElement.name,
 					store: new ObjectStore({ 
 						objectStore: new Memory({ 
@@ -636,7 +640,7 @@ var form = declare(null,{
 			break;
 
 			case "SmallEditor":
-				myField = new this.deferred_modules.Editor({
+				myField = new this.deferred_modules.SmallEditor({
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
 					readOnly: !hierarchyElement.readonly ? false : "readOnly",
@@ -657,7 +661,7 @@ var form = declare(null,{
 			break;
 
 			case "FullEditor":
-				myField = new this.deferred_modules.Editor({
+				myField = new this.deferred_modules.FullEditor({
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
 					readOnly: !hierarchyElement.readonly ? false : "readOnly",

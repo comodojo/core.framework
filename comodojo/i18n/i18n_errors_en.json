@@ -92,7 +92,7 @@
 	"2104":"Unsustainable request: relative method not declared",
 	"2105":"Unsustainable request: parameters mismatch",
 	"2106":"Inconsistent request: application or method not specified",
-	"2107":"Session lost",
+	"2107":"Session lost, reload page to continue",
 	"2401":"Undefined or invalid account in system keychain",
 	"2402":"Not enough privileges to delete selected account",
 	"2403":"Undefined or invalid account to delete",

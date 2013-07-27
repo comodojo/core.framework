@@ -142,7 +142,7 @@ $i18n_installer = array (
 	"0120"	=>	"Installation failure",
 	"0121"	=>	"Installation ends successfully. Remember to change password for administrator user at first login:",
 	"0122"	=>	"Go to portal",
-	"0123"	=>	"Installation failed",
+	"0123"	=>	"Installation succeeded",
 	"0124"	=>	"Administrator's email",
 	"0125"	=>	"'/home' directory is not empty. Continuing, some content may be lost.",
 	

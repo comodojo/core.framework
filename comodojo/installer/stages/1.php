@@ -19,40 +19,40 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['DB_DATA_MODEL'],
 				"options"		=>	array(
 					array(
-						"value"	=>	"MYSQLI",
-						"name"	=>	"MySQLi"
+						"id"	=>	"MYSQLI",
+						"label"	=>	"MySQLi"
 						),
 					array(
-						"value"	=>	"MYSQL",
-						"name"	=>	"MySQL"
+						"id"	=>	"MYSQL",
+						"label"	=>	"MySQL"
 						),
 					array(
-						"value"	=>	"MYSQL_PDO",
-						"name"	=>	"MySQL (PDO)"
+						"id"	=>	"MYSQL_PDO",
+						"label"	=>	"MySQL (PDO)"
 						),
 					array(
-						"value"	=>	"SQLITE_PDO",
-						"name"	=>	"SQLite (PDO)"
+						"id"	=>	"SQLITE_PDO",
+						"label"	=>	"SQLite (PDO)"
 						),
 					array(
-						"value"	=>	"POSTGRESQL",
-						"name"	=>	"PostgreSQL"
+						"id"	=>	"POSTGRESQL",
+						"label"	=>	"PostgreSQL"
 						),
 					array(
-						"value"	=>	"ORACLE_PDO",
-						"name"	=>	"SQLite (PDO)"
+						"id"	=>	"ORACLE_PDO",
+						"label"	=>	"SQLite (PDO)"
 						),
 					array(
-						"value"	=>	"INFORMIX_PDO",
-						"name"	=>	"Informix (PDO)"
+						"id"	=>	"INFORMIX_PDO",
+						"label"	=>	"Informix (PDO)"
 						),
 					array(
-						"value"	=>	"DBLIB_PDO",
-						"name"	=>	"DBLib/MSSQL (PDO)"
+						"id"	=>	"DBLIB_PDO",
+						"label"	=>	"DBLib/MSSQL (PDO)"
 						),
 					array(
-						"value"	=>	"DB2",
-						"name"	=>	"DB2"
+						"id"	=>	"DB2",
+						"label"	=>	"DB2"
 						)
 					)
 				),

@@ -86,7 +86,7 @@ var dbase = declare(null, {
 			this.primaryCloseButton = false;
 			this.secondaryCloseButton = false;
 			this.actionOk = null;
-			this.actionCancel = null;
+			//this.actionCancel = null;
 		}
 		if (this._isApplication) {
 			//comodojo.debugDeep('Application dialog was requested, it will override focusKilling, secondaryCloseButton, actions and hiding.');
@@ -178,6 +178,16 @@ var dbase = declare(null, {
 			var actionCancelButton = new dijit.form.Button({
 				label: comodojo.getLocalizedMessage('10004'),
 				onClick: lang.isFunction(this.actionCancel) ? this.actionCancel : function() {}
+			}).placeAt(this.actionBar);
+			if (this.closeOnCancel) { 
+				on(actionCancelButton, 'click', function(){ diag.hide(); });
+			}
+		}
+
+		if (!lang.isFunction(this.actionOk) && lang.isFunction(this.actionCancel)) {
+			var actionCancelButton = new dijit.form.Button({
+				label: comodojo.getLocalizedMessage('10004'),
+				onClick: this.actionCancel
 			}).placeAt(this.actionBar);
 			if (this.closeOnCancel) { 
 				on(actionCancelButton, 'click', function(){ diag.hide(); });

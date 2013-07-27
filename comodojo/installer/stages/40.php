@@ -40,16 +40,16 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['GLOBAL_DEBUG_LEVEL'],
 				"options"		=>	array(
 										array(
-											"name"		=>	"INFO",
-											"value"		=>	"INFO"
+											"label"		=>	"INFO",
+											"id"		=>	"INFO"
 										),
 										array(
-											"name"		=>	"WARNING",
-											"value"		=>	"WARNING"
+											"label"		=>	"WARNING",
+											"id"		=>	"WARNING"
 										),
 										array(
-											"name"		=>	"ERROR",
-											"value"		=>	"ERROR"
+											"label"		=>	"ERROR",
+											"id"		=>	"ERROR"
 										)
 									)
 			)

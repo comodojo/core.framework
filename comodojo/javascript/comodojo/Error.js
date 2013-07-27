@@ -83,15 +83,13 @@ Error.local = function(Node, Code, Detail) {
 
 Error.critical = function(Code, Detail) {
 	
-	comodojo.Session.logout();
+	//comodojo.Session.logout();
 
 	utils.destroyAll(Detail);
 
-	return new dialogBase({
+	var dialog = new dialogBase({
 		title: comodojo.getLocalizedMessage('10034'),
 		content: "<h3>("+Code+") - "+comodojo.getLocalizedError(Code)+"</h3><p>"+Detail+"</p>",
-		primaryCloseButton: false,
-		secondaryCloseButton: false,
 		parseOnLoad: false,
 		blocker: true
 	});

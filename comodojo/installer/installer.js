@@ -1,174 +1,217 @@
-/** 
- * installer.js
- * 
- * Installer client-side helper;
- *
- * @package		Comodojo Installer
- * @author		comodojo.org
- * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
- * @version		__CURRENT_VERSION__
- * @license		GPL Version 3
- */
- var installer = {
-	
-	moveStage: function(stageName) {
-		
-		if (comodojo.isSomething('installer_form').success) {
-			var myForm = dijit.byId('installer_form');
-			if (!myForm.validate()) {
-				comodojo.error.custom('There was an error (js)!', 'invalid data in form');
-				return false;
+define(["dojo/dom",
+	"dojo/_base/declare",
+	"dojo/dom-construct",
+	"dojo/_base/window",
+	"dojo/request",
+	"dojo/_base/lang",
+	"dijit/Dialog",
+	"dijit/form/Button",
+	"comodojo/Utils",
+	"comodojo/Form",
+	"dijit/ProgressBar"],
+function(dom,
+	declare,
+	domConstruct,
+	win,
+	request,
+	lang,
+	dialog,
+	Button,
+	Utils,
+	Form,
+	ProgressBar
+){
+
+	// module:
+	// 	installer/Installer
+
+	var that = false;
+
+	var installer = declare("installer.Installer", [], {
+
+		form: false,
+
+		loader: false,
+
+		message: false,
+
+		backButton: false,
+
+		nextButton: false,
+
+		progressBar: false,
+
+		constructor: function(args) {
+
+			that = this;
+
+			this.buildDialogs();
+
+			this.buildEnv();
+
+			comodojo._goToPortal = this._goToPortal;
+
+			comodojo._retryVerification = this._retryVerification;
+
+			this.loader.stopIn(2000);
+
+			this.moveStage(0);
+
+		},
+
+		moveStage: function(stageName) {
+
+			var values;
+
+			if (!this.form) {
+				values = [];
 			}
-			var myValues = myForm.get('value');	
-		}
-		else {
-			var myForm, myValues;
-		}
-				
-		comodojo.loader.start();
-		
-		var myBackButton = dijit.byId('backButton');
-		var myNextButton = dijit.byId('nextButton');
-		var myProgressBar = dijit.byId('installer_progressBar');
-		
-		dojo.xhrPost({
-			url: "comodojo/installer/dispatcher.php?stage="+stageName,
-			load: function(data){
-				
-				if (data.fatalError == true) {
-					comodojo.error.fatal('Installer crash!','Installer backend unavailable.')
-					return false;
+			else {
+				if (!this.form.validate()) {
+					this.throwError('invalid data in form');
+					return;
 				}
-				
-				else if (data.success == true) {
-					comodojo.destroySomething('installer_form');
+				values = this.form.get('value');
+			}
 					
-					myForm = new $c.form({
-						hierarchy: data.formComponents,
-						attachNode: dojo.byId('installerContent'),
-						formId: 'installer_form'
-					});
+			this.loader.start();
 			
-					myForm.build();
-										
-					myBackButton.set('disabled',data.backButtonDisabled);
-					myBackButton.set('label',data.backButtonLabel);
-					myBackButton.set('onClick',function() {
-						installer.moveStage(data.backButtonStage);
-					});
-					
-					myNextButton.set('disabled',data.nextButtonDisabled);
-					myNextButton.set('label',data.nextButtonLabel);
-					myNextButton.set('onClick',function() {
-						installer.moveStage(data.nextButtonStage);
-					});
-					
-					myProgressBar.update({progress: data.progressBarProgress});
-					
-					comodojo.loader.stop();
-					
+			request("comodojo/installer/dispatcher.php?stage="+stageName,{
+				method: 'POST',
+				data: values,
+				handleAs: 'json',
+				preventCache: true,
+				//sync: this.sync
+			}).then(/*load*/function(data) {
+				//try{
+					that.moveStageCallback(data);
+				//}
+				//catch(e){
+				//	console.log(e);
+				//}
+			},/*error*/function(error){
+				this.loader.stop();
+				this.throwError(error);
+			});
+		},
+
+		moveStageCallback: function(data) {
+			if (data.success == true) {
+				if (this.form !== false) {
+					this.form.destroyRecursive();
 				}
-				else {
-					comodojo.loader.stop();
-					comodojo.error.custom('Error: '+data.code, data.result);
-				}
+				this.form = new Form({
+					modules: ['Button','TextBox','ValidationTextBox','Select','PasswordTextBox','EmailTextBox','OnOffSelect','GenderSelect'],
+					hierarchy: data.formComponents,
+					attachNode: dom.byId('installerContent')
+				}).build();
+		
+				this.backButton.set('disabled',data.backButtonDisabled);
+				this.backButton.set('label',data.backButtonLabel);
+				this.backButton.set('onClick',function() {
+					that.moveStage(data.backButtonStage);
+				});
 				
-			},
-			error: function(e){
-				comodojo.loader.stop();
-				comodojo.error.custom('Error', e);
-			},
-			content: myValues,
-			handleAs: "json",
-			preventCache: true
-		});
-		
-	},
-	
-	initEnv: function() {
-		installer._loadMessages();
-		comodojo.loadScriptFile('comodojo/javascript/resources/environment.js',{
-			sync:true,
-			onLoad:function(){
-				comodojo.loader.start();
+				this.nextButton.set('disabled',data.nextButtonDisabled);
+				this.nextButton.set('label',data.nextButtonLabel);
+				this.nextButton.set('onClick',function() {
+					//try{
+						that.moveStage(data.nextButtonStage);
+					//}
+					//catch(e) {
+					//	console.log(e);
+					//}
+					
+				});
+				
+				this.progressBar.update({progress: data.progressBarProgress});
+				
+				this.loader.stop();
+				
 			}
-		});
-		comodojo.loadScriptFile('comodojo/javascript/resources/form.js',{sync:true});
-		
-		dojo.ready(function(){
-			comodojo.loader.stopIn(2000);
-			installer.moveStage(0);
-		});
-	},
-	
-	_loadMessages: function() {
-		
-		var myMessagesLocaleTry = {
-			url: 'comodojo/installer/i18n/i18n_installer_'+comodojo.locale+'.json',
-			handleAs: 'json',
-			sync: true,
-			load: function(data){
-				comodojo.localizedMessages = data;
-				comodojo._localizedMessagesResult = true;
-			},
-			error: function(error){
-				comodojo.debug('failed to understand your locale or localized messages file doesn\'t exists!');
-				comodojo.debug('Reason was: '+ error );
-				if (this.url == 'comodojo/installer/i18n/i18n_installer_en.json') {
-					comodojo.debug('Standard messages localization file doesn\'t exists, messages unavailable.');
-					comodojo._localizedMessagesResult = false;
-				}
-				else {
-					comodojo.debug('Falling back to default messages locale (en).');
-					this.url = 'comodojo/installer/i18n/i18n_installer_en.json';
-					dojo.xhrGet(myMessagesLocaleTry);
-				}
+			else {
+				this.loader.stop();
+				this.throwError('('+data.code+')&nbsp;'+data.result);
 			}
-		};
-		dojo.xhrGet(myMessagesLocaleTry);
-		
-	},
-	
-	/*
-	_checkDatabase: function() {
-		
-		var myForm = dijit.byId('installer_form');
-		if (!myForm.validate()) {
-			comodojo.error.custom('There was an error (js)!', 'invalid data in form');
-			return false;
-		}
-		var myValues = myForm.get('value');		
-						
-		var myNextButton = dijit.byId('nextButton');
-		
-		dojo.xhrPost({
-			url: "comodojo/installer/installerDispatcher.php?stage=stage_11",
-			load: function(data){
-				comodojo.dialog.info(data.result);
-				if (data.success == true) {
-					myNextButton.set('disabled',false);
-				}
-				else {
-					myNextButton.set('disabled',true);
-				}
-			},
-			error: function(e){
-				comodojo.error.custom('There was an error (xhr)!', e);
-			},
-			content: myValues,
-			handleAs: "json",
-			preventCache: true
-		});
-	},
-	*/
+		},
 
-	_retryVerification: function() {
-		installer.moveStage(90);
-	},
-	
+		_retryVerification: function() {
+			that.moveStage(90);
+		},
 
-	_goToPortal: function(href) {
-		location.href = href;
-	}
+		_goToPortal: function(href) {
+			location.href = href;
+		},
+
+		buildEnv: function() {
+
+			this.progressBar = new ProgressBar({
+				//className: "progressBar",
+				maximum:100
+			},'installer_progressBar');
+
+			this.backButton = new Button({
+				className: 'backButton',
+				label: ''
+			},'backButton');
+
+			this.nextButton = new Button({
+				className: 'nextButton',
+				label: ''
+			},'nextButton');
+
+		},
+
+		buildDialogs: function() {
+			
+			this.message = new dialog({
+				title: '$',
+				content: '$'
+			}).placeAt(win.body());
+
+			var actionBar = domConstruct.create("div", {
+				class: "dijitDialogPaneActionBar"
+			}, this.message.containerNode);
+
+			new Button({
+				label: comodojo.getLocalizedMessage('10011'),
+				onClick: function() {
+					this.message.hide();
+				}
+			}).placeAt(actionBar);
+
+			this.loader = new dialog({
+				title: comodojo.getLocalizedMessage('10007'),
+				content: '<div style="width:300px; height:40px; text-align: center;"><img src="comodojo/images/bar_loader.gif" /></div>',
+				templateString: "<div class=\"dijitDialog\" role=\"dialog\" aria-labelledby=\"${id}_title\">\n\t<div data-dojo-attach-point=\"titleBar\" class=\"dijitDialogTitleBar\">\n\t\t<span data-dojo-attach-point=\"titleNode\" class=\"dijitDialogTitle\" id=\"${id}_title\"\n\t\t\t\trole=\"header\" level=\"1\"></span>\n\t\t<span data-dojo-attach-point=\"closeButtonNode\" title=\"${buttonCancel}\" role=\"button\" tabIndex=\"-1\">\n\t\t\t<span data-dojo-attach-point=\"closeText\" class=\"closeText\" title=\"${buttonCancel}\">&nbsp;</span>\n\t\t</span>\n\t</div>\n\t<div data-dojo-attach-point=\"containerNode\" class=\"dijitDialogPaneContent\"></div>\n</div>\n"
+			}).placeAt(win.body());
+
+			this.message.startup();
+			this.loader.startup();
+
+			this.loader.start = function() { that.loader.show(); };
+
+			this.loader.stop = function() { that.loader.hide(); };
+
+			this.loader.stopIn = function(timeout) { setTimeout(function(){ that.loader.stop(); }, isFinite(timeout) ? timeout : /*default timeout is 5 secs*/ 5000); };
+
+		},
+
+		throwError: function(error) {
+			this.message.set("title", comodojo.getLocalizedMessage('10034'));
+			this.message.set("content", error);
+			this.message.show();
+		},
+
+		throwMessage: function(message) {
+			this.message.set("title", comodojo.getLocalizedMessage('10036'));
+			this.message.set("content", message);
+			this.message.show();
+		},
+
+	});
+
+	return installer;
+
+});
 	
-};

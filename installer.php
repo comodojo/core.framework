@@ -41,7 +41,7 @@ function makeIndex() {
 		$loader = '
 			<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/resources/dojo.css" />
 			<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css" />
-			<script type="text/javascript" src="'.$available_cdn[0]["value"].'"></script>
+			<script type="text/javascript" src="'.$available_cdn[0]["id"].'"></script>
 		';
 	}
 
@@ -49,6 +49,7 @@ function makeIndex() {
 	$index = str_replace("*_BANNER_*",$comodojoCustomization['banner'],$index);
 	$index = str_replace("*_SERVERLOCALE_*",$_SESSION[SITE_UNIQUE_IDENTIFIER]['PHP_LOCALE'],$index);
 	$index = str_replace("*_COMODOJOVERSION_*",comodojo_version('VERSION'),$index);
+	$index = str_replace("*_COMODOJO_SITE_URL_*",COMODOJO_SITE_URL,$index);
 	
 	return $index;
 

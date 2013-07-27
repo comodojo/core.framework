@@ -52,7 +52,7 @@ class stage extends stage_base {
 			"type"			=>	"Button",
 			"label"			=>	$this->i18n["0109"],
 			"id"			=>	"installer_retryVerification",
-			"onClick"		=>	"installer._retryVerification();",
+			"onClick"		=>	"comodojo._retryVerification();",
 			"disabled"		=>	false
 			)
 		);

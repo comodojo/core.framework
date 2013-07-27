@@ -4,44 +4,65 @@
 	<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
 	<title>comodojo Installation</title>
 	<link rel="stylesheet" type="text/css" href="comodojo/installer/installer.css" />
-	<link rel="stylesheet" type="text/css" href="comodojo/CSS/environment.css" />
 	
 	<script type="text/javascript">
-		var djConfig = {
+		var dojoConfig = {
+			async: false,
 			parseOnLoad: true,
-			isDebug: false,
-			popup: false,
-			debugAtAllCost: false
+			packages: [{
+				name: 'comodojo',
+				location: '*_COMODOJO_SITE_URL_*comodojo/javascript/comodojo'
+			},{
+				name: 'installer',
+				location: '*_COMODOJO_SITE_URL_*comodojo/installer'
+			}],
+			has: {
+				'dojo-amd-factory-scan': false,
+				'dojo-firebug': true,
+				'dojo-debug-messages': true,
+				'popup':false
+			}
 		};
 		var comodojoConfig = {
 			version: '*_COMODOJOVERSION_*',
+			debug: true,
+			debugDeep: true,
 			phpLocale: "*_SERVERLOCALE_*",
 			locale: "*_SERVERLOCALE_*",
-			useName: null,
-			userRole: null,
+			useName: false,
+			userRole: 0,
 			dojoTheme: 'claro',
 			defaultContainer: null
-		}
+		};
 	</script>
 		
 	*_DOJOLOADER_*
-		
-	<script type="text/javascript" src="comodojo/javascript/resources/comodojo.js" ></script>		
-	<script type="text/javascript" src="comodojo/installer/installer.js" ></script>
-	
+
 	<script type="text/javascript">
-		dojo.require("dijit.layout.ContentPane");
-		dojo.require("dijit.Dialog");
-		dojo.require("dijit.form.Form");
-		dojo.require("dijit.form.Button");
-		dojo.require("dijit.form.TextBox");
-		dojo.require("dijit.form.ValidationTextBox");
-		dojo.require("dijit.form.Select");
-		dojo.require("dijit.ProgressBar");
-		dojo.require("dojo.parser");
-		
-		dojo.ready(function(){
-			installer.initEnv();
+
+		dojo.require('comodojo.Config');
+		dojo.require('installer/Installer');
+	
+		dojo.ready(function() {
+			dojo.setObject("comodojo.getLocalizedMessage", function(message) {
+				messageObj = comodojo.localized_messages;
+				if (comodojo.Utils.defined(messageObj[message])) {
+					return messageObj[message];
+				}
+				else {
+					return '__?('+message+')?__';
+				}
+			});
+
+			dojo.setObject("$c", comodojo);
+			dojo.setObject("$d", dojo);
+			dojo.setObject("$j", dijit);
+			dojo.setObject("$x", dojox);
+			dojo.setObject("$q", function(query, root, listCtor){
+				return dojo.query(query, root, listCtor);
+			});
+
+			var s = new installer.Installer();
 		});
 	</script>
 
@@ -55,7 +76,7 @@
 	
 			<img src="*_BANNER_*"/>
 	
-			<div class="progressBar" maximum="100" id="installer_progressBar" dojoType="dijit.ProgressBar"></div>
+			<div class="progressBar" id="installer_progressBar"></div>
 	
 		</div>
 	
@@ -64,8 +85,8 @@
 		</div>
 		
 		<div id="installerActions">
-			<div dojoType="dijit.form.Button" id="backButton" class="backButton"></div>
-			<div dojoType="dijit.form.Button" id="nextButton" class="nextButton"></div>
+			<div id="backButton" class="backButton"></div>
+			<div id="nextButton" class="nextButton"></div>
 		</div>
 	
 		<div id="installerFooter">

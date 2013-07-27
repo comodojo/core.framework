@@ -34,19 +34,19 @@ $comodojoCustomization = array(
 	
 	"supportedLocales"	=>	array(
 		array(
-			"name"		=>	"auto",
-			"value"		=>	"auto",
-			"default"	=>	true
+			"label"		=>	"auto",
+			"id"		=>	"auto"//,
+			//"default"	=>	true
 		),
 		array(
-			"name"		=>	"English",
-			"value"		=>	"en",
-			"default"	=>	false
+			"label"		=>	"English",
+			"id"		=>	"en"//,
+			//"default"	=>	false
 		),
 		array(
-			"name"		=>	"Italiano",
-			"value"		=>	"it",
-			"default"	=>	false
+			"label"		=>	"Italiano",
+			"id"		=>	"it"//,
+			//"default"	=>	false
 		)
 	),
 	

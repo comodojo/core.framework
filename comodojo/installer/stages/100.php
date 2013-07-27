@@ -120,10 +120,10 @@ class stage extends stage_base {
 		$_locale = false;
 		foreach($comodojoCustomization['supportedLocales'] as $locale) {
 			if (!$_locale) {
-				$_locale = $locale['value']."";
+				$_locale = $locale['id']."";
 			}
 			else {
-				$_locale .= ",".$locale['value'];
+				$_locale .= ",".$locale['id'];
 			}
 		}
 		$myFileData = "<?php
@@ -210,7 +210,7 @@ define('COMODOJO_GLOBAL_DEBUG_FILE',null);
 			array_push($this->out, array("type"=>!$block ? 'warning' : 'error',"content"=>$failure));
 			if ($block) {
 				$this->next_button_disabled = true;
-				$this->next_button_label = $this->i18n['01 20'];
+				$this->next_button_label = $this->i18n['012320'];
 			}
 		}
 		else {
@@ -221,7 +221,7 @@ define('COMODOJO_GLOBAL_DEBUG_FILE',null);
 				array_push($this->out, array(
 					"type"			=>	"Button",
 					"label"			=>	$this->i18n["0122"],
-					"onClick"		=>	"installer._goToPortal('".COMODOJO_SITE_URL."');",
+					"onClick"		=>	"comodojo._goToPortal('".COMODOJO_SITE_URL."');",
 					"disabled"		=>	false
 				));
 			}

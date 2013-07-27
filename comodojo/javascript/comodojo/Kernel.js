@@ -48,7 +48,7 @@ Kernel.callKernel = function(httpMethod, callback, params) {
 	}).then(/*load*/function(data,status){
 		bus.callEvent("comodojo_kernel_end");
 		if (!data.success && data.result.code==2107) {
-			error.critical('lost session');
+			error.critical(data.result.code,data.result.name);
 			//setTimeout(function(){
 			//	location.href = comodojoConfig.siteUrl;
 			//}, 5000);

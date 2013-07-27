@@ -29,16 +29,16 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SMTP_SERVICE'],
 				"options"		=>	array(
 										array(
-											"value"	=>	0,
-											"name"	=>	"SMTP"
+											"id"	=>	0,
+											"label"	=>	"SMTP"
 										),
 										array(
-											"value"	=>	1,
-											"name"	=>	"mail"
+											"id"	=>	1,
+											"label"	=>	"mail"
 										),
 										array(
-											"value"	=>	2,
-											"name"	=>	"sendmail"
+											"id"	=>	2,
+											"label"	=>	"sendmail"
 										)
 									)
 			),
@@ -55,16 +55,16 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SMTP_SECURITY'],
 				"options"		=>	array(
 										array(
-											"value"	=>	0,
-											"name"	=>	"No"
+											"id"	=>	0,
+											"label"	=>	"No"
 										),
 										array(
-											"value"	=>	1,
-											"name"	=>	"ssl"
+											"id"	=>	1,
+											"label"	=>	"ssl"
 										),
 										array(
-											"value"	=>	2,
-											"name"	=>	"tls"
+											"id"	=>	2,
+											"label"	=>	"tls"
 										)
 									)
 			),

@@ -19,24 +19,24 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SITE_THEME_DOJO'],
 				"options"		=>	array(
 										array(
-											"name"		=>	"tundra",
-											"value"		=>	"tundra",
-											"default"	=>	true
+											"label"		=>	"tundra",
+											"id"		=>	"tundra"//,
+											//"default"	=>	true
 										),
 										array(
-											"name"		=>	"soria",
-											"value"		=>	"soria",
-											"default"	=>	false
+											"label"		=>	"soria",
+											"id"		=>	"soria"//,
+											//"default"	=>	false
 										),
 										array(
-											"name"		=>	"nihilo",
-											"value"		=>	"nihilo",
-											"default"	=>	false
+											"label"		=>	"nihilo",
+											"id"		=>	"nihilo"//,
+											//"default"	=>	false
 										),
 										array(
-											"name"		=>	"claro",
-											"value"		=>	"claro",
-											"default"	=>	false
+											"label"		=>	"claro",
+											"id"		=>	"claro"//,
+											//"default"	=>	false
 										)
 									)
 			),

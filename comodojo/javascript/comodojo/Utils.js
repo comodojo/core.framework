@@ -366,7 +366,7 @@ Utils.destroyAll = function(message) {
 	comodojo.debug('Site-wide destroy in progress...');
 	registry.forEach(function(widget){
 		comodojo.debugDeep('Killing widget: '+widget.id);
-		this.destroyWidget(widget);
+		Utils.destroyWidget(widget);
 	});
 	win.body().parentNode.replaceChild(document.createElement("body",{
 		innerHTML: !message ? '' : "<p>"+message+"</p>"

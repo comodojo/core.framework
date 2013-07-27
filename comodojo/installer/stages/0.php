@@ -22,12 +22,12 @@ class stage extends stage_base {
 				"value"		=>	"en",
 				"options"	=>	array(
 					array(
-						"value"	=>	"it",
-						"name"	=>	"Italiano"
+						"id"	=>	"it",
+						"label"	=>	"Italiano"
 						),
 					array(
-						"value"	=>	"en",
-						"name"	=>	"English"
+						"id"	=>	"en",
+						"label"	=>	"English"
 						)
 					)
 				)			

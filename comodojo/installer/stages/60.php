@@ -16,20 +16,20 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['AUTHENTICATION_MODE'],
 				"options"		=>	array(
 										array(
-											"value"		=>	0,
-											"name"		=>	$this->i18n["0092"]
+											"id"		=>	0,
+											"label"		=>	$this->i18n["0092"]
 										),
 										array(
-											"value"		=>	1,
-											"name"		=>	$this->i18n["0093"]
+											"id"		=>	1,
+											"label"		=>	$this->i18n["0093"]
 										),
 										array(
-											"value"		=>	2,
-											"name"		=>	$this->i18n["0094"]
+											"id"		=>	2,
+											"label"		=>	$this->i18n["0094"]
 										),
 										array(
-											"value"		=>	3,
-											"name"		=>	$this->i18n["0095"]
+											"id"		=>	3,
+											"label"		=>	$this->i18n["0095"]
 										)
 									)
 			),
@@ -59,12 +59,12 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['REGISTRATION_MODE'],
 				"options"		=>	array(
 										array(
-											"value"		=>	0,
-											"name"		=>	$this->i18n["0097"]
+											"id"		=>	0,
+											"label"		=>	$this->i18n["0097"]
 										),
 										array(
-											"value"		=>	1,
-											"name"		=>	$this->i18n["0096"]
+											"id"		=>	1,
+											"label"		=>	$this->i18n["0096"]
 										)
 									)
 			),
@@ -126,22 +126,22 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['GRAVATAR_RATING'],
 				"options"		=>	array(
 										array(
-											"value"		=>	"g",
-											"name"		=>	"g"
+											"id"		=>	"g",
+											"label"		=>	"g"
 										),
 										array(
-											"value"		=>	"pg",
-											"name"		=>	"pg"
+											"id"		=>	"pg",
+											"label"		=>	"pg"
 										)
 										,
 										array(
-											"value"		=>	"r",
-											"name"		=>	"r"
+											"id"		=>	"r",
+											"label"		=>	"r"
 										)
 										,
 										array(
-											"value"		=>	"x",
-											"name"		=>	"x"
+											"id"		=>	"x",
+											"label"		=>	"x"
 										)
 									)
 			)

@@ -77,16 +77,16 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['CRON_NOTIFICATION_MODE'],
 				"options"		=>	array(
 										array(
-											"value"	=>	'DISABLED',
-											"name"	=>	"DISABLED"
+											"id"	=>	'DISABLED',
+											"label"	=>	"DISABLED"
 										),
 										array(
-											"value"	=>	'FAILURE',
-											"name"	=>	"DISABLED"
+											"id"	=>	'FAILURE',
+											"label"	=>	"DISABLED"
 										),
 										array(
-											"value"	=>	'ALL',
-											"name"	=>	"ALL"
+											"id"	=>	'ALL',
+											"label"	=>	"ALL"
 										)
 									)
 			),

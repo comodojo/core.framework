@@ -28,11 +28,22 @@ class kernel extends comodojo_basic {
 	
 	private $method = false;
 	
+	
+	/**
+	 * If it's a DATASTORE request, setup kernel to handle a datastore
+	 */
 	private $is_datastore_request = false;
 	
 	private $datastore_label = 'name'; 
 	
 	private $datastore_identifier = 'resource';
+	
+
+	/**
+	 * If it's a STORE request, setup kernel to handle a KernelStore (ObjectStore)
+	 */
+	private $is_store_request = false;
+	
 	
 	private $encoded_content = false;
 	
@@ -65,6 +76,10 @@ class kernel extends comodojo_basic {
 			$this->is_datastore_request = true;
 			if (isset($attributes['datastoreLabel'])) $this->datastore_label = $attributes['datastoreLabel'];
 			if (isset($attributes['datastoreIdentifier'])) $this->datastore_identifier = $attributes['datastoreIdentifier'];
+		}
+
+		if (isset($attributes['store']) AND @$attributes['store'] == true) {
+			$this->is_store_request = true;
 		}
 		
 		if ($this->application == 'comodojo') {
@@ -124,7 +139,16 @@ class kernel extends comodojo_basic {
 		
 		comodojo_debug('Serving content for request to '.$this->application.'->'.$this->method,'INFO','kernel');
 		
-		return $this->encode_return_data($this->is_datastore_request ? $this->compose_return_datastore($this->datastore_label, $this->datastore_identifier, $to_return) : $this->compose_return_data($to_return));
+		if ($this->is_datastore_request) {
+			$to_encode_and_return = $this->compose_return_datastore($this->datastore_label, $this->datastore_identifier, $to_return);
+		}
+		elseif ($this->is_store_request) {
+			$to_encode_and_return = $this->compose_return_store($to_return);
+		}
+		else {
+			$to_encode_and_return = $this->compose_return_data($to_return);
+		}
+		return $this->encode_return_data($to_encode_and_return);
 		
 	}
 	
@@ -190,6 +214,10 @@ class kernel extends comodojo_basic {
 	}
 	
 	private function compose_return_datastore($label, $identifier, $data) {
+		return Array("label"=>$label,"identifier"=>$identifier,"items"=>is_null($data) ? Array() : $data);
+	}
+
+	private function compose_return_store($data) {
 		return Array("label"=>$label,"identifier"=>$identifier,"items"=>is_null($data) ? Array() : $data);
 	}
 	

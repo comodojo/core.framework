@@ -166,7 +166,7 @@ class authentication {
 			throw $e;
 		}
 		
-		if ($result["resultLength"] == 1 AND $result["result"]['ldap'] == 0) {
+		if ($result["resultLength"] == 1 AND @$result["result"][0]['ldap'] == 0) {
 			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
 			try {
 				$db->clean();
@@ -192,7 +192,7 @@ class authentication {
 				return false;
 			}
 		}
-		else if ($result["resultLength"] == 1 AND $result["result"]['ldap'] == 1) {
+		else if ($result["resultLength"] == 1 AND @$result["result"][0]['ldap'] == 1) {
 			comodojo_debug('User '.$this->userName.' found in local database, now checking password on ldap','INFO','authentication');
 			try {
 				$ldap = new ldap();
@@ -242,7 +242,7 @@ class authentication {
 			throw $e;
 		}
 		
-		if ($result["resultLength"] == 1 AND $result["result"]['ldap'] == 0) {
+		if ($result["resultLength"] == 1 AND @$result["result"][0]['ldap'] == 0) {
 			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
 			try {
 				$db->clean();
@@ -360,7 +360,7 @@ class authentication {
 			throw $e;
 		}
 		
-		if ($result["resultLength"] == 1 AND $result["result"]['rpc'] == 0) {
+		if ($result["resultLength"] == 1 AND @$result["result"][0]['rpc'] == 0) {
 			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
 			try {
 				$db->clean();
@@ -386,7 +386,7 @@ class authentication {
 				return false;
 			}
 		}
-		else if ($result["resultLength"] == 1 AND $result["result"]['rpc'] == 1) {
+		else if ($result["resultLength"] == 1 AND @$result["result"][0]['rpc'] == 1) {
 			//maybe user profile was updated locally, so return local values but check pwd remotely
 			try {
 				$client = new rpc_client();

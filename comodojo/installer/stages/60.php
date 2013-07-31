@@ -17,7 +17,7 @@ class stage extends stage_base {
 				"options"		=>	array(
 										array(
 											"id"		=>	0,
-											"label"		=>	$this->i18n["0092"]
+											"label"		=>	$this->i18n["0092"]	
 										),
 										array(
 											"id"		=>	1,

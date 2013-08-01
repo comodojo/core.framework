@@ -141,34 +141,47 @@ class kernel extends comodojo_basic {
 		
 		if ($this->is_datastore_request) {
 			$to_encode_and_return = $this->compose_return_datastore($this->datastore_label, $this->datastore_identifier, $to_return);
+			$total = false;
 		}
 		elseif ($this->is_store_request) {
-			$to_encode_and_return = $this->compose_return_store($to_return);
+			list($to_encode_and_return, $total) = $this->compose_return_store($to_return);
 		}
 		else {
 			$to_encode_and_return = $this->compose_return_data($to_return);
+			$total = false;
 		}
-		return $this->encode_return_data($to_encode_and_return);
+		return $this->encode_return_data($to_encode_and_return, $total);
 		
 	}
 	
 	public function error($error_code, $error_name) {
 		
-		$error = Array('success'=>false,'result'=>Array('code'=>$error_code,'name'=>$error_name));
-		
-		switch ($this->transport) {
-			case 'JSON': $to_return = array2json($error); $contentType = 'application/json'; break;
-			case 'XML': $to_return = array2xml($error); $contentType = 'application/xml'; break;
-			case 'YAML': $to_return = array2yaml($error); $contentType = ''; break;
-			default: $to_return = array2json($error); $contentType = 'application/json'; break;
+		if ($this->is_store_request) {
+
+			$to_return = $error_code.'-'.$error_name;
+
+			set_header(Array(
+				'statusCode'	=>	500
+			), strlen($to_return));
+
 		}
+		else {
+			$error = Array('success'=>false,'result'=>Array('code'=>$error_code,'name'=>$error_name));
 		
-		set_header(Array(
-			'statusCode'	=>	200,
-			'ttl'			=> 	0,
-			'contentType'	=> $contentType,
-			'charset'		=>	COMODOJO_DEFAULT_ENCODING
-		), strlen($to_return));
+			switch ($this->transport) {
+				case 'JSON': $to_return = array2json($error); $contentType = 'application/json'; break;
+				case 'XML': $to_return = array2xml($error); $contentType = 'application/xml'; break;
+				case 'YAML': $to_return = array2yaml($error); $contentType = ''; break;
+				default: $to_return = array2json($error); $contentType = 'application/json'; break;
+			}
+			
+			set_header(Array(
+				'statusCode'	=>	200,
+				'ttl'			=> 	0,
+				'contentType'	=> $contentType,
+				'charset'		=>	COMODOJO_DEFAULT_ENCODING
+			), strlen($to_return));
+		}
 		
 		return $to_return;
 		
@@ -218,24 +231,71 @@ class kernel extends comodojo_basic {
 	}
 
 	private function compose_return_store($data) {
-		return Array("label"=>$label,"identifier"=>$identifier,"items"=>is_null($data) ? Array() : $data);
+		return Array(is_null($data->data) ? Array() : $data->data, is_null($data->total) ? false : $data->total);
 	}
 	
-	private function encode_return_data($data) {
+	private function encode_return_data($data, $total) {
 		
-		switch ($this->transport) {
-			case 'JSON': $to_return = array2json($data); $contentType = 'application/json'; break;
-			case 'XML': $to_return = array2xml($data); $contentType = 'application/xml'; break;
-			case 'YAML': $to_return = array2yaml($data); $contentType = ''; break;
-			default: $to_return = array2json($data); $contentType = 'application/json'; break;
+		if ($this->is_store_request) {
+			switch($this->method) {
+				case 'kernel_get':
+					if(empty($data)) {
+						$to_return = null;
+						set_header(Array(
+							'statusCode'	=>	404
+						), 0);
+					}
+					else {
+						$to_return = array2json($data);
+						set_header(Array(
+							'statusCode'	=>	200,
+							'ttl'			=> 	0,
+							'contentType'	=>	'application/json',
+							'charset'		=>	COMODOJO_DEFAULT_ENCODING
+						), strlen($to_return));
+					}
+				break;
+				case 'kernel_delete':
+					$to_return = null;
+					if(!$data) {
+						set_header(Array(
+							'statusCode'	=>	404
+						), 0);
+					}
+					else {
+						set_header(Array(
+							'statusCode'	=>	204
+						), 0);
+					}
+				break;
+				case 'kernel_store':
+				case 'kernel_update':
+					$to_return = array2json($data);
+					set_header(Array(
+						'statusCode'	=>	200,
+						'ttl'			=> 	0,
+						'contentType'	=>	'application/json',
+						'charset'		=>	COMODOJO_DEFAULT_ENCODING
+					), strlen($to_return));
+				break;
+			}
+
 		}
-		
-		set_header(Array(
-			'statusCode'	=>	200,
-			'ttl'			=> 	0,
-			'contentType'	=>	$contentType,
-			'charset'		=>	COMODOJO_DEFAULT_ENCODING
-		), strlen($to_return));
+		else {
+			switch ($this->transport) {
+				case 'JSON': $to_return = array2json($data); $contentType = 'application/json'; break;
+				case 'XML': $to_return = array2xml($data); $contentType = 'application/xml'; break;
+				case 'YAML': $to_return = array2yaml($data); $contentType = ''; break;
+				default: $to_return = array2json($data); $contentType = 'application/json'; break;
+			}
+			
+			set_header(Array(
+				'statusCode'	=>	200,
+				'ttl'			=> 	0,
+				'contentType'	=>	$contentType,
+				'charset'		=>	COMODOJO_DEFAULT_ENCODING
+			), strlen($to_return));
+		}
 		
 		return $to_return;
 	}

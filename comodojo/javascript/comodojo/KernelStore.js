@@ -1,5 +1,5 @@
-define("dojo/store/JsonRest", ["../_base/xhr", "../_base/lang", "../json", "../_base/declare", "./util/QueryResults" /*=====, "./api/Store" =====*/
-], function(xhr, lang, JSON, declare, QueryResults /*=====, Store =====*/){
+define("dojo/store/JsonRest", ["../_base/xhr", "../_base/lang", "../json", "../_base/declare", "./util/QueryResults"
+], function(xhr, lang, JSON, declare, QueryResults){
 
 var base = null;
 
@@ -92,12 +92,13 @@ return declare("comodojo.KernelStore", base, {
 			store: true,
 			application: this.application,
 			method: hasId ? this.methodPut : this.methodAdd,
-			transport: 'JSON'
+			transport: 'JSON',
+			data: xhr.objectToQuery(object)
 		}
 
 		return xhr("POST", {
 			url: 'kernel.php',
-			postData: lang.mixin(post_data,JSON.stringify(object)),
+			postData: post_data,//lang.mixin(post_data,JSON.stringify(object)),
 			handleAs: "json"
 		});
 	},
@@ -148,31 +149,6 @@ return declare("comodojo.KernelStore", base, {
 		//		The results of the query, extended with iterative methods.
 		options = options || {};
 
-//		var headers = lang.mixin({ Accept: this.accepts }, this.headers, options.headers);
-//
-//		if(options.start >= 0 || options.count >= 0){
-//			headers.Range = headers["X-Range"] //set X-Range for Opera since it blocks "Range" header
-//				 = "items=" + (options.start || '0') + '-' +
-//				(("count" in options && options.count != Infinity) ?
-//					(options.count + (options.start || 0) - 1) : '');
-//		}
-//		var hasQuestionMark = this.target.indexOf("?") > -1;
-//		if(query && typeof query == "object"){
-//			query = xhr.objectToQuery(query);
-//			query = query ? (hasQuestionMark ? "&" : "?") + query: "";
-//		}
-//		if(options && options.sort){
-//			var sortParam = this.sortParam;
-//			query += (query || hasQuestionMark ? "&" : "?") + (sortParam ? sortParam + '=' : "sort(");
-//			for(var i = 0; i<options.sort.length; i++){
-//				var sort = options.sort[i];
-//				query += (i > 0 ? "," : "") + (sort.descending ? this.descendingPrefix : this.ascendingPrefix) + encodeURIComponent(sort.attribute);
-//			}
-//			if(!sortParam){
-//				query += ")";
-//			}
-//		}
-
 		var _postData = {
 			store: true,
 			application: this.application,
@@ -180,9 +156,28 @@ return declare("comodojo.KernelStore", base, {
 			transport: 'JSON'
 		};
 
+		if(query && typeof query == "object"){
+			query = xhr.objectToQuery(query);
+			_postData.query = query ? query : "";
+		}
+
+		if(options.start >= 0 || options.count >= 0){
+			_postData.range = (options.start || '0') + '-' +
+				(("count" in options && options.count != Infinity) ?
+					(options.count + (options.start || 0) - 1) : '');
+		}
+
+		if(options && options.sort){
+			_postData.sort = '';
+			for(var i = 0; i<options.sort.length; i++){
+				var s = options.sort[i];
+				_postData.sort += (i > 0 ? "," : "") + (s.descending ? this.descendingPrefix : this.ascendingPrefix) + encodeURIComponent(s.attribute);
+			}
+		}
+
 		var results = xhr("POST", {
 			url: 'kernel.php',
-			postData: lang.mixin(_postData,options),
+			postData: _postData,
 			handleAs: "json"
 		});
 

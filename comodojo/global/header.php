@@ -45,6 +45,9 @@ function set_header ($params, $contentLength=0) {
 	$allowedMethods		= isset($params['allowedMethods']) ? $params['allowedMethods'] : false;
 	
 	$contentDisposition = isset($params['contentDisposition']) ? $params['contentDisposition'] : false;
+
+	$contentRange = isset($params['contentRange']) ? $params['contentRange'] : false;
+
 	$filename 		= isset($params['filename']) ? $params['filename'] : false;
 	
 	$accessControlAllowOrigin = isset($params['accessControlAllowOrigin']) ? $params['accessControlAllowOrigin'] : false;
@@ -70,6 +73,7 @@ function set_header ($params, $contentLength=0) {
 			if ($contentType !== false) header('Content-type: '.strtolower($contentType).($charset != false ? '; charset='.$charset : ''));
 			if ($contentLength !== 0) header('Content-Length: '.$contentLength,true);
 			if ($contentDisposition !== 0) header('Content-Disposition: '.$contentDisposition.';'.( !$filename ? '' : (' filename="'.$filename.'"') ),true);
+			if ($contentRange !== false) header('Content-Range: '.$contentRange,true);
 		break;
 		case 202: //Accepted
 			//PLEASE NOTE: according to HTTP/1.1, 202 header SHOULD HAVE status description in body... just in case

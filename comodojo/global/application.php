@@ -16,13 +16,25 @@
 
 class application {
 	
+	/**
+	 * Array of declared methods; kernel will process only requests to those methods
+	 */
 	private $application_declared_methods = Array();
 
-	public $id_key;
+	/**
+	 * ID key for kernel store requests
+	 */
+	private $id_key = 'id';
 
-	public $table;
+	/**
+	 * Table to manage with kernel store
+	 */
+	private $table;
 
-	public $fields;
+	/**
+	 * Table fields to manage with kernel store
+	 */
+	//private $fields;
 	
 	/**
 	 * Registered methods will be something like:
@@ -34,8 +46,21 @@ class application {
 		array_push($this->application_declared_methods,Array('RM'=>$request_method,'CM'=>$class_method,'RP'=>$required_parameters,'DE'=>$description,'CH'=>$cache));
 	}
 
-	public final function add_store_methods($methods, $table, $id_key='id', $fields='*') {
-
+	//public final function add_store_methods($methods, $table, $id_key='id', $fields=Array(), 
+	public final function add_store_methods($methods, $table, $id_key='id', 
+		$dbHost=COMODOJO_DB_HOST,
+		$dbDataModel=COMODOJO_DB_DATA_MODEL,
+		$dbName=COMODOJO_DB_NAME,
+		$dbPort=COMODOJO_DB_PORT,
+		$dbPrefix=COMODOJO_DB_PREFIX,
+		$dbUserName=COMODOJO_DB_USER,
+		$dbUserPass=COMODOJO_DB_PASSWORD
+	) {
+		//DELETE id
+		//STORE data, overwrite
+		//UPDATE id, data, overwrite
+		//GET id
+		//QUERY query
 	}
 	
 	public final function get_registered_method($request_method) {
@@ -73,11 +98,90 @@ class application {
 	
 	public function kernel_get($params) {
 		comodojo_load_resource('database');
+		try {
+			$db = new database();
+			$result = $db->table($this->table)->keys('*')->where($this->id_key,"=",$params['id'])->get();
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		return $result;
 	}
 
-	public function kernel_store($params) {}
+	public function kernel_query($params) {
+		comodojo_load_resource('database');
+		list($offset,$limit) = isset($params['range']) ? explode('-', $params['range']) : Array(0,0);
+		$where_done = false;
+		try {
+			$db = new database();
+			$result = $db->table($this->table)->keys('*');
+			if ($params['query'] != false) {
+				parse_str($params['data'],$query);
+				foreach ($query as $key => $value) {
+					if (!$where_done) {
+						$result = $result->where($key,'=',$value);
+						$where_done = true;
+					}
+					else {
+						$result = $result->and_where($key,'=',$value);
+					}
+				}
+			}
+			if (isset($params['sort'])) {
+				foreach (explode(',',$params['sort']) as $sort) {
+					$direction = substr($sort, 0, 1) == '+' ? 'ASC' : 'DESC';
+					$value = substr($sort, $1);
+					$result = $result->order_by($value,$direction);
+				}
+			}
+			$result = $result->get($limit,$offset);
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		return $result;
 
-	public function kernel_update($params) {}
+	}
+
+	public function kernel_store($params) {
+		comodojo_load_resource('database');
+		parse_str($params['data'],$data);
+		$data_keys = array_keys($data);
+		$data_values = array_values($data);
+		try {
+			$db = new database();
+			$result = $db->table($this->table)->keys($data_keys)->values($data_values)->store();
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		return $result;
+	}
+
+	public function kernel_update($params) {
+		comodojo_load_resource('database');
+		parse_str($params['data'],$data);
+		$data_keys = array_keys($data);
+		$data_values = array_values($data);
+
+		try {
+			$db = new database();
+			if ($params['overwrite'] == true) {
+				$db->table($this->table)->where($this->id_key,"=",$params['id'])->delete();
+				$db->clean();
+				array_push($data_keys, $this->id_key);
+				array_push($data_values, $params['id']);
+				$result = $db->table($this->table)->keys($data_keys)->values($data_values)->store();
+			}
+			else {
+				$result = $db->table($this->table)->keys($data_keys)->values($data_values)->where($this->id_key,"=",$params['id'])->update();
+			}
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		return $result;
+	}
 
 	public function kernel_delete($params) {
 		comodojo_load_resource('database');

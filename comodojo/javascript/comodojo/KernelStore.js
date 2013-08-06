@@ -36,6 +36,10 @@ return declare("comodojo.KernelStore", base, {
 
 	// methodGet: String
 	// kernel method to call on get requests
+	methodQuery: 'kernel_query',
+
+	// methodGet: String
+	// kernel method to call on get requests
 	methodPut: 'kernel_update',
 
 	// methodGet: String
@@ -85,16 +89,20 @@ return declare("comodojo.KernelStore", base, {
 		//		property if a specific id is to be used.
 		// returns: dojo/_base/Deferred
 		options = options || {};
+		if (typeof options.overwrite != "undefined") { options.overwrite = false; }
 		var id = ("id" in options) ? options.id : this.getIdentity(object);
 		var hasId = typeof id != "undefined";
-
+		
 		var post_data = {
 			store: true,
 			application: this.application,
 			method: hasId ? this.methodPut : this.methodAdd,
 			transport: 'JSON',
-			data: xhr.objectToQuery(object)
+			data: xhr.objectToQuery(object),
+			overwrite: options.overwrite
 		}
+
+		if (hasId) { post_data.id = id; }
 
 		return xhr("POST", {
 			url: 'kernel.php',
@@ -152,13 +160,16 @@ return declare("comodojo.KernelStore", base, {
 		var _postData = {
 			store: true,
 			application: this.application,
-			method: this.methodGet,
+			method: this.methodQuery,
 			transport: 'JSON'
 		};
 
 		if(query && typeof query == "object"){
 			query = xhr.objectToQuery(query);
-			_postData.query = query ? query : "";
+			_postData.query = query ? query : false;
+		}
+		else {
+			_postData.query = false;
 		}
 
 		if(options.start >= 0 || options.count >= 0){

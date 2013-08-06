@@ -141,14 +141,14 @@ class kernel extends comodojo_basic {
 		
 		if ($this->is_datastore_request) {
 			$to_encode_and_return = $this->compose_return_datastore($this->datastore_label, $this->datastore_identifier, $to_return);
-			$total = false;
+			$total = null;
 		}
 		elseif ($this->is_store_request) {
 			list($to_encode_and_return, $total) = $this->compose_return_store($to_return);
 		}
 		else {
 			$to_encode_and_return = $this->compose_return_data($to_return);
-			$total = false;
+			$total = null;
 		}
 		return $this->encode_return_data($to_encode_and_return, $total);
 		
@@ -231,10 +231,10 @@ class kernel extends comodojo_basic {
 	}
 
 	private function compose_return_store($data) {
-		return Array(is_null($data->data) ? Array() : $data->data, is_null($data->total) ? false : $data->total);
+		return Array(is_null($data->data) ? Array() : $data->data, is_null($data->total) ? null : $data->total);
 	}
 	
-	private function encode_return_data($data, $total) {
+	private function encode_return_data($data, $total=null) {
 		
 		if ($this->is_store_request) {
 			switch($this->method) {
@@ -251,7 +251,8 @@ class kernel extends comodojo_basic {
 							'statusCode'	=>	200,
 							'ttl'			=> 	0,
 							'contentType'	=>	'application/json',
-							'charset'		=>	COMODOJO_DEFAULT_ENCODING
+							'charset'		=>	COMODOJO_DEFAULT_ENCODING,
+							'contentRange'	=>	is_null($total) ? false : $total
 						), strlen($to_return));
 					}
 				break;

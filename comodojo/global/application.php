@@ -17,6 +17,12 @@
 class application {
 	
 	private $application_declared_methods = Array();
+
+	public $id_key;
+
+	public $table;
+
+	public $fields;
 	
 	/**
 	 * Registered methods will be something like:
@@ -26,6 +32,10 @@ class application {
 	
 	public final function add_application_method($request_method,$class_method,$required_parameters,$description=null,$cache=false) {
 		array_push($this->application_declared_methods,Array('RM'=>$request_method,'CM'=>$class_method,'RP'=>$required_parameters,'DE'=>$description,'CH'=>$cache));
+	}
+
+	public final function add_store_methods($methods, $table, $id_key='id', $fields='*') {
+
 	}
 	
 	public final function get_registered_method($request_method) {
@@ -61,6 +71,26 @@ class application {
 		$this->application_registered_methods['methods'] = Array('get_registered_methods',Array(),'',false);
 	}
 	
+	public function kernel_get($params) {
+		comodojo_load_resource('database');
+	}
+
+	public function kernel_store($params) {}
+
+	public function kernel_update($params) {}
+
+	public function kernel_delete($params) {
+		comodojo_load_resource('database');
+		try {
+			$db = new database();
+			$result = $db->table($this->table)->where($this->id_key,"=",$params['id'])->delete();
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		return $result;
+	}
+
 	public function init() {}
 }
 

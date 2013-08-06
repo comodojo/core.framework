@@ -14,7 +14,7 @@ define("comodojo/Form", [
 function(lang, Deferred/*, has*/, declare, domConstruct, domClass, ObjectStore, Memory, Form, ContentPane){
 
 	// module:
-	// 	comodojo/Basic
+	// 	comodojo/Form
 
 var form = declare(null,{
 	// summary:
@@ -699,6 +699,6 @@ var form = declare(null,{
 
 });
 
-return form;	
+return form;
 
 });

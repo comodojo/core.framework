@@ -47,7 +47,7 @@ class application {
 	}
 
 	//public final function add_store_methods($methods, $table, $id_key='id', $fields=Array(), 
-	public final function add_store_methods($methods, $table, $id_key='id', 
+	public final function add_store_methods($table, $methods=Array("DELETE","STORE","UPDATE","GET","QUERY"), $id_key='id', 
 		$dbHost=COMODOJO_DB_HOST,
 		$dbDataModel=COMODOJO_DB_DATA_MODEL,
 		$dbName=COMODOJO_DB_NAME,
@@ -56,11 +56,27 @@ class application {
 		$dbUserName=COMODOJO_DB_USER,
 		$dbUserPass=COMODOJO_DB_PASSWORD
 	) {
-		//DELETE id
-		//STORE data, overwrite
-		//UPDATE id, data, overwrite
-		//GET id
-		//QUERY query
+		$this->table = $table;
+		foreach ($methods as $method) {
+			$m = strtoupper($method);
+			switch ($m) {
+				case 'DELETE':
+					$this->add_application_method('kernel_delete','kernel_delete',Array('id'));
+				break;
+				case 'STORE':
+					$this->add_application_method('kernel_store','kernel_store',Array('data','overwrite'));
+				break;
+				case 'UPDATE':
+					$this->add_application_method('kernel_update','kernel_update',Array('id','data','overwrite','idProperty'));
+				break;
+				case 'GET':
+					$this->add_application_method('kernel_get','kernel_get',Array('id'));
+				break;
+				case 'QUERY':
+					$this->add_application_method('kernel_query','kernel_query',Array('query','idProperty'));
+				break;
+			}
+		}
 	}
 	
 	public final function get_registered_method($request_method) {
@@ -105,7 +121,7 @@ class application {
 		catch (Exception $e){
 			throw $e;
 		}
-		return $result;
+		return Array("data"=>$result,"total"=>null);
 	}
 
 	public function kernel_query($params) {
@@ -115,8 +131,8 @@ class application {
 		try {
 			$db = new database();
 			$result = $db->table($this->table)->keys('*');
-			if ($params['query'] != false) {
-				parse_str($params['data'],$query);
+			if ($params['query'] != 0) {
+				parse_str($params['query'],$query);
 				foreach ($query as $key => $value) {
 					if (!$where_done) {
 						$result = $result->where($key,'=',$value);
@@ -130,17 +146,22 @@ class application {
 			if (isset($params['sort'])) {
 				foreach (explode(',',$params['sort']) as $sort) {
 					$direction = substr($sort, 0, 1) == '+' ? 'ASC' : 'DESC';
-					$value = substr($sort, $1);
+					$value = substr($sort, 1);
 					$result = $result->order_by($value,$direction);
 				}
 			}
-			$result = $result->get($limit,$offset);
+			$result_data = $result->get($limit,$offset);
+			$result_total = $result->keys('COUNT::'.$params['idProperty'].'=>count')->get();
 		}
 		catch (Exception $e){
 			throw $e;
 		}
-		return $result;
 
+		$count = $result_total['result'][0]['count'];
+		$total = (isset($params['range']) ? $offset.'-'.($limit<$count ? $limit-1 : $count-1) : '0-'.($result_total['result'][0]-1)).'/'.$count;
+
+		//return $result;
+		return Array("data"=>$result_data,"total"=>$total);
 	}
 
 	public function kernel_store($params) {
@@ -155,18 +176,24 @@ class application {
 		catch (Exception $e){
 			throw $e;
 		}
-		return $result;
+		//return $result;
+		return Array("data"=>$result,"total"=>null);
 	}
 
 	public function kernel_update($params) {
 		comodojo_load_resource('database');
 		parse_str($params['data'],$data);
+
+		if (isset($data[$params['idProperty']])) {
+			unset($data[$params['idProperty']]);
+		}
+
 		$data_keys = array_keys($data);
 		$data_values = array_values($data);
 
 		try {
 			$db = new database();
-			if ($params['overwrite'] == true) {
+			if ($params['overwrite'] == 1) {
 				$db->table($this->table)->where($this->id_key,"=",$params['id'])->delete();
 				$db->clean();
 				array_push($data_keys, $this->id_key);
@@ -180,7 +207,8 @@ class application {
 		catch (Exception $e){
 			throw $e;
 		}
-		return $result;
+		//return $result;
+		return Array("data"=>$result,"total"=>null);
 	}
 
 	public function kernel_delete($params) {
@@ -192,7 +220,8 @@ class application {
 		catch (Exception $e){
 			throw $e;
 		}
-		return $result;
+		//return $result;
+		return Array("data"=>$result,"total"=>null);
 	}
 
 	public function init() {}

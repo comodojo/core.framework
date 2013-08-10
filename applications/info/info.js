@@ -8,54 +8,49 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('layout',["Grid"]);
+$d.require("dojo.data.ItemFileWriteStore");
+$d.require("dojo.store.DataStore");
+$d.require("comodojo.Layout");
 
 $c.App.load("info",
 
 	function(pid, applicationSpace, status){
 	
-		this.enableJavascriptExtras = false;
-	
-		dojo.mixin(this, status);
-	
 		var myself = this;
 		
 		this.init = function(){
 			
-			this.container = new $c.layout({
+			datastore = $c.Kernel.newDatastore('info', 'get_info', { isWriteStore : true, label : 'id', identifier: 'id' });
+
+    		store = new dojo.store.DataStore({store: datastore, idProperty: 'id'});
+
+    		this.container = new $c.Layout({
+				modules: ['Grid'],
 				attachNode: applicationSpace,
 				splitter: false,
-				_pid: pid,
+				id: pid,
 				hierarchy: [{
 					type: 'Grid',
 					name: 'center',
 					region: 'center',
-					createStore: {
-						name: 'grid_store',
-						application: 'info',
-						method: 'get_info',
-						label : 'id',
-						identifier : 'id'
-					},
 					params: {
 						structure: [
-						    { name: this.getLocalizedMessage('0050'), field: 'info', width: "60%", formatter: function(value) {return myself.getLocalizedMessage(value);}},
-						    { name: this.getLocalizedMessage('0051'), field: 'value', width: "40%"}
+							{ name: this.getLocalizedMessage('0050'), field: 'info', width: "60%", formatter: function(value) {return myself.getLocalizedMessage(value.info);}},
+							{ name: this.getLocalizedMessage('0051'), field: 'value', width: "40%"}
 						],
-						style: 'padding: 0px; margin: 0px !important;'
+						style: 'padding: 0px; margin: 0px !important;',
+						store: store
+					}
+				},{
+					type: 'ContentPane',
+					name: 'bottom',
+					region: 'bottom',
+					params: {
+						content: myself.getLocalizedMessage('0032')+': '+$c.frameworkVersion+', '+myself.getLocalizedMessage('0033')+': '+$d.version+'<br>'+myself.getLocalizedMessage('0030')+': '+$c.locale+', '+myself.getLocalizedMessage('0031')+': '+$c.timezone,
+						style: "height: 30px;"
 					}
 				}]
 			}).build();
-			if (this.enableJavascriptExtras) {
-				this.pushOtherInfo(this.container.stores.grid_store,this.container.main.center);
-			}
-		};
-		
-		this.pushOtherInfo = function(store, grid) {
-			store.newItem({id:50, info:'0030',value:$c.locale});
-			store.newItem({id:51, info:'0031',value:$c.timezone});
-			store.newItem({id:52, info:'0032',value:$c.frameworkVersion});
-			store.newItem({id:53, info:'0033',value:$d.version});
 		};
 		
 	}

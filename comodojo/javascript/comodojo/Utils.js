@@ -244,7 +244,7 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 			startObj[hierachy.name] = myNode;
 			if(hierachy.childrens){
 				array.forEach(hierachy.childrens, function(child){
-					startObj[hierachy.name].appendChild(this.fromHierarchy(child, startObj[hierachy.name]).domNode);
+					startObj[hierachy.name].appendChild(Utils.fromHierarchy(child, startObj[hierachy.name]).domNode);
 				});
 			}
 			BuiltObject = startObj[hierachy.name];
@@ -254,7 +254,7 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 			BuiltObject = myNode;
 			if(hierachy.childrens){
 				array.forEach(hierachy.childrens, function(child){
-					BuiltObject.appendChild(this.fromHierarchy(child, false).domNode);
+					BuiltObject.appendChild(Utils.fromHierarchy(child, false).domNode);
 				});
 			}
 			BuiltObject.domNode = BuiltObject;
@@ -267,11 +267,11 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 			if (hierachy.innerHTML) { startObj[hierachy.name].set('content',hierachy.innerHTML);}
 			if(hierachy.childrens){
 				array.forEach(hierachy.childrens, function(child){
-					if (lang.isFunction(startObj[hierachy.name].addChild)) { startObj[hierachy.name].addChild(this.fromHierarchy(child, startObj[hierachy.name])); }
+					if (lang.isFunction(startObj[hierachy.name].addChild)) { startObj[hierachy.name].addChild(Utils.fromHierarchy(child, startObj[hierachy.name])); }
 					else { 
-						if (startObj[hierachy.name].containerNode) { startObj[hierachy.name].containerNode.appendChild(this.fromHierarchy(child, startObj[hierachy.name]).domNode); }
-						else if (startObj[hierachy.name].domNode) { startObj[hierachy.name].domNode.appendChild(this.fromHierarchy(child, startObj[hierachy.name]).domNode); }
-						else { startObj[hierachy.name].appendChild(this.fromHierarchy(child, startObj[hierachy.name]).domNode); }
+						if (startObj[hierachy.name].containerNode) { startObj[hierachy.name].containerNode.appendChild(Utils.fromHierarchy(child, startObj[hierachy.name]).domNode); }
+						else if (startObj[hierachy.name].domNode) { startObj[hierachy.name].domNode.appendChild(Utils.fromHierarchy(child, startObj[hierachy.name]).domNode); }
+						else { startObj[hierachy.name].appendChild(Utils.fromHierarchy(child, startObj[hierachy.name]).domNode); }
 					}
 				});
 			}
@@ -282,11 +282,11 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 			if (hierachy.innerHTML) { BuiltObject.set('content',hierachy.innerHTML);}
 			if(hierachy.childrens){
 				array.forEach(hierachy.childrens, function(child){
-					if (lang.isFunction(BuiltObject.addChild)) { BuiltObject.addChild(this.fromHierarchy(child, false)); }
+					if (lang.isFunction(BuiltObject.addChild)) { BuiltObject.addChild(Utils.fromHierarchy(child, false)); }
 					else { 
-						if (BuiltObject.containerNode) { BuiltObject.containerNode.appendChild(this.fromHierarchy(child, false).domNode); }
-						else if (BuiltObject.domNode) { BuiltObject.domNode.appendChild(this.fromHierarchy(child, false).domNode); }
-						else { BuiltObject.appendChild(this.fromHierarchy(child, false).domNode); }
+						if (BuiltObject.containerNode) { BuiltObject.containerNode.appendChild(Utils.fromHierarchy(child, false).domNode); }
+						else if (BuiltObject.domNode) { BuiltObject.domNode.appendChild(Utils.fromHierarchy(child, false).domNode); }
+						else { BuiltObject.appendChild(Utils.fromHierarchy(child, false).domNode); }
 					}
 				});
 			}

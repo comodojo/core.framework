@@ -88,18 +88,30 @@ return declare("comodojo.KernelStore", base, {
 		//		Additional metadata for storing the data.  Includes an "id"
 		//		property if a specific id is to be used.
 		// returns: dojo/_base/Deferred
+		
 		options = options || {};
-		if (typeof options.overwrite != "undefined") { options.overwrite = false; }
+		
+		if (typeof options.overwrite == "undefined" || !options.overwrite) {
+			options.overwrite = 0;
+		}
+		else {
+			options.overwrite = 1;	
+		}
+		
 		var id = ("id" in options) ? options.id : this.getIdentity(object);
 		var hasId = typeof id != "undefined";
+		
+		//console.info(id);
+		//console.info(hasId);
 		
 		var post_data = {
 			store: true,
 			application: this.application,
 			method: hasId ? this.methodPut : this.methodAdd,
 			transport: 'JSON',
-			data: xhr.objectToQuery(object),
-			overwrite: options.overwrite
+			overwrite: options.overwrite,
+			idProperty: this.idProperty,
+			data: xhr.objectToQuery(object)
 		}
 
 		if (hasId) { post_data.id = id; }
@@ -161,15 +173,16 @@ return declare("comodojo.KernelStore", base, {
 			store: true,
 			application: this.application,
 			method: this.methodQuery,
-			transport: 'JSON'
+			transport: 'JSON',
+			idProperty: this.idProperty
 		};
 
 		if(query && typeof query == "object"){
 			query = xhr.objectToQuery(query);
-			_postData.query = query ? query : false;
+			_postData.query = query ? query : 0;
 		}
 		else {
-			_postData.query = false;
+			_postData.query = 0;
 		}
 
 		if(options.start >= 0 || options.count >= 0){

@@ -1,4 +1,9 @@
 comodojo.loadCss('comodojo/CSS/layout.css');
+comodojo.loadCss('comodojo/javascript/dojox/layout/resources/ExpandoPane.css');
+//comodojo.loadCss('comodojo/javascript/dojox/grid/resources/'+comodojoConfig.dojoTheme+'Grid.css');
+//comodojo.loadCss('comodojo/javascript/dijit/themes/'+comodojoConfig.dojoTheme+'/document.css');
+comodojo.loadCss('comodojo/javascript/gridx/resources/'+comodojoConfig.dojoTheme+'/Gridx.css');
+
 define("comodojo/Layout", [
 	"dojo/_base/lang",
 	"dojo/_base/Deferred",
@@ -7,12 +12,15 @@ define("comodojo/Layout", [
 	"dojo/dom-construct",
 	"dojo/dom-class",
 	"dojo/dom-geometry",
+	"dojo/dom-style",
 	"dijit/layout/BorderContainer",
 	"dijit/layout/ContentPane",
-	"dijit/layout/TabContainer",
-	"dijit/layout/AccordionContainer",
-	"dojox/layout/ExpandoPane",
-	"comodojo/Utils"
+	//"dijit/layout/TabContainer",
+	//"dijit/layout/AccordionContainer",
+	//"dojox/layout/ExpandoPane",
+	"comodojo/Utils",
+	"gridx/core/model/cache/Sync",
+	"gridx/core/model/cache/Async"
 ], 
 function(
 	lang,
@@ -22,18 +30,23 @@ function(
 	domConstruct,
 	domClass,
 	domGeom,
+	domStyle,
 	BorderContainer,
 	ContentPane,
-	TabContainer,
-	AccordionContainer,
-	ExpandoPane,
-	Utils
+	//TabContainer,
+	//AccordionContainer,
+	//ExpandoPane,
+	Utils,
+	SyncCache,
+	AsyncCache
 ){
 
 	// module:
 	// 	comodojo/Form
 
-var layout = declare(null,{
+var that = false;
+
+var Layout = declare(null,{
 	// summary:
 	// description:
 
@@ -78,7 +91,19 @@ var layout = declare(null,{
 	// Object
 	hierarchy: {},
 
+	// Modules to load
+	// Array
+	modules: [],
+
+	load_modules: function(dfrrd,module) {
+		require(module, function(mod) {
+			dfrrd.resolve(mod);
+		})
+	},
+
 	constructor: function(args) {
+
+		that = this;
 
 		declare.safeMixin(this,args);
 
@@ -90,6 +115,89 @@ var layout = declare(null,{
 		//this.layout = [];
 		//this._structure = false;
 		//this.real_attach_node = false;
+
+		this.deferred_calls = [];
+
+		for (i in args.modules) {
+			var mods;
+			switch(args.modules[i]) {
+				case 'TabContainer':
+					mods = ["dijit/layout/TabContainer"];
+				break;
+				case 'AccordionContainer':
+					mods = ["dijit/layout/AccordionContainer"];
+				break;
+				case 'ExpandoPane':
+					mods = ["dojox/layout/ExpandoPane"];
+				break;
+				case 'Tree':
+					mods = ["dijit/Tree","dijit/tree/ObjectStoreModel","dojo/store/Observable"];
+				break;
+				case 'Grid':
+					mods = ["gridx/Grid"];
+				break;
+				/*case 'GridSortSimple':
+					mods = ["gridx/modules/SingleSort"];
+				break;
+				case 'GridSortNested':
+					mods = ["gridx/modules/NestedSort"];
+				break;
+				case 'GridEdit':
+					mods = ["gridx/modules/CellWidget","gridx/modules/Edit"];
+				break;
+				case 'GridPaginationBar':
+					mods = ["gridx/modules/Pagination","gridx/modules/pagination/PaginationBar"];
+				break;
+				case 'GridPaginationDropDown':
+					mods = ["gridx/modules/Pagination","gridx/modules/pagination/PaginationBarDD"];
+				break;
+				case 'GridFilterBar':
+					mods = ["gridx/modules/Filter","gridx/modules/filter/FilterBar"];
+				break;
+				case 'GridFilterQuick':
+					mods = ["gridx/modules/Filter","gridx/modules/filter/QuickFilter"];
+				break;
+				case 'GridRowHeader':
+					mods = ["gridx/modules/RowHeader"];
+				break;
+				case 'GridVirtualScroller':
+					mods = ["gridx/modules/VirtualVScroller"];
+				break;
+				case 'GridIndirectSelect':
+					mods = ["gridx/modules/IndirectSelect"];
+				break;
+				case 'GridSimpleSelectRow':
+					mods = ["gridx/modules/select/Row"];
+				break;
+				case 'GridSimpleSelectColumn':
+					mods = ["gridx/modules/select/Column"];
+				break;
+				case 'GridSimpleSelectCell':
+					mods = ["gridx/modules/select/Cell"];
+				break;
+				case 'GridExtendedSelectRow':
+					mods = ["gridx/modules/extendedSelect/Row"];
+				break;
+				case 'GridExtendedSelectColumn':
+					mods = ["gridx/modules/extendedSelect/Column"];
+				break;
+				case 'GridExtendedSelectCell':
+					mods = ["gridx/modules/extendedSelect/Cell"];
+				break;
+				case 'GridColumnResizer':
+					mods = ["gridx/modules/ColumnResizer"];
+				break;*/
+				
+			}
+
+			this.deferred_calls[i] = new Deferred();
+
+			this.deferred_calls[i].then(function(v) {
+				comodojo.debug('Loaded layout module (deferred): '+args.modules[i]);
+			});
+			
+			this.load_modules(this.deferred_calls[i],mods);
+		}
 
 	},
 
@@ -249,35 +357,35 @@ var layout = declare(null,{
 
 	buildLayout: function(structure, attachNode) {
 		
-		var layout, privateLayout; 
+		var layout=[], privateLayout; 
 
 		privateLayout = Utils.fromHierarchy(structure,layout);
 		
-		//console.log(this.layout);
+		//console.log(privateLayout);
 		
 		attachNode.appendChild(privateLayout.domNode);
 		
 		privateLayout.resize = function(changeSize, resultSize) {
 			
-			real_width = $d.getMarginBox(that.attachNode.containerNode).w-2;
-			real_height = $d.getMarginBox(that.attachNode.canvas).h-2;
+			real_width = domGeom.getMarginBox(that.attachNode.containerNode).w-2;
+			real_height = domGeom.getMarginBox(that.attachNode.canvas).h-2;
 			
 			var node = this.domNode, mb = {w:real_width,h:real_height,l:0,t:0};
 			
-			$d.setMarginBox(node, mb);
+			domGeom.setMarginBox(node, mb);
 			
 			//if(!this.cs || !this.pe){
-				this.cs = $d.getComputedStyle(node);
-				this.pe = $d.getPadExtents(node, this.cs);
-				this.pe.r = $d.toPixelValue(node, this.cs.paddingRight);
-				this.pe.b = $d.toPixelValue(node, this.cs.paddingBottom);
-				this.pe.t = $d.toPixelValue(node, this.cs.paddingTop);
-				this.pe.l = $d.toPixelValue(node, this.cs.paddingLeft);
+				this.cs = domStyle.getComputedStyle(node);
+				this.pe = domGeom.getPadExtents(node, this.cs);
+				this.pe.r = domStyle.toPixelValue(node, this.cs.paddingRight);
+				this.pe.b = domStyle.toPixelValue(node, this.cs.paddingBottom);
+				this.pe.t = domStyle.toPixelValue(node, this.cs.paddingTop);
+				this.pe.l = domStyle.toPixelValue(node, this.cs.paddingLeft);
 
 				node.style.padding = "5px";
 				
-				var me = $d.getMarginExtents(node, this.cs);
-				var be = $d.getBorderExtents(node, this.cs);
+				var me = domGeom.getMarginExtents(node, this.cs);
+				var be = domGeom.getBorderExtents(node, this.cs);
 				
 				this._borderBox = {
 					w: mb.w - (me.w + be.w),
@@ -285,8 +393,8 @@ var layout = declare(null,{
 				};
 				
 				this._contentBox = {
-					l: $d.toPixelValue(node, this.cs.paddingLeft),
-					t: $d.toPixelValue(node, this.cs.paddingTop),
+					l: domStyle.toPixelValue(node, this.cs.paddingLeft),
+					t: domStyle.toPixelValue(node, this.cs.paddingTop),
 					w: this._borderBox.w - this.pe.w - 10,
 					h: this._borderBox.h - this.pe.h - 10
 				};
@@ -298,6 +406,13 @@ var layout = declare(null,{
 		};
 		
 		privateLayout.startup();
+
+		// THIS IS UGLY
+		// Resize function is still buggy, so it needs to be called 3 times to work correctly
+		// THIS IS UGLY
+		privateLayout.resize();
+		privateLayout.resize();
+		privateLayout.resize();
 		
 		return layout;
 
@@ -310,9 +425,9 @@ var layout = declare(null,{
 			
 			var wtype, wname, wregion, wid, wreference, wparams;
 			
-			wname = $c.isDefined(hierarchy[i].name) ? hierarchy[i].name : ($c.isDefined(hierarchy[i].region) ? hierarchy[i].region : hierarchy[i].type);
-			wregion = $c.isDefined(hierarchy[i].region) ? hierarchy[i].region : false;
-			wid = wname+'_'+wregion+'_'+this._pid;
+			wname = Utils.defined(hierarchy[i].name) ? hierarchy[i].name : (Utils.defined(hierarchy[i].region) ? hierarchy[i].region : hierarchy[i].type);
+			wregion = Utils.defined(hierarchy[i].region) ? hierarchy[i].region : false;
+			wid = wname+'_'+wregion+'_'+this.id;
 			
 			gridBoxDef = {
 				title: '',
@@ -321,7 +436,8 @@ var layout = declare(null,{
 			
 			wparams = {
 				region: wregion,
-				splitter: this.splitter
+				splitter: this.splitter,
+				cacheClass: 'async'
 			};
 			
 			switch (hierarchy[i].type) {
@@ -329,18 +445,24 @@ var layout = declare(null,{
 				case "BorderContainer":
 				case "TabContainer":
 				case "AccordionContainer":
+					wtype = "dijit.layout."+hierarchy[i].type;
+				break;
 				case "Tree":
 					wtype = "dijit.layout."+hierarchy[i].type;
+					wparams.model = new dijit.tree.ObjectStoreModel({
+						store: new dojo.store.Observable(hierarchy[i].store),
+						query; hierarchy[i].query
+					});
 				break;
 				case "ExpandoPane":
 					wtype = "dojox.layout."+hierarchy[i].type;
 				break;
 				case "Grid":
-					wtype = "dojox.grid.DataGrid";
+					wtype = "gridx.Grid";
 				break;
-				case "TreeGrid":
-					wtype = "dijit.grid.TreeGrid";
-				break;
+				//case "TreeGrid":
+				//	wtype = "dijit.grid.TreeGrid";
+				//break;
 				case "GridBox":
 					wtype = "dijit.layout.ContentPane";
 					lang.mixin(gridBoxDef, hierarchy[i].gridBox);
@@ -358,7 +480,11 @@ var layout = declare(null,{
 			}
 			
 			lang.mixin(wparams, hierarchy[i].params);
-			
+
+			if (wtype == "gridx.Grid") {
+				wparams.cacheClass = wparams.cacheClass == 'sync' ? SyncCache : AsyncCache;
+			}
+
 			wreference = {
 				widget: wtype,
 				name: wname,
@@ -376,6 +502,6 @@ var layout = declare(null,{
 
 });
 
-return layout;	
+return Layout;	
 
 });

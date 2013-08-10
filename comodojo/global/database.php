@@ -238,17 +238,71 @@ class database {
 			throw new Exception('Invalid key/s',1011);
 		}
 		elseif (is_array($key_name_or_array)) {
+
 			foreach ($key_name_or_array as $key=>$key_val) {
-				$_key_val = sprintf($keys_pattern,$key_val);
+
+				$key_val = trim($key_val);
+				$key_val_pieces = explode('::', $key_val);
+
+				if (sizeof($key_val_pieces) == 1) {
+					$key_val_int_pieces = explode('=>', $key_val);
+					if (sizeof($key_val_int_pieces) == 1) {
+						$_key_val = sprintf($keys_pattern,$key_val);
+					}
+					else {
+						$_key_val = sprintf($keys_pattern,$key_val_int_pieces[0]).' AS '.$key_val_int_pieces[1];	
+					}
+				}
+				elseif (sizeof($key_val_pieces) == 2) {
+					$key_val_int_pieces = explode('=>', $key_val_pieces[1]);
+					if (sizeof($key_val_int_pieces) == 1) {
+						$_key_val = $key_val_pieces[0].'('.sprintf($keys_pattern,$key_val_pieces[1]).')';
+					}
+					else {
+						$_key_val = $key_val_pieces[0].'('.sprintf($keys_pattern,$key_val_int_pieces[0]).') AS '.$key_val_int_pieces[1];
+					}
+				}
+				else {
+					comodojo_debug('Invalid key/s','ERROR','database');
+					throw new Exception('Invalid key/s',1011);
+				}
+
 				$key_name_or_array[$key] = $_key_val;
 				array_push($this->keys_array,$_key_val);
+
 			}
 			$this->keys = implode(',',$key_name_or_array);
 		}
 		else {
+			
 			$k = trim($key_name_or_array);
-			$this->keys = $k == "*" ? "*" : sprintf($keys_pattern,$k);
+			$key_val_pieces = explode('::', $k);
+
+			if (sizeof($key_val_pieces) == 1) {
+				$key_val_int_pieces = explode('=>', $k);
+				if (sizeof($key_val_int_pieces) == 1) {
+					$this->keys = $k == "*" ? "*" : sprintf($keys_pattern,$k);
+				}
+				else {
+					$this->keys = sprintf($keys_pattern,$key_val_int_pieces[0]).' AS '.$key_val_int_pieces[1];
+				}
+			}
+			elseif (sizeof($key_val_pieces) == 2) {
+				$key_val_int_pieces = explode('=>', $key_val_pieces[1]);
+				if (sizeof($key_val_int_pieces) == 1) {
+					$this->keys = $key_val_pieces[0].'('.sprintf($keys_pattern,$key_val_pieces[1]).')';
+				}
+				else {
+					$this->keys = $key_val_pieces[0].'('.sprintf($keys_pattern,$key_val_int_pieces[0]).') AS '.$key_val_int_pieces[1];
+				}
+			}
+			else {
+				comodojo_debug('Invalid key/s','ERROR','database');
+				throw new Exception('Invalid key/s',1011);
+			}
+
 			array_push($this->keys_array,$this->keys);
+
 		}
 
 		comodojo_debug('Keys are now: '.$this->keys,'INFO','database');
@@ -326,7 +380,7 @@ class database {
 			}
 			$_values = '('.implode(',',$value_or_array).')';
 			array_push($this->values, $_values);
-			array_push($this->values_array, $value_or_array);
+			$this->values_array = $value_or_array;
 		}
 		else {
 			if	(is_bool($value_or_array) === true) {
@@ -532,7 +586,7 @@ class database {
 		}
 
 		$c = trim($column);
-		if (!is_null($direction)) $d = strtoupper($direction);
+		if (!is_null($direction)) $d = ' '.strtoupper($direction);
 		else $d = null;
 		
 		if (is_null($this->order_by)) $this->order_by = "ORDER BY ".sprintf($order_column_pattern,$c,$d);
@@ -952,7 +1006,7 @@ class database {
 			throw new Exception('Invalid parameters for database::get',1004);
 		}
 
-		$query_pattern = "%s %s FROM %s%s%s%s%s%s";
+		$query_pattern = "%s %s FROM %s%s%s%s%s%s%s";
 
 		/*
 		switch ($this->dbDataModel) {
@@ -978,7 +1032,7 @@ class database {
 				$_having = is_null($this->having) ? null : " ".$this->having;
 				$_order_by = is_null($this->order_by) ? null : " ".$this->order_by;
 
-				$_limit = $limit === 0 ? null : (' LIMIT '.($offset === 0 ? intval($limit) : intval($offset).",".intval($limit)));
+				$_limit = intval($limit) === 0 ? null : (' LIMIT '.(intval($offset) === 0 ? intval($limit) : intval($offset).",".intval($limit)));
 		
 		/*		
 				break;

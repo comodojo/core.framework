@@ -231,7 +231,7 @@ class kernel extends comodojo_basic {
 	}
 
 	private function compose_return_store($data) {
-		return Array(is_null($data->data) ? Array() : $data->data, is_null($data->total) ? null : $data->total);
+		return Array(is_null($data['data']['result']) ? Array() : $data['data']['result'], is_null($data['total']) ? null : $data['total']);
 	}
 	
 	private function encode_return_data($data, $total=null) {
@@ -252,9 +252,19 @@ class kernel extends comodojo_basic {
 							'ttl'			=> 	0,
 							'contentType'	=>	'application/json',
 							'charset'		=>	COMODOJO_DEFAULT_ENCODING,
-							'contentRange'	=>	is_null($total) ? false : $total
+							'contentRange'	=>	is_null($total) ? false : 'items '.$total
 						), strlen($to_return));
 					}
+				break;
+				case 'kernel_query':
+					$to_return = array2json($data);
+					set_header(Array(
+						'statusCode'	=>	200,
+						'ttl'			=> 	0,
+						'contentType'	=>	'application/json',
+						'charset'		=>	COMODOJO_DEFAULT_ENCODING,
+						'contentRange'	=>	is_null($total) ? false : 'items '.$total
+					), strlen($to_return));
 				break;
 				case 'kernel_delete':
 					$to_return = null;

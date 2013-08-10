@@ -72,7 +72,7 @@ function set_header ($params, $contentLength=0) {
 			}
 			if ($contentType !== false) header('Content-type: '.strtolower($contentType).($charset != false ? '; charset='.$charset : ''));
 			if ($contentLength !== 0) header('Content-Length: '.$contentLength,true);
-			if ($contentDisposition !== 0) header('Content-Disposition: '.$contentDisposition.';'.( !$filename ? '' : (' filename="'.$filename.'"') ),true);
+			if ($contentDisposition !== false) header('Content-Disposition: '.$contentDisposition.';'.( !$filename ? '' : (' filename="'.$filename.'"') ),true);
 			if ($contentRange !== false) header('Content-Range: '.$contentRange,true);
 		break;
 		case 202: //Accepted

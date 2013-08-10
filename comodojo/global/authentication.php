@@ -350,7 +350,7 @@ class authentication {
 		try {
 			$db = new database();
 			$result = $db->table('users')
-			->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url","fromRpc"))
+			->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url","rpc"))
 			->where("userName","=",$this->userName)
 			->and_where("enabled","=",1)
 			->and_where("ldap","=",0)

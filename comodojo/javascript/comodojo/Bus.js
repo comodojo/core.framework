@@ -18,7 +18,7 @@ Bus._triggers = {};
 
 Bus._events = {};
 
-//Bus._modules = {};
+Bus._tmp = {};
 
 Bus._timestamps = {};
 
@@ -349,6 +349,21 @@ Bus.getRunningApplications = function(pids_only) {
 
 Bus.addAutostartApplication = function(appExec) {
 	Bus._autostartApplications.push(appExec);
+};
+
+Bus.temp = function(k, v) {
+	if (!v) {
+		if (utils.defined(Bus._tmp[k])) {
+			return Bus._tmp[k];
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		Bus._tmp[k] = v;
+		return Bus._tmp[k];
+	}
 };
 
 //Add std events to the bus:

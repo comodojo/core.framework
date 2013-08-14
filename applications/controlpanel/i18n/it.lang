@@ -14,7 +14,7 @@ $lang = Array(
 
 	'0000'	=>	'Torna al menu principale',
 	'0001'	=>	'Preferenze salvate correttamente!',
-	'0002'	=>	'La cache è stata cancellata. Potrebbe essere necessario riavviare il portale per rendere le modifiche operative.<br>${0}Clicca qui${1} per riavviare comodojo; le informazioni non salvate verranno perse.',
+	'0002'	=>	'La cache è stata cancellata. Potrebbe essere necessario riavviare il portale per rendere le modifiche operative.<br>{0}Clicca qui{1} per riavviare comodojo; le informazioni non salvate verranno perse.',
 	'0003'	=>	'',
 	'0004'	=>	'',
 	'0005'	=>	'',

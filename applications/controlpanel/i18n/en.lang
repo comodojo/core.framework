@@ -14,7 +14,7 @@ $lang = Array(
 
 	'0000'	=>	'Back to Main Menu',
 	'0001'	=>	'Preferences saved correctly!',
-	'0002'	=>	'Cache cleaned. Restart could be required to apply new preferences.<br>${0}Click here${1} to restart; unsaved changes will be lost.',
+	'0002'	=>	'Cache cleaned. Restart could be required to apply new preferences.<br>{0}Click here{1} to restart; unsaved changes will be lost.',
 	'0003'	=>	'',
 	'0004'	=>	'',
 	'0005'	=>	'',

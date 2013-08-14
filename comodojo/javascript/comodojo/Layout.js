@@ -451,7 +451,7 @@ var Layout = declare(null,{
 					wtype = "dijit.layout."+hierarchy[i].type;
 					wparams.model = new dijit.tree.ObjectStoreModel({
 						store: new dojo.store.Observable(hierarchy[i].store),
-						query; hierarchy[i].query
+						query: hierarchy[i].query
 					});
 				break;
 				case "ExpandoPane":

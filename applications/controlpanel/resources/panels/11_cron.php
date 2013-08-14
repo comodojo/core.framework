@@ -13,16 +13,16 @@
 function get_cron_notification_options() {
 	return Array(
 		Array(
-			"name"	=>	"Never",
-			"value"	=>	"DISABLED"
+			"label"	=>	"Never",
+			"id"	=>	"DISABLED"
 		),
 		Array(
-			"name"	=>	"Always (each cycle)",
-			"value"	=>	"ALWAYS"
+			"label"	=>	"Always (each cycle)",
+			"id"	=>	"ALWAYS"
 		),
 		Array(
-			"name"	=>	"On failures",
-			"value"	=>	"FAILURES"
+			"label"	=>	"On failures",
+			"id"	=>	"FAILURES"
 		)
 	);
 }

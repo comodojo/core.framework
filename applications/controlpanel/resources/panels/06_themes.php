@@ -18,8 +18,8 @@ function get_available_site_themes() {
 			require(COMODOJO_SITE_PATH."comodojo/themes/".$item."/theme.info");
 			if (is_array($theme)) {
 				array_push($themes_available, Array(
-					"name"=>$theme["name"],
-					"value"=>$theme["name"],
+					"label"=>$theme["name"],
+					"id"=>$theme["name"],
 					"createdBy"=>$theme["createdBy"],
 					"version"=>$theme["version"],
 					"framework"=>$theme["framework"],
@@ -35,10 +35,10 @@ function get_available_site_themes() {
 
 function get_available_dojo_themes() {
 	return Array(
-		Array("name"=>"tundra","value"=>"tundra"),
-		Array("name"=>"soria","value"=>"soria"),
-		Array("name"=>"nihilo","value"=>"nihilo"),
-		Array("name"=>"claro","value"=>"claro")
+		Array("label"=>"tundra","id"=>"tundra"),
+		Array("label"=>"soria","id"=>"soria"),
+		Array("label"=>"nihilo","id"=>"nihilo"),
+		Array("label"=>"claro","id"=>"claro")
 	);
 }
 

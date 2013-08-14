@@ -9,6 +9,9 @@
  */
 
 $c.App.loadCss('controlpanel');
+$d.require("comodojo.Form");
+$d.require("comodojo.Layout");
+/*
 $c.loadComponent('layout',["TreeGrid"]);
 $c.loadComponent('form', [
 	'Button',
@@ -23,8 +26,8 @@ $c.loadComponent('form', [
 	'SmallEditor',
 	'Textarea'
 ]);
-
-$c.app.load("controlpanel",
+*/
+$c.App.load("controlpanel",
 
 	function(pid, applicationSpace, status){
 	
@@ -41,12 +44,12 @@ $c.app.load("controlpanel",
 		this.init = function(){
 		
 			if (typeof this.onApplicationStart == 'function') { this.onApplicationStart(this); }
-			if (typeof this.onApplicationStop == 'function') { $d.connect(applicationSpace, 'uninitialize', myself.onApplicationStop); }
+			if (typeof this.onApplicationStop == 'function') { $d.aspect.after(applicationSpace, 'close', myself.onApplicationStop); }
 			
-			this.container = new $c.layout({
+			this.container = new $c.Layout({
 				attachNode: applicationSpace,
 				splitter: false,
-				_pid: pid,
+				id: pid,
 				hierarchy: [{
 					type: 'Content',
 					name: 'top',
@@ -121,11 +124,11 @@ $c.app.load("controlpanel",
 		this._setErrorState = function(error) {
 			myself.container.main.center.containerNode.innerHTML = "";
 			myself._loadingStateRelease();
-			$c.error.local(10011,'('+error.code+') '+error.name,myself.container.main.center);
+			$c.Error.local(myself.container.main.center, error.code, error.name);
 			myself._buttonsGoesToRestart();
 		};
 		this._throwSaveNotCompliantWarning = function() {
-			$c.dialog.info($c.getLocalizedMessage('10028'));
+			$c.Dialog.info($c.getLocalizedMessage('10028'));
 		};
 		
 		this._buttonsGoesToSave = function() {
@@ -166,7 +169,7 @@ $c.app.load("controlpanel",
 				break;
 			}
 			
-			$c.kernel.newCall((!this.state ? this._buildMainGrid : this._buildState), callOptions);
+			$c.Kernel.newCall((!this.state ? this._buildMainGrid : this._buildState), callOptions);
 			
 		};
 		
@@ -238,7 +241,11 @@ $c.app.load("controlpanel",
 				if (components[i].content) { components[i].content = this.getLocalizedMessage(components[i].content); }
 			}
 			
-			this.form = new $c.form({
+			this.form = new $c.Form({
+				modules: ['Button','DateTextBox', 'ValidationTextBox',
+						'NumberSpinner','NumberTextBox','EmailTextBox',
+						'TextBox', 'Select', 'OnOffSelect', 'SmallEditor',
+						'Textarea','PasswordTextBox'],
 				autoFocus: true,
 				hierarchy: components,
 				attachNode: this.container.main.center.containerNode
@@ -263,7 +270,7 @@ $c.app.load("controlpanel",
 			
 			this.container.main.center.containerNode.appendChild(this._themeImage);
 			
-			$c.tmp._availableThemes = [];
+			this.temp = $c.Bus.temp('availableThemes',[]);
 			
 			var currentTheme = false, i=0, o=0;
 			
@@ -273,18 +280,18 @@ $c.app.load("controlpanel",
 					currentTheme = components[i].value;
 					
 					for (o in components[i].options) {
-						$c.tmp._availableThemes[components[i].options[o].name] = components[i].options[o];
+						this.temp[components[i].options[o].label] = components[i].options[o];
 					}
 					
 					components[i].label = this.getLocalizedMessage(components[i].label);
 					
 					components[i].onChange = function() {
-						myself._themeImage.style.backgroundImage = "url('comodojo/themes/" + $c.tmp._availableThemes[this.value].name + "/theme.jpg')";
-						myself._themeName.innerHTML = "<strong>"+myself.getLocalizedMessage('0153')+":</strong> "+ $c.tmp._availableThemes[this.value].name;
-						myself._themeCreatedBy.innerHTML = "<strong>"+myself.getLocalizedMessage('0154')+":</strong> "+ $c.tmp._availableThemes[this.value].createdBy;
-						myself._themeVersion.innerHTML = "<strong>"+myself.getLocalizedMessage('0155')+":</strong> "+ $c.tmp._availableThemes[this.value].version;
-						myself._themeFramework.innerHTML = "<strong>"+myself.getLocalizedMessage('0156')+":</strong> "+ $c.tmp._availableThemes[this.value].framework;
-						myself._themeComment.innerHTML = "<strong>"+myself.getLocalizedMessage('0157')+":</strong> "+ $c.tmp._availableThemes[this.value].comment;
+						myself._themeImage.style.backgroundImage = "url('comodojo/themes/" + myself.temp[this.value].label + "/theme.jpg')";
+						myself._themeName.innerHTML = "<strong>"+myself.getLocalizedMessage('0153')+":</strong> "+ myself.temp[this.value].label;
+						myself._themeCreatedBy.innerHTML = "<strong>"+myself.getLocalizedMessage('0154')+":</strong> "+ myself.temp[this.value].createdBy;
+						myself._themeVersion.innerHTML = "<strong>"+myself.getLocalizedMessage('0155')+":</strong> "+ myself.temp[this.value].version;
+						myself._themeFramework.innerHTML = "<strong>"+myself.getLocalizedMessage('0156')+":</strong> "+ myself.temp[this.value].framework;
+						myself._themeComment.innerHTML = "<strong>"+myself.getLocalizedMessage('0157')+":</strong> "+ myself.temp[this.value].comment;
 					};
 					
 				}
@@ -292,14 +299,15 @@ $c.app.load("controlpanel",
 					components[i].label = this.getLocalizedMessage(components[i].label);
 				}
 			}
-			this._themeImage.style.backgroundImage = "url('comodojo/themes/" + $c.tmp._availableThemes[currentTheme].name + "/theme.jpg')";
-			this._themeName.innerHTML = "<strong>"+this.getLocalizedMessage('0153')+":</strong> "+ $c.tmp._availableThemes[currentTheme].name;
-			this._themeCreatedBy.innerHTML = "<strong>"+this.getLocalizedMessage('0154')+":</strong> "+ $c.tmp._availableThemes[currentTheme].createdBy;
-			this._themeVersion.innerHTML = "<strong>"+this.getLocalizedMessage('0155')+":</strong> "+ $c.tmp._availableThemes[currentTheme].version;
-			this._themeFramework.innerHTML = "<strong>"+this.getLocalizedMessage('0156')+":</strong> "+ $c.tmp._availableThemes[currentTheme].framework;
-			this._themeComment.innerHTML = "<strong>"+this.getLocalizedMessage('0157')+":</strong> "+ $c.tmp._availableThemes[currentTheme].comment;
+			this._themeImage.style.backgroundImage = "url('comodojo/themes/" + this.temp[currentTheme].label + "/theme.jpg')";
+			this._themeName.innerHTML = "<strong>"+this.getLocalizedMessage('0153')+":</strong> "+ this.temp[currentTheme].label;
+			this._themeCreatedBy.innerHTML = "<strong>"+this.getLocalizedMessage('0154')+":</strong> "+ this.temp[currentTheme].createdBy;
+			this._themeVersion.innerHTML = "<strong>"+this.getLocalizedMessage('0155')+":</strong> "+ this.temp[currentTheme].version;
+			this._themeFramework.innerHTML = "<strong>"+this.getLocalizedMessage('0156')+":</strong> "+ this.temp[currentTheme].framework;
+			this._themeComment.innerHTML = "<strong>"+this.getLocalizedMessage('0157')+":</strong> "+ this.temp[currentTheme].comment;
 			
-			this.form = new $c.form({
+			this.form = new $c.Form({
+				modules: ['Select'],
 				autoFocus: true,
 				hierarchy: components,
 				attachNode: this.container.main.center.containerNode
@@ -323,7 +331,7 @@ $c.app.load("controlpanel",
 				});
 			}
 			
-			this.form = new $c.form({
+			this.form = new $c.Form({
 				autoFocus: true,
 				hierarchy: hierarchy,
 				attachNode: this.container.main.center.containerNode
@@ -450,7 +458,7 @@ $c.app.load("controlpanel",
 			}
 			else {
 				values.group = this.state;
-				$c.kernel.newCall(myself.saveCallback, {
+				$c.Kernel.newCall(myself.saveCallback, {
 					application: "controlpanel",
 					method:"set_state", 
 					content: values
@@ -461,7 +469,7 @@ $c.app.load("controlpanel",
 		
 		this.saveCallback = function(success, result) {
 			if (success) { myself._setSuccessState(); }
-			else { myself._setErrorState(); }
+			else { myself._setErrorState(result); }
 		};
 		
 	}

@@ -13,7 +13,7 @@
 function get_locale_options() {
 	$locales = Array();
 	foreach (getSupportedLocales() as $locale) {
-		array_push($locales,Array("name"=>$locale,"value"=>$locale));
+		array_push($locales,Array("label"=>$locale,"id"=>$locale));
 	}
 	return $locales;
 } 
@@ -65,20 +65,20 @@ $options = Array(
 		"onclick"	=>	false,
 		"options"	=>	Array(
 			array(
-				"value"	=>	"g",
-				"name"	=>	"G"
+				"id"	=>	"g",
+				"label"	=>	"G"
 			),
 			array(
-				"value"	=>	"pg",
-				"name"	=>	"PG"
+				"id"	=>	"pg",
+				"label"	=>	"PG"
 			),
 			array(
-				"value"	=>	"r",
-				"name"	=>	"R"
+				"id"	=>	"r",
+				"label"	=>	"R"
 			),
 			array(
-				"value"	=>	"x",
-				"name"	=>	"X"
+				"id"	=>	"x",
+				"label"	=>	"X"
 			)
 		)
 	),

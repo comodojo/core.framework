@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>*_SITETITLE_*</title>
 		
 		<style>
@@ -45,7 +45,7 @@
 				background-color: #FCFCFC;
 			}
 			
-			#footer {
+			#mailFooter {
 				clear: both;
 				padding: 0.1em;
 				background-color: #e6ebf3;
@@ -99,89 +99,6 @@
 				margin-bottom: .3em;
 				text-indent: .5em;
 			}
-			
-			table {
-				width:100%;
-				border-collapse:collapse;
-				margin: 1.3571em 0 0 0;
-				color:#333;
-				border-top: 1px #ccc solid;
-				border-bottom: 1px #ccc solid;
-			}
-			
-			table.narrow {
-				margin:  1.4286em 0 0 0;
-			}
-			
-			table.narrow th,
-			table.narrow td {
-				padding: 0 0.5em;
-				line-height: 1.4286em;
-			}
-			
-			table.bordertable {
-				border:1px #ccc solid;
-			}
-			
-			table caption {
-				font-variant:small-caps;
-			}
-			
-			th, td {
-				line-height: 1.5em;
-				vertical-align: top;
-				padding: 0.7143em 0.5em;
-			}
-			
-			th *:first-child,
-			td *:first-child {
-				margin-top: 0;
-			}
-			
-			th.nowrap,
-			td.nowrap {
-				white-space: nowrap;
-			}
-			
-			thead th {
-				text-align: left;
-				color:#000;
-				border-bottom:2px #000 solid;
-			}
-			
-			.bordertable thead th {
-				background:#e0e0e0;
-				border-right:1px #ccc solid;
-				border-bottom:1px #ccc solid;
-			}
-			
-			.bordertable tbody th[scope="row"] {
-				background:#f0f0f0;
-			}
-			
-			tbody th {
-				text-align: left;
-				border-top:1px solid #ccc;
-				text-align:left;
-			}
-			
-			.bordertable tbody th {
-				border-right:1px solid #ccc;
-			}
-			
-			tbody td {
-				text-align: left;
-				border-top:1px solid #ccc;
-			}
-			
-			.bordertable tbody td {
-				border-right:1px solid #ccc;
-			}
-			
-			tbody tr:hover th,
-			tbody tr:hover td {
-				background:#f8f8f8;
-			}
 		</style>
 		
 	</head>
@@ -198,25 +115,36 @@
 	
 		<div id="mailContent">
 	
-			<h1>*_SITETITLE_* Mail System</h1>
+			<h1>*_SITETITLE_*</h1>
 
 			<h2>*_SUBJECT_*</h2>
 			
-			<div style="width:100%">
-				<table align="center">
-					<tr>
-						<th align="center" valign="middle">PID</th>
-						<th align="center" valign="middle">Name</th>
-						<th align="center" valign="middle">Su</th>
-						<th align="center" valign="middle">Time (secs)</th>
-					</tr>
-					*_MESSAGE_*
-				</table>
-			</div>
+			<dl>
+				<p>
+					Salve *_COMPLETENAME_*,<br />
+					<br />
+					qualcuno ha richiesto che la password per il tuo account -- username <span style="font-weight: bold;">*_USERNAME_*</span> -- fosse ripristinata.
+				</p>
+				<p>
+					Se non hai fatto nessuna richiesta, ignora questa mail; è stata inviata solo al tuo indirizzo di posta e rimarrà valida fino al *_TIME_*, quindi non dovrai preoccuparti che il tuo account venga compromesso.
+				</p>
+				<p>
+					Accedendo a <a href="*_SITEURL_*?application=comodojo&method=passwordRecovery&email=*_EMAIL_*&code=*_CODE_*" target"_blank">questo link</a> ti verrà assegnata e comunicata via mail una nuova password, che ti consigliamo di cambiare al prossimo accesso.
+				</p>
+				<p>
+					Se hai problemi ad aprire il link precedente, puoi copiare e incollare il seguente indirizzo sul tuo browser:
+				</p>
+				<pre>http://*_SITEURL_*?application=comodojo&method=password_recovery&email=*_EMAIL_*&code=*_CODE_*</pre>
+				<p>
+					Grazie,<br />
+					<br />
+					*_SITETITLE_*
+				</p>
+			</dl>
 			
 		</div>
 	
-		<div id="footer">
+		<div id="mailFooter">
 		
 			<p>Powered by <a href="http://www.comodojo.org" target="_blank">Comodojo Core</a></p>
 		

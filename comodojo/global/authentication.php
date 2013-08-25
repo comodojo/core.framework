@@ -56,19 +56,19 @@ class authentication {
 		
 		try {
 			switch (COMODOJO_AUTHENTICATION_MODE) {
-				case 0:
+				case 'local':
 					comodojo_debug('Starting local authentication for user '.$userName,'INFO','authentication');
 					$isValid = $this->validate_user_local();
 				break;
-				case 1:
+				case 'ldapfiltered':
 					comodojo_debug('Starting ldap filtered authentication for user '.$userName,'INFO','authentication');
 					$isValid = $this->validate_user_ldap_filtered();
 				break;
-				case 2:
+				case 'ldapunfiltered':
 					comodojo_debug('Starting ldap unfiltered authentication for user '.$userName,'INFO','authentication');
 					$isValid = $this->validate_user_ldap_unfiltered();
 				break;
-				case 3:
+				case 'rpc':
 					comodojo_debug('Starting RPC authenticator authentication for user '.$userName,'INFO','authentication');
 					$isValid = $this->validate_user_external_rpc();
 				break;

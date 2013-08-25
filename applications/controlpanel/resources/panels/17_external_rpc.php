@@ -12,15 +12,15 @@
 
 function get_external_rpc_mode() {
 	return Array(
-		Array("name"=>"PlainText", "value"=>0),
-		Array("name"=>"SharedKey", "value"=>1)
+		Array("label"=>"PlainText", "id"=>'plain'),
+		Array("label"=>"SharedKey", "id"=>'shared')
 	);
 }
 
 function get_external_rpc_transport() {
 	return Array(
-		Array("name"=>"XML", "value"=>"XML"),
-		Array("name"=>"JSON", "value"=>"JSON")
+		Array("label"=>"XML", "id"=>"XML"),
+		Array("label"=>"JSON", "id"=>"JSON")
 	);
 }
  

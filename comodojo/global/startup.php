@@ -25,6 +25,9 @@ class comodojo_startup extends comodojo_basic {
 	private $meta = '';
 	
 	private $js_loader = false;
+
+	private $current_message_code = null;
+	private $current_message_values = null;
 	
 	public function logic($attributes) {
 		
@@ -50,13 +53,39 @@ class comodojo_startup extends comodojo_basic {
 		if ($suspended !== false) {
 			return $suspended;
 		}
-		else {
-			
-			$this->buildJsLoader($attributes);
-			
-			return $this->set_template();
-			
+
+		if (isset($attributes['application']) AND @$attributes['application'] == 'comodojo' AND isset($attributes['method']) 
+			AND (@$attributes['method'] == "confirmRegistration" OR @$attributes['method'] == "passwordRecovery")) 
+		{
+			try {
+				$this->app_exec = COMODOJO_SITE_PATH.'comodojo/global/comodojo_reserved.php';
+				require $this->app_exec;
+				$this->app_run = new comodojo_reserved();
+				$method = $this->app_run->get_registered_method($attributes['method']);
+				if (!attributes_to_parameters_match($attributes, $method[1])) {
+					$this->current_message_code = 10026;
+					$this->current_message_values = "'Conversation error.'";
+				}
+				else {
+					$message_values = $this->app_run->$method[0]($attributes);
+					if ($attributes['method'] == "confirmRegistration") {
+						$this->current_message_code = 10025;
+						$this->current_message_values = "'".$message_values['completeName']."','".$message_values['userName']."'";
+					}
+					else {
+						$this->current_message_code = 10027;
+						$this->current_message_values = "'".$message_values['userName']."','".$message_values['email']."'";
+					}
+				}
+			} catch (Exception $e) {
+				$this->current_message_code = 10026;
+				$this->current_message_values = '"'.$e->getMessage().'"';
+			}
 		}
+
+		$this->buildJsLoader($attributes);
+		
+		return $this->set_template();
 		
 	}
 	
@@ -199,13 +228,13 @@ class comodojo_startup extends comodojo_basic {
 			<script type=\"text/javascript\">
 				dojo.ready(function() {
 					comodojo.startup();";
-		/*
-		if ($this->throwSiteMessage) {
+		if ($this->current_message_code != null) {
 			$myJsLoader .= "
-					comodojo.dialog.siteMessage($this->_siteMessageCode, '$this->_siteMessageClass');
+					var notifier  = new comodojo.Notification();
+					notifier.notify(comodojo.getLocalizedMutableMessage('".$this->current_message_code."',[".$this->current_message_values."]));
 			";
 		}
-		*/
+		
 		$myJsLoader .= "					
 				});
 			</script>

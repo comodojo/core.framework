@@ -12,17 +12,17 @@
 
 function get_local_rpc_mode() {
 	return Array(
-		Array("name"=>"PlainText", "value"=>0),
-		Array("name"=>"SharedKey", "value"=>1),
-		Array("name"=>"PlainText + SharedKey", "value"=>2)
+		Array("label"=>"PlainText", "id"=>'plain'),
+		Array("label"=>"SharedKey", "id"=>'shared'),
+		Array("label"=>"PlainText + SharedKey", "id"=>'any')
 	);
 }
 
 function get_local_allowed_transport() {
 	return Array(
-		Array("name"=>"XML + JSON", "value"=>"XML,JSON"),
-		Array("name"=>"XML", "value"=>"XML"),
-		Array("name"=>"JSON", "value"=>"JSON")
+		Array("label"=>"XML + JSON", "id"=>"XML,JSON"),
+		Array("label"=>"XML", "id"=>"XML"),
+		Array("label"=>"JSON", "id"=>"JSON")
 	);
 }
  

@@ -505,7 +505,14 @@ class registration {
 
 		comodojo_load_resource("mail");
 
-		$mail_template = $this->use_localized_email_templates ? "mail_registration_confirm_".COMODOJO_CURRENT_LOCALE.".html" : "mail_registration_confirm_en.html";
+		$localized_email = "mail_registration_confirm_".COMODOJO_CURRENT_LOCALE.".html";
+
+		if ($this->use_localized_email_templates and realFileExists(COMODOJO_SITE_PATH."comodojo/templates/".$localized_email)) {
+			$mail_template = $localized_email;
+		}
+		else {
+			$mail_template = "mail_registration_confirm_en.html";
+		}
 		
 		try {
 			$mail = new mail();
@@ -528,8 +535,15 @@ class registration {
 
 		comodojo_load_resource("mail");
 
-		$mail_template = $this->use_localized_email_templates ? "mail_registration_notify_".COMODOJO_CURRENT_LOCALE.".html" : "mail_registration_notify_en.html";
-		
+		$localized_email = "mail_registration_notify_".COMODOJO_CURRENT_LOCALE.".html";
+
+		if ($this->use_localized_email_templates and realFileExists(COMODOJO_SITE_PATH."comodojo/templates/".$localized_email)) {
+			$mail_template = $localized_email;
+		}
+		else {
+			$mail_template = "mail_registration_notify_en.html";
+		}
+
 		try {
 			$mail = new mail();
 			$mail->template($mail_template)

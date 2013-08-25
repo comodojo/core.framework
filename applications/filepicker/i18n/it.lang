@@ -11,7 +11,7 @@
  */
 
 $lang = Array(
-	'0000'	=>	'Seleziona una directory',
+	'0000'	=>	'Seleziona un file',
 	'0001'	=>	'Seleziona',
 	'0002'	=>	'Annulla'
 );

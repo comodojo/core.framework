@@ -9,18 +9,15 @@
  */
 
 /**
- * Load extra component, like layout and forms
- */
-$c.loadComponent('layout');
-$c.loadComponent('form', [
-    'Button',
-	'TextBox'
-]);
-
-/**
  * Load also the css included, to show output message properly
  */
 $c.App.loadCss('helloworld');
+
+/**
+ * Load comodojo modules, if required
+ */
+$d.require('comodojo.Form');
+$d.require('comodojo.Layout');
 
 /**
  * Now declare application, as a function defined in second member of $c.app.load.
@@ -46,10 +43,10 @@ $c.App.load("helloworld",
 		 */
 		this.init = function(){
 			
-			this.container = new $c.layout({
+			this.container = new $c.Layout({
 				attachNode: applicationSpace,
 				splitter: false,
-				_pid: pid,
+				id: pid,
 				hierarchy: [{
 					type: 'Content',
 					name: 'top',
@@ -68,7 +65,8 @@ $c.App.load("helloworld",
 				}]
 			}).build();
 			
-			this.form = new $c.form({
+			this.form = new $c.Form({
+				modules: ['Button','TextBox'],
 				autoFocus: true,
 				hierarchy: [{
 	                name: "to",
@@ -91,7 +89,7 @@ $c.App.load("helloworld",
 		
 		this.say = function(to) {
 			content = !to ? {} : {to: to};
-			$c.kernel.newCall(myself.sayCallback,{
+			$c.Kernel.newCall(myself.sayCallback,{
 				application: "helloworld",
 				method: "say",
 				content: content
@@ -103,7 +101,7 @@ $c.App.load("helloworld",
 				myself.container.main.center.set('content','<p class="helloworld_helloMessage">'+result+'</p>');
 			}
 			else {
-				$c.error.local(10011,'('+result.code+') '+result.name,myself.container.main.center);
+				$c.Error.local(myself.container.main.center,result.code,result.name);
 			}
 		};
 		

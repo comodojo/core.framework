@@ -36,7 +36,7 @@ Win.newWindow = function(params) {
 
 	lang.mixin(p,params);
 
-	comodojo.debugDeep("Launching new window, id will be: " + this.id);
+	comodojo.debugDeep("Launching new window, id will be: " + p.id);
 		
 	var myNewWin = new WindowBase({
 		title: p.title,

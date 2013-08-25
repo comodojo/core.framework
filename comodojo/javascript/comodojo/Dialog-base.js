@@ -5,12 +5,14 @@ define([
 	"dojo/_base/lang",
 	"dojo/dom-construct",
 	"dojo/dom-attr",
+	"dojo/dom-class",
+	"dojo/window",
 	"dijit/registry",
 	"dijit/Dialog",
 	"dijit/form/Button",
 	"comodojo/Utils",
 	"dojo/domReady!"],
-function(declare,aspect,on,lang,domConstruct,domAttr,registry,dialog,button,utils){
+function(declare,aspect,on,lang,domConstruct,domAttr,domClass,win,registry,dialog,button,utils){
 
 // module:
 // 	comodojo/Dialog-base
@@ -46,9 +48,13 @@ var dbase = declare(null, {
 
 	hided : false,
 
-	maxWidth : "600px",
+	width: false,
 
-	maxHeight : "600px",
+	height: false,
+
+	maxWidth : win.getBox().w-20,
+
+	maxHeight : win.getBox().h-20,
 
 	hideOverflow : false,
 
@@ -63,6 +69,8 @@ var dbase = declare(null, {
 	closeOnOk : false,
 
 	closeOnCancel : true,
+
+	cssClass : false,
 
 	//this.forceWidth = false;
 	//this.forceHeight = false;
@@ -101,7 +109,7 @@ var dbase = declare(null, {
 			this.templateString = "<div class=\"dijitDialog\" role=\"dialog\" aria-labelledby=\"${id}_title\">\n\t<div data-dojo-attach-point=\"titleBar\" class=\"dijitDialogTitleBar\">\n\t\t<span data-dojo-attach-point=\"titleNode\" class=\"dijitDialogTitle\" id=\"${id}_title\"\n\t\t\t\trole=\"header\" level=\"1\"></span>\n\t\t<span data-dojo-attach-point=\"closeButtonNode\" title=\"${buttonCancel}\" role=\"button\" tabIndex=\"-1\">\n\t\t\t<span data-dojo-attach-point=\"closeText\" class=\"closeText\" title=\"${buttonCancel}\">&nbsp;</span>\n\t\t</span>\n\t</div>\n\t<div data-dojo-attach-point=\"containerNode\" class=\"dijitDialogPaneContent\"></div>\n</div>\n";
 		}
 		if (registry.byId(this.id) != null) {
-			if (!forced) {
+			if (!this.forced) {
 				comodojo.debug("Id already in use, aborting...");
 				return false;
 			}
@@ -116,7 +124,8 @@ var dbase = declare(null, {
 			id: this.id,
 			title: this.title,
 			parseOnLoad: this.parseOnLoad,
-			draggable: this.draggable
+			draggable: this.draggable,
+			style: ''
 		};
 		
 		if (utils.isNode(this.content)) {
@@ -139,10 +148,25 @@ var dbase = declare(null, {
 			params.templateString = this.templateString;
 		}
 		
+		if (this.maxWidth != false) {
+			params.style += 'max-width: '+(utils.isNumeric(this.maxWidth) ? this.maxWidth+'px' : this.maxWidth)+' !important;';
+		}
+		if (this.maxHeight != false) {
+			params.style += 'max-height: '+(utils.isNumeric(this.maxHeight) ? this.maxHeight+'px' : this.maxHeight)+' !important;';
+		}
+		if (this.width != false) {
+			params.style += 'width: '+(utils.isNumeric(this.width) ? this.width+'px' : this.width)+' !important;';
+		}
+		if (this.height != false) {
+			params.style += 'height: '+ (utils.isNumeric(this.height) ? this.height+'px' : this.height)+' !important;';
+		}
+		
 		this._dialog = new dialog(params);
+		
 		var diag = this._dialog;
-		this._dialog.containerNode.style.maxWidth = this.maxWidth;
-		this._dialog.containerNode.style.maxHeight = this.maxHeight;
+
+		if (this.cssClass != false) { domClass.add(diag.domNode,this.cssClass); }
+
 		this._dialog.containerNode.style.overflow = !this.hideOverflow ? "auto" : "hidden";
 
 		if (!this.persistent || this.focusKilled) {
@@ -169,14 +193,14 @@ var dbase = declare(null, {
 
 		if (lang.isFunction(this.actionOk)) {
 			var actionOkButton = new dijit.form.Button({
-				label: comodojo.getLocalizedMessage('10003'),
+				label: comodojo.getLocalizedMessage('10019'),
 				onClick: this.actionOk
 			}).placeAt(this.actionBar);
 			if (this.closeOnOk) {
 				on(actionOkButton, 'click', function(){ diag.hide(); });
 			}
 			var actionCancelButton = new dijit.form.Button({
-				label: comodojo.getLocalizedMessage('10004'),
+				label: comodojo.getLocalizedMessage('10020'),
 				onClick: lang.isFunction(this.actionCancel) ? this.actionCancel : function() {}
 			}).placeAt(this.actionBar);
 			if (this.closeOnCancel) { 

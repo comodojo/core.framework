@@ -333,13 +333,13 @@ class mail {
 		$this->mail = new PHPMailer(true);
 
 		switch (COMODOJO_MAIL_SERVICE) {
-			case 0:
+			case 'smtp':
 				$this->mail->IsSMTP();
 			break;
-			case 1:
+			case 'mail':
 				$this->mail->IsMail();
 			break;
-			case 2:
+			case 'sendmail':
 				$this->mail->IsSendmail();
 			break;
 			default:
@@ -359,10 +359,10 @@ class mail {
 		$this->mail->Password   = COMODOJO_MAIL_PASS;
 
 		switch (COMODOJO_MAIL_SECURITY) {
-			case 1:
+			case 'ssl':
 				$this->mail->SMTPSecure = 'ssl';
 			break;
-			case 2:
+			case 'tls':
 				$this->mail->SMTPSecure = 'tls';
 			break;
 			default:

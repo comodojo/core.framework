@@ -9,24 +9,16 @@
  */
 
 $c.App.loadCss('controlpanel');
+
 $d.require("comodojo.Form");
 $d.require("comodojo.Layout");
-/*
-$c.loadComponent('layout',["TreeGrid"]);
-$c.loadComponent('form', [
-	'Button',
-	'DateTextBox', 
-	'ValidationTextBox',
-	'NumberSpinner',
-	'NumberTextBox',
-	'EmailTextBox', 
-	'TextBox', 
-	'Select', 
-	'OnOffSelect', 
-	'SmallEditor',
-	'Textarea'
-]);
-*/
+$d.require("gridx.Grid");
+$d.require("gridx.core.model.cache.Sync");
+$d.require("gridx.modules.RowHeader");
+$d.require("gridx.modules.Tree");
+$d.require("gridx.modules.select.Row");
+$d.require("gridx.modules.IndirectSelect");
+
 $c.App.load("controlpanel",
 
 	function(pid, applicationSpace, status){
@@ -132,7 +124,7 @@ $c.App.load("controlpanel",
 		};
 		
 		this._buttonsGoesToSave = function() {
-			myself.bottomButton.set('label', '<img src="'+$c.icons.getIcon('saveall',16)+'" />&nbsp;'+$c.getLocalizedMessage('10019'));
+			myself.bottomButton.set('label', '<img src="'+$c.icons.getIcon('saveall',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'));
 			myself.bottomButton.onClick = function() { myself.save(); };
 			myself.topButtonBack.set('disabled',false);
 		};
@@ -142,7 +134,7 @@ $c.App.load("controlpanel",
 			myself.topButtonBack.set('disabled',false);
 		};
 		this._buttonsGoesToRestart = function() {
-			myself.bottomButton.set('label','<img src="'+$c.icons.getIcon('reload',16)+'" />&nbsp;'+$c.getLocalizedMessage('10022'));
+			myself.bottomButton.set('label','<img src="'+$c.icons.getIcon('reload',16)+'" />&nbsp;'+$c.getLocalizedMessage('10024'));
 			myself.bottomButton.onClick = function() { $c.app.restart(pid); };
 			myself.topButtonBack.set('disabled',false);
 		};
@@ -332,6 +324,7 @@ $c.App.load("controlpanel",
 			}
 			
 			this.form = new $c.Form({
+				modules: ['Textarea'],
 				autoFocus: true,
 				hierarchy: hierarchy,
 				attachNode: this.container.main.center.containerNode
@@ -347,6 +340,7 @@ $c.App.load("controlpanel",
 				components[0].value = {};
 			}
 			components[0].options.roles.persistent = {id:'persistent',description:'persistent',reference:'persistent'};
+			var initialSelection = [];
 			var storeElements = {
 				identifier: 'id',
 				label: 'description',
@@ -372,31 +366,54 @@ $c.App.load("controlpanel",
 						id: components[0].options.applications[o]+'_'+components[0].options.roles[i].id,
 						description: components[0].options.applications[o],
 						//status: !components[0].value[components[0].options.roles[i].id][components[0].options.applications[o]] ? false : true
-						status: $c.inArray(components[0].options.applications[o],components[0].value[components[0].options.roles[i].id]) ? true : false
+						status: $c.Utils.inArray(components[0].options.applications[o],components[0].value[components[0].options.roles[i].id]) ? true : false
 					});
+					if ($c.Utils.inArray(components[0].options.applications[o],components[0].value[components[0].options.roles[i].id])) {
+						initialSelection.push(components[0].options.applications[o]+'_'+components[0].options.roles[i].id);
+					}
 				}
 			}
+
+			//console.log(storeElements);
+
 			var bootstrapLayout = [
 				//{ name: "id", field: "id", width: "auto" },
-				{ name: "description", field: "description", width: "90%" },
-				{ name: "status", field: "status", width: "10%", type: dojox.grid.cells.Bool, editable: true}
-			];
+				{ id: "description", name: "description", field: "description", width: "90%" },
+				{ id: "status", name: "status", field: "status", width: "10%", formatter: function(value) {
+					return !$c.Utils.defined(value.status) ? '&nbsp;' : ('<img src="'+$c.icons.getIcon(value.status ? 'on' : 'off',16)+'" alt="'+(value.status ? 'on' : 'off')+'"/>');
+				}
+			}];
 			this.bootstrapStore = new dojo.data.ItemFileWriteStore({ data: storeElements });
-			var bootstrapModel = new dijit.tree.ForestStoreModel({
+
+			this.bootstrapStore.hasChildren = function(id, item){
+				return item && myself.bootstrapStore.getValues(item, 'childs').length;
+			};
+
+			this.bootstrapStore.getChildren = function(item){
+				return myself.bootstrapStore.getValues(item, 'childs');
+			};
+
+			this.bootstrapGrid = new gridx.Grid({
 				store: this.bootstrapStore,
-				rootId: 'roleId',
-				rootLabel: 'Roles',
-				childrenAttrs: ['childs']
-			});
-			this.bootstrapGrid = new dojox.grid.TreeGrid({
-				treeModel: bootstrapModel,
+				cacheClass: 'gridx/core/model/cache/Sync',
 				structure: bootstrapLayout,
-				defaultOpen: false,
-				selectionMode: 'none'
+				modules: [
+					'gridx/modules/Tree',
+					'gridx/modules/RowHeader',
+					'gridx/modules/select/Row',
+					'gridx/modules/IndirectSelect'
+				],
+				selectRowTriggerOnCell: true
 			});
+
 			myself._loadingStateRelease();
 			this.container.main.center.addChild(this.bootstrapGrid);
 			this.bootstrapGrid.startup();
+
+			for (var s in initialSelection) {
+				this.bootstrapGrid.select.row.selectById(initialSelection[s]);
+			}
+
 			this.container.main.center._layoutChildren();
 			this.bootstrapGrid.resize();
 		};
@@ -426,21 +443,19 @@ $c.App.load("controlpanel",
 				
 				case 'bootstrap':
 					validData = true;
-					bootstrapValues = {};
-					this.bootstrapStore.fetch({
-						onComplete: function(roles){
-							var i = 0, o = 0;
-							for (i in roles) {
-								bootstrapValues[roles[i].id] = [];
-								for (o in roles[i].childs) {
-									if (roles[i].childs[o].status[0] == true) {
-										bootstrapValues[roles[i].id].push(roles[i].childs[o].description[0]);
-									}
-								}
-							}
+					var bValues = this.bootstrapGrid.select.row.getSelected();
+					var jValues = {persistent: []};
+					var jParent, jId;
+
+					for (var value in bValues) {
+						jParent = this.bootstrapGrid.row(bValues[value]).parent().id;
+						jId = this.bootstrapGrid.row(bValues[value]).data().description;
+						if (!$c.Utils.defined(jValues[jParent])) {
+							jValues[jParent] = [];
 						}
-					});
-					values = {BOOTSTRAP: $d.toJson(bootstrapValues)};
+						jValues[jParent].push(jId);
+					}
+					values = {BOOTSTRAP: $d.toJson(jValues)};
 				break;
 				/*
 				case 'require':

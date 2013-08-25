@@ -11,16 +11,9 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Please insert your email address.',
+	'0001'	=>	'Address not found.',
+	'0002'	=>	'A mail was sent to your email address with instruction to restore your password.'
 );
 
 ?>

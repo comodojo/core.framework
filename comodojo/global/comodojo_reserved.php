@@ -20,6 +20,7 @@ class comodojo_reserved extends application {
 		$this->add_application_method('login', 'login', Array('userName','userPass'), '',false);
 		$this->add_application_method('logout', 'logout', Array(), '',false);
 		$this->add_application_method('confirmRegistration', 'confirm_registration', Array('id','code'), '',false);
+		$this->add_application_method('passwordRecovery', 'password_recovery', Array('email','code'), '',false);
 		$this->add_application_method('applications', 'applications', Array(), '',false);
 		$this->add_application_method('version', 'version', Array(), '',false);
 	}
@@ -44,6 +45,17 @@ class comodojo_reserved extends application {
 		try {
 			$re = new registration();
 			$result = $re->confirm_request($params['id'],$params['code']);
+		} catch (Exception $e) {
+			throw $e;
+		}
+		return $result;
+	}
+
+	public function password_recovery($params) {
+		comodojo_load_resource("users_management");
+		try {
+			$um = new users_management();
+			$result = $um->user_recovery_confirm($params['email'],$params['code']);
 		} catch (Exception $e) {
 			throw $e;
 		}

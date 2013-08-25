@@ -72,7 +72,7 @@ class rpc_client {
 		$this->port = $port;
 		$this->http_method = $http_method;
 		
-		if ($mode === 1) {
+		if ($mode === 'shared') {
 			comodojo_load_resource('Crypt/AES.php');
 			$this->mode = $mode;
 			$this->key = $key;
@@ -215,7 +215,7 @@ class rpc_client {
 
 	private function send_data($data, $contentType) {
 		
-		if ($this->mode === 1) {
+		if ($this->mode === 'shared') {
 			$aes = new Crypt_AES();
 			$aes->setKey($this->key);
 			//$data = Array('comodojo.encrypted'=>true,'transport'=>$this->transport, 'payload'=>$aes->encrypt($data));
@@ -235,7 +235,7 @@ class rpc_client {
 			comodojo_debug("Cannot init sender: ".$e->getMessage(),"ERROR","rpc_client");
 			throw new Exception("Cannot init sender: ".$e->getMessage(), 2002);
 		}
-		if ($this->mode === 1) {
+		if ($this->mode === 'shared') {
 			return $aes->decrypt($received);
 		}
 		else return $received;

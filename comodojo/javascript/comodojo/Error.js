@@ -13,6 +13,7 @@ lang.setObject("comodojo.Error", Error);
 Error.generic = function(Code, Name, Detail) {
 
 	return new dialogBase({
+		id: "errorDialog",
 		title: comodojo.getLocalizedMessage('10034'),
 		content: "<h3>("+Code+") - "+Name+"</h3><p>"+Detail+"</p>",
 		primaryCloseButton: false,
@@ -26,6 +27,7 @@ Error.generic = function(Code, Name, Detail) {
 Error.genericHang = function(Code, Name, Detail) {
 
 	return new dialogBase({
+		id: "errorDialog",
 		title: comodojo.getLocalizedMessage('10034'),
 		content: "<h3>("+Code+") - "+Name+"</h3><p>"+Detail+"</p>",
 		primaryCloseButton: false,
@@ -55,6 +57,7 @@ Error.genericLocal = function(Node, Code, Name, Detail) {
 Error.modal = function(Code, Detail) {
 
 	return new dialogBase({
+		id: "errorDialog",
 		title: comodojo.getLocalizedMessage('10034'),
 		content: "<h3>("+Code+") - "+comodojo.getLocalizedError(Code)+"</h3><p>"+Detail+"</p>",
 		primaryCloseButton: false,
@@ -88,6 +91,7 @@ Error.critical = function(Code, Detail) {
 	utils.destroyAll(Detail);
 
 	var dialog = new dialogBase({
+		id: "errorDialog",
 		title: comodojo.getLocalizedMessage('10034'),
 		content: "<h3>("+Code+") - "+comodojo.getLocalizedError(Code)+"</h3><p>"+Detail+"</p>",
 		parseOnLoad: false,

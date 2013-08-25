@@ -144,7 +144,7 @@ $comodojoCustomization = array(
 		/**
 		 * Authentication & registration
 		 */
-		"AUTHENTICATION_MODE"			=>	0,
+		"AUTHENTICATION_MODE"			=>	'local',
 		"AUTHENTICATION_CACHE_ENABLED"	=>	0,
 		"AUTHENTICATION_CACHE_TTL"		=>	259200,
 		"REGISTRATION_MODE"				=>	0,
@@ -167,9 +167,9 @@ $comodojoCustomization = array(
 		 */
 		"SMTP_SERVER"			=>	'localhost',
 		"SMTP_PORT"				=>	25,
-		"SMTP_SERVICE"			=>	1,
+		"SMTP_SERVICE"			=>	'mail',
 		"SMTP_AUTHENTICATED"	=>	0,
-		"SMTP_SECURITY"			=>	0,
+		"SMTP_SECURITY"			=>	'off',
 		"SMTP_USER"				=>	'',
 		"SMTP_PASSWORD"			=>	'',
 		"SMTP_ADDRESS"			=>	'',
@@ -178,14 +178,14 @@ $comodojoCustomization = array(
 		 */
 		"EXTERNAL_RPC_SERVER"		=>	'',
 		"EXTERNAL_RPC_PORT"			=>	80,
-		"EXTERNAL_RPC_MODE"			=>	0,
+		"EXTERNAL_RPC_MODE"			=>	'plain',
 		"EXTERNAL_RPC_TRANSPORT"	=>	'XML',
 		"EXTERNAL_RPC_KEY"			=>	'',
 		/**
 		 * Local RPC
 		 */
 		"RPC_ENABLED"			=>	0,
-		"RPC_MODE"				=>	0,
+		"RPC_MODE"				=>	'plain',
 		"RPC_ALLOWED_TRANSPORT"	=>	'XML,JSON',
 		"RPC_KEY"				=>	random(),
 		/**

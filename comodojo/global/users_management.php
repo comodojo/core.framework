@@ -26,6 +26,16 @@ class users_management {
 	  * Reserved usernames (same as users_management)
 	  */
 	 private $reserved_usernames = Array('admin','administrator','root','toor','comodojo','guest');
+
+	  /**
+	  * If true, localized email template will be used.
+	  * If false, default en template will be used.
+	  *
+	  * Email templates should be defined as:
+	  * [comodojo_root_folder]/comodojo/tenplates/mail_users_management_[action]_[locale].html
+	  */
+	 private $use_localized_email_templates = true;
+
 /********************** PRIVATE VARS *********************/
 
 /********************** PUBLIC VARS *********************/
@@ -40,7 +50,7 @@ class users_management {
 /********************* PUBLIC METHODS ********************/
 	/**
 	 * Change user password.
-	 * PLEASE NOTE: user_management::change_user_password() will only works with local users or remote user via RPC
+	 * PLEASE NOTE: users_management::change_user_password() will only works with local users or remote user via RPC
 	 * 
 	 * @todo	Extend also on ldap
 	 * 
@@ -55,12 +65,12 @@ class users_management {
 	public	function change_user_password($userName, $oldPassword, $newPassword) {
 			
 		if (empty($userName) OR empty($oldPassword) OR empty($newPassword)) {
-			comodojo_debug('Invalid username, wrong old password or empty new password provided','ERROR','user_management');
+			comodojo_debug('Invalid username, wrong old password or empty new password provided','ERROR','users_management');
 			throw new Exception("Invalid username, wrong old password or empty new password provided", 2601);
 		}
 		
 		if (is_null($userName) OR $userName != COMODOJO_USER_NAME) {
-			comodojo_debug('Password can be changed only by user','ERROR','user_management');
+			comodojo_debug('Password can be changed only by user','ERROR','users_management');
 			throw new Exception("Password can be changed only by user", 2602);
 		}
 		
@@ -70,19 +80,19 @@ class users_management {
 		try{
 			$presence = $this->findRegisteredUser($userName, false, false);
 			if ($presence == 'LOCAL') {
-				comodojo_debug('Changing local password from user: '.$userName,'INFO','user_management');
+				comodojo_debug('Changing local password from user: '.$userName,'INFO','users_management');
 				$success = $this->change_user_password_local($userName, $oldPassword, $newPassword);
 			}
 			else if ($presence == 'RPC') {
-				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','user_management');
+				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
 				$success = $this->change_user_password_external_rpc($userName, $oldPassword, $newPassword);
 			}
 			else if ($presence == 'LDAP') {
-				comodojo_debug('Unsupported action','ERROR','user_management');
+				comodojo_debug('Unsupported action','ERROR','users_management');
 				throw new Exception("Unsupported action", 2614);
 			}
 			else {
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -99,7 +109,7 @@ class users_management {
 
 	/**
 	 * Reset user password.
-	 * PLEASE NOTE: user_management::changeUserPassword() will only works with local users or remote user via RPC
+	 * PLEASE NOTE: users_management::changeUserPassword() will only works with local users or remote user via RPC
 	 * 
 	 * @todo	Extend also on ldap
 	 * 
@@ -112,12 +122,12 @@ class users_management {
 	public	function reset_user_password($userName) {
 			
 		if (empty($userName)) {
-			comodojo_debug('Invalid username','ERROR','user_management');
+			comodojo_debug('Invalid username','ERROR','users_management');
 			throw new Exception("Invalid username", 2604);
 		}
 		
 		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
-			comodojo_debug('Only administrators can manage users','ERROR','user_management');
+			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 		
@@ -127,19 +137,19 @@ class users_management {
 		try{
 			$presence = $this->findRegisteredUser($userName, false, false);
 			if ($presence == 'LOCAL') {
-				comodojo_debug('Changing local password from user: '.$userName,'INFO','user_management');
+				comodojo_debug('Changing local password from user: '.$userName,'INFO','users_management');
 				$success = $this->reset_user_password_local();
 			}
 			else if ($presence == 'RPC') {
-				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','user_management');
+				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
 				$success = $this->reset_user_password_external_rpc();
 			}
 			else if ($presence == 'LDAP') {
-				comodojo_debug('Unsupported action','ERROR','user_management');
+				comodojo_debug('Unsupported action','ERROR','users_management');
 				throw new Exception("Unsupported action", 2614);
 			}
 			else {
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -169,7 +179,7 @@ class users_management {
 		comodojo_load_resource('cache');
 		comodojo_load_resource('user_avatar');
 		
-		$request = 'COMODOJO_USER_MANAGEMENT_GET_USERS_'.$userImageDimensions;
+		$request = 'COMODOJO_USERS_MANAGEMENT_GET_USERS_'.$userImageDimensions;
 		
 		try {
 
@@ -222,7 +232,7 @@ class users_management {
 	public function get_user($userName, $userImageDimensions=64) {
 		
 		if (empty($userName)) {
-			comodojo_debug('Invalid username','ERROR','user_management');
+			comodojo_debug('Invalid username','ERROR','users_management');
 			throw new Exception("Invalid username", 2604);
 		}
 
@@ -230,7 +240,7 @@ class users_management {
 		comodojo_load_resource('cache');
 		comodojo_load_resource('user_avatar');
 		
-		$request = 'COMODOJO_USER_MANAGEMENT_GET_USER_'.$userName."_".$userImageDimensions;
+		$request = 'COMODOJO_USERS_MANAGEMENT_GET_USER_'.$userName."_".$userImageDimensions;
 		
 		try {
 			$c = new cache();
@@ -251,7 +261,7 @@ class users_management {
 					$c->set_cache(Array('cache_content'=>$to_return), $request, 'JSON', false);
 				} 
 				else {
-					comodojo_debug('Unknown user','ERROR','user_management');
+					comodojo_debug('Unknown user','ERROR','users_management');
 					throw new Exception("Unknown user", 2603);
 				}
 			}
@@ -266,17 +276,17 @@ class users_management {
 	public function add_user($userName, $userPass, $email, $params=Array()) {
 		
 		if (empty($userName) OR empty($userPass) OR empty($email) OR !is_array($params)) {
-			comodojo_debug('Invalid user parameters','ERROR','user_management');
+			comodojo_debug('Invalid user parameters','ERROR','users_management');
 			throw new Exception("Invalid user parameters", 2612);
 		}
 
 		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
-			comodojo_debug('Only administrators can manage users','ERROR','user_management');
+			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 
 		if (in_array(strtolower($userName), $this->reserved_usernames)) {
-			comodojo_debug('Invalid user parameters: reserved username '+$userName,'ERROR','user_management');
+			comodojo_debug('Invalid user parameters: reserved username '+$userName,'ERROR','users_management');
 			throw new Exception("User already registered", 2613);
 		}
 
@@ -284,7 +294,7 @@ class users_management {
 		comodojo_load_resource('filesystem');
 
 		if ($this->findRegisteredUser($userName, true, true)) {
-			comodojo_debug('User already registered','ERROR','user_management');
+			comodojo_debug('User already registered','ERROR','users_management');
 			throw new Exception("User already registered", 2613);
 		}
 
@@ -326,19 +336,19 @@ class users_management {
 	public function edit_user($userName,$params=Array()) {
 
 		if (empty($userName) OR !is_array($params)) {
-			comodojo_debug('Invalid user parameters','ERROR','user_management');
+			comodojo_debug('Invalid user parameters','ERROR','users_management');
 			throw new Exception("Invalid user parameters", 2612);
 		}
 
 		if ($userName != COMODOJO_USER_NAME AND $this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
-			comodojo_debug('Only administrators can manage users','ERROR','user_management');
+			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 
 		comodojo_load_resource('database');
 
 		if (!$this->findRegisteredUser($userName, true, false)) {
-			comodojo_debug('Unknown user','ERROR','user_management');
+			comodojo_debug('Unknown user','ERROR','users_management');
 			throw new Exception("Unknown user", 2603);
 		}
 
@@ -355,7 +365,7 @@ class users_management {
 		}
 
 		if (empty($_keys)) {
-			comodojo_debug('Invalid user parameters','ERROR','user_management');
+			comodojo_debug('Invalid user parameters','ERROR','users_management');
 			throw new Exception("Invalid user parameters", 2612);
 		}
 
@@ -379,12 +389,12 @@ class users_management {
 	public function delete_user($userName) {
 		
 		if (empty($userName)) {
-			comodojo_debug('Invalid username','ERROR','user_management');
+			comodojo_debug('Invalid username','ERROR','users_management');
 			throw new Exception("Invalid username", 2604);
 		}
 		
 		if ($userName != COMODOJO_USER_NAME AND $this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
-			comodojo_debug('Only administrators can manage users','ERROR','user_management');
+			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 
@@ -395,11 +405,11 @@ class users_management {
 			$presence = $this->findRegisteredUser($userName, true, false);
 
 			if ($presence != false) {
-				comodojo_debug('Deleting user: '.$userName." defined as ".$presence,'INFO','user_management');
+				comodojo_debug('Deleting user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->delete_user_local($userName, true);
 			}
 			else {
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -417,12 +427,12 @@ class users_management {
 	public function enable_user($userName) {
 		
 		if (empty($userName)) {
-			comodojo_debug('Invalid username','ERROR','user_management');
+			comodojo_debug('Invalid username','ERROR','users_management');
 			throw new Exception("Invalid username", 2604);
 		}
 		
 		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
-			comodojo_debug('Only administrators can manage users','ERROR','user_management');
+			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 
@@ -432,11 +442,11 @@ class users_management {
 		try {
 			$presence = $this->findRegisteredUser($userName, true, false);
 			if ($presence != false) {
-				comodojo_debug('Enabling  user: '.$userName." defined as ".$presence,'INFO','user_management');
+				comodojo_debug('Enabling  user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->enable_user_local($userName, true);
 			}
 			else {
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -454,12 +464,12 @@ class users_management {
 	public function disable_user($userName) {
 		
 		if (empty($userName)) {
-			comodojo_debug('Invalid username','ERROR','user_management');
+			comodojo_debug('Invalid username','ERROR','users_management');
 			throw new Exception("Invalid username", 2604);
 		}
 		
 		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
-			comodojo_debug('Only administrators can manage users','ERROR','user_management');
+			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 		
@@ -469,11 +479,11 @@ class users_management {
 		try {
 			$presence = $this->findRegisteredUser($userName, true, false);
 			if ($presence != false) {
-				comodojo_debug('Disabling user: '.$userName." defined as ".$presence,'INFO','user_management');
+				comodojo_debug('Disabling user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->enable_user_local($userName, false);
 			}
 			else {
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -491,7 +501,7 @@ class users_management {
 	public function userId_by_userName($userName) {
 		
 		if (empty($userName)) {
-			comodojo_debug('Invalid username','ERROR','user_management');
+			comodojo_debug('Invalid username','ERROR','users_management');
 			throw new Exception("Invalid username", 2604);
 		}
 		
@@ -515,7 +525,7 @@ class users_management {
 	public final function get_private_identifier($userName, $userPass) {
 		
 		if (empty($userName) OR empty($userPass)) {
-			comodojo_debug('Invalid user parameters','ERROR','user_management');
+			comodojo_debug('Invalid user parameters','ERROR','users_management');
 			throw new Exception("Invalid user parameters", 2612);
 		}
 
@@ -530,7 +540,7 @@ class users_management {
 			if ($result['resultLength'] == 1) $id = $result['result'][0]['private_identifier'];
 			else {
 				//$id = null;
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -543,7 +553,7 @@ class users_management {
 	public final function get_public_identifier($userName) {
 		
 		if (empty($userName)) {
-			comodojo_debug('Invalid user parameters','ERROR','user_management');
+			comodojo_debug('Invalid user parameters','ERROR','users_management');
 			throw new Exception("Invalid user parameters", 2612);
 		}
 
@@ -558,7 +568,7 @@ class users_management {
 			if ($result['resultLength'] == 1) $id = $result['result'][0]['public_identifier'];
 			else {
 				//$id = null;
-				comodojo_debug('Unknown user','ERROR','user_management');
+				comodojo_debug('Unknown user','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -568,13 +578,124 @@ class users_management {
 		return $id;
 	}
 
-	public final function user_recovery_request($email) {}
+	public final function user_recovery_request($email) {
 
-	public final function user_recovery_confirm($email,$code) {}
+		comodojo_load_resource('database');
+		comodojo_load_resource('events');
+		
+		$this->user_recovery_expire_batch();
 
-	public final function user_recovery_expire() {
+		$code = random(256);
+		$timestamp = strtotime('now');
+		
+		try {
+
+			$db = new database();
+			$ev = new events();
+			
+			$isInDatabase = $db->table('users')->keys(Array('userName','completeName'))->where('email','=',$email)->get();
+
+			if ($isInDatabase['resultLength'] != 1) {
+				comodojo_debug("Email address is not in users' database","ERROR","users_management");
+				throw new Exception("Email address is not in users' database", 2615);
+			}
+
+			$db->table('users_recovery')
+			->keys(Array(
+				"timestamp",
+				"userName",
+				"email",
+				"code",
+				"confirmed",
+				"expired"
+			))
+			->values(Array(
+				$timestamp,
+				$isInDatabase['result'][0]['userName'],
+				$email,
+				$code,
+				0,
+				0
+			))->store();
+			
+			$this->send_recovery_email($userName, is_null($isInDatabase['result'][0]['completeName']) ? $userName : $isInDatabase['result'][0]['completeName'], $email, $code, $timestamp);
+			
+			$ev->record('user_recovery_request', $email, true);
+			
+		}
+		catch (Exception $e) {
+			$ev->record('user_recovery_request', $email, false);
+			throw $e;
+		}
+
+	}
+
+	public final function user_recovery_confirm($email,$code) {
+		comodojo_load_resource('database');
+		comodojo_load_resource('events');
+		
+		$this->user_recovery_expire_batch();
+
+		try {
+
+			$db = new database();
+			$ev = new events();
+			
+			$isInDatabase = $db->table('users_recovery')
+				->keys('userName')
+				->where('code','=',$code)
+				->and_where('email','=',$email)
+				->and_where('expired','=',0)
+				->and_where('confirmed','=',0)
+				->get();
+
+			if ($isInDatabase['resultLength'] != 1) {
+				comodojo_debug("No request found for this email address or request expired","ERROR","users_management");
+				throw new Exception("No request found for this email address or request expired", 2616);
+			}
+
+			$new_pass = $this->reset_user_password($isInDatabase['result'][0]['userName']);
+
+			$db->table('users_recovery')
+			->keys("confirmed")
+			->values(1)
+			->where('code','=',$code)
+			->and_where('email','=',$email)
+			->store();
+			
+			$this->send_reset_email($userName, is_null($isInDatabase['result'][0]['completeName']) ? $userName : $isInDatabase['result'][0]['completeName'], $email, $new_pass);
+			
+			$ev->record('user_recovery_confirm', $email, true);
+			
+		}
+		catch (Exception $e) {
+			$ev->record('user_recovery_confirm', $email, false);
+			throw $e;
+		}
+
+		return Array("userName" => $isInDatabase['result'][0]['userName'], "email" => $email);
+	}
+
+	public final function user_recovery_expire_batch() {
 		//Check if request is expired (will use registration TTL as max request lifetime)
 		//->where("timestamp","<=",$timestamp-COMODOJO_REGISTRATION_TTL)
+		comodojo_load_resource('database');
+		comodojo_load_resource('events');
+		
+		try {
+
+			$db = new database();
+			$ev = new events();
+			
+			$db->table('users_recovery')->keys('expired')->values(1)->where('timestamp','<=',(strtotime('now')-COMODOJO_REGISTRATION_TTL))->update();
+			
+			$ev->record('user_recovery_expire_batch', '', true);
+			
+		}
+		catch (Exception $e) {
+			$ev->record('user_recovery_expire_batch', '', false);
+			comodojo_debug($e->getMessage(),"ERROR","users_management");
+		}
 	}
 
 
@@ -644,7 +765,7 @@ class users_management {
 			->get();
 			
 			if ($result['resultLength'] != 1) {
-				comodojo_debug('Wrong password provided','ERROR','user_management');
+				comodojo_debug('Wrong password provided','ERROR','users_management');
 				throw new Exception("Wrong password provided", 2606);
 			};
 			
@@ -661,7 +782,7 @@ class users_management {
 			//comodojo_debug($result);
 			
 			if ($result['affectedRows'] != 1) {
-				comodojo_debug('Same password provided or error changing password','ERROR','user_management');
+				comodojo_debug('Same password provided or error changing password','ERROR','users_management');
 				throw new Exception("Same password provided or error changing password", 2607);
 			};
 		}
@@ -694,7 +815,7 @@ class users_management {
 			->update();
 			
 			if ($result['affectedRows'] != 1) {
-				comodojo_debug('Error resetting password','ERROR','user_management');
+				comodojo_debug('Error resetting password','ERROR','users_management');
 				throw new Exception("Error resetting password", 2608);
 			};
 
@@ -724,7 +845,7 @@ class users_management {
 			->update();
 			
 			if ($result['affectedRows'] != 1) {
-				comodojo_debug('Error enabling/disabling user','ERROR','user_management');
+				comodojo_debug('Error enabling/disabling user','ERROR','users_management');
 				throw new Exception("Error enabling/disabling user", 2610);
 			}
 		}
@@ -745,7 +866,7 @@ class users_management {
 			$result = $db->table('users')->where("userName","=",$userName)->delete();
 			
 			if ($result['affectedRows'] != 1) {
-				comodojo_debug('Error deleting user','ERROR','user_management');
+				comodojo_debug('Error deleting user','ERROR','users_management');
 				throw new Exception("Error deleting user", 2611);
 			}
 		}
@@ -755,6 +876,67 @@ class users_management {
 		
 		return true;
 		
+	}
+
+	private function send_recovery_email($userName, $completeName, $email, $code, $timestamp) {
+
+		comodojo_load_resource("mail");
+
+		$localized_email = "mail_users_management_recovery_".COMODOJO_CURRENT_LOCALE.".html";
+
+		if ($this->use_localized_email_templates and realFileExists(COMODOJO_SITE_PATH."comodojo/templates/".$localized_email)) {
+			$mail_template = $localized_email;
+		}
+		else {
+			$mail_template = "mail_users_management_recovery_en.html";
+		}
+		
+		try {
+			$mail = new mail();
+			$mail->template($mail_template)
+				 ->to($email)
+				 ->subject("Password Reset Request")
+				 ->add_tag("*_COMPLETENAME_*",$completeName)
+				 ->add_tag("*_USERNAME_*",$userName)
+				 ->add_tag("*_EMAIL_*",$userName)
+				 ->add_tag("*_CODE_*",$code)
+				 ->add_tag("*_TIME_*",date(DATE_RFC850,$timestamp))
+				 ->embed(COMODOJO_SITE_PATH."comodojo/images/logo.png","COMODOJO_LOGO","logo")
+				 ->send();
+		}
+		catch (Exception $e) {
+			throw $e;			
+		}
+	}
+
+	private function send_reset_email($userName, $completeName, $email, $password) {
+
+		comodojo_load_resource("mail");
+
+		$localized_email = "mail_users_management_reset_".COMODOJO_CURRENT_LOCALE.".html";
+
+		if ($this->use_localized_email_templates and realFileExists(COMODOJO_SITE_PATH."comodojo/templates/".$localized_email)) {
+			$mail_template = $localized_email;
+		}
+		else {
+			$mail_template = "mail_users_management_reset_en.html";
+		}
+		
+		try {
+			$mail = new mail();
+			$mail->template($mail_template)
+				 ->to($email)
+				 ->subject("Password Reset Request")
+				 ->add_tag("*_COMPLETENAME_*",$completeName)
+				 ->add_tag("*_USERNAME_*",$userName)
+				 ->add_tag("*_EMAIL_*",$userName)
+				 ->add_tag("*_PASSWORD_*",$password)
+				 ->embed(COMODOJO_SITE_PATH."comodojo/images/logo.png","COMODOJO_LOGO","logo")
+				 ->send();
+		}
+		catch (Exception $e) {
+			throw $e;			
+		}
 	}
 //********************* PRIVATE METHODS *******************/
 

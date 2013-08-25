@@ -12,10 +12,10 @@
 
 function get_authentication_mode() {
 	return Array(
-		Array("name"=>"Local", "value"=>0),
-		Array("name"=>"LDAP filtered", "value"=>1),
-		Array("name"=>"LDAP unfiltered + SharedKey", "value"=>2),
-		Array("name"=>"External RPC", "value"=>3)
+		Array("label"=>"Local", "id"=>'local'),
+		Array("label"=>"LDAP filtered", "id"=>'ldapfiltered'),
+		Array("label"=>"LDAP unfiltered + SharedKey", "id"=>'ldapunfiltered'),
+		Array("label"=>"External RPC", "id"=>'rpc')
 	);
 }
 

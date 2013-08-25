@@ -137,7 +137,7 @@ App.autostart = function() {
 	};
 };
 
-App.start = function(appExec, status) {
+App.start = function(appExec, status, on_start, on_stop, force_properties) {
 
 	var app_reg = bus.getRegisteredApplication(appExec);
 
@@ -169,6 +169,19 @@ App.start = function(appExec, status) {
 
 	var pid = comodojo.getPid();
 	var prop = bus._registeredApplications[appExec].properties;
+
+	//override selected properties if force_properties populated
+	if (utils.defined(force_properties) && lang.isObject(force_properties)) {
+		prop.type = utils.defined(force_properties.type) ? force_properties.type : prop.type;
+		prop.width = utils.defined(force_properties.width) ? force_properties.width : prop.width;
+		prop.height = utils.defined(force_properties.height) ? force_properties.height : prop.height;
+		prop.resizable = utils.defined(force_properties.resizable) ? force_properties.resizable : prop.resizable;
+		prop.maxable = utils.defined(force_properties.maxable) ? force_properties.maxable : prop.maxable;
+		prop.attachNode = utils.defined(force_properties.attachNode) ? force_properties.attachNode : prop.attachNode;
+		prop.requestSpecialNode = utils.defined(force_properties.requestSpecialNode) ? force_properties.requestSpecialNode : prop.requestSpecialNode;
+		prop.placeAt = utils.defined(force_properties.placeAt) ? force_properties.placeAt : prop.placeAt;
+	}
+
 	var applicationSpace = false;
 	var loadingState = domConstruct.create('div',{
 		innerHTML: prop.runMode == "system" ? '<span><img src="comodojo/images/small_loader.gif" />' + comodojo.getLocalizedMessage("10007") + '</span>' : '<p style="text-align: center; padding: 10px;" ><img src="comodojo/images/small_loader.gif" /></p><p style="font-weight: bold; font-size: large; text-align: center;">'+prop.title+'</p><p style="text-align: center;">'+prop.description+'</p>'	
@@ -181,6 +194,16 @@ App.start = function(appExec, status) {
 
 			applicationSpace = Window.application(pid,prop.title,prop.width,prop.height,prop.resizable,prop.maxable,icon);
 		
+			applicationSpace.set('isComodojoApplication',"WINDOWED");
+				
+			applicationSpace.containerNode.style.display = "none";
+			applicationSpace.lockNode = loadingState;
+			applicationSpace.canvas.appendChild(applicationSpace.lockNode);
+
+			if (lang.isFunction(on_stop)) {
+				aspect.after(applicationSpace,'close',on_stop);
+			}
+			
 			aspect.after(applicationSpace, 'close', function(){
 				applicationSpace.minNode.style.display = "none";
 				applicationSpace.closeNode.style.display = "none";
@@ -189,42 +212,47 @@ App.start = function(appExec, status) {
 				applicationSpace.closeNode.style.display = "none";
 				comodojo.App.kill(pid);
 			});
-				
-			applicationSpace.set('isComodojoApplication',"WINDOWED");
-				
-			applicationSpace.containerNode.style.display = "none";
-			applicationSpace.lockNode = loadingState;
-			applicationSpace.canvas.appendChild(applicationSpace.lockNode);
-				
+
 			applicationSpace.bringToTop();
+
+			if (lang.isFunction(on_start)) {
+				on_start();
+			}
 
 		break;
 
 		case 'modal':
 
-			applicationSpace = dialog.application(pid, prop.title, "", false)._dialog;
+			var _w = (prop.width != false || prop.width.toLowerCase != 'auto') ? prop.width : false;
+			var _h = (prop.height != false || prop.height.toLowerCase != 'auto') ? prop.height : false;
 
-			var reSize = {};
-			if (prop.width != false) {
-				reSize.w = parseInt(prop.width,10)+'px';
-			} 
-			if (prop.height != false) {
-				reSize.h = parseInt(prop.height,10)+'px';
-			}
+			applicationSpace = dialog.application(pid, prop.title, "", false, _w, _h)._dialog;
+
+			//var reSize = {};
+			//if (prop.width != false) {
+			//	reSize.w = _w+'px';
+			//} 
+			//if (prop.height != false) {
+			//	reSize.h = parseInt(prop.height,10)+'px';
+			//}
 			
 			applicationSpace.set('isComodojoApplication',"MODAL");
 			applicationSpace.containerNode.style.display = "none";
 			applicationSpace.lockNode = loadingState;
 			applicationSpace.domNode.appendChild(applicationSpace.lockNode);
 			
-			if (utils.defined(reSize.w) || utils.defined(reSize.h)) {
-				applicationSpace._layout(false, reSize);
-			}
+			//if (utils.defined(reSize.w) || utils.defined(reSize.h)) {
+			//	applicationSpace._layout(false, reSize);
+			//}
 			
 			applicationSpace.close = function() {
 				applicationSpace.hide();
 			};
 
+			if (lang.isFunction(on_stop)) {
+				aspect.after(applicationSpace,'close',on_stop);
+			}
+			
 			applicationSpace._position();
 			
 			aspect.after(applicationSpace, "hide", function(){
@@ -235,6 +263,10 @@ App.start = function(appExec, status) {
 			//applicationSpace.on('close',function() {
 			//	comodojo.App.kill(pid);
 			//});
+
+			if (lang.isFunction(on_start)) {
+				on_start();
+			}
 
 		break;
 
@@ -305,6 +337,14 @@ App.start = function(appExec, status) {
 			}
 			else {
 				domConstruct.place(applicationSpace.domNode, myNode);
+			}
+
+			if (lang.isFunction(on_stop)) {
+				aspect.after(applicationSpace,'close',on_stop);
+			}
+			
+			if (lang.isFunction(on_start)) {
+				on_start();
 			}
 
 		break;

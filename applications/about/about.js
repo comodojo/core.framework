@@ -17,7 +17,7 @@ $c.App.load("about",
 		var myself = this;
 		
 		this.init = function(){
-			$c.kernel.newCall(myself.initCallback,{
+			$c.Kernel.newCall(myself.initCallback,{
 				application: "about",
 				method: "get_info",
 				preventCache: false,
@@ -31,7 +31,7 @@ $c.App.load("about",
 			}
 			else {
 				myself.stop();
-				$c.error.global(result.code,result.name);
+				$c.Error.modal(result.code,result.name);
 			}
 		};
 			

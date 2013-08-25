@@ -16,19 +16,19 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['AUTHENTICATION_MODE'],
 				"options"		=>	array(
 										array(
-											"id"		=>	0,
+											"id"		=>	'local',
 											"label"		=>	$this->i18n["0092"]	
 										),
 										array(
-											"id"		=>	1,
+											"id"		=>	'ldapfiltered',
 											"label"		=>	$this->i18n["0093"]
 										),
 										array(
-											"id"		=>	2,
+											"id"		=>	'ldapunfiltered',
 											"label"		=>	$this->i18n["0094"]
 										),
 										array(
-											"id"		=>	3,
+											"id"		=>	'rpc',
 											"label"		=>	$this->i18n["0095"]
 										)
 									)

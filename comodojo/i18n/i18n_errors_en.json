@@ -123,6 +123,8 @@
 	"2612":"Invalid user parameters",
 	"2613":"User already registered",
 	"2614":"Unsupported action",
+	"2615":"Email address is not in users' database",
+	"2616":"No request found for this email address or request expired",
 	"2701":"Invalid reference or description",
 	"2702":"Invalid role identifier",
 	"2703":"Cannot modify a protected role",

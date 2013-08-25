@@ -8,7 +8,9 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('form', ['Button','Select','TextBox','PasswordTextBox']);
+$d.require("dojo.aspect");
+$d.require("comodojo.Form");
+
 $c.App.load("userdialog",
 
 	function(pid, applicationSpace, status){
@@ -54,13 +56,14 @@ $c.App.load("userdialog",
 		
 		this.init = function(){
 
-			applicationSpace.on('cancel',function(){
+			//applicationSpace.on('cancel',function(){
+			dojo.aspect.before(applicationSpace, 'close', function() {
 				if ($d.isFunction(myself.callback) && !myself.preventCancel) {
 					myself.callback();
 				};
 			});
 			if (this.showUserName && this.userNameList) {
-				$c.kernel.newCall(myself.userListCallback,{
+				$c.Kernel.newCall(myself.userListCallback,{
 					application: "userdialog",
 					method: "get_users",
 					content: {},
@@ -78,15 +81,15 @@ $c.App.load("userdialog",
 			if (success) {
 				for (i in result) {
 					myself._userNameList.push({
-						name: '<img src="'+result[i].userImage+'" /> '+result[i].userName,
-						value: result[i].userName
+						label: '<img src="'+result[i].userImage+'" /> '+result[i].userName,
+						id: result[i].userName
 					});
 					myself.buildForm();
 				}
 			}
 			else {
 				myself.stop();
-				$c.error.global(result.code,result.name);
+				$c.Error.modal(result.code,result.name);
 			}
 		};
 		
@@ -142,13 +145,17 @@ $c.App.load("userdialog",
                 	myself.preventCancel = true;
                 	if ($d.isFunction(myself.callback)) {
                 		var val = myself.form.get('value');
-                		myself.callback(val.userName,val.userPass);	
+                		myself.callback({
+                			userName: val.userName,
+                			userPass: val.userPass
+                		});	
 					};
 					myself.stop();
                 }
             });
 			
-			myself.form = new $c.form({
+			myself.form = new $c.Form({
+				modules: ['Button','Select','TextBox','PasswordTextBox'],
 				formWidth: 500,
 				hierarchy:h,
 				attachNode: applicationSpace.containerNode

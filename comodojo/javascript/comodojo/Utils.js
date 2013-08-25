@@ -196,6 +196,14 @@ Utils.isElement = function(element_or_id) {
 	}
 };
 
+Utils.isNumeric = function(num) {
+	// summary:
+	// 		Check if num is a number
+	// returns:
+	//		true in case of number or false otherwise
+	return !isNaN(parseFloat(num)) && isFinite(num);
+};
+
 Utils.fromHierarchy = function(hierachy, startObj) {
 	// summary:
 	//	Create a complex object starting from json hierachy

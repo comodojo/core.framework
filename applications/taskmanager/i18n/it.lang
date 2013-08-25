@@ -19,7 +19,7 @@ $lang = Array(
 	'0006'	=>	'Sistema',
 	'0007'	=>	'Seleziona',
 	'0008'	=>	'Termina',
-	'0009'	=>	'Carico sistema: ${0},${1},${2}'
+	'0009'	=>	'Carico sistema: {0}%, {1}%, {2}%'
 );
 
 ?>

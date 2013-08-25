@@ -34,6 +34,7 @@ $lang = Array(
 	'0020'	=>	'Comodojo version',
 	'0021'	=>	'User Name',
 	'0022'	=>	'User role',
+	'0023'	=>	'Authentication type',
 
 	'0030'	=>	'Locale (JS)',
 	'0031'	=>	'Timezone',

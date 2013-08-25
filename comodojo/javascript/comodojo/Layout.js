@@ -131,7 +131,7 @@ var Layout = declare(null,{
 					mods = ["dojox/layout/ExpandoPane"];
 				break;
 				case 'Tree':
-					mods = ["dijit/Tree","dijit/tree/ObjectStoreModel","dojo/store/Observable"];
+					mods = ["dijit/Tree"/*,"dijit/tree/ObjectStoreModel","dojo/store/Observable"*/];
 				break;
 				case 'Grid':
 					mods = ["gridx/Grid"];
@@ -209,9 +209,9 @@ var Layout = declare(null,{
 		
 		var dim = this.computeDimension(this.attachNode);
 		
-		var structure = this.prepareStructure(this.hierarchy);
+		var structure = this.prepareStructure(this.hierarchy, dim.width, dim.height);
 		
-		var layout = this.buildLayout(structure, dim.attachNode);
+		var layout = this.buildLayout(structure, dim.attachNode, dim.resize);
 		
 		layout.newChild = function(to, name, params) { 
 			var _params = {
@@ -285,13 +285,13 @@ var Layout = declare(null,{
 		return layout;
 	},
 
-	prepareStructure: function(hierarchy) {
+	prepareStructure: function(hierarchy,width,height) {
 		var structure = {
 			widget: "dijit.layout.BorderContainer",
 			name: 'main',
 			params: {
 				id: 'comodojoLayout_'+this.id,
-				style: "height:"+this._height+"px; width:"+this._width+"px; overflow: auto;",
+				style: "height:"+height+"px; width:"+width+"px; overflow: auto;",
 				gutters: this.gutters,
 				design: this.design
 			},
@@ -303,25 +303,33 @@ var Layout = declare(null,{
 
 	computeDimension: function(attachNode) {
 		
-		var attach_node, container_dimensions, real_width, real_height, extra_height;
+		var attach_node, container_dimensions, real_width, real_height, extra_height, resize;
 		
 		if (Utils.defined(attachNode.isComodojoApplication)) {
+			
 			// it is a comodojo application
 			switch(attachNode.isComodojoApplication) {
 				case "WINDOWED":
+					//console.info('is win');
+					//console.info(attachNode.containerNode);
 					attach_node = attachNode.containerNode;
 					real_width  = domGeom.getMarginBox(attachNode.containerNode).w;
 					real_height = domGeom.getMarginBox(attachNode.canvas).h;
+					resize = true;
 				break;
 				case "MODAL":
+					//console.info('is modal');
+					//console.info(attachNode.containerNode);
 					attach_node = attachNode.containerNode;
-					real_width  = domGeom.getMarginBox(attachNode.containerNode).w;
+					real_width  = domGeom.getMarginBox(attach_node).w;
 					real_height = domGeom.getMarginBox(attach_node).h;
+					resize = false;
 				break;
 				case "ATTACHED":
 					attach_node = (this.attachNode.containerNode ? this.attachNode.containerNode : (this.attachNode.domNode ? this.attachNode.domNode : this.attachNode));
 					real_width  = domGeom.getMarginBox(attach_node).w;
 					real_height = domGeom.getMarginBox(attach_node).h;
+					resize = false;
 				break;
 			}
 		}
@@ -350,12 +358,13 @@ var Layout = declare(null,{
 		return {
 			attachNode: attach_node,
 			width : (!this.width || this.width == "auto") ? (real_width > this.minWidth ? real_width-2 : this.minWidth) : this.width,
-			height: (!this.height || this.height == "auto") ? (real_height > this.minHeight ? real_height-2 : this.minHeight) : this.height
+			height: (!this.height || this.height == "auto") ? (real_height > this.minHeight ? real_height-2 : this.minHeight) : this.height,
+			resize: resize
 		};
 		
 	},
 
-	buildLayout: function(structure, attachNode) {
+	buildLayout: function(structure, attachNode, shouldResize) {
 		
 		var layout=[], privateLayout; 
 
@@ -407,12 +416,14 @@ var Layout = declare(null,{
 		
 		privateLayout.startup();
 
-		// THIS IS UGLY
-		// Resize function is still buggy, so it needs to be called 3 times to work correctly
-		// THIS IS UGLY
-		privateLayout.resize();
-		privateLayout.resize();
-		privateLayout.resize();
+		if (shouldResize) {
+			// THIS IS UGLY
+			// Resize function is still buggy, so it needs to be called 3 times to work correctly
+			// THIS IS UGLY
+			privateLayout.resize();
+			privateLayout.resize();
+			privateLayout.resize();
+		}
 		
 		return layout;
 
@@ -448,11 +459,11 @@ var Layout = declare(null,{
 					wtype = "dijit.layout."+hierarchy[i].type;
 				break;
 				case "Tree":
-					wtype = "dijit.layout."+hierarchy[i].type;
-					wparams.model = new dijit.tree.ObjectStoreModel({
-						store: new dojo.store.Observable(hierarchy[i].store),
-						query: hierarchy[i].query
-					});
+					wtype = "dijit.Tree";
+					//wparams.model = new dijit.tree.ObjectStoreModel({
+					//	store: new dojo.store.Observable(hierarchy[i].store),
+					//	query: hierarchy[i].query
+					//});
 				break;
 				case "ExpandoPane":
 					wtype = "dojox.layout."+hierarchy[i].type;

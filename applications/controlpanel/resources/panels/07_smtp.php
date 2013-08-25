@@ -12,17 +12,17 @@
 
 function get_smtp_service() {
 	return Array(
-		Array("name"=>"SMTP","value"=>0),
-		Array("name"=>"mail","value"=>1),
-		Array("name"=>"SendMail","value"=>2)
+		Array("label"=>"SMTP","id"=>'smtp'),
+		Array("label"=>"mail","id"=>'mail'),
+		Array("label"=>"SendMail","id"=>'sendmail')
 	);
 }
 
 function get_smtp_security() {
 	return Array(
-		Array("name"=>"No","value"=>0),
-		Array("name"=>"ssl","value"=>1),
-		Array("name"=>"tls","value"=>2)
+		Array("label"=>"No","id"=>'off'),
+		Array("label"=>"ssl","id"=>'ssl'),
+		Array("label"=>"tls","id"=>'tls')
 	);
 } 
 

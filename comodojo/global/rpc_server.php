@@ -237,11 +237,11 @@ class rpc_server extends comodojo_basic {
 		
 		switch(COMODOJO_RPC_MODE) {
 			
-			case 0:
+			case 'plain':
 				if ($payload_is_encrypted) throw new Exception('Encrypted transport not available', -32096);
 			break;
 			
-			case 1:
+			case 'shared':
 				if ($payload_is_encrypted) {
 					try { $attributes = $this->decryptData(substr($attributes,28)); }
 					catch (Exception $e) { throw $e; }
@@ -251,7 +251,7 @@ class rpc_server extends comodojo_basic {
 				}
 			break;
 				
-			case 2:
+			case 'any':
 				if ($payload_is_encrypted) {
 					try { $attributes = $this->decryptData(substr($attributes,28)); }
 					catch (Exception $e) { throw $e; }

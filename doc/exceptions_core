@@ -139,7 +139,7 @@
 	08 
 	09 
 	10 Could not get job list
-2600 USER_MANAGEMENT
+2600 USERS_MANAGEMENT
 	01 Invalid username, wrong old password or empty new password provided
 	02 Password can be changed only by user
 	03 Unknown user
@@ -154,8 +154,8 @@
 	12 Invalid user parameters
 	13 User already registered
 	14 Unsupported action
-	15 
-	16 
+	15 Password recover failure: userName-email couple not found
+	16 No request found for this email address or request expired
 	17 
 	18 
 	19 

@@ -8,7 +8,9 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('layout',['Tree']);
+$d.require("dojo.data.ItemFileWriteStore");
+$d.require("dijit.tree.ForestStoreModel");
+$d.require('comodojo.Layout');
 
 $c.App.load("filepicker",
 
@@ -18,57 +20,59 @@ $c.App.load("filepicker",
 		
 		// callback on action end end
 		this.callback = false;
-		this.closeOnCallback = false;
-		
-		// fire when application load/unload
-		this.onApplicationStart = false;
-		this.onApplicationStop = false;
-		
-		this._path = "/";
-		this._name = "";
-		
+
 		dojo.mixin(this, status);
 	
+		this.filePath = "/";
+		this.fileName = "";
+
+		this.fileType = "";
+
 		var myself = this;
 		
 		this.init = function(){
 			
-			this.container = new $c.layout({
+			this.treeStore = $c.Kernel.newDatastore('filepicker', 'list_'+this.accessLevel, {
+				label: 'file_name',
+				identifier: 'relative_resource'
+			});
+
+			this.treeModel = dijit.tree.ForestStoreModel({
+				store: this.treeStore,
+				rootLabel: "home",
+				childrenAttrs: ["childs"]
+			});
+			
+			this.container = new $c.Layout({
+				modules: ['Tree'],
 				attachNode: applicationSpace,
 				splitter: false,
-				_pid: pid,
+				id: pid,
 				hierarchy: [{
 					type: 'Tree',
 					name: 'listingtree',
 					region: 'center',
-					createStore: {
-						name: 'listingtree_store',
-						application: 'filepicker',
-						method: 'list_'+this.accessLevel,
-						label: 'file_name',
-						identifier: 'relative_resource'
-					},
-					model: {
-						name: 'listingtree_model',
-						rootLabel: "home",
-						childrenAttrs: ["childs"]
-					},
-					params: {}
+					params: {
+						model: this.treeModel
+					}
 				},{
 					type: 'ContentPane',
 					name: 'bottom',
 					region: 'bottom',
-					params: {
-						//style:"background-color: #EFEFEF; height: 30px; overflow: hidden; text-align: right;"
-					},
 					cssClass: 'layout_action_pane',
 					childrens:[]
 				}]
 			}).build();
 			
+			this.container.main.listingtree.getIconClass = function(item,opened){
+				return opened ? "dijitFolderOpened" : "dijitFolderClosed";
+			};
+			
 			this.container.main.listingtree.on('click',function(item){
-				myself._path = item.relative_path;//item.root ? "/" : item.path;
-				myself._name = item.file_name;//root ? "" : item.name;
+				myself.filePath = item.relative_path;
+				myself.fileName = item.file_name;
+				myself.fileType = item.type;
+				myself.selectButton.set('disabled',myself.fileType == 'file' ? false : 'disabled');
 			});
 			
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
@@ -78,15 +82,26 @@ $c.App.load("filepicker",
 				}
 			}).domNode);
 			
-			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
+			this.selectButton = new dijit.form.Button({
 				label: this.getLocalizedMessage('0001')+'&nbsp;<img src="'+$c.icons.getIcon('right_arrow',16)+'" />',
+				disabled: 'disabled',
 				onClick: function() {
-					if ($d.isFunction(myself.callback)) {
-						myself.callback(myself._path, myself._name)
-					};
-					myself.stop();
+					//if (myself.fileType[0] != 'file') {
+					//	return;
+					//}
+					//else {
+						if ($d.isFunction(myself.callback)) {
+							myself.callback({
+								filePath: myself.filePath[0],
+								fileName: myself.fileName[0]
+							});
+						};
+						myself.stop();
+					//}
 				}
-			}).domNode);
+			});
+
+			this.container.main.bottom.containerNode.appendChild(this.selectButton.domNode);
 			
 		};
 			

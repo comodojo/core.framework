@@ -58,6 +58,7 @@ $create = Array(
 		'columns'	=>	Array(
 			Array('id','INTEGER',Array('unsigned'=>true,'null'=>false,'autoincrement'=>true,'primary'=>true)),
 			Array('timestamp','INTEGER',Array('length'=>64,'null'=>false)),
+			Array('userName','STRING',Array('length'=>32,'null'=>false)),
 			Array('email','STRING',Array('length'=>32,'null'=>false)),
 			Array('code','STRING',Array('length'=>128,'null'=>false)),
 			Array('confirmed','BOOL',Array('default'=>0)),

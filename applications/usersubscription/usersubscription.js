@@ -10,7 +10,7 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('form',['ValidationTextBox','Button','EmailTextBox','DateTextBox','GenderSelect','BusyButton']);
+$d.require("comdojo.Form")
 
 $c.App.load("usersubscription",
 
@@ -23,7 +23,7 @@ $c.App.load("usersubscription",
 		
 		this.init = function(){
 		
-			$c.kernel.newCall(myself.initCallback,{
+			$c.Kernel.newCall(myself.initCallback,{
 				application: "usersubscription",
 				method: "check_registration_mode",
 				content: {}
@@ -33,7 +33,7 @@ $c.App.load("usersubscription",
 		
 		this.initCallback = function(success, result) {
 			if (!success) {
-				$c.error.local(result.code,result.name,applicationSpace.containerNode);
+				$c.Error.local(applicationSpace.containerNode, result.code, result.name);
 			}
 			else {
 				myself._registrationMode = result.mode;
@@ -110,7 +110,8 @@ $c.App.load("usersubscription",
 				}];
 			}
 
-			this.registrationform = new $c.form({
+			this.registrationform = new $c.Form({
+				modules: ['ValidationTextBox','Button','EmailTextBox','DateTextBox','GenderSelect','BusyButton'],
 				formWidth: 500,
 				hierarchy: subscription_h,
 				attachNode: applicationSpace.containerNode
@@ -126,7 +127,7 @@ $c.App.load("usersubscription",
 				setTimeout(myself.registrationform.fields.gobuttom.cancel,100);
 			}
 			else {
-				$c.kernel.newCall(myself.registerCallback,{
+				$c.Kernel.newCall(myself.registerCallback,{
 					application: "usersubscription",
 					method: "new_registration",
 					preventCache: true,
@@ -144,7 +145,7 @@ $c.App.load("usersubscription",
 				myself.registrationform.fields.gobutton.cancel();
 			}
 			else {
-				$c.dialog.info(myself.getLocalizedMessage(result._registrationAuthorization == 0 ? '0012' : '0013'));
+				$c.Dialog.info(myself.getLocalizedMessage(result._registrationAuthorization == 0 ? '0012' : '0013'));
 				myself.stop();
 			}
 

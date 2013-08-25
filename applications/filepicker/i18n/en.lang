@@ -11,7 +11,7 @@
  */
 
 $lang = Array(
-	'0000'	=>	'Select folder',
+	'0000'	=>	'Select file',
 	'0001'	=>	'Select',
 	'0002'	=>	'Close'
 );

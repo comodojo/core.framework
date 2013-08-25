@@ -641,6 +641,7 @@ var form = declare(null,{
 
 			case "SmallEditor":
 				myField = new this.deferred_modules.SmallEditor({
+					name: hierarchyElement.name,
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
 					readOnly: !hierarchyElement.readonly ? false : "readOnly",
@@ -652,6 +653,7 @@ var form = declare(null,{
 
 			case "Editor":
 				myField = new this.deferred_modules.Editor({
+					name: hierarchyElement.name,
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
 					readOnly: !hierarchyElement.readonly ? false : "readOnly",
@@ -662,6 +664,7 @@ var form = declare(null,{
 
 			case "FullEditor":
 				myField = new this.deferred_modules.FullEditor({
+					name: hierarchyElement.name,
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
 					readOnly: !hierarchyElement.readonly ? false : "readOnly",

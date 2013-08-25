@@ -10,7 +10,10 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('layout',['Grid']);
+$d.require("dojo.data.ItemFileWriteStore");
+$d.require("dojo.store.DataStore");
+$d.require("comodojo.Layout");
+$d.require("dojo.aspect");
 			
 $c.App.load("taskmanager",
 
@@ -20,40 +23,32 @@ $c.App.load("taskmanager",
 		
 		$d.mixin(this,status);
 		
-		this.selectedPid = false;
-		
-		/**
-		 * Alias of "this", to deferred function call
-		 */
 		var myself = this;
 
-		/**
-		 * THE INIT - it's default constructor for new application
-		 */
 		this.init = function() {
 			
 			this.processStore = new dojo.data.ItemFileReadStore({data: this.getProcessListStore(), clearOnClose: true});
 
-			this.container = new $c.layout({
+			this.mappedProcessStore = new dojo.store.DataStore({store: this.processStore, idProperty: 'pid'});
+
+			this.container = new $c.Layout({
+				modules: ['Grid'],
 				attachNode: applicationSpace,
 				splitter: false,
-				_pid: pid,
+				id: pid,
 				hierarchy: [{
 					type: 'ContentPane',
 					name: 'top',
 					region: 'top',
 					params: {
 						style:"height: 25px; overflow: hidden;"
-					},
-					childrens:[]
+					}
 				},
 				{
 					type: 'ContentPane',
 					name: 'bottom',
 					region: 'bottom',
-					params: {
-						//style:"height: 30px; overflow: hidden; text-align:center;"
-					},
+					params: {},
 					cssClass: 'layout_action_pane',
 					childrens:[]
 				},
@@ -61,39 +56,40 @@ $c.App.load("taskmanager",
 					type: 'Grid',
 					name: 'taskgrid',
 					region: 'center',
-					store: this.processStore,
 					params: {
 						structure: [
-							{ name: this.getLocalizedMessage('0001'), field: 'pid', width: "5%", formatter: function(value) {return value.split('_')[1];}
+							{ name: this.getLocalizedMessage('0001'), /*field: 'pid',*/ width: "8%", formatter: function(value) {return value.pid.split('_')[1];}
 							},
 							{ name: this.getLocalizedMessage('0002'), field: 'title', width: "40%"},
 							{ name: this.getLocalizedMessage('0003'), field: 'exec', width: "30%"},
-							{ name: this.getLocalizedMessage('0004'), field: 'runMode', width: "15%"},
-							{ name: '', width: "5%", formatter: function() {
-									return '<img src="'+$c.icons.getIcon('cancel',16)+'" onClick="$c.app.byPid(\''+pid+'\').killSelected()" />';
+							{ name: this.getLocalizedMessage('0004'), field: 'runMode', width: "12%"},
+							{ name: '', width: "5%", formatter: function(value) {
+									return '<img src="'+$c.icons.getIcon('cancel',16)+'" onClick="$c.App.byPid(\''+value.pid+'\').stop()" />';
 								}
 							},
-							{ name: '', width: "5%", formatter: function() {
-									return '<img src="'+$c.icons.getIcon('right_arrow',16)+'" onClick="$c.app.byPid(\''+pid+'\').focusSelected()" />';
+							{ name: '', width: "5%", formatter: function(value) {
+									if ($c.App.byPid(value.pid).isComodojoApplication == "WINDOWED") {
+										return '<img src="'+$c.icons.getIcon('right_arrow',16)+'" onClick="$c.App.byPid(\''+value.pid+'\').focus()" />';
+									}
+									else {
+										return '';
+									}
+									
 								}
 							}
 						],
-						style: 'padding: 0px; margin: 0px !important;',
-						selectionMode: "single"
+						store: this.mappedProcessStore,
+						cacheClass: 'sync'
 					}
 				}]
 			}).build();
 
-			this.container.main.taskgrid.onCellMouseOver = function(e) {
-				myself.selectedPid = myself.container.main.taskgrid.getItem(e.rowIndex).pid;
-			};
-			
-			$c.bus.addConnection('taskManager_applicationsRunningTableChange','applicationsRunningTableChange',function(){
+			$c.Bus.addConnection('taskManager_applicationsRunningTableChange','comodojo_app_running_registry_change',function(){
 				myself.updateTaskManagerStore();
 			});
 			
-			dojo.connect(applicationSpace, 'uninitialize', function(){
-				$c.bus.removeConnection('taskManager_applicationsRunningTableChange');
+			dojo.aspect.before(applicationSpace, 'close', function(){
+				$c.Bus.removeConnection('taskManager_applicationsRunningTableChange');
 			});
 
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
@@ -103,7 +99,7 @@ $c.App.load("taskmanager",
 				}
 			}).domNode);
 
-			$c.kernel.newCall(myself.loadCallback,{
+			$c.Kernel.newCall(myself.loadCallback,{
 				application: "taskmanager",
 				method: "get_load",
 				content: {}
@@ -117,15 +113,15 @@ $c.App.load("taskmanager",
 				label: 'title',
 				items: []
 			};
-			for (var process in $c.bus._runningApplications) {
-				if ( $c.bus._runningApplications[process][3] == "system" && !myself.showSystemProcesses) {
+			for (var process in $c.Bus._runningApplications) {
+				if ( $c.Bus._runningApplications[process][3] == "system" && !myself.showSystemProcesses) {
 					continue;
 				}
 				processList.items.push({
-					pid: $c.bus._runningApplications[process][0],
-					exec: $c.bus._runningApplications[process][1],
-					title: $c.bus._runningApplications[process][2],
-					runMode: $c.bus._runningApplications[process][3]
+					pid: $c.Bus._runningApplications[process][0],
+					exec: $c.Bus._runningApplications[process][1],
+					title: $c.Bus._runningApplications[process][2],
+					runMode: $c.Bus._runningApplications[process][3]
 				});
 			}
 			return processList;
@@ -139,24 +135,21 @@ $c.App.load("taskmanager",
 			
 			this.processStore.fetch();
 						
-			this.container.main.taskgrid.setStore(this.processStore);
+			this.container.main.taskgrid.model.clearCache();
+			this.container.main.taskgrid.body.refresh();
 		
-		};
-		
-		this.killSelected = function() {
-			$c.app.stop(myself.selectedPid[0]);
-		};
-		
-		this.focusSelected = function() {
-			$c.app.setFocus(myself.selectedPid[0]);
 		};
 		
 		this.loadCallback = function(success, result) {
 			if (!success) {
-				$c.error.local(result.code,result.name,myself.container.main.top.containerNode);
+				$c.Error.local(myself.container.main.top.containerNode, result.code, result.name);
 			}
 			else {
-				myself.container.main.top.set('content',myself.getLocalizedMutableMessage('0009',[result[0],result[1],result[2]]));
+				myself.container.main.top.set('content',myself.getLocalizedMutableMessage('0009',[
+					Math.round(result[0]*100)/100,
+					Math.round(result[1]*100)/100,
+					Math.round(result[2]*100)/100
+				]));
 			}
 		};
 

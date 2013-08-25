@@ -27,32 +27,32 @@ $c.App.load("chpasswd",
 					name: "message",
 					type: "info",
 					content: this.getLocalizedMessage('0003')
-	            },{
+				}, {
 					name: "oldUserPass",
 					value: "",
 					type: "PasswordTextBox",
 					label: this.getLocalizedMessage('0000'),
 					required: true
-	            }, {
+				}, {
 					name: "newUserPassOne",
 					value: "",
 					type: "PasswordTextBox",
 					label: this.getLocalizedMessage('0001'),
 					required: true
-	            }, {
+				}, {
 					name: "newUserPassTwo",
 					value: "",
 					type: "PasswordTextBox",
 					label: this.getLocalizedMessage('0002'),
 					required: true
-	            }, {
+				}, {
 					name: "go",
 					type: "Button",
 					label: this.getLocalizedMessage('0005'),
 					onClick: function() {
 						myself.tryChpasswd();
 					}
-	            }],
+				}],
 				attachNode: applicationSpace.containerNode
 			}).build();
 			

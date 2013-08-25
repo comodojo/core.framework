@@ -15,7 +15,7 @@ comodojo_load_resource('application');
 class helloworld extends application {
 	
 	public function init() {
-		$this->add_application_method('say', 'sayHello', Array(), '...',false);
+		$this->add_application_method('say', 'sayHello', Array(), 'Say hello!',false);
 	}
 	
 	public function sayHello ($attributes) {

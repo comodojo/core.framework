@@ -42,7 +42,8 @@ class info extends application {
 			Array('id'=>19,'info'=>'0019', 'value'=>COMODOJO_CRON_ENABLED),
 			Array('id'=>20,'info'=>'0020', 'value'=>comodojo_version()),
 			Array('id'=>21,'info'=>'0021', 'value'=>COMODOJO_USER_NAME),
-			Array('id'=>22,'info'=>'0022', 'value'=>COMODOJO_USER_ROLE)
+			Array('id'=>22,'info'=>'0022', 'value'=>COMODOJO_USER_ROLE),
+			Array('id'=>23,'info'=>'0023', 'value'=>COMODOJO_AUTHENTICATION_MODE)
 		);
 	}
 	

@@ -30,7 +30,7 @@
 	"10029":"Impossibile avviare l'applicazione",
 	"10030":"Errore del kernel",
 	"10031":"Sessione persa",
-	"10032":"${0}",
+	"10032":"{0}",
 	"10033":"Errore di sistema, ricaricare il portale.",
 	"10034":"Errore!",
 	"10035":"Email",

@@ -106,7 +106,7 @@ $c.App.load("test_kernel_store",
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: 'Add',
 				onClick: function() {
-					myself.add();
+					myself.showAddForm();
 				}
 			}).domNode);
 
@@ -131,20 +131,75 @@ $c.App.load("test_kernel_store",
 			this.container.main.center.model.save();
 		};
 		
-		this.add = function() {
-			this.container.main.center.store.add({
-				//id:"109",
-				name:"test-n",
-				description:"this is a test",
-				pattern:"this is a test",
-				content:"test test test two",
-				timestamp:"1375914416",
-				date:"2013-08-07",
-				userName:"admin",
-				rating:2,
-				refer:3,
-				type:"TEST"
+		this.showAddForm = function() {
+			$c.App.start('readyform',{
+				modules: ['ValidationTextBox','Button','Editor','DateTextBox','Textarea','Select','OnOffSelect','TextBox'],
+				callback: myself.add,
+				callbackOnClose: false,
+				hierarchy: [{
+					name: 'name',
+					type: "ValidationTextBox",
+					label: 'Name',
+					required:true
+				},{
+					name: 'description',
+					type: "Editor",
+					label: 'Description',
+					required: false
+				},{
+					name: 'pattern',
+					type: "ValidationTextBox",
+					label: 'Pattern',
+					required: true
+				},{
+					name: 'content',
+					type: "Textarea",
+					label: 'Content',
+					required: false
+				},{
+					name: 'timestamp',
+					type: "TextBox",
+					label: 'Tstamp',
+					required: false,
+					readonly: true,
+					value: 1375914416
+				},{
+					name: 'date',
+					type: "DateTextBox",
+					label: 'Date',
+					required: true
+				},{
+					name: 'userName',
+					type: "TextBox",
+					label: 'User Name',
+					required: false,
+					readonly: true,
+					value: $c.userName
+				},{
+					name: 'rating',
+					type: "Select",
+					label: 'Rating',
+					required: false,
+					value: 1,
+					options: [{label:"1",id:1},{label:"2",id:2},{label:"3",id:3},{label:"4",id:4},{label:"5",id:5}]
+				},{
+					name: 'refer',
+					type: "OnOffSelect",
+					label: 'Refer',
+					value: 1
+				},{
+					name: 'type',
+					type: "Select",
+					label: 'Type',
+					required: true,
+					value: 'TEST',
+					options: [{label:'TEST',id:'TEST'},{label:'TEST-1',id:'TEST-1'},{label:'TEST-2',id:'TEST-2'}]
+				}]
 			});
+		};
+
+		this.add = function(data) {
+			myself.container.main.center.store.add(data);
 		};
 
 	}

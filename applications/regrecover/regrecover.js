@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('form',['EmailTextBox','BusyButton']);
+$d.require('comodojo.Form');
 
 $c.App.load("regrecover",
 
@@ -18,7 +18,8 @@ $c.App.load("regrecover",
 		
 		this.init = function(){
 
-			this.recoverform = new $c.form({
+			this.recoverform = new $c.Form({
+				modules: ['EmailTextBox','BusyButton'],
 				formWidth: 500,
 				hierarchy: [{
 					name: "message",
@@ -50,7 +51,7 @@ $c.App.load("regrecover",
 				setTimeout(myself.recoverform.fields.gobuttom.cancel,100);
 			}
 			else {
-				$c.kernel.newCall(myself.recoverCallback,{
+				$c.Kernel.newCall(myself.recoverCallback,{
 					application: "regrecover",
 					method: "send_new_email",
 					preventCache: true,
@@ -62,7 +63,7 @@ $c.App.load("regrecover",
 		this.recoverCallback = function(success, result) {
 			if (!success) {
 				myself.recoverform.fields.message.changeType('error');
-				myself.recoverform.fields.message.changeContent('('+result.code+') '+result.name);
+				myself.recoverform.fields.message.changeContent($c.getLocalizedError(result.code));
 				myself.recoverform.fields.gobutton.cancel();
 			}
 			else {

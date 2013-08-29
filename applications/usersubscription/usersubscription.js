@@ -10,7 +10,7 @@
  * @license		GPL Version 3
  */
 
-$d.require("comdojo.Form")
+$d.require("comodojo.Form")
 
 $c.App.load("usersubscription",
 
@@ -111,7 +111,7 @@ $c.App.load("usersubscription",
 			}
 
 			this.registrationform = new $c.Form({
-				modules: ['ValidationTextBox','Button','EmailTextBox','DateTextBox','GenderSelect','BusyButton'],
+				modules: ['ValidationTextBox','Button','EmailTextBox','DateTextBox','GenderSelect','BusyButton','PasswordTextBox','TextBox'],
 				formWidth: 500,
 				hierarchy: subscription_h,
 				attachNode: applicationSpace.containerNode

@@ -8,11 +8,8 @@
  * @license		GPL Version 3
  */
 
-$c.loadComponent('layout',['Grid']);
 $c.App.loadCss('chmod');
-
-$d.require("dijit.form.Button");
-$d.require("dijit.form.FilteringSelect");
+$d.require("comodojo.layout");
 
 $c.App.load("chmod",
 
@@ -22,9 +19,6 @@ $c.App.load("chmod",
 		this.filePath = false;
 		this.allowSelection = true;
 		this.allowSet = true;
-		
-		this.onApplicationStart = false;
-		this.onApplicationStop = false;
 		
 		dojo.mixin(this, status);
 	

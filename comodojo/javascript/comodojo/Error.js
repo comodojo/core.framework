@@ -24,6 +24,20 @@ Error.generic = function(Code, Name, Detail) {
 
 };
 
+Error.minimal = function(Detail) {
+
+	return new dialogBase({
+		id: "errorDialog",
+		title: comodojo.getLocalizedMessage('10034'),
+		content: "<p>"+Detail+"</p>",
+		primaryCloseButton: false,
+		secondaryCloseButton: true,
+		parseOnLoad: false,
+		blocker: false
+	});
+
+};
+
 Error.genericHang = function(Code, Name, Detail) {
 
 	return new dialogBase({

@@ -46,7 +46,7 @@ $lang = Array(
 	'0033'	=>	'Modifica il tuo profilo',
 	'0034'	=>	'Modifica localizzazione',
 	'0035'	=>	'Cambia password',
-	'0036'	=>	'${0}Registrati al portale${1} o ${2}invia una nuova email${3}'
+	'0036'	=>	'{0}Registrati al portale{1} o {2}invia una nuova email{3}'
 );
 
 ?>

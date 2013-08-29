@@ -173,7 +173,13 @@ $fill = Array(
 	Array('users',Array(0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_USER'], MD5($_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_PASSWORD']),
 		1, 1, 0, 0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_USER'], 0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_MAIL'],
 		$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SITE_DATE'], "M", $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SITE_URL'],
-		random(),random()))
+		random(),random())),
+	
+	Array('test',Array(0,'test', 'this is a test','TEST','foo boo',strtotime('now'),'10-10-2013','admin','5','false','TEST_TYPE_1')),
+	Array('test',Array(0,'test1','this is a test','TEST','foo boo',strtotime('now'),'10-10-2013','admin','4','false','TEST_TYPE_1')),
+	Array('test',Array(0,'test2','this is a test','TEST','foo boo',strtotime('now'),'10-10-2013','admin','3','false','TEST_TYPE_1')),
+	Array('test',Array(0,'test3','this is a test','TEST','foo boo',strtotime('now'),'10-10-2013','admin','2','false','TEST_TYPE_2')),
+	Array('test',Array(0,'test4','this is a test','TEST','foo boo',strtotime('now'),'10-10-2013','admin','1','false','TEST_TYPE_2'))
 	);
 
 foreach($_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values'] as $key=>$value) {

@@ -53,20 +53,10 @@ class stage extends stage_base {
 				"required"		=>	true
 			),
 			array(
-				"type"			=>	"Select",
+				"type"			=>	"OnOffSelect",
 				"label"			=>	$this->i18n["0039"],
 				"name"			=>	"REGISTRATION_MODE",
-				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['REGISTRATION_MODE'],
-				"options"		=>	array(
-										array(
-											"id"		=>	0,
-											"label"		=>	$this->i18n["0097"]
-										),
-										array(
-											"id"		=>	1,
-											"label"		=>	$this->i18n["0096"]
-										)
-									)
+				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['REGISTRATION_MODE']
 			),
 			array(
 				"type"			=>	"OnOffSelect",

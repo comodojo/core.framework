@@ -14,6 +14,7 @@ define([
 	"dojo/text!../../templates/FilterPane.html",
 	"dojo/i18n!../../nls/FilterBar",
 	"dijit/layout/ContentPane",
+	"dijit/_BidiSupport",
 	"dijit/form/Select",
 	"dijit/form/TextBox",
 	"dijit/form/DateTextBox",
@@ -21,7 +22,7 @@ define([
 	"dijit/form/RadioButton",
 	"dijit/form/NumberTextBox",
 	"dijit/form/ComboBox"
-], function(declare, lang, array, dom, css, string, query, registry, ellipsis, metrics, DistinctComboBoxMenu, Filter, template, i18n, ContentPane){
+], function(declare, lang, array, dom, css, string, query, registry, ellipsis, metrics, DistinctComboBoxMenu, Filter, template, i18n, ContentPane, _BidiSupport){
 
 /*=====
 	return declare([], {
@@ -38,10 +39,10 @@ define([
 		sltColumn: null,
 		sltCondition: null,
 		grid: null,
-		title: i18n.defaultRuleTitle,
 		postCreate: function(){
 			this.inherited(arguments);
-			this.i18n = i18n;
+			this.i18n = this.grid.filterBar._nls;
+			this.set('title', this.i18n.defaultRuleTitle);
 			this.set('content', string.substitute(template, this));
 			this._initFields();
 			this._initSltCol();
@@ -62,7 +63,10 @@ define([
 				return {
 					colId: isAnyColumn(colId) ? '' : colId,
 					condition: condition,
-					value: condition === 'isEmpty' ? '' : value,
+					//fix defect #10741
+					//set('value', '') on DateTimeBox will set date to 1/1/1970
+					//so, set('value', null) when condition is empty on a DateTimeBoxs
+					value: condition === 'isEmpty'? ( this._getType() === 'Date'? null : '') : value,
 					type: this._getType()
 				};
 			}else{
@@ -136,7 +140,7 @@ define([
 			}, this);
 		},
 		_initSltCol: function(){
-			var colOpts = [{label: i18n.anyColumnOption, value: ANY_COLUMN_VALUE}],
+			var colOpts = [{label: this.i18n.anyColumnOption, value: ANY_COLUMN_VALUE}],
 				fb = this.grid.filterBar, 
 				sltCol = this.sltColumn;
 			array.forEach(this.grid.columns(), function(col){
@@ -156,7 +160,7 @@ define([
 				className: 'gridxFilterPaneCloseButton',
 				innerHTML: '<img src="' + this._blankGif + '"/>',
 				tabIndex: 0,
-				title: i18n.removeRuleButton || ''
+				title: this.i18n.removeRuleButton || ''
 			}, btnWidget.domNode, 'last');
 			this.connect(closeButton, 'onclick', 'close');
 			css.add(btnWidget.titleTextNode, 'dojoxEllipsis');
@@ -179,6 +183,9 @@ define([
 			this.onChange();
 		},
 		_onValueChange: function(){
+			if(this.grid.textDir && this.grid.textDir == 'auto'){
+				this.tbSingle.focusNode.dir = _BidiSupport.prototype._checkContextual(this._getValue());
+			}
 			this._updateTitle();
 			this.onChange();
 		},
@@ -270,7 +277,7 @@ define([
 				case 'Text':
 					return (combo ? this.comboText : this.tbSingle).get('value') || null;
 				case 'Number':
-					return isNaN(this.tbNumber.get('value')) ? null : this.tbNumber.get('value');
+					return (isNaN(this.tbNumber.get('value')) || !this.tbNumber.isValid())? null : this.tbNumber.get('value');
 				case 'Select':
 					return this.sltSingle.get('value') || null;
 				case 'Date':

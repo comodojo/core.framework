@@ -8,21 +8,20 @@ define([
 	"dojo/_base/Deferred",
 	"dojo/_base/sniff",
 	'dojo/_base/array',
-	"dojo/on",
 	"dojo/DeferredList",
 	"dojo/dom-class",
 	"dojo/dom-style",
 	"dojo/dom-geometry",
 	"dojo/dom-construct",
 	"dojo/keys",
+	"dijit/a11y",
 	"../core/_Module",
-	"../core/util",
 	"dojo/date/locale",
 	'../core/model/extensions/Modify',
 	'dojo/_base/event',
 	"dijit/form/TextBox"
 //    "dojo/NodeList-traverse"
-], function(/*=====Column, Cell, =====*/declare, lang, query, json, Deferred, has, array, on, DeferredList, domClass, domStyle, domGeo, domConstruct, keys, _Module, util, locale, Modify, event){
+], function(/*=====Column, Cell, =====*/declare, lang, query, json, Deferred, has, array, DeferredList, domClass, domStyle, domGeo, domConstruct, keys, a11y, _Module, locale, Modify, event){
 
 /*=====
 	Cell.beginEdit = function(){
@@ -81,6 +80,7 @@ define([
 
 	var Edit = declare(_Module, {
 		// summary:
+		//		module name: edit.
 		//		This module provides editing mode for grid cells.
 		// description:
 		//		This module relies on an implementation of the CellWidget module.
@@ -286,7 +286,8 @@ define([
 		if(col.storePattern && (col.dataType == 'date' || col.dataType == 'time')){
 			return locale.parse(storeData, col.storePattern);
 		}
-		return gridData;
+		//Some editor like textbox will ignore setting undefined value.
+		return gridData === undefined ? null : gridData;
 	}
 	
 	function dateTimeFormatter(field, parseArgs, formatArgs, rawData){
@@ -338,7 +339,18 @@ define([
 						cellBgNode = query('.gridxCellBg', node),
 						rowId = cell.row.id,
 						colId = cell.column.id,
-						visualIndex = cell.row.visualIndex();
+						visualIndex = cell.row.visualIndex(),
+						gridxRelaPath = function(){
+							var p= dojo.config.packages || {};
+							
+							for(var i in p){
+								if(p[i].name == 'gridx'){
+									var l = p[i].location;
+									return l[l.length - 1] == '/' ? l : l + '/';
+								}
+							}
+							return '';
+						};
 						
 						if(!cellBgNode.length){
 							var computedStyle = domStyle.getComputedStyle(node),
@@ -348,10 +360,7 @@ define([
 								html = [
 								"<div rowid='" + rowId + "' ",
 								"colid='" + colId + "' ",
-								"class='gridxCellBg' ",
-								"style='position:absolute;'>",
-								"<img style='position:absolute;z-index:10' src='" + dojo.baseUrl + "../gridx/resources/images/gridxCellChanged.png'>",
-								'</div>'
+								"class='gridxCellEditedBg'><span>◥</span></div>"
 							].join('');
 							
 							cellBgNode = domConstruct.toDom(html);
@@ -406,7 +415,12 @@ define([
 				t.connect(g.body, 'onAfterCell', _onAftercell);
 			}
 			g.domNode.removeAttribute('aria-readonly');
-			t.connect(g, 'onCellDblClick', '_onUIBegin');
+			t.connect(g, 'onCellDblClick', function(evt){
+				if(!domClass.contains(evt.target, 'gridxTreeExpandoIcon') &&
+					!domClass.contains(evt.target, 'gridxTreeExpandoInner')){
+					t._onUIBegin(evt);
+				}
+			});
 			t.connect(g.cellWidget, 'onCellWidgetCreated', '_onCellWidgetCreated');
 			t.connect(g.cellWidget, 'initializeCellWidget', function(widget, cell){
 				var column = cell.column;
@@ -437,7 +451,7 @@ define([
 			});
 		},
 		
-		lazySave: true,
+		lazySave: false,
 		
 		load: function(){
 			//Must init focus after navigable cell, so that "edit" focus area will be on top of the "navigablecell" focus area.
@@ -463,8 +477,7 @@ define([
 			},
 
 			editor: function(){
-				var cw = this.grid.cellWidget.getCellWidget(this.row.id, this.column.id);
-				return cw && cw.gridCellEditField;
+				return this.grid.edit.getEditor(this.row.id, this.column.id);
 			},
 
 			isEditable: function(){
@@ -513,9 +526,9 @@ define([
 							lang.partial(getTypeData, col)));
 					t._record(rowId, colId);
 					g.body.refreshCell(row.visualIndex(), col.index).then(function(){
+						g.resize();
 						t._focusEditor(rowId, colId);
 						d.callback(true);
-						g.resize();
 						t.onBegin(g.cell(rowId, colId, 1));
 					});
 				}else{
@@ -635,8 +648,7 @@ define([
 			if(col && col.alwaysEditing){
 				return true;
 			}
-			var widget = this.grid.cellWidget.getCellWidget(rowId, colId);
-			return !!widget && !!widget.gridCellEditField;
+			return !!this.getEditor(rowId, colId);
 		},
 
 		setEditor: function(colId, editor, args){
@@ -645,7 +657,12 @@ define([
 			col.editor = editor;
 			lang.mixin(editorArgs, args || {});
 		},
-		
+
+		getEditor: function(rowId, colId){
+			var widget = this.grid.cellWidget.getCellWidget(rowId, colId);
+			return widget && widget.gridCellEditField;
+		},
+
 		getLazyData: function(rowId, colId){
 			var t = this,
 				f = t.grid._columnsById[colId].field;
@@ -710,17 +727,30 @@ define([
 					col.navigable = true;
 					var needCellWidget = col.needCellWidget;
 					col.needCellWidget = function(cell){
-						return needCellWidget.apply(col, arguments) && cell.isEditable();
+						return (!needCellWidget || needCellWidget.apply(col, arguments)) && cell.isEditable();
 					};
+					col._userDec = col.decorator;
 					col.userDecorator = t._getDecorator(col.id);
 					col.setCellValue = getEditorValueSetter((col.editorArgs && col.editorArgs.toEditor) ||
 							lang.partial(getTypeData, col));
-					col.decorator = function(){ return ''; };
+					col.decorator = t._dummyDecorator;
 					//FIXME: this breaks encapsulation
 					col._cellWidgets = {};
 					col._backupWidgets = [];
 				}
 			});
+		},
+
+		_dummyDecorator: function(data, rowId, visualIndex, cell){
+			var column = cell.column;
+			if(!column.needCellWidget || column.needCellWidget(cell)){
+				return '';
+			}
+			//If not editable, allow user decorator to take effect.
+			if(column._userDec){
+				return column._userDec(data, rowId, visualIndex, cell);
+			}
+			return data;
 		},
 
 		_getColumnEditor: function(colId){
@@ -749,7 +779,10 @@ define([
 							var delay = column.editorArgs && column.editorArgs.applyDelay || 500;
 							clearTimeout(editor._timeoutApply);
 							editor._timeoutApply = setTimeout(function(){
-								t.apply(rn.getAttribute('rowid'), column.id);
+								var rowId = rn.getAttribute('rowid');
+								t.apply(rowId, column.id).then(function(){
+									t._focusEditor(rowId, column.id);
+								});
 							}, delay);
 						}
 					});
@@ -761,18 +794,10 @@ define([
 		},
 
 		_focusEditor: function(rowId, colId, forced){
-			var cw = this.grid.cellWidget,
-				func = function(){
-					var widget = cw.getCellWidget(rowId, colId),
-						editor = widget && widget.gridCellEditField;
-					if(editor && !editor.focused && lang.isFunction(editor.focus) || forced){
-						editor.focus();
-					}
-				};
-			if(has('webkit')){
-				func();
-			}else{
-				setTimeout(func, 1);
+			var editor = this.getEditor(rowId, colId);
+			if(editor && !editor.focused && lang.isFunction(editor.focus) || forced){
+				this.grid.hScroller.scrollToColumn(colId);
+				editor.focus();
 			}
 		},
 
@@ -898,26 +923,33 @@ define([
 				view = g.view,
 				body = g.body;
 			if(t._editing && step){
-				var rowIndex = view.getRowInfo({
-						parentId: t.model.parentId(t._focusCellRow),
-						rowIndex: t.model.idToIndex(t._focusCellRow)
-					}).visualIndex,
-					colIndex = g._columnsById[t._focusCellCol].index,
-					dir = step > 0 ? 1 : -1,
-					checker = function(r, c){
-						return g._columns[c].editable;
-					};
-				body._nextCell(rowIndex, colIndex, dir, checker).then(function(obj){
-					g.focus.stopEvent(evt);
-					t._applyAll();
-					t._focusCellCol = g._columns[obj.c].id;
-					var rowInfo = view.getRowInfo({visualIndex: obj.r});
-					t._focusCellRow = t.model.indexToId(rowInfo.rowIndex, rowInfo.parentId);
-					//This breaks encapsulation a little....
-					body._focusCellCol = obj.c;
-					body._focusCellRow = obj.r;
-					t.begin(t._focusCellRow, t._focusCellCol);
+				var cellNode = g.body.getCellNode({
+					rowId: t._focusCellRow,
+					colId: t._focusCellCol
 				});
+				var elems = a11y._getTabNavigable(cellNode);
+				if(evt && evt.target == (step < 0 ? elems.first : elems.last)){
+					g.focus.stopEvent(evt);
+					var rowIndex = view.getRowInfo({
+							parentId: t.model.parentId(t._focusCellRow),
+							rowIndex: t.model.idToIndex(t._focusCellRow)
+						}).visualIndex,
+						colIndex = g._columnsById[t._focusCellCol].index,
+						dir = step > 0 ? 1 : -1,
+						checker = function(r, c){
+							return g._columns[c].editable;
+						};
+					body._nextCell(rowIndex, colIndex, dir, checker).then(function(obj){
+						t._applyAll();
+						t._focusCellCol = g._columns[obj.c].id;
+						var rowInfo = view.getRowInfo({visualIndex: obj.r});
+						t._focusCellRow = t.model.indexToId(rowInfo.rowIndex, rowInfo.parentId);
+						//This breaks encapsulation a little....
+						body._focusCellCol = obj.c;
+						body._focusCellRow = obj.r;
+						t.begin(t._focusCellRow, t._focusCellCol);
+					});
+				}
 				return false;
 			}
 			return true;
@@ -925,6 +957,7 @@ define([
 
 		_onBlur: function(){
 			this._applyAll();
+			this._editing = false;
 			return true;
 		},
 
@@ -940,19 +973,14 @@ define([
 			this._editing = false;
 			var focus = this.grid.focus;
 			if(focus){
-				if(has('ie')){
-					setTimeout(function(){
-						focus.focusArea('body');
-					}, 1);
-				}else{
-					focus.focusArea('body');
-				}
+				focus.focusArea('body');
 			}
 		},
 		
 		_onKey: function(e){
 			var t = this,
 				g = t.grid,
+				ctrlKey = g._isCtrlKey(e),
 				col = g._columnsById[e.columnId];
 			if(col.editable){
 				var editing = t.isEditing(e.rowId, e.columnId);
@@ -975,24 +1003,24 @@ define([
 					t.cancel(e.rowId, e.columnId).then(lang.hitch(t, t._blur)).then(function(){
 						g.focus.focusArea('body');
 					});
-				}else if(e.keyCode == 'Z'.charCodeAt(0) && e.ctrlKey){
+				}else if(e.keyCode == 'Z'.charCodeAt(0) && ctrlKey){
 					if(t.arg('lazySave')){
 						t.model.undo();
 					}
-				}else if(e.keyCode == 'Y'.charCodeAt(0) && e.ctrlKey){
+				}else if(e.keyCode == 'Y'.charCodeAt(0) && ctrlKey){
 					if(t.arg('lazySave')){
 						t.model.redo();
 					}
-				}else if(e.keyCode == 'S'.charCodeAt(0) && e.ctrlKey){
+				}else if(e.keyCode == 'S'.charCodeAt(0) && ctrlKey){
 					if(t.arg('lazySave')){
 						t.model.save();
 						e.preventDefault();
 					}
 				}
 			}
-			if(t._editing && e.keyCode !== keys.TAB){
-				e.stopPropagation();
-			}
+//            if(t._editing && e.keyCode !== keys.TAB){
+//                e.stopPropagation();
+//            }
 		}
 		
 	});

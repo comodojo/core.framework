@@ -6,15 +6,13 @@ define([
 	"dijit/registry",
 	"dijit/a11y",
 	"dojo/dom-construct",
-	"../core/_Module",
-	"../core/util"
-], function(require, declare, lang, array, registry, a11y, domConstruct, _Module, util){
+	"../core/_Module"
+], function(require, declare, lang, array, registry, a11y, domConstruct, _Module){
 
 /*=====
 	var Bar = declare(_Module, {
-		// module:
-		//		gridx/modules/Bar
 		// summary:
+		//		module name: bar.
 		//		This is a general-purpose bar for gridx.
 		// description:
 		//		This module can be configured to hold various plugins, such as pager, pageSizer, gotoPageButton, summary, quickFilter, toobar, etc.

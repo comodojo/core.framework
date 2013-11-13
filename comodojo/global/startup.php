@@ -37,10 +37,10 @@ class comodojo_startup extends comodojo_basic {
 		//if(isset($attributes['userName']) AND isset($attributes['userPass'])) $this->auth_login($attributes['userName'], $attributes['userPass']);
 		
 		try {
-			$events->record('SITE_HIT', COMODOJO_USER_NAME);
+			$events->record('site_hit', COMODOJO_USER_NAME);
 		}
 		catch(Exception $e) {
-			comodojo_debug("There was a problem recording event 'SITE_HIT': ".$e->getMessage(),'WARNING','startup');
+			comodojo_debug("There was a problem recording event 'site_hit': ".$e->getMessage(),'WARNING','startup');
 		}
 		
 		$this->evalMeta();

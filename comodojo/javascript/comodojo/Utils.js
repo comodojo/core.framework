@@ -237,6 +237,8 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 	//
 	// returns: Object
 	//
+	
+	//try{
 	var myNode, ObjectConstructor, BuiltObject;
 		
 	myNode = domConstruct.create(!hierachy.domobj ? "div" : hierachy.domobj, {}, win.body());
@@ -269,6 +271,7 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 		}
 	}
 	else {
+		//console.log(hierachy.widget);
 		ObjectConstructor = eval(hierachy.widget);
 		if (startObj) { 
 			startObj[hierachy.name] = new ObjectConstructor (!hierachy.params ? {} : hierachy.params, myNode);
@@ -301,6 +304,8 @@ Utils.fromHierarchy = function(hierachy, startObj) {
 		}
 		BuiltObject.startup();
 	}
+	//}
+	//catch(e) {console.log(e);}
 	return BuiltObject;
 };
 

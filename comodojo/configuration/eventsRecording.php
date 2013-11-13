@@ -46,7 +46,14 @@ $_events = array(
 	"user_authorized"							=> array("enabled"=>true,"type"=>"info"),
 	"user_confirmed"							=> array("enabled"=>true,"type"=>"info"),
 	"user_rejected"								=> array("enabled"=>true,"type"=>"info"),
-	"user_new_notification"						=> array("enabled"=>true,"type"=>"info")
+	"user_new_notification"						=> array("enabled"=>true,"type"=>"info"),
+	//USER_MANAGEMENT
+	"user_recovery_request"						=> array("enabled"=>true,"type"=>"info"),
+	"user_recovery_request"						=> array("enabled"=>true,"type"=>"info"),
+	"user_recovery_confirm"						=> array("enabled"=>true,"type"=>"info"),
+	"user_recovery_confirm"						=> array("enabled"=>true,"type"=>"info"),
+	"user_recovery_expire_batch"				=> array("enabled"=>true,"type"=>"info"),
+	"user_recovery_expire_batch"				=> array("enabled"=>true,"type"=>"info")
 );
 
 ?>

@@ -14,6 +14,7 @@ define([
 /*=====
 	return declare(VScroller, {
 		// summary:
+		//		module name: vScroller.
 		//		This module implements lazy-rendering when virtically scrolling grid.
 		// description:
 		//		This module takes a DOMNode-based way to implement lazy-rendering.
@@ -183,6 +184,7 @@ define([
 	
 		_init: function(args){
 			var t = this;
+			t._avgRowHeight = t.grid.body.arg('defaultRowHeight') || 24;
 			t._rowHeight = {};
 			t._syncHeight();
 			t.connect(t.grid, '_onResizeEnd', function(){
@@ -286,6 +288,7 @@ define([
 					bn.scrollTop += deltaT;
 				}
 			}
+			t._doVirtual();
 		},
 		
 		_doScroll: function(e, forced, noLazy){
@@ -312,7 +315,6 @@ define([
 			var t = this;
 			t._update();
 			t._doScroll(0, 1);
-			t._doVirtual();
 			//If some scrollToRow requests are pending, resume them.
 			array.forEach(t._scrolls, function(d){
 				if(d.scrollContext){
@@ -327,7 +329,6 @@ define([
 		_onForcedScroll: function(){
 			this._rowHeight = {};
 			this._doScroll(0, 1);
-			this._doVirtual();
 		},
 
 		//Private ---------------------------------------------------
@@ -348,9 +349,14 @@ define([
 				t._ratio = h / maxHeight;
 				h = maxHeight;
 			}
+			var dn = t.domNode,
+				//remember the scroll bar position
+				oldScrollTop = dn.scrollTop;
 			t.stubNode.style.height = h + 'px';
+			//Update last scrolltop, to avoid firing _doVirtualScroll with incorrect delta.
 			if(t._lastScrollTop){
-				t._lastScrollTop = t.domNode.scrollTop;
+				dn.scrollTop = oldScrollTop;
+				t._lastScrollTop = dn.scrollTop;
 			}
 		},
 	
@@ -362,7 +368,7 @@ define([
 			}, 100);
 		},
 	
-		_updateRowHeight: function(){
+		_updateRowHeight: function(mode){
 			//Update average row height and unrender rows
 			var t = this,
 				preCount = 0,
@@ -374,7 +380,8 @@ define([
 				st = bn.scrollTop,
 				top = st - buff,
 				bottom = st + bn.clientHeight + buff,
-				rh = t._rowHeight;
+				rh = t._rowHeight,
+				ret = 0;
 	
 			array.forEach(bn.childNodes, function(n){
 				rh[n.getAttribute('rowid')] = n.offsetHeight;
@@ -384,18 +391,25 @@ define([
 					++preCount;
 				}
 			});
-			bd.unrenderRows(preCount);
-			bd.unrenderRows(postCount, 'post');
+			if(mode != 'post'){
+				bd.unrenderRows(preCount);
+				ret = preCount;
+			}
+			if(mode != 'pre'){
+				bd.unrenderRows(postCount, 'post');
+				ret = postCount;
+			}
 	
 			var p, h = 0, c = 0;
 			for(p in rh){
 				h += rh[p];
 				++c;
 			}
-			if(c){
+			if(h && c){
 				t._avgRowHeight = h / c;
 				t._syncHeight();
 			}
+			return ret;
 		},
 
 		_onKeyScroll: function(evt){
@@ -404,16 +418,17 @@ define([
 				view = t.grid.view,
 				focus = t.grid.focus,
 				sn = t.domNode,
+				ctrlKey = t.grid._isCtrlKey(evt),
 				st = 'scrollTop',
 				r,
 				fc = '_focusCellRow';
 			if(!focus || focus.currentArea() == 'body'){
-				if(evt.keyCode == keys.HOME && evt.ctrlKey){
+				if(evt.keyCode == keys.HOME && ctrlKey){
 					bd._focusCellCol = 0;
 					bd[fc] = 0;
 					sn[st] = 0;
 					bd._focusCell();
-				}else if(evt.keyCode == keys.END && evt.ctrlKey){
+				}else if(evt.keyCode == keys.END && ctrlKey){
 					bd._focusCellCol = t.grid._columns.length - 1;
 					bd[fc] = view.visualCount - 1;
 					sn[st] = t.stubNode.clientHeight - bd.domNode.offsetHeight;

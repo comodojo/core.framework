@@ -58,7 +58,7 @@ class chmod extends application {
 			$result = $fs->getPermissions();
 			$to_return = Array();
 			$acl_id = 1;
-			foreach ($result['readers'] as $reader) { array_push($to_return,Array("acl_id"=> $reader, "userName"=>$reader,"role"=>'reader')); $acl_id++;}
+			foreach ($result['readers'] as $reader) { array_push($to_return,Array("acl_id"=> $acl_id, "userName"=>$reader,"role"=>'reader')); $acl_id++;}
 			foreach ($result['writers'] as $writer) { array_push($to_return,Array("acl_id"=> $acl_id, "userName"=>$writer,"role"=>'writer')); $acl_id++;}
 			foreach ($result['owners'] as $owner) { array_push($to_return,Array("acl_id"=> $acl_id, "userName"=>$owner,"role"=>'owner')); $acl_id++;}
 		}

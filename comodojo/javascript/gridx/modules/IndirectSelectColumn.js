@@ -8,13 +8,13 @@ define([
 	"dojo/_base/Deferred",
 	"dojo/keys",
 	"../core/_Module",
-	"../core/util",
 	"./RowHeader"
-], function(declare, array, event, query, lang, domClass, Deferred, keys, _Module, util){
+], function(declare, array, event, query, lang, domClass, Deferred, keys, _Module){
 
 /*=====
 	return declare(_Module, {
 		// summary:
+		//		module name: indirectSelect.
 		//		Provide a check box (or radio button) column to select rows.
 		// description:
 		//		This module depends on "rowHeader" and "selectRow" modules.
@@ -47,9 +47,8 @@ define([
 			var t = this,
 				g = t.grid,
 				sr = g.select.row,
-				columns = g._columns,
 				w = t.arg('width'),
-				col = {
+				col = t._col = {
 					id: indirectSelectColumnId,
 					decorator: lang.hitch(this, '_createSelector'),
 					headerStyle: 'text-align: center;',
@@ -63,10 +62,13 @@ define([
 					declaredWidth: w,
 					width: w
 				};
+			sr.holdingCtrl = true;
 			t.batchConnect(
+				[g, 'setColumns', '_onSetColumns'],
 				[sr, 'onHighlightChange', '_onHighlightChange' ],
 				[sr, 'onSelectionChange', '_onSelectionChange'],
 				[sr, 'clear', '_onClear'],
+				[g.body, 'onRender', '_onSelectionChange'],
 				g.filter && [g.filter, 'onFilter', '_onSelectionChange'],
 				[g.body, 'onMoveToCell', function(r, c, e){
 					var evt = {
@@ -80,11 +82,7 @@ define([
 				}],
 				[g, 'onCellMouseOver', '_onMouseOver'],
 				[g, 'onCellMouseOut', '_onMouseOut']);
-			columns.splice(t.arg('position'), 0, col);
-			g._columnsById[col.id] = col;
-			array.forEach(columns, function(c, i){
-				c.index = i;
-			});
+			t._onSetColumns();
 			if(sr.selectByIndex && t.arg('all')){
 				t._allSelected = {};
 				col.name = t._createSelectAllBox();
@@ -101,6 +99,23 @@ define([
 				});
 			}
 			g.header._build();
+		},
+
+		_onSetColumns: function(){
+			var g = this.grid,
+				columns = g._columns,
+				col = this._col;
+			columns.splice(this.arg('position'), 0, col);
+			g._columnsById[col.id] = col;
+			array.forEach(columns, function(c, i){
+				c.index = i;
+			});
+		},
+
+		_updateSelectAll: function(){
+			var newHeader = this._createSelectAllBox();
+			this.grid._columnsById[indirectSelectColumnId].name = newHeader;
+			this.grid.header.getHeaderNode(indirectSelectColumnId).innerHTML = newHeader;
 		},
 
 		_createSelectAllBox: function(){
@@ -143,9 +158,18 @@ define([
 			return select.hasOwnProperty('multiple') && !select.arg('multiple');
 		},
 
-		_onClear: function(){
-			var cls = this._getDijitClass() + 'Checked';
-			query('.' + cls, this.grid.bodyNode).removeClass(cls);
+		_onClear: function(reservedRowId){
+			var dijitCls = this._getDijitClass(),
+				cls = dijitCls + 'Checked',
+				partialCls = dijitCls + 'Partial',
+				g = this.grid;
+			query('.' + cls, g.bodyNode).removeClass(cls);
+			query('.' + partialCls, g.bodyNode).removeClass(partialCls);
+			if(g.select.row.isSelected(reservedRowId)){
+				query('[rowid="' + g._escapeId(reservedRowId) + '"].gridxRow .gridxIndirectSelectionCheckBox', g.bodyNode).addClass(cls);
+			}
+			query('.' + cls, g.headerNode).removeClass(cls).attr('aria-checked', 'false');
+			this._allSelected = {};
 		},
 
 		_onHighlightChange: function(target, toHighlight){
@@ -165,7 +189,7 @@ define([
 				domClass.toggle(node, dijitClass + 'Disabled', !selected && !partial && isUnselectable);
 				node.setAttribute('aria-checked', selected ? 'true' : partial ? 'mixed' : 'false');
 				node.firstChild.innerHTML = selected ? '&#10003;' : partial ? '&#9646;' : '&#9744;';
-			}			
+			}
 		},
 
 		_onMouseOver: function(e){
@@ -174,10 +198,6 @@ define([
 				if(!sr.triggerOnCell){
 					this._triggerOnCell = false;
 					sr.triggerOnCell = true;
-				}
-				if(!sr.arg('holdingCtrl')){
-					this._holdingCtrl = false;
-					sr.holdingCtrl = true;
 				}
 			}else{
 				this._onMouseOut();
@@ -190,10 +210,6 @@ define([
 				sr.triggerOnCell = false;
 				delete this._triggerOnCell;
 			}
-			if(this.hasOwnProperty('_holdingCtrl')){
-				sr.holdingCtrl = false;
-				delete this._holdingCtrl;
-			}
 		},
 
 		_onSelectAll: function(){
@@ -205,7 +221,7 @@ define([
 			]([0, g.view.visualCount - 1]);
 		},
 
-		_onSelectionChange: function(selected){
+		_onSelectionChange: function(){
 			var t = this, d,
 				g = t.grid,
 				allSelected,
@@ -213,42 +229,40 @@ define([
 				model = t.model,
 				start = view.rootStart,
 				count = view.rootCount;
-			var selectedRoot = array.filter(selected || g.select.row.getSelected(), function(id){
-				return !model.treePath(id).pop();
-			});
-			var unselectableRows = g.select.row._getUnselectableRows();
-			var unselectableRoots = array.filter(unselectableRows, function(id){
-				return !model.parentId(id) && !g.select.row.isSelected(id);
-			});			
-			if(count === model.size()){
-				allSelected = count && count - unselectableRoots.length == selectedRoot.length;
-			}else{
-				d = new Deferred();
-				model.when({
-					start: start,
-					count: count
-				}, function(){
-					var indexes = array.filter(array.map(selectedRoot, function(id){
-						return model.idToIndex(id);
-					}), function(index){
-						return index >= start && index < start + count;
+			if(g.select.row.selectByIndex && t.arg('all')){
+				var selectedRoot = array.filter(g.select.row.getSelected(), function(id){
+					return !model.treePath(id).pop();
+				});
+				var unselectableRows = g.select.row._getUnselectableRows();
+				var unselectableRoots = array.filter(unselectableRows, function(id){
+					return !model.parentId(id) && !g.select.row.isSelected(id);
+				});
+				if(count === model.size()){
+					allSelected = count && count - unselectableRoots.length == selectedRoot.length;
+				}else{
+					d = new Deferred();
+					model.when({
+						start: start,
+						count: count
+					}, function(){
+						var indexes = array.filter(array.map(selectedRoot, function(id){
+							return model.idToIndex(id);
+						}), function(index){
+							return index >= start && index < start + count;
+						});
+						unselectableRoots = array.filter(unselectableRoots, function(id){
+							var index = model.idToIndex(id);
+							return index >= start && index < start + count;
+						});
+						allSelected = count - unselectableRoots.length == indexes.length;
+						d.callback();
 					});
-					unselectableRoots = array.filter(unselectableRoots, function(id){
-						var index = model.idToIndex(id);
-						return index >= start && index < start + count;
-					});
-					allSelected = count - unselectableRoots.length == indexes.length;
-					d.callback();
+				}
+				Deferred.when(d, function(){
+					t._allSelected[t._getPageId()] = allSelected;
+					t._updateSelectAll();
 				});
 			}
-			Deferred.when(d, function(){
-				if(t.arg('all')){
-					t._allSelected[t._getPageId()] = allSelected;
-					var newHeader = t._createSelectAllBox();
-					g._columnsById[indirectSelectColumnId].name = newHeader;
-					g.header.getHeaderNode(indirectSelectColumnId).innerHTML = newHeader;
-				}
-			});
 		}
 	});
 });

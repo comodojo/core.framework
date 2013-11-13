@@ -13,12 +13,13 @@ define([
 	'dijit/Menu',
 	'dijit/MenuItem',
 	'../modules/Filter',
-	'dojo/i18n!../nls/QuickFilter',
-	'dojo/text!../templates/QuickFilter.html'
+	'dojo/i18n',
+	'dojo/text!../templates/QuickFilter.html',
+	'dojo/i18n!../nls/QuickFilter'
 ], function(declare, lang, array, domClass, keys,
 	_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 	TextBox, Button, ComboButton, Menu, MenuItem,
-	F, nls, template){
+	F, i18n, template){
 
 /*=====
 	return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -44,8 +45,13 @@ define([
 		templateString: template,
 
 		constructor: function(args){
-			lang.mixin(this, nls);
-			this._hasFilterBar = args.grid.filterBar ? 'gridxQuickFilterHasFilterBar' : 'gridxQuickFilterNoFilterBar';
+			var t = this;
+			lang.mixin(t, i18n.getLocalization('gridx', 'QuickFilter', args.grid.lang));
+			t._hasFilterBar = args.grid.filterBar ? 'gridxQuickFilterHasFilterBar' : 'gridxQuickFilterNoFilterBar';
+			t.connect(args.grid.model, 'setStore', function(){
+				t.textBox.set('value', '');
+				domClass.remove(t.domNode, 'gridxQuickFilterActive');
+			});
 		},
 
 		postCreate: function(){
@@ -84,6 +90,14 @@ define([
 				t._handle = setTimeout(function(){
 					t._filter();
 				}, key == keys.ENTER ? 0 : t.delay);
+			}
+		},
+
+		_onKey: function(evt){
+			if(evt.keyCode == keys.ENTER){
+				this.grid.focus.stopEvent(evt);
+				this._clear();
+				this.textBox.focus();
 			}
 		},
 

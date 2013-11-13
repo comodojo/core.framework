@@ -11,7 +11,7 @@
  */
 
 $lang = Array(
-	'0000'	=>	'Modifica permessi per la risorsa: ${0}',
+	'0000'	=>	'Modifica permessi per la risorsa: {0}',
 	'0001'	=>	'Seleziona una risorsa',
 	'0002'	=>	'Aggiungi utente',
 	'0003'	=>	'Nessuna risorsa selezionata',
@@ -19,7 +19,8 @@ $lang = Array(
 	'0005'	=>	'Permessi salvati correttamente',
 	'0006'	=>	'Impossibile salvare i permessi sulla risorsa',
 	'0007'	=>	'Utente',
-	'0008'	=>	'Accesso'
+	'0008'	=>	'Accesso',
+	'0009'	=>	'Impossibile selezionare una risorsa'
 );
 
 ?>

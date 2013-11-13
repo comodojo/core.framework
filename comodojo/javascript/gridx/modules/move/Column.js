@@ -17,6 +17,7 @@ define([
 
 	return declare(_Module, {
 		// summary:
+		//		module name: moveColumn.
 		//		This module provides several APIs to move columns within grid.
 		// description:
 		//		This module does not include any UI. So different kind of column dnd UI implementations can be built
@@ -35,7 +36,7 @@ define([
 		//		End index should be always larger than start index.
 		//		For example: { 0: 3 } means the first 4 columns can only be moved within themselves,
 		//		they can not be moved out and other columns can not be moved in.
-		constraints: Object
+		constraints: Object,
 
 		move: function(columnIndexes, target){
 			// summary:
@@ -193,7 +194,7 @@ define([
 				ltr = g.isLeftToRight(),
 				preKey = ltr ? keys.LEFT_ARROW : keys.RIGHT_ARROW,
 				postKey = ltr ? keys.RIGHT_ARROW : keys.LEFT_ARROW;
-			if(e.ctrlKey && !e.shiftKey && !e.altKey && (e.keyCode == preKey || e.keyCode == postKey)){
+			if(g._isCtrlKey(e) && !e.shiftKey && !e.altKey && (e.keyCode == preKey || e.keyCode == postKey)){
 				var target = e.columnIndex,
 					colIdxes = selector && selector.isSelected(e.columnId) ?
 						array.map(selector.getSelected(), function(id){

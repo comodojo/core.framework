@@ -10,13 +10,15 @@ define([
 	"dojo/keys",
 	"../core/_Module",
 	"../core/model/extensions/Sort",
+	"dojo/i18n",
 	"dojo/i18n!../nls/NestedSort",
 	"./HeaderRegions"
-], function(declare, array, lang, event, query, string, domClass, domConstruct, keys, _Module, Sort, nls){
+], function(declare, array, lang, event, query, string, domClass, domConstruct, keys, _Module, Sort, i18n){
 
 /*=====
 	return declare(_Module, {
 		// summary:
+		//		module name: sort.
 		//		Sort multiple columns in a nested way.
 
 		getSortData: function(){
@@ -68,6 +70,7 @@ define([
 		preload: function(args){
 			var t = this,
 				g = t.grid;
+			t._nls = i18n.getLocalization('gridx', 'NestedSort', g.lang);
 			t._sortData = t.arg('initialOrder', []);
 			if(g.persist){
 				var d = g.persist.registerAndLoad('sort', function(){
@@ -83,6 +86,9 @@ define([
 			if(t._sortData.length){
 				g.model.sort(t._sortData);
 			}
+			
+			t.connect(g.headerRegions, 'refresh', t._updateUI);
+
 			g.headerRegions.add(lang.hitch(t, t._createBtn, 1), 10, 1);
 			g.headerRegions.add(lang.hitch(t, t._createBtn, 0), 11, 1);
 		},
@@ -137,8 +143,8 @@ define([
 					'class': 'gridxSortBtn gridxSortBtn' + (isSingle ? 'Single' : 'Nested'),
 					tabIndex: -1,
 					title: isSingle ?
-						nls.singleSort + ' - ' + nls.ascending :
-						nls.nestedSort + ' - ' + nls.ascending,
+						t._nls.singleSort + ' - ' + t._nls.ascending :
+						t._nls.nestedSort + ' - ' + t._nls.ascending,
 					innerHTML: isSingle ?
 						a11yText.dojoxGridAscendingTip + '&nbsp;' :
 						t._sortData.length + 1 + a11yText.dojoxGridAscendingTip
@@ -200,9 +206,12 @@ define([
 
 		_updateUI: function(){
 			var t = this,
+				nls = t._nls,
 				g = t.grid,
 				dn = g.domNode,
-				sortData = t._sortData;
+				sortData = array.filter(t._sortData, function(s){
+					return g._columnsById[s.colId];
+				});
 			removeClass(dn, 'gridxSingleSorted');
 			removeClass(dn, 'gridxNestedSorted');
 			if(sortData.length == 1){
@@ -265,8 +274,8 @@ define([
 				orderState = data.descending ? 'descending' : 'ascending';
 				orderAction = data.descending ? 'none' : 'descending';
 			}
-			var a11ySingleLabel = string.substitute(nls.waiSingleSortLabel, [columnInfo, orderState, orderAction]),
-				a11yNestedLabel = string.substitute(nls.waiNestedSortLabel, [columnInfo, orderState, orderAction]);
+			var a11ySingleLabel = string.substitute(this._nls.waiSingleSortLabel, [columnInfo, orderState, orderAction]),
+				a11yNestedLabel = string.substitute(this._nls.waiNestedSortLabel, [columnInfo, orderState, orderAction]);
 			query('.gridxSortBtnSingle', cell)[0].setAttribute("aria-label", a11ySingleLabel);
 			query('.gridxSortBtnNested', cell)[0].setAttribute("aria-label", a11yNestedLabel);
 		}

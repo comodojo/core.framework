@@ -14,6 +14,7 @@ define([
 /*=====
 	return declare(_Module, {
 		// summary:
+		//		module name: columnWidth.
 		//		Manages column width distribution, allow grid autoWidth and column autoResize.
 
 		// default: Number
@@ -33,6 +34,39 @@ define([
 	});
 =====*/
 
+	var needHackPadBorder = has('safari') < 6 || (!has('safari') && has('webkit') && has('ios'));
+
+	function calcAutoWidth(autoCols, freeWidth, padBorder){
+		autoCols.sort(function(c1, c2){
+			return (c1.minWidth || 0) - (c2.minWidth || 0);
+		});
+		var i = autoCols.length - 1, c;
+		for(; i >= 0; --i){
+			c = autoCols[i];
+			if(c.minWidth && (c.minWidth + padBorder) * (i + 1) > freeWidth){
+				c.width = c.minWidth + 'px';
+				freeWidth -= c.minWidth + padBorder;
+			}else{
+				break;
+			}
+		}
+		var len = i + 1;
+		if(len){
+			var w = Math.floor(freeWidth / len - padBorder);
+			var ww = freeWidth - (w + padBorder) * (len - 1) - padBorder;
+			if(w < 0){
+				w = 0;
+			}
+			if(ww < 0){
+				ww = 0;
+			}
+			for(i = 0; i < len; ++i){
+				c = autoCols[i];
+				c.width = (i ? w : ww) + 'px';
+			}
+		}
+	}
+
 	return declare(_Module, {
 		name: 'columnWidth',
 
@@ -42,18 +76,13 @@ define([
 			this._init();
 		},
 
-		preload: function(){
+		load: function(){
 			var t = this,
 				g = t.grid;
-			t._ready = new Deferred();
-			t.batchConnect(
-				[g.hLayout, 'onUpdateWidth', '_onUpdateWidth'],
-				[g, 'setColumns', '_onSetColumns']);
-		},
-
-		load: function(){
-			this._adaptWidth();
-			this.loaded.callback();
+			t.aspect(g.hLayout, 'onUpdateWidth', '_onUpdateWidth');
+			t.aspect(g, 'setColumns', '_onSetColumns');
+			t._adaptWidth();
+			t.loaded.callback();
 		},
 
 		//Public-----------------------------------------------------------------------------
@@ -67,26 +96,21 @@ define([
 		_init: function(){
 			var t = this,
 				g = t.grid,
-				dn = g.domNode,
-				cols = g._columns;
-			array.forEach(cols, function(col){
+				autoResize = t.arg('autoResize'),
+				defaultWidth = t.arg('default') + 'px';
+			array.forEach(g._columns, function(col){
 				if(!col.hasOwnProperty('declaredWidth')){
 					col.declaredWidth = col.width = col.width || 'auto';
 				}
+				if(g.autoWidth && (col.declaredWidth == 'auto' || /%$/.test(col.declaredWidth))){
+					//If minWidth exists, check it
+					col.width = t['default'] < col.minWidth ? col.minWidth + 'px' : defaultWidth;
+				}else if(autoResize && !(/%$/).test(col.declaredWidth)){
+					col.width = 'auto';
+				}
 			});
-			if(g.autoWidth){
-				array.forEach(cols, function(c){
-					if(c.declaredWidth == 'auto'){
-						c.width = t.arg('default') + 'px';
-					}
-				});
-			}else if(t.arg('autoResize')){
-				domClass.add(dn, 'gridxPercentColumnWidth');
-				array.forEach(cols, function(c){
-					if(!(/%$/).test(c.declaredWidth)){
-						c.width = 'auto';
-					}
-				});
+			if(autoResize){
+				domClass.add(g.domNode, 'gridxPercentColumnWidth');
 			}
 		},
 
@@ -96,18 +120,19 @@ define([
 			if(g.autoWidth){
 				t._adaptWidth();
 			}else{
-				var noHScroller = g.hScrollerNode.style.display == 'none';
+				var noHScroller = g.hScrollerNode.style.display == 'none',
+					autoResize = t.autoResize;
 				t._adaptWidth(!noHScroller, 1);	//1 as true
-				if(!t.arg('autoResize') && noHScroller){
+				if(!autoResize && noHScroller){
 					query('.gridxCell', g.bodyNode).forEach(function(cellNode){
-						var col = g._columnsById[cellNode.getAttribute('colId')];
-						if(t.arg('autoResize') ||
-							!col.declaredWidth ||
-							col.declaredWidth == 'auto' ||
-							(/%$/).test(col.declaredWidth)){
-							cellNode.style.width = col.width;
-							cellNode.style.minWidth = col.width;
-							cellNode.style.maxWidth = col.width;
+						var col = g._columnsById[cellNode.getAttribute('colId')],
+							declaredWidth = col.declaredWidth;
+						if(autoResize || !declaredWidth || declaredWidth == 'auto' || (/%$/).test(declaredWidth)){
+							var s = cellNode.style,
+								w = col.width;
+							s.width = w;
+							s.minWidth = w;
+							s.maxWidth = w;
 						}
 					});
 				}
@@ -152,18 +177,34 @@ define([
 				t.onUpdate();
 				return;
 			}
+			if(!t.arg('autoResize')){
+				if(needHackPadBorder){
+					query('.gridxCell', innerNode).forEach(function(node){
+						var c = g._columnsById[node.getAttribute('colid')];
+						if(/px$/.test(c.declaredWidth)){
+							var w = parseInt(c.declaredWidth, 10) + padBorder;
+							w = c.width = w + 'px';
+							node.style.width = w;
+							node.style.minWidth = w;
+							node.style.maxWidth = w;
+						}
+					});
+				}
+			}
 			if(g.autoWidth){
 				var headers = query('.gridxCell', innerNode),
 					totalWidth = 0;
 				headers.forEach(function(node){
+					var c = g._columnsById[node.getAttribute('colid')];
 					var w = domStyle.get(node, 'width');
-					if(isGroupHeader || !has('safari') || !isGridHidden){
+					if(isGroupHeader || !needHackPadBorder || !isGridHidden){
 						w += padBorder;
 					}
+					if(w < c.minWidth){
+						w = c.minWidth;
+					}
 					totalWidth += w;
-					var c = g._columnsById[node.getAttribute('colid')];
 					if(c.width == 'auto' || (/%$/).test(c.width)){
-						console.log(c.id, w);
 						node.style.width = c.width = w + 'px';
 						node.style.minWidth = c.width;
 						node.style.maxWidth = c.width;
@@ -177,7 +218,7 @@ define([
 				var autoCols = [],
 					cols = g._columns,
 					fixedWidth = 0;
-				if(!isGroupHeader && has('safari')){
+				if(!isGroupHeader && needHackPadBorder){
 					padBorder = 0;
 				}
 				array.forEach(cols, function(c){
@@ -189,6 +230,9 @@ define([
 						if(w < 0){
 							w = 0;
 						}
+						if(typeof c.minWidth == 'number' && w < c.minWidth){
+							w = c.minWidth;
+						}
 						var node = header.getHeaderNode(c.id);
 						node.style.width = c.width = w + 'px';
 						node.style.minWidth = c.width;
@@ -198,7 +242,7 @@ define([
 				array.forEach(cols, function(c){
 					if(c.declaredWidth != 'auto'){
 						var headerNode = header.getHeaderNode(c.id),
-							w = !isGroupHeader && has('safari') ? parseFloat(headerNode.style.width, 10) :
+							w = !isGroupHeader && needHackPadBorder ? parseFloat(headerNode.style.width, 10) :
 								headerNode.offsetWidth || (domStyle.get(headerNode, 'width') + padBorder);
 						if(/%$/.test(c.declaredWidth)){
 							c.width = (w > padBorder ? w - padBorder : 0) + 'px';
@@ -207,22 +251,22 @@ define([
 					}
 				});
 				if(autoCols.length){
-					var w = bodyWidth > fixedWidth ? ((bodyWidth - fixedWidth) / autoCols.length - padBorder) : t.arg('default'),
-						ww = parseInt(w, 10);
-					if(bodyWidth > fixedWidth){
-						ww = bodyWidth - fixedWidth - (ww + padBorder) * (autoCols.length - 1) - padBorder;
-					}
-					w = parseInt(w, 10);
-					//Check if less than zero, prevent error in IE.
-					if(w < 0){
-						w = 0;
-					}
-					if(ww < 0){
-						ww = 0;
+					var freeWidth = bodyWidth - fixedWidth;
+					if(freeWidth > 0){
+						calcAutoWidth(autoCols, freeWidth, padBorder);
+					}else{
+						var w = t.arg('default');
+						array.forEach(autoCols, function(c, i){
+							var cw = w;
+							if(typeof c.minWidth == 'number' && cw < c.minWidth){
+								cw = c.minWidth;
+							}
+							c.width = cw + 'px';
+						});
 					}
 					array.forEach(autoCols, function(c, i){
 						var node = header.getHeaderNode(c.id);
-						node.style.width = c.width = (i < autoCols.length - 1 ? w : ww) + 'px';
+						node.style.width = c.width;
 						node.style.minWidth = c.width;
 						node.style.maxWidth = c.width;
 					});
@@ -237,7 +281,6 @@ define([
 					if(/px$/.test(col.width)){
 						var width = node.clientWidth - domGeometry.getPadExtents(node).w;
 						if(parseInt(col.width, 10) != width){
-							console.log('here! ', col.width, ', ', width);
 							col.width = width = width + 'px';
 							node.style.width = width;
 							node.style.minWidth = width;
@@ -258,7 +301,8 @@ define([
 			var t = this,
 				g = t.grid;
 			t._init();
-			g.header.refresh();
+			//Now header and body can be different, so we should not trigger any onRender event at this inconsistent stage,
+			g.header._build();
 			t._adaptWidth();
 			//FIXME: Is there any more elegant way to do this?
 			if(g.cellWidget){

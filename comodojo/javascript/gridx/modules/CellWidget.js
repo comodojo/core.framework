@@ -25,6 +25,7 @@ define([
 
 	var CellWidget = declare(_Module, {
 		// summary:
+		//		module name: cellWidget.
 		//		This module makes it possible to efficiently show widgets within a grid cell.
 		// description:
 		//		Since widget declarations need to be parsed by dojo.parser, it can NOT be directly
@@ -109,6 +110,8 @@ define([
 		//		Indicating whether this column should use this CellWidget module.
 		//		CellWidget module reuses widgets in cell, so if there is no widgets in cell, you don't need this module at all.
 		widgetsInCell: false,
+
+		allowEventBubble: false,
 
 		decorator: function(){
 			// summary:
@@ -203,10 +206,14 @@ define([
 			},
 
 			postCreate: function(){
-				this.connect(this.domNode, 'onmousedown', function(e){
-					e.cancelBubble = true;
+				var t = this,
+					dn = t.domNode;
+				t.connect(dn, 'onmousedown', function(e){
+					if(e.target != dn && !t.cell.column.allowEventBubble){
+						e.cancelBubble = true;
+					}
 				});
-				this._cellCnnts = [];
+				t._cellCnnts = [];
 			},
 
 			startup: function(){
@@ -226,7 +233,7 @@ define([
 					var output = [];
 					cellWidget.collectCellWidgetConnects(t, output);
 					t._cellCnnts = array.map(output, function(cnnt){
-						t.connect.apply(t, cnnt);
+						return t.connect.apply(t, cnnt);
 					});
 				}
 			},
@@ -240,17 +247,21 @@ define([
 						if(widget){
 							var useStoreData = domClass.contains(widget.domNode, 'gridxUseStoreData'),
 								data = useStoreData ? storeData : gridData,
-								onChange = widget.onChange;
+								handleOnChange = widget._handleOnChange;
 							//If we are just rendering this cell, setting widget value should not trigger onChange event,
 							//which will then trigger edit apply. But things are complicated because onChange is
 							//fired asynchronously, and maybe sometimes not fired.
 							//FIXME: How to ensure the onChange event does not fire if isInit is true?
+							/*var onChange = widget.onChange;
 							if(isInit && onChange && !onChange._init && widget.get('value') !== data){
 								widget.onChange = function(){
 									widget.onChange = onChange;
 								};
 								widget.onChange._init = true;
-							}
+							}*/
+							widget._handleOnChange = function(){
+								widget._handleOnChange = handleOnChange;
+							};
 							if(!t.setCellValue){
 								widget.set('value', data);
 							}
@@ -305,7 +316,7 @@ define([
 		},
 
 		//Public-----------------------------------------------------------------
-		backupCount: 20,
+		backupCount: 50,
 
 		setCellDecorator: function(rowId, colId, decorator, setCellValue){
 			var rowDecs = this._decorators[rowId];
@@ -394,18 +405,27 @@ define([
 				col = columns[i];
 				if(col.widgetsInCell){
 					col.userDecorator = col.decorator || dummyFunc;
-					col.decorator = dummyFunc;
+					col.decorator = this._dummyDecorator;
 					col._cellWidgets = {};
 					col._backupWidgets = [];
 				}
 			}
 		},
 
+		_dummyDecorator: function(data, rowId, visualIndex, cell){
+			var column = cell.column;
+			if(!column.needCellWidget || column.needCellWidget(cell)){
+				return '';
+			}
+			return data;
+		},
+
 		_showDijits: function(row){
 			var t = this;
 			array.forEach(row.cells(), function(cell){
 				var col = cell.column.def();
-				if(col.userDecorator || t._getSpecialCellDec(cell.row.id, col.id)){
+				if((!col.needCellWidget || col.needCellWidget(cell)) &&
+					(col.userDecorator || t._getSpecialCellDec(cell.row.id, col.id))){
 					var cellNode = cell.contentNode();
 					if(cellNode){
 						var cellWidget = t._prepareCellWidget(cell);
@@ -425,7 +445,8 @@ define([
 
 		_showDijit: function(cell){
 			var col = cell.column.def();
-			if(col.userDecorator || this._getSpecialCellDec(cell.row.id, col.id)){
+			if((!col.needCellWidget || col.needCellWidget(cell)) &&
+				(col.userDecorator || this._getSpecialCellDec(cell.row.id, col.id))){
 				var cellWidget = this._prepareCellWidget(cell),
 					cellNode = cell.contentNode();
 				cellNode.innerHTML = "";
@@ -452,11 +473,7 @@ define([
 				col._cellWidgets[cell.row.id] = widget;
 			}
 			widget.cell = cell;
-			// if(cell.lazyData){
-				// widget.setValue(cell.data(), cell.rawData(), true, cell.lazyData());
-			// }else{
-				widget.setValue(cell.data(), cell.rawData(), true);
-			// }
+			widget.setValue(cell.data(), cell.rawData(), true);
 			return widget;
 		},
 
@@ -481,9 +498,11 @@ define([
 				var col = cols[i],
 					cellWidgets = col._cellWidgets;
 				if(cellWidgets){
-					if(this.model.isId(id) && cellWidgets[id]){
-						backup(col, id);
-						delete cellWidgets[id];
+					if(this.model.isId(id)){
+						if(cellWidgets[id]){
+							backup(col, id);
+							delete cellWidgets[id];
+						}
 					}else{
 						for(var j in cellWidgets){
 							backup(col, j);

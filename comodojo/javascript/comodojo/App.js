@@ -323,13 +323,14 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 				applicationSpace.containerNode = domConstruct.create(prop.requestSpecialNode, {
 					id: pid+"_containerNode"
 				});
+
+				applicationSpace.domNode = applicationSpace;
 			}
 
 			applicationSpace.isComodojoApplication = "ATTACHED";
 			applicationSpace.containerNode.style.display = "none";
 			applicationSpace.lockNode = loadingState;
 
-			applicationSpace.domNode = applicationSpace;
 			applicationSpace.domNode.appendChild(applicationSpace.lockNode);
 
 			if (utils.inArray(prop.placeAt.toLowerCase(),['before', 'after', 'replace', 'only', 'first', 'last'])) {

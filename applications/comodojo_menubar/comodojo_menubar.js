@@ -13,6 +13,7 @@
  $d.require("dijit.Menu");
  $d.require("dijit.MenuBar");
  $d.require("dijit.MenuBarItem");
+ $d.require("dijit.MenuSeparator");
  $d.require("dijit.PopupMenuBarItem");
  $d.require("dijit.TooltipDialog");
  $d.require("dojox.html.styles");

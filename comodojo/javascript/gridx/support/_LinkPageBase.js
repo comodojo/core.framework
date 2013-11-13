@@ -7,8 +7,9 @@ define([
 	"dijit/_WidgetBase",
 	"dijit/_FocusMixin",
 	"dijit/_TemplatedMixin",
+	"dojo/i18n",
 	"dojo/i18n!../nls/PaginationBar"
-], function(declare, lang, array, has, domClass, _WidgetBase, _FocusMixin, _TemplatedMixin, nls){
+], function(declare, lang, array, has, domClass, _WidgetBase, _FocusMixin, _TemplatedMixin, i18n){
 
 /*=====
 	return declare([_WidgetBase, _TemplatedMixin, _FocusMixin], {
@@ -22,7 +23,7 @@ define([
 	return declare([_WidgetBase, _TemplatedMixin, _FocusMixin], {
 		constructor: function(args){
 			var t = this;
-			lang.mixin(t, nls);
+			lang.mixin(t, i18n.getLocalization('gridx', 'PaginationBar'));
 			if(has('ie')){
 				//IE does not support inline-block, so have to set tabIndex
 				var gridTabIndex = args.grid.domNode.getAttribute('tabindex');
@@ -31,10 +32,13 @@ define([
 		},
 
 		postCreate: function(){
-			this.domNode.setAttribute('tabIndex', this.grid.domNode.getAttribute('tabIndex'));
-			this.refresh();
-			this.connect(this, 'onFocus', '_onFocus');
-			this.connect(this.domNode, 'onkeydown', '_onKey');
+			var t = this;
+			t.domNode.setAttribute('tabIndex', t.grid.domNode.getAttribute('tabIndex'));
+			t.connect(t, 'onFocus', '_onFocus');
+			t.connect(t.domNode, 'onkeydown', '_onKey');
+			t.grid.pagination.loaded.then(function(){
+				t.refresh();
+			});
 		},
 
 		//Public-----------------------------------------------------------------------------

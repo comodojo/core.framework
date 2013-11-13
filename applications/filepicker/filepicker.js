@@ -71,8 +71,9 @@ $c.App.load("filepicker",
 			this.container.main.listingtree.on('click',function(item){
 				myself.filePath = item.relative_path;
 				myself.fileName = item.file_name;
-				myself.fileType = item.type;
-				myself.selectButton.set('disabled',myself.fileType == 'file' ? false : 'disabled');
+				//myself.fileType = item.type;
+				//myself.selectButton.set('disabled',myself.fileType == 'file' ? false : 'disabled');
+				myself.selectButton.set('disabled',false);
 			});
 			
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({

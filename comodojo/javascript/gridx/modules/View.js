@@ -18,6 +18,7 @@ define([
 
 	var View = declare(_Module, {
 		// summary:
+		//		module name: view.
 		//		Manages how many and what rows should be shown in the current grid body.
 		// description:
 		//		This module defines a key concept: visual index, which is the position of a row in current grid body.
@@ -146,16 +147,16 @@ define([
 				g = t.grid,
 				persistedOpenInfo = g.persist ? g.persist.registerAndLoad('tree', function(){
 					return t._openInfo;
-				}) : [];
+				}) : {};
 			t._clear();
 			t.aspect(m, 'onSizeChange', '_onSizeChange');
 			t.aspect(m, 'onDelete', '_onDelete');
-			t.aspect(g, 'setStore', function(){
+			t.aspect(m, 'setStore', function(){
 				//If server store changes without notifying grid, expanded rows should remain expanded.
 				if(t.arg('clearOnSetStore')){
 					t._clear();
 				}
-			});
+			}, t, 'before');
 			t._loadLevels(persistedOpenInfo).then(function(){
 				var size = t._openInfo[''].count = m.size();
 				t.rootCount = t.rootCount || size - t.rootStart;
@@ -180,6 +181,8 @@ define([
 				}).visualIndex;
 			}
 		},
+
+		clearOnSetStore: true,
 
 		rootStart: 0,
 
@@ -486,45 +489,57 @@ define([
 		},
 
 		_onDelete: function(rowId, rowIndex, treePath){
-			var t = this,
-				openInfo = t._openInfo,
-				parentOpenInfo = t._parentOpenInfo,
-				info = openInfo[rowId],
-				model = t.model,
-				parentId = treePath.pop(),
-				count = 1,
-				deleteItem = function(id, parentId){
-					var info = openInfo[id],
-						openedChildren = parentOpenInfo[id] || [];
-					array.forEach(openedChildren, function(child){
-						deleteItem(child);
-					});
-					delete parentOpenInfo[id];
-					if(info){
-						delete openInfo[id];
-						parentId = info.parentId;
-					}else if(!model.isId(parentId)){
-						//FIXME: don't know what to do here...
-						return;
-					}
-					var ppoi = parentOpenInfo[parentId],
-						i = array.indexOf(ppoi, id);
-					if(i >= 0){
-						ppoi.splice(i, 1);
-					}
-				};
-			if(info){
-				count += info.count;
-				info = openInfo[info.parentId];
-			}else if(model.isId(parentId)){
-				info = openInfo[parentId];
+			if(treePath){
+				var t = this,
+					openInfo = t._openInfo,
+					parentOpenInfo = t._parentOpenInfo,
+					info = openInfo[rowId],
+					model = t.model,
+					parentId = treePath.pop(),
+					count = 1,
+					deleteItem = function(id, parentId){
+						var info = openInfo[id],
+							openedChildren = parentOpenInfo[id] || [];
+						array.forEach(openedChildren, function(child){
+							deleteItem(child);
+						});
+						delete parentOpenInfo[id];
+						if(info){
+							delete openInfo[id];
+							parentId = info.parentId;
+						}else if(!model.isId(parentId)){
+							//FIXME: don't know what to do here...
+							return;
+						}
+						var ppoi = parentOpenInfo[parentId],
+							i = array.indexOf(ppoi, id);
+						if(i >= 0){
+							ppoi.splice(i, 1);
+						}
+					};
+				if(info){
+					count += info.count;
+					info = openInfo[info.parentId];
+				}else if(model.isId(parentId)){
+					info = openInfo[parentId];
+				}
+				deleteItem(rowId, parentId);
+				while(info){
+					info.count -= count;
+					info = openInfo[info.parentId];
+				}
+				if(parentId === '' && rowIndex >= t.rootStart && rowIndex < t.rootStart + t.rootCount){
+					t.rootCount--;
+				}
+				var rootIndex = model.idToIndex(model.rootId(rowId));
+				if(rootIndex >= t.rootStart && rootIndex < t.rootStart + t.rootCount){
+					t.visualCount -= count;
+				}
+			}else{
+				//FIXME: what to do if some unknown row is deleted?
+				this._clear();
 			}
-			deleteItem(rowId, parentId);
-			while(info){
-				info.count -= count;
-				info = openInfo[info.parentId];
-			}
-			t.visualCount -= count;
+			this.grid.body.lazyRefresh();
 		}
 	});
 });

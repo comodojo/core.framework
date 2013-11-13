@@ -1,0 +1,57 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Eventi',
+	'0001'	=>	'Tipo',
+	'0002'	=>	'Riferimento',
+	'0003'	=>	'Esito',
+	'0004'	=>	'Data',
+	'0005'	=>	'Ora',
+	'0006'	=>	'Utente',
+	'0007'	=>	'Host',
+	'0008'	=>	'User Agent',
+	'0009'	=>	'Browser',
+	'0010'	=>	'Sistema Operativo',
+	'0011'	=>	'Sessione',
+	'0012'	=>	'dettagli',
+	'0013'	=>	'',
+	'0014'	=>	'',
+	'0015'	=>	'',
+	'0016'	=>	'',
+	'0017'	=>	'',
+	'0018'	=>	'',
+	'0019'	=>	'',
+	//events translation
+	'10100'	=>	'Sito raggiunto',
+	'10101'	=>	'Login utente',
+	'10102'	=>	'Logout utente',
+	'10103'	=>	'Cambio password',
+	'10104'	=>	'Reset password',
+	'10105'	=>	'Abilitazione utente',
+	'10106'	=>	'Disabilitazione utente',
+	'10107'	=>	'Richiesta ai servizi',
+	'10108'	=>	'Richiesta account portachiavi',
+	'10109'	=>	'Registrazione account portachiavi',
+	'10110'	=>	'Utilizzo account portachiavi di sistema',
+	'10111'	=>	'Eliminazione account portachiavi',
+	'10112'	=>	'Download di file',
+	'10113'	=>	'Modifica configurazione',
+	'10114'	=>	'',
+	'10115'	=>	'',
+	'10116'	=>	'',
+	'10117'	=>	'',
+	'10118'	=>	'',
+	'10119'	=>	''
+);
+
+?>

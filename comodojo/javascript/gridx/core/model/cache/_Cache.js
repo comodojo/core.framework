@@ -68,6 +68,7 @@ define([
 			//virtual root node, with id ''.
 			t._struct[''] = [];
 			t._size[''] = -1;
+			t.totalSize = undefined;
 		},
 
 		byIndex: function(index, parentId){
@@ -163,7 +164,7 @@ define([
 				c = t._cache[id];
 				for(colId in columns){
 					col = columns[colId];
-					c.data[colId] = t._formatCell(col.id, c.rawData);
+					c.data[colId] = t._formatCell(c.rawData, id, col.id);
 				}
 			}
 		},
@@ -181,15 +182,15 @@ define([
 			return item;
 		},
 
-		_formatCell: function(colId, rawData){
+		_formatCell: function(rawData, rowId, colId){
 			var col = this.columns[colId];
-			return col.formatter ? col.formatter(rawData) : rawData[col.field || colId];
+			return col.formatter ? col.formatter(rawData, rowId) : rawData[col.field || colId];
 		},
 
-		_formatRow: function(rowData){
+		_formatRow: function(rowData, rowId){
 			var cols = this.columns, res = {}, colId;
 			for(colId in cols){
-				res[colId] = this._formatCell(colId, rowData);
+				res[colId] = this._formatCell(rowData, rowId, colId);
 			}
 			return res;
 		},
@@ -202,13 +203,13 @@ define([
 				ids = st[pid],
 				i;
 			if(!ids){
-				throw new Error("Fatal error of cache._addRow: parent item " + pid + " of " + id + " is not loaded");
+				throw new Error("Fatal error of _Cache._addRow: parent item " + pid + " of " + id + " is not loaded");
 			}
-			if(!ids[index + 1]){
-				ids[index + 1] = id;
-			}else if(ids[index + 1] !== id){
-				throw new Error("Fatal error of cache._addRow: different row id " + id + " and " + ids[index + 1] + " for same row index " + index);
+			var oldId = ids[index + 1];
+			if(t.model.isId(oldId) && oldId !== id){
+				console.error("Error of _Cache._addRow: different row id " + id + " and " + ids[index + 1] + " for same row index " + index);
 			}
+			ids[index + 1] = id;
 			st[id] = st[id] || [pid];
 			if(pid === ''){
 				i = indexOf(pr, id);
@@ -218,7 +219,7 @@ define([
 				pr.push(id);
 			}
 			t._cache[id] = {
-				data: t._formatRow(rowData),
+				data: t._formatRow(rowData, id),
 				rawData: rowData,
 				item: item
 			};
@@ -226,12 +227,12 @@ define([
 		},
 
 		_storeFetch: function(options, onFetched){
-			console.debug("\tFETCH parent: ",
-					options.parentId, ", start: ",
-					options.start || 0, ", count: ",
-					options.count, ", end: ",
-					options.count && (options.start || 0) + options.count - 1, ", options:",
-					this.options);
+//            console.debug("\tFETCH parent: ",
+//                    options.parentId, ", start: ",
+//                    options.start || 0, ", count: ",
+//                    options.count, ", end: ",
+//                    options.count && (options.start || 0) + options.count - 1, ", options:",
+//                    this.options);
 
 			var t = this,
 				s = t.store,
@@ -244,7 +245,15 @@ define([
 				t._size[parentId] = parseInt(size, 10);
 			}
 			function onComplete(items){
-				//Private function to be called in the scope of cache
+				//FIXME: store does not support getting total size after filter/query, so we must change the protocal a little.
+				if(items.ioArgs && items.ioArgs.xhr){
+					var range = results.ioArgs.xhr.getResponseHeader("Content-Range");
+					if(range && (range = range.match(/(.+)\//))){
+						t.totalSize = +range[1];
+					}else{
+						t.totalSize = undefined;
+					}
+				}
 				try{
 					var start = options.start || 0,
 						i = 0,
@@ -309,15 +318,19 @@ define([
 				row = t._itemToObject(item),
 				parentItem = parentInfo && parentInfo[s.fetch ? 'item' : 'parent'],
 				parentId = parentItem ? s.getIdentity(parentItem) : '',
+				id = s.getIdentity(item),
 				size = t._size[''];
 			t.clear();
-			t.onNew(s.getIdentity(item), 0, {
-				data: t._formatRow(row),
+			t.onNew(id, 0, {
+				data: t._formatRow(row, id),
 				rawData: row,
 				item: item
 			});
 			if(!parentItem && size >= 0){
 				t._size[''] = size + 1;
+				if(t.totalSize >= 0){
+					t.totalSize = size + 1;
+				}
 				t.model._onSizeChange();
 			}
 		},
@@ -360,9 +373,14 @@ define([
 				t.onDelete(id, index - 1, path);
 				if(!parentId && size >= 0){
 					sz[''] = size - 1;
+					if(t.totalSize >= 0){
+						t.totalSize = size - 1;
+					}
 					t.model._onSizeChange();
 				}
 			}else{
+				//FIXME: Don't know what to do if the deleted row was not loaded.
+				t.clear();
 				t.onDelete(id);
 //                var onBegin = hitch(t, _onBegin),
 //                    req = mixin({}, t.options || {}, {

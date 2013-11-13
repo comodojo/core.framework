@@ -8,13 +8,15 @@ define([
 	"dojo/_base/Deferred",
 	"dojo/keys",
 	"../core/_Module",
-	"../core/util",
+	"dojo/i18n",
+	"dojo/i18n!../nls/Body",
 	"./RowHeader"
-], function(declare, array, event, query, lang, domClass, Deferred, keys, _Module, util){
+], function(declare, array, event, query, lang, domClass, Deferred, keys, _Module, i18n){
 
 /*=====
 	return declare(_Module, {
 		// summary:
+		//		module name: indirectSelect.
 		//		This module shows a checkbox(or radiobutton) on the row header when row selection is used.
 		// description:
 		//		This module depends on "rowHeader" and "selectRow" modules.
@@ -42,26 +44,17 @@ define([
 				focus = g.focus,
 				sr = g.select.row,
 				rowHeader = g.rowHeader;
+			t._nls = i18n.getLocalization('gridx', 'Body', g.lang);
 			rowHeader.cellProvider = lang.hitch(t, t._createSelector);
 			t.batchConnect(
 				[sr,'onHighlightChange', '_onHighlightChange' ],
 				[sr,'clear', '_onClear' ],
 				[sr, 'onSelectionChange', '_onSelectionChange'],
-				[g, 'onRowMouseOver', '_onMouseOver'],
-				[g, 'onRowMouseOut', '_onMouseOut'],
+				[g.body, 'onRender', '_onSelectionChange'],
 				[g, 'onRowKeyDown', '_onKeyDown'],
 				[g, 'onHeaderKeyDown', '_onKeyDown'],
-				g.filter && [g.filter, 'onFilter', '_onSelectionChange'],
-				focus && [focus, 'onFocusArea', function(name){
-					if(name == 'rowHeader'){
-						t._onMouseOver();
-					}
-				}],
-				focus && [focus, 'onBlurArea', function(name){
-					if(name == 'rowHeader'){
-						t._onMouseOut();
-					}
-				}]);
+				g.filter && [g.filter, 'onFilter', '_onSelectionChange']);
+			g.select.row.holdingCtrl = true;
 			if(sr.selectByIndex && t.arg('all')){
 				t._allSelected = {};
 				rowHeader.headerProvider = lang.hitch(t, t._createSelectAllBox);
@@ -118,7 +111,9 @@ define([
 		},
 
 		_createSelectAllBox: function(){
-			return this._createCheckBox(this._allSelected[this._getPageId()]);
+			var allSelected = this._allSelected[this._getPageId()];
+			this.grid.rowHeader.headerCellNode.setAttribute('aria-label', allSelected ? this._nls.indirectDeselectAll : this._nls.indirectSelectAll);
+			return this._createCheckBox(allSelected);
 		},
 
 		_getPageId: function(){
@@ -126,12 +121,17 @@ define([
 		},
 
 		_onClear: function(reservedRowId){
-			var cls = this._getDijitClass() + 'Checked',
+			var dijitCls = this._getDijitClass(),
+				cls = dijitCls + 'Checked',
+				partialCls = dijitCls + 'Partial',
 				g = this.grid;
 			query('.' + cls, g.rowHeader.bodyNode).removeClass(cls);
+			query('.' + partialCls, g.rowHeader.bodyNode).removeClass(partialCls);
 			if(g.select.row.isSelected(reservedRowId)){
 				query('[rowid="' + g._escapeId(reservedRowId) + '"].gridxRowHeaderRow .gridxIndirectSelectionCheckBox', g.rowHeader.bodyNode).addClass(cls);
 			}
+			query('.' + cls, g.rowHeader.headerCellNode).removeClass(cls).attr('aria-checked', 'false');
+			this._allSelected = {};
 		},
 
 		_onHighlightChange: function(target, toHighlight){
@@ -153,21 +153,6 @@ define([
 				node.firstChild.innerHTML = selected ? '&#10003;' : partial ? '&#9646;' : '&#9744;';
 			}
 		},
-		
-		_onMouseOver: function(){
-			var sr = this.grid.select.row;
-			if(!sr.holdingCtrl){
-				this._holdingCtrl = false;
-				sr.holdingCtrl = true;
-			}
-		},
-
-		_onMouseOut: function(){
-			if(this.hasOwnProperty('_holdingCtrl')){
-				this.grid.select.row.holdingCtrl = false;
-				delete this._holdingCtrl;
-			}
-		},
 
 		_getDijitClass: function(){
 			return this._isSingle() ? 'dijitRadio' : 'dijitCheckBox';
@@ -187,7 +172,7 @@ define([
 			]([0, g.view.visualCount - 1]);
 		},
 
-		_onSelectionChange: function(selected){
+		_onSelectionChange: function(){
 			var t = this, d,
 				g = t.grid,
 				allSelected,
@@ -195,42 +180,46 @@ define([
 				model = t.model,
 				start = view.rootStart,
 				count = view.rootCount;
-			var selectedRoot = array.filter(selected || g.select.row.getSelected(), function(id){
-				return !model.parentId(id);
-			});
-			var unselectableRows = g.select.row._getUnselectableRows();
-			var unselectableRoots = array.filter(unselectableRows, function(id){
-				return !model.parentId(id) && !g.select.row.isSelected(id);
-			});
-			if(count === model.size()){
-				allSelected = count && count - unselectableRoots.length == selectedRoot.length;
-			}else{
-				d = new Deferred();
-				model.when({
-					start: start,
-					count: count
-				}, function(){
-					var indexes = array.filter(array.map(selectedRoot, function(id){
-						return model.idToIndex(id);
-					}), function(index){
-						return index >= start && index < start + count;
-					});
-					unselectableRoots = array.filter(unselectableRoots, function(id){
-						var index = model.idToIndex(id);
-						return index >= start && index < start + count;
-					});
-					allSelected = count - unselectableRoots.length == indexes.length;
-					d.callback();
+			if(g.select.row.selectByIndex && t.arg('all')){
+				var selectedRoot = array.filter(g.select.row.getSelected(), function(id){
+					return !model.parentId(id);
 				});
-			}
-			Deferred.when(d, function(){
-				if(t.arg('all')){
+				var unselectableRows = g.select.row._getUnselectableRows();
+				var unselectableRoots = array.filter(unselectableRows, function(id){
+					return !model.parentId(id) && !g.select.row.isSelected(id);
+				});
+				if(count === model.size()){
+					allSelected = count && count - unselectableRoots.length == selectedRoot.length;
+				}else{
+					d = new Deferred();
+					model.when({
+						start: start,
+						count: count
+					}, function(){
+						var indexes = array.filter(array.map(selectedRoot, function(id){
+							return model.idToIndex(id);
+						}), function(index){
+							return index >= start && index < start + count;
+						});
+						unselectableRoots = array.filter(unselectableRoots, function(id){
+							var index = model.idToIndex(id);
+							return index >= start && index < start + count;
+						});
+						allSelected = count - unselectableRoots.length == indexes.length;
+						d.callback();
+					});
+				}
+				Deferred.when(d, function(){
 					t._allSelected[t._getPageId()] = allSelected;
 					var node = t.grid.rowHeader.headerCellNode.firstChild;
-					domClass.toggle(node, t._getDijitClass() + 'Checked', allSelected);
-					node.setAttribute('aria-checked', allSelected ? 'true' : 'false');
-				}
-			});
+					if(node){
+						domClass.toggle(node, t._getDijitClass() + 'Checked', allSelected);
+						node.setAttribute('aria-checked', allSelected ? 'true' : 'false');
+						t.grid.rowHeader.headerCellNode.setAttribute('aria-label',
+							allSelected ? t._nls.indirectDeselectAll : t._nls.indirectSelectAll);
+					}
+				});
+			}
 		},
 
 		//Focus------------------------------------------------------
@@ -260,7 +249,7 @@ define([
 		},
 		_onKeyDown: function(evt){
 			// CTRL - A
-			if(evt.keyCode == 65 && evt.ctrlKey && !evt.shiftKey){
+			if(evt.keyCode == 65 && this.grid._isCtrlKey(evt) && !evt.shiftKey){
 				if(!this._allSelected[this._getPageId()]){
 					this._onSelectAll();
 				}

@@ -5,14 +5,17 @@ define([
 	"dojo/dom-class",
 	"dojo/keys",
 	"dojo/_base/event",
-	"dojo/_base/lang",
 	"dijit/registry",
 	"dijit/Menu"
-], function(declare, connect, _Module, domClass, keys, event, lang, registry, Menu){
+], function(declare, connect, _Module, domClass, keys, event, registry, Menu){
 
 /*=====
 	var Menu = declare(_Module, {
-		// context: __MenuContext
+		// summary:
+		//		module name: menu.
+		//		Manage context menu for grid.
+
+		// context: [readonly] __MenuContext
 		//		An object representing the current context when user triggers a context menu.
 		//		This property is updated everytime a menu of grid is popped up.
 		//		Users can refer to this in their menu action handlers by grid.menu.context.
@@ -85,16 +88,27 @@ define([
 				type = args.selected ? hookPoint + '-selected' : hookPoint,
 				evtName = t._evtMap[hookPoint],
 				m = t._menus[type] = t._menus[type] || {},
-				showMenu = lang.partial(t._showMenu, type);
+				showMenu = function(evt){
+					t._showMenu(type, evt);
+				},
+				keyShowMenu = function(evt){
+					if(evt.keyCode == keys.F10 && evt.shiftKey){
+						t._showMenu(type, evt);
+					}
+				};
 			connect.disconnect(m.open);
+			connect.disconnect(m.keyopen);
 			connect.disconnect(m.close);
 			m.menu = registry.byId(menu);
 			if(evtName){
-				m.open = t.connect(g, evtName, showMenu);
+				m.open = t.connect(g, evtName[0], showMenu);
+				m.keyopen = t.connect(g, evtName[1], keyShowMenu);
 			}else if(hookPoint == 'body'){
 				m.open = t.connect(g.bodyNode, 'oncontextmenu', showMenu);
+				m.keyopen = t.connect(g.bodyNode, 'onkeydown', keyShowMenu);
 			}else{
 				m.open = t.connect(g.domNode, 'oncontextmenu', showMenu);
+				m.keyopen = t.connect(g.domNode, 'onkeydown', keyShowMenu);
 			}
 			m.close = t.connect(m.menu, 'onClose', function(){
 				t._mutex = 0;
@@ -108,6 +122,7 @@ define([
 				m = menus[type];
 				if(m.menu == menu){
 					connect.disconnect(m.open);
+					connect.disconnect(m.keyopen);
 					connect.disconnect(m.close);
 					delete menus[type];
 					return;
@@ -117,10 +132,10 @@ define([
 		
 		//[private]==
 		_evtMap: {
-			header: 'onHeaderContextMenu',
-			headercell: 'onHeaderCellContextMenu',
-			cell: 'onCellContextMenu',
-			row: 'onRowContextMenu'
+			header: ['onHeaderContextMenu', 'onHeaderKeyDown'],
+			headercell: ['onHeaderCellContextMenu', 'onHeaderCellKeyDown'],
+			cell: ['onCellContextMenu', 'onCellKeyDown'],
+			row: ['onRowContextMenu', 'onRowKeyDown']
 		},
 
 		_showMenu: function(type, e){

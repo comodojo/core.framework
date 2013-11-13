@@ -55,6 +55,7 @@ define([
 
 	var Tree = declare(_Module, {
 		// summary:
+		//		module name: tree.
 		//		This module manages row expansion/collapsing in tree grid.
 		// description:
 		//		To use tree grid, the store must have 2 extra methods: hasChildren and getChildren.
@@ -471,7 +472,7 @@ define([
 					array.forEach(cols, function(col, i){
 						col.expandLevel = i + 1;
 					});
-				}else{
+				}else if(cols.length){
 					cols[0].expandLevel = 1;
 				}
 			}
@@ -554,10 +555,13 @@ define([
 			var rowNode = this.grid.body.getRowNode({rowId: id}),
 				isOpen = this.isExpanded(id);
 			if(rowNode){
+				var nls = this.grid.body._nls;
 				query('.gridxTreeExpandoCell', rowNode).
 					removeClass('gridxTreeExpandoLoading').
 					toggleClass('gridxTreeExpandoCellOpen', isOpen).
-					closest('.gridxCell').attr('aria-expanded', String(isOpen));
+					closest('.gridxCell').
+					attr('aria-expanded', String(isOpen)).
+					attr('aria-label', isOpen ? nls.treeExpanded : nls.treeCollapsed);
 				query('.gridxTreeExpandoIcon', rowNode).forEach(function(node){
 					node.firstChild.innerHTML = isOpen ? '-' : '+';
 				});
@@ -590,14 +594,17 @@ define([
 				var rowNode = row.node(),
 					expanded = this.isExpanded();
 				rowNode.setAttribute('aria-expanded', expanded);
-				//This is only to make JAWS read.
-				query('.gridxTreeExpandoCell', rowNode).closest('.gridxCell').attr('aria-expanded', String(expanded));
+				//This is only to make JAWS readk
+				var nls = this.grid.body._nls;
+				query('.gridxTreeExpandoCell', rowNode).closest('.gridxCell').
+					attr('aria-expanded', String(expanded)).
+					attr('aria-label', expanded ? nls.treeExpanded : nls.treeCollapsed);
 			}
 		},
 
 		//Focus------------------------------------------------------------------
 		_initFocus: function(){
-			this.connect(this.grid, 'onCellKeyPress', '_onKey'); 
+			this.connect(this.grid, 'onCellKeyDown', '_onKey'); 
 		},
 
 		_onKey: function(e){
@@ -627,7 +634,7 @@ define([
 						});
 					});
 				}
-			}else if(e.ctrlKey && isExpando(e.cellNode)){
+			}else if(t.grid._isCtrlKey(e) && isExpando(e.cellNode)){
 				var ltr = t.grid.isLeftToRight();
 				if(e.keyCode == (ltr ? keys.LEFT_ARROW : keys.RIGHT_ARROW) && t.isExpanded(e.rowId)){
 					t.collapse(e.rowId);

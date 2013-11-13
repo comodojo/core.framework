@@ -126,15 +126,23 @@ class application {
 
 	public function kernel_query($params) {
 		comodojo_load_resource('database');
-		list($offset,$limit) = isset($params['range']) ? explode('-', $params['range']) : Array(0,0);
+		$off_limit = isset($params['range']) ? explode('-', $params['range']) : Array(0,0);
+		$offset = !is_null($off_limit[0]) ? intval($off_limit[0]) : 0;
+		$limit = !is_null($off_limit[1]) ? intval($off_limit[1]) : 0;
+		//list($offset,$limit) = isset($params['range']) ? explode('-', $params['range']) : Array(0,0);
 		$where_done = false;
 		try {
 			$db = new database();
 			$result = $db->table($this->table)->keys('*');
-			if ($params['query'] != 0) {
+			//error_log("######".$params['query']);
+			if ($params['query'] != "0") {
 				parse_str($params['query'],$query);
+				//error_log("######".$query);
 				foreach ($query as $key => $value) {
-					if (!$where_done) {
+					if ($value == "**") {
+						continue;
+					}
+					elseif (!$where_done) {
 						$result = $result->where($key,'=',$value);
 						$where_done = true;
 					}
@@ -158,7 +166,10 @@ class application {
 		}
 
 		$count = $result_total['result'][0]['count'];
-		$total = (isset($params['range']) ? $offset.'-'.($limit<$count ? $limit-1 : $count-1) : '0-'.($result_total['result'][0]-1)).'/'.$count;
+		
+		$total = $offset.'-'.($limit<$count && $limit !== 0 ? $limit-1 : $count-1).'/'.$count;
+
+		//$total = (isset($params['range']) ? $offset.'-'.($limit<$count ? $limit-1 : $count-1) : '0-'.($count-1)).'/'.$count;
 
 		//return $result;
 		return Array("data"=>$result_data,"total"=>$total);

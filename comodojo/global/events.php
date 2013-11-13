@@ -52,7 +52,9 @@ class events {
 					$event,
 					$eventReferTo,
 					!$success ? 0 : 1,
-					strtotime("now"),
+					//strtotime("now"),
+					date("Y-m-d"),
+					date("H:i:s"),
 					defined('COMODOJO_USER_NAME') ? (is_null(COMODOJO_USER_NAME) ? 'GUEST' : COMODOJO_USER_NAME) : 'GUEST',
 					$_SERVER["REMOTE_ADDR"],
 					isset($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : 'unknown',
@@ -97,7 +99,7 @@ class events {
 		try {
 			$db = new database();
 			$db ->table("events")
-				->keys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"))
+				->keys(Array("id","type","referTo","success",/*"timestamp",*/"date","time","userName","host","userAgent","browser","OS","sessionId"))
 				->order("timestamp","DESC");
 			foreach ($this->params as $param->$value) {
 				if (!$run) {
@@ -127,7 +129,7 @@ class events {
 			$db = new database();
 			$result = $db
 				->table("events")
-				->keys(Array("id","type","referTo","success","timestamp","userName","host","userAgent","browser","OS","sessionId"))
+				->keys(Array("id","type","referTo","success",/*"timestamp",*/"date","time","userName","host","userAgent","browser","OS","sessionId"))
 				->order_by("timestamp","DESC")
 				->where("sessionId","=",$session_id)
 				->get($limit,$offset);

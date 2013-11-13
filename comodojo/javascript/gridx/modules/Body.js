@@ -12,10 +12,11 @@ define([
 	"dojo/_base/sniff",
 	"dojo/keys",
 	"../core/_Module",
+	"dojo/i18n",
 	"dojo/i18n!../nls/Body"
 //    "dojo/NodeList-dom",
 //    "dojo/NodeList-traverse"
-], function(/*=====Row, Cell, =====*/declare, query, array, lang, json, domConstruct, domClass, Deferred, has, keys, _Module, nls){
+], function(/*=====Row, Cell, =====*/declare, query, array, lang, json, domConstruct, domClass, Deferred, has, keys, _Module, i18n){
 
 /*=====
 	Row.node = function(){
@@ -42,6 +43,7 @@ define([
 
 	var Body = declare(_Module, {
 		// summary:
+		//		module name: body.
 		//		The body UI of grid.
 		// description:
 		//		This module is in charge of row rendering. It should be compatible with virtual/non-virtual scroll, 
@@ -188,6 +190,11 @@ define([
 			//		Fired when there's no rows in current body view.
 		},
 
+		onLoadFail: function(){
+			// summary:
+			//		Fire when there's an error occured when loading data.
+		},
+
 		onForcedScroll: function(){
 			// summary:
 			//		Fired when the body needs to fetch more data, but there's no trigger to the scroller.
@@ -228,10 +235,11 @@ define([
 				g = t.grid,
 				dn = t.domNode = g.bodyNode;
 			t._cellCls = {};
+			t._nls = i18n.getLocalization('gridx', 'Body', g.lang);
 			if(t.arg('rowHoverEffect')){
 				domClass.add(dn, 'gridxBodyRowHoverEffect');
 			}
-			g.emptyNode.innerHTML = t.arg('loadingInfo', nls.loadingInfo);
+			g.emptyNode.innerHTML = t.arg('loadingInfo', t._nls.loadingInfo);
 			g._connectEvents(dn, '_onMouseEvent', t);
 			t.aspect(t.model, 'onSet', '_onSet');
 			t.aspect(g, 'onRowMouseOver', '_onRowMouseOver');
@@ -243,7 +251,7 @@ define([
 					query('> .gridxRowOver', t.domNode).removeClass('gridxRowOver');
 				}
 			});
-			t.aspect(g, 'setStore', function(){
+			t.aspect(g.model, 'setStore', function(){
 				t.refresh();
 			});
 		},
@@ -255,8 +263,7 @@ define([
 		load: function(args){
 			var t = this,
 				view = t.grid.view;
-			t.aspect(t.model, 'onDelete', '_onDelete');
-			t.aspect(view, 'onUpdate', '_onSizeChange');
+			t.aspect(view, 'onUpdate', 'lazyRefresh');
 			if(view._err){
 				t._loadFail(view._err);
 			}
@@ -286,7 +293,7 @@ define([
 			},
 			contentNode: function(){
 				var node = this.node();
-				return node && (query('.gridxCellContent', node)[0] || node);
+				return node && query('.gridxCellContent', node)[0] || node;
 			}
 		},
 
@@ -355,7 +362,8 @@ define([
 				}
 				var c = " [colid='" + colId + "'].gridxCell";
 				if(t.model.isId(args.rowId) && has('ie')){
-					return query(c, t._getRowNode(args.rowId))[0] || null;
+					var rowNode = t._getRowNode(args.rowId);
+					return rowNode && query(c, rowNode)[0] || null;
 				}else{
 					return query(r + c, t.domNode)[0] || null;
 				}
@@ -369,6 +377,8 @@ define([
 				d = new Deferred();
 			delete t._err;
 			domClass.add(loadingNode, 'gridxLoading');
+			domClass.toggle(t.domNode, 'gridxBodyRowHoverEffect', t.arg('rowHoverEffect'));
+
 			t.grid.view.updateVisualCount().then(function(){
 				try{
 					var rs = t.renderStart,
@@ -461,7 +471,7 @@ define([
 						rowInfo.rowId = m.indexToId(idx, pid);
 						var cell = g.cell(rowInfo.rowId, col.id, 1),
 							isPadding = g.tree && g.tree.isPaddingCell(rowInfo.rowId, col.id);
-						cellNode.innerHTML = t._buildCellContent(cell, rowVisualIndex, isPadding);
+						cellNode.innerHTML = t._buildCellContent(col, rowInfo.rowId, cell, rowVisualIndex, isPadding);
 						t.onAfterCell(cell);
 					}
 				}).then(function(){
@@ -473,6 +483,16 @@ define([
 			return d;
 		},
 
+		lazyRefresh: function(){
+			var t = this;
+			clearTimeout(t._sizeChangeHandler);
+			t._sizeChangeHandler = setTimeout(function(){
+				if(!t._destroyed){
+					t.refresh();
+				}
+			}, 10);
+		},
+
 		renderRows: function(start, count, position/*?top|bottom*/, isRefresh){
 			var t = this,
 				g = t.grid,
@@ -481,13 +501,13 @@ define([
 				renderedRows = [],
 				n = t.domNode,
 				en = g.emptyNode,
-				emptyInfo = t.arg('emptyInfo', nls.emptyInfo),
+				emptyInfo = t.arg('emptyInfo', t._nls.emptyInfo),
 				finalInfo = '';
 			if(t._err){
 				return;
 			}
 			if(count > 0){
-				en.innerHTML = t.arg('loadingInfo', nls.loadingInfo);
+				en.innerHTML = t.arg('loadingInfo', t._nls.loadingInfo);
 				en.style.zIndex = '';
 				if(position != 'top' && position != 'bottom'){
 					t.model.free();
@@ -497,9 +517,27 @@ define([
 					t.renderCount += t.renderStart - start;
 					t.renderStart = start;
 					domConstruct.place(str, n, 'first');
+					//unrender out-of-range rows immediately, so that CellWidget can reuse the widgets.
+					//FIXME: need a better solution here!
+					if(g.cellWidget && g.vScroller._updateRowHeight){
+						var oldEnd = t.renderStart + t.renderCount,
+							postCount = g.vScroller._updateRowHeight('post');
+						if(oldEnd - postCount < start + count){
+							count = oldEnd - postCount - start;
+						}
+					}
 				}else if(position == 'bottom'){
 					t.renderCount = start + count - t.renderStart;
 					domConstruct.place(str, n, 'last');
+					//unrender out-of-range rows immediately, so that CellWidget can reuse the widgets.
+					//FIXME: need a better solution here!
+					if(g.cellWidget && g.vScroller._updateRowHeight){
+						g.vScroller._updateRowHeight('pre');
+						if(t.renderStart > start){
+							start = t.renderStart;
+							count = t.renderCount;
+						}
+					}
 				}else{
 					t.renderStart = start;
 					t.renderCount = count;
@@ -507,7 +545,10 @@ define([
 					var scrollTop = isRefresh ? n.scrollTop : 0;
 					n.scrollTop = 0;
 					//unrender before destroy nodes, so that other modules have a chance to detach nodes.
-					t.onUnrender();
+					if(!t._skipUnrender){
+						//only when we do have something to unrender
+						t.onUnrender();
+					}
 					n.innerHTML = str;
 					if(scrollTop){
 						n.scrollTop = scrollTop;
@@ -528,10 +569,13 @@ define([
 			}else if(!{top: 1, bottom: 1}[position]){
 				n.scrollTop = 0;
 				//unrender before destroy nodes, so that other modules have a chance to detach nodes.
-				t.onUnrender();
+				if(!t._skipUnrender){
+					//only when we do have something to unrender
+					t.onUnrender();
+				}
 				n.innerHTML = '';
 				en.innerHTML = emptyInfo;
-				en.style.zIndex = 1;
+				en.style.zIndex = '';
 				t.onEmpty();
 				t.model.free();
 			}
@@ -591,6 +635,8 @@ define([
 
 		onEmpty: function(){},
 
+		onLoadFail: function(){},
+
 		onForcedScroll: function(){},
 
 		collectCellWrapper: function(/* wrappers, rowId, colId */){},
@@ -622,11 +668,12 @@ define([
 		_loadFail: function(e){
 			console.error(e);
 			var en = this.grid.emptyNode;
-			en.innerHTML = this.arg('loadFailInfo', nls.loadFailInfo);
+			en.innerHTML = this.arg('loadFailInfo', this._nls.loadFailInfo);
 			en.style.zIndex = 1;
 			this.domNode.innerHTML = '';
 			this._err = e;
 			this.onEmpty();
+			this.onLoadFail(e);
 		},
 
 		_buildRows: function(start, count, uncachedRows, renderedRows){
@@ -635,7 +682,7 @@ define([
 				s = [],
 				g = t.grid,
 				w = t.domNode.scrollWidth,
-				columns = g.columns();
+				columns = g.columns(),
 				i = start;
 			for(; i < end; ++i){
 				var rowInfo = g.view.getRowInfo({visualIndex: i}),
@@ -686,7 +733,7 @@ define([
 					n.innerHTML = t._buildCells(row, rowInfo.visualIndex);
 					t.onAfterRow(row);
 				}else{
-					throw new Error('Row is not in cache:' + rowInfo.rowIndex);
+					console.error('Error in Body._buildRowContent: Row is not in cache: ' + rowInfo.rowIndex);
 				}
 			}
 		},
@@ -697,43 +744,44 @@ define([
 
 		_buildCells: function(row, visualIndex, cols){
 			var t = this,
-				g = t.grid,
-				columns = g._columns,
-				rowData = row.data(),
-				isFocusArea = g.focus.currentArea() == 'body',
+				rowId = row.id,
 				sb = ['<table class="gridxRowTable" role="presentation" border="0" cellpadding="0" cellspacing="0"><tr>'],
 				output = {};
 			t.onCheckCustomRow(row, output);
-			if(output[row.id]){
+			if(output[rowId]){
 				output = {};
 				t.onBuildCustomRow(row, output);
 				sb.push('<td class="gridxCustomRow" aria-readonly="true" role="gridcell" tabindex="-1">',
-					t._wrapCellData(output[row.id], row.id),
+					t._wrapCellData(output[rowId], rowId),
 					'</td>');
 			}else{
-				var cellCls = t._cellCls[row.id] || {};
+				var g = t.grid,
+					isFocusedRow = g.focus.currentArea() == 'body' && t._focusCellRow === visualIndex,
+					rowData = t.model.byId(rowId).data,
+					columns = g._columns,
+					cellCls = t._cellCls[rowId] || {};
 				for(var i = 0, len = columns.length; i < len; ++i){
 					var col = columns[i],
-						isPadding = g.tree && g.tree.isPaddingCell(row.id, col.id),
-						cell = g.cell(row, cols && cols[i] || col.id, 1),
-						cls = [col._class || ''],
+						colId = col.id,
+						colWidth = col.width,
+						isPadding = g.tree && g.tree.isPaddingCell(rowId, colId),
 						customCls = col['class'],
-						style = g.getTextDirStyle(col.id, rowData[col.id]);
-					cls.push((customCls && lang.isFunction(customCls) ? customCls(cell) : customCls) || '');
-					cls = cls.concat(cellCls[col.id] || []);
-					style += (col.style && lang.isFunction(col.style) ? col.style(cell) : col.style) || '';
-					sb.push('<td aria-describedby="', col._domId, '" class="gridxCell ');
-					if(isPadding){
-						sb.push('gridxPaddingCell ');
-					}
-					if(isFocusArea && t._focusCellRow === visualIndex && t._focusCellCol === i){
-						sb.push('gridxCellFocus ');
-					}
-					sb.push(cls.join(' '),
-						'" aria-readonly="true" role="gridcell" tabindex="-1" colid="', col.id, 
-						'" style="width:', col.width, ';min-width:', col.width, ';max-width:', col.width,
-						';', style,
-						'">', t._buildCellContent(cell, visualIndex, isPadding),
+						cellData = rowData[colId],
+						customClsIsFunction = customCls && lang.isFunction(customCls),
+						styleIsFunction = col.style && lang.isFunction(col.style),
+						needCell = customClsIsFunction || styleIsFunction || (!isPadding && col.decorator),
+						cell = needCell && g.cell(row, cols && cols[i] || colId, 1);
+					sb.push('<td aria-readonly="true" role="gridcell" tabindex="-1" aria-describedby="',
+						col._domId,'" colid="', colId, '" class="gridxCell ',
+						isPadding ? 'gridxPaddingCell ' : '',
+						isFocusedRow && t._focusCellCol === i ? 'gridxCellFocus ' : '',
+						col._class || '', ' ',
+						(customClsIsFunction ? customCls(cell) : customCls) || '', ' ',
+						cellCls[colId] ? cellCls[colId].join('') : '',
+						' " style="width:', colWidth, ';min-width:', colWidth, ';max-width:', colWidth, ';',
+						g.getTextDirStyle(colId, cellData),
+						(styleIsFunction ? col.style(cell) : col.style) || '',
+						'">', t._buildCellContent(col, rowId, cell, visualIndex, isPadding, cellData),
 					'</td>');
 				}
 			}
@@ -741,14 +789,12 @@ define([
 			return sb.join('');
 		},
 
-		_buildCellContent: function(cell, visualIndex, isPadding){
+		_buildCellContent: function(col, rowId, cell, visualIndex, isPadding, cellData){
 			var r = '',
-				col = cell.column,
-				row = cell.row,
-				data = cell.data();
+				data = cellData === undefined && cell ? cell.data() : cellData;
 			if(!isPadding){
-				var s = col.decorator ? col.decorator(data, row.id, visualIndex, cell) : data;
-				r = this._wrapCellData(s, row.id, col.id);
+				var s = col.decorator ? col.decorator(data, rowId, visualIndex, cell) : data;
+				r = this._wrapCellData(s, rowId, col.id);
 			}
 			return (r === '' || r === null || r === undefined) && (has('ie') < 8 || this.arg('stuffEmptyCell')) ? '&nbsp;' : r;
 		},
@@ -837,69 +883,13 @@ define([
 									}
 								}
 								//Support for Bidi end
-								cell.node().innerHTML = t._buildCellContent(cell, row.visualIndex(), isPadding);
+								cell.node().innerHTML = t._buildCellContent(col, id, cell, row.visualIndex(), isPadding);
 								t.onAfterCell(cell);
 							}
 						});
 					}
 				}
 			}
-		},
-
-		_onDelete: function(id){
-			var t = this;
-			if(t.autoUpdate){
-				var node = t.getRowNode({rowId: id});
-				if(node){
-					var sn, count = 0,
-						start = parseInt(node.getAttribute('rowindex'), 10),
-						pid = node.getAttribute('parentid'),
-						pids = {},
-						toDelete = [node],
-						rid, ids = [id],
-						vidx;
-					pids[id] = 1;
-					for(sn = node.nextSibling; sn && pids[sn.getAttribute('parentid')]; sn = sn.nextSibling){
-						rid = sn.getAttribute('rowid');
-						ids.push(rid);
-						toDelete.push(sn);
-						pids[rid] = 1;
-					}
-					for(; sn; sn = sn.nextSibling){
-						if(sn.getAttribute('parentid') == pid){
-							sn.setAttribute('rowindex', parseInt(sn.getAttribute('rowindex'), 10) - 1);
-						}
-						vidx = parseInt(sn.getAttribute('visualindex'), 10) - toDelete.length;
-						sn.setAttribute('visualindex', vidx);
-						domClass.toggle(sn, 'gridxRowOdd', vidx % 2);
-						++count;
-					}
-					t.renderCount -= toDelete.length;
-					array.forEach(ids, t.onUnrender, t);
-					array.forEach(toDelete, domConstruct.destroy);
-					t.onDelete(id, start);
-					t.onRender(start, count);
-					if(!t.domNode.childNodes.length){
-						var en = t.grid.emptyNode,
-							emptyInfo = t.arg('emptyInfo', nls.emptyInfo);
-						en.innerHTML = emptyInfo;
-						en.style.zIndex = 1;
-						t.onEmpty();
-					}
-				}
-			}
-		},
-
-		_onSizeChange: function(){
-			var t = this;
-			if(t._sizeChangeHandler){
-				clearTimeout(t._sizeChangeHandler);
-			}
-			t._sizeChangeHandler = setTimeout(function(){
-				if(!t._destroyed){
-					t.refresh();
-				}
-			}, 10);
 		},
 
 		//-------------------------------------------------------------------------------------
@@ -936,16 +926,17 @@ define([
 			});
 			t.connect(g.mainNode, 'onkeydown', function(evt){
 				if(focus.currentArea() == 'body'){
-					var dk = keys;
-					if(evt.keyCode == dk.HOME && !evt.ctrlKey){
+					var dk = keys,
+						ctrlKey = g._isCtrlKey(evt);
+					if(evt.keyCode == dk.HOME && !ctrlKey){
 						t._focusCellCol = 0;
 						t._focusCell();
 						focus.stopEvent(evt);
-					}else if(evt.keyCode == dk.END && !evt.ctrlKey){
+					}else if(evt.keyCode == dk.END && !ctrlKey){
 						t._focusCellCol = g._columns.length - 1;
 						t._focusCell();
 						focus.stopEvent(evt);
-					}else if(!g.tree || !evt.ctrlKey){
+					}else if(!g.tree || !ctrlKey){
 						focus._noBlur = 1;	//1 as true
 						var arr = {}, dir = g.isLeftToRight() ? 1 : -1;
 						arr[dk.LEFT_ARROW] = [0, -dir, evt];
@@ -983,7 +974,7 @@ define([
 			g.focus.stopEvent(evt);
 			colIdx = colIdx >= 0 ? colIdx : t._focusCellCol;
 			rowVisIdx = rowVisIdx >= 0 ? rowVisIdx : t._focusCellRow;
-			var colId = g._columns[colIdx].id,
+			var colId = g._columns[colIdx]? g._columns[colIdx].id : undefined,
 				n = t.getCellNode({
 					visualIndex: rowVisIdx,
 					colId: colId

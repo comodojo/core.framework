@@ -189,6 +189,22 @@
 	line-height: 0;
 }
 
+.gridxMac .gridxHScrollerInner::-webkit-scrollbar {
+	-webkit-appearance:none !important;
+	height:11px !important;
+}
+.gridxMac .gridxHScrollerInner::-webkit-scrollbar-thumb {
+	border-radius:8px !important;
+	border:2px solid white !important;
+	background-color:rgba(100,100,100,.5) !important;
+}
+.gridxMac .gridxHScrollerInner::-webkit-scrollbar-thumb:hover,
+.gridxMac .gridxHScrollerInner::-webkit-scrollbar-thumb:active,
+.gridxMac .gridxHScrollerInner::-webkit-scrollbar-thumb:focus {
+	background-color: rgba(0,0,0,.5) !important;
+}
+
+
 
 /*VScroller*/
 .gridxVScroller {
@@ -202,6 +218,23 @@
 	outline: none;
 }
 
+.gridxMac .gridxVScroller::-webkit-scrollbar {
+	-webkit-appearance:none !important;
+	width:11px !important;
+	background-color: #eee !important;
+}
+.gridxMac .gridxVScroller::-webkit-scrollbar-thumb {
+	border-radius:8px !important;
+	border:2px solid white !important;
+	background-color:rgba(100,100,100,.5) !important;
+}
+.gridxMac .gridxVScroller::-webkit-scrollbar-thumb:hover,
+.gridxMac .gridxVScroller::-webkit-scrollbar-thumb:active,
+.gridxMac .gridxVScroller::-webkit-scrollbar-thumb:focus {
+	background-color: rgba(0,0,0,.5) !important;
+}
+
+
 /*RowHeader*/
 .gridxRowHeaderHeader,
 .gridxRowHeaderBody {
@@ -211,6 +244,11 @@
 	height: 100%;
 	overflow: hidden;
 	border-right: 1px solid #E5DAC8;
+	box-sizing: border-box; /* css3 rec */
+	-moz-box-sizing: border-box; /* ff2 */
+	-ms-box-sizing: border-box; /* ie8 */
+	-webkit-box-sizing: border-box; /* safari3 */
+	-khtml-box-sizing: border-box; /* konqueror */	
 }
 
 .gridxRowHeaderBody table {
@@ -229,6 +267,8 @@
 	background: -o-linear-gradient(top,  #edf2f7 0%,#d0dfea 100%); /* Opera 11.10+ */
 	background: -ms-linear-gradient(top,  #edf2f7 0%,#d0dfea 100%); /* IE10+ */
 	background: linear-gradient(top,  #edf2f7 0%,#d0dfea 100%); /* W3C */
+	width: 100%;
+	
 }
 
 .gridxRowHeaderHeader .gridxHeaderCellFocus {
@@ -420,4 +460,23 @@
 .gridxHeaderRegionFocus .gridxSortNode:focus,
 .gridxHeaderRegionFocus .gridxHeaderRegion:focus {
 	outline: 1px dashed darkblue;
+}
+
+.gridxCellEditedBg{
+	background-image: url('images/gridxCellChanged.png');
+	height: 6px;
+	width: 6px;
+	position:absolute;
+	z-index:10
+}
+.gridxCellEditedBg span{
+	display: none;
+}
+
+.dijit_a11y .gridxCellEditedBg span{
+	position: relative;
+	display: block;
+	left: -3px;
+	color: white;
+	font-size: 8px;
 }

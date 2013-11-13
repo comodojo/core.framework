@@ -7,13 +7,13 @@ define([
 	"dojo/_base/window",
 	"dojo/_base/event",
 	"dojo/keys",
-	"../core/_Module",
-	"../core/util"
-], function(declare, array, connect, lang, sniff, win, event, keys, _Module, util){
+	"../core/_Module"
+], function(declare, array, connect, lang, has, win, event, keys, _Module){
 
 /*=====
 	var Focus = declare(_Module, {
 		// summary
+		//		module name: focus.
 		//		This module controls the TAB sequence of all the UI modules.
 		//		But this module is (or at least can be) a non-UI module, because it does not handle the actual focus job.
 
@@ -149,9 +149,23 @@ define([
 	return Focus;
 =====*/
 
+	function biSearch(arr, comp){
+		var i = 0, j = arr.length, k;
+		for(k = Math.floor((i + j) / 2); i + 1 < j; k = Math.floor((i + j) / 2)){
+			if(comp(arr[k]) > 0){
+				j = k;
+			}else{
+				i = k;
+			}
+		}
+		return arr.length && comp(arr[i]) >= 0 ? i : j;
+	}
+
 	return declare(_Module, {
 		name: 'focus',
-		
+
+		enabled: !has('ios') && !has('android'),
+
 		constructor: function(){
 			var t = this,
 				g = t.grid;
@@ -160,7 +174,7 @@ define([
 			t._focusNodes = [];
 			t._onDocFocus = function(evt){
 				if(!t._noBlur){
-					if(sniff('ie')){
+					if(has('ie')){
 						evt.target = evt.srcElement;
 					}
 					t._onFocus(evt);
@@ -171,7 +185,7 @@ define([
 				[g.domNode, 'onfocus', '_focus'],
 				[g.lastFocusNode, 'onfocus', '_focus'],
 				[g, 'onBlur', '_doBlur']);
-			if(sniff('ie') < 9){
+			if(has('ie') < 9){
 				win.doc.attachEvent('onfocusin', t._onDocFocus);
 			}else{
 				win.doc.addEventListener('focus', t._onDocFocus, true);
@@ -184,7 +198,7 @@ define([
 			t._areaQueue = null;
 			t._focusNodes = [];
 			t._queueIdx = -1;
-			if(sniff('ie') < 9){
+			if(has('ie') < 9){
 				win.doc.detachEvent('onfocusin', t._onDocFocus);
 			}else{
 				win.doc.removeEventListener('focus', t._onDocFocus, true);
@@ -210,7 +224,7 @@ define([
 				area.connects = area.connects || [];
 
 				t._areas[area.name] = area;
-				var i = util.biSearch(tq, function(a){
+				var i = biSearch(tq, function(a){
 					return a.p - area.priority;
 				});
 				//If the priority is the same, put this area above the current one.
@@ -310,7 +324,7 @@ define([
 				if(t.currentArea() === areaName){
 					t._updateCurrentArea();
 				}
-				var i = util.biSearch(t._tabQueue, function(a){
+				var i = biSearch(t._tabQueue, function(a){
 						return a.p - area.priority;
 					}), j, 
 					stack = t._tabQueue[i].stack;
@@ -349,7 +363,7 @@ define([
 		_stackIdx: 0,
 
 		_onTabDown: function(evt){
-			if(evt.keyCode === keys.TAB){
+			if(this.arg('enabled') && evt.keyCode === keys.TAB){
 				this.tab(evt.shiftKey ? -1 : 1, evt);
 			}
 		},
@@ -360,61 +374,67 @@ define([
 				dn = t.grid.domNode,
 				n = evt.target,
 				currentArea = t._areas[t.currentArea()];
-			while(n && n !== dn){
-				i = array.indexOf(t._focusNodes, n);
-				if(i >= 0){
-					stack = t._tabQueue[i].stack;
-					for(j = 0; j < stack.length; ++j){
-						area = t._areas[stack[j]];
-						if(area.onFocus(evt)){
-							if(currentArea && currentArea.name !== area.name){
-								currentArea.onBlur(evt);
-								t.onBlurArea(currentArea.name);
+			if(t.arg('enabled')){
+				while(n && n !== dn){
+					i = array.indexOf(t._focusNodes, n);
+					if(i >= 0){
+						stack = t._tabQueue[i].stack;
+						for(j = 0; j < stack.length; ++j){
+							area = t._areas[stack[j]];
+							if(area.onFocus(evt)){
+								if(currentArea && currentArea.name !== area.name){
+									currentArea.onBlur(evt);
+									t.onBlurArea(currentArea.name);
+								}
+								t.onFocusArea(area.name);
+								t._queueIdx = i;
+								t._stackIdx = j;
+								return;
 							}
-							t.onFocusArea(area.name);
-							t._queueIdx = i;
-							t._stackIdx = j;
-							return;
 						}
+						return;
 					}
-					return;
+					n = n.parentNode;
 				}
-				n = n.parentNode;
-			}
-			if(n == dn && currentArea){
-				t._doBlur(evt, currentArea);
+				if(n == dn && currentArea){
+					t._doBlur(evt, currentArea);
+				}
 			}
 		},
 
 		_focus: function(evt){
 			var t = this;
-			if(t._tabingOut){
-				t._tabingOut = 0;
-			}else if(evt.target == t.grid.domNode){
-				t._queueIdx = -1;
-				t.tab(1);
-			}else if(evt.target === t.grid.lastFocusNode){
-				t._queueIdx = t._tabQueue.length;
-				t.tab(-1);
+			if(t.arg('enabled')){
+				if(t._tabingOut){
+					t._tabingOut = 0;
+				}else if(evt.target == t.grid.domNode){
+					t._queueIdx = -1;
+					t.tab(1);
+				}else if(evt.target === t.grid.lastFocusNode){
+					t._queueIdx = t._tabQueue.length;
+					t.tab(-1);
+				}
 			}
 		},
 
 		_doBlur: function(evt, area){
 			var t = this;
-			if(!area && t.currentArea()){
-				area = t._areas[t.currentArea()];
-			}
-			if(area){
-				area.onBlur(evt);
-				t.onBlurArea(area.name);
-				t._updateCurrentArea();
+			if(t.arg('enabled')){
+				if(!area && t.currentArea()){
+					area = t._areas[t.currentArea()];
+				}
+				if(area){
+					area.onBlur(evt);
+					t.onBlurArea(area.name);
+					t._updateCurrentArea();
+				}
 			}
 		},
 
 		_updateCurrentArea: function(area){
 			var t = this, tq = t._tabQueue;
 			if(area){
-				var i = t._queueIdx = util.biSearch(tq, function(a){
+				var i = t._queueIdx = biSearch(tq, function(a){
 						return a.p - area.priority;
 					}),
 					stack = tq[i].stack;

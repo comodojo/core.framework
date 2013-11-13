@@ -1,12 +1,11 @@
 define([
 	'dojo/_base/declare',
 	'dojo/_base/lang',
-	'dojo/aspect',
 	'dojo/DeferredList',
 	'dojo/_base/Deferred',
 	'dojo/_base/array',
 	'../_Extension'
-], function(declare, lang, aspect, DeferredList, Deferred, array,  _Extension){
+], function(declare, lang, DeferredList, Deferred, array, _Extension){
 /*=====
 	return declare([], {
 		// Summary:
@@ -27,7 +26,7 @@ define([
 			
 		},
 		
-		undo：function(){
+		undo: function(){
 			// summary:
 			//		Undo last edit change.
 			// returns:
@@ -35,7 +34,7 @@ define([
 			return false;	//Boolean
 		},
 		
-		redo： function(){
+		redo: function(){
 			// summary:
 			//		redo next edit change.
 			// returns:
@@ -43,24 +42,24 @@ define([
 			return false;	//Boolean
 		},
 		
-		save： function(){
+		save:  function(){
 			// summary:
 			//		write to store. Clear undo list.
 			// returns:
 			//		A Deferred object indicating all the store save operation has finished.			
 		},
 		
-		clearLazyData： function(){
+		clearLazyDat: function(){
 			// summary:
 			//		Undo all. Clear undo list. The initial name of this function is 'clear'.
 			//		When use grid.model.clear(), this function won't be run because 
 			//		there is a function named 'clear'in ClientFilter.
 			//		So rename this function to clearLazyData which is more in detail about what this 
 			//		function really do.			
-			
+		
 		},
 		
-		isChanged： function(){
+		isChanged: function(){
 			// summary:
 			//		Check whether a field is changed for the given row.
 			// rowId:
@@ -71,13 +70,13 @@ define([
 			return false;	//Boolean
 		},
 		
-		getChanged： function(){
+		getChanged: function(){
 			// summary:
 			//		Get all the changed rows Ids.
 			// returns:
 			//		An array of changed row IDs.
 			return [];	//Array
-		}，
+		},
 
 		onSave: function(rowids){
 			// summary:
@@ -119,7 +118,6 @@ define([
 		
 		constructor: function(model, args){
 			var t = this,
-				c = 'aspect',
 				s = model.store;
 			
 			t._globalOptList = [];
@@ -142,7 +140,11 @@ define([
 		byId: function(id){
 			var t = this,
 				c = t.inner._call('byId', arguments);
-			if(!c){ return c; }
+				
+			if(!c || !t._lazyRawData[id]){ 
+				return c; 
+			}
+			
 			var d = lang.mixin({}, c);
 			d.rawData = lang.mixin({}, d.rawData, t._lazyRawData[id]);
 			d.data = lang.mixin({}, d.data, t._lazyData[id]);		
@@ -153,9 +155,12 @@ define([
 			var t = this,
 				c = t.inner._call('byIndex', arguments),
 				id = t.inner._call('indexToId', arguments);
-			if(!c){ return c; }
-			var d = lang.mixin({}, c);
+
+			if(!c || !t._lazyRawData[id]){ 
+				return c; 
+			}
 			
+			var d = lang.mixin({}, c);
 			d.rawData = lang.mixin({}, d.rawData, t._lazyRawData[id]);
 			d.data = lang.mixin({}, d.data, t._lazyData[id]);
 			return d;
@@ -221,7 +226,6 @@ define([
 		},
 
 		clearLazyData: function(){
-			console.log('in clear');
 			var t = this,
 				cl = t.getChanged();
 			
@@ -253,22 +257,19 @@ define([
 					t._globalOptIndex = -1;
 					t._lazyRawData = {};
 					t._lazyData = {};
-					console.log('save to store successfully');
 					t.onSave(dl);
 					d.callback();
 				}, function(){
 					d.errback();
-					console.log('nothing to save');
 				});
 			}else{
 				d.callback();
-				console.log('nothing to save');
 			}
 			return d;
 		},
 
 		isChanged: function(rowId, field){
-			var t = this;
+			var t = this,
 				cache = t.inner._call('byId', [rowId]),
 				ld = t._lazyRawData[rowId];
 			if(field){

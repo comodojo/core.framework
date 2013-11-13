@@ -326,7 +326,9 @@ var Layout = declare(null,{
 					resize = false;
 				break;
 				case "ATTACHED":
-					attach_node = (this.attachNode.containerNode ? this.attachNode.containerNode : (this.attachNode.domNode ? this.attachNode.domNode : this.attachNode));
+					//console.log(this.attachNode);
+					//attach_node = (this.attachNode.containerNode ? this.attachNode.containerNode : (this.attachNode.domNode ? this.attachNode.domNode : this.attachNode));
+					attach_node = (Utils.isNode(attachNode.containerNode) ? attachNode.containerNode : (Utils.isNode(attachNode.domNode) ? attachNode.domNode : attachNode));
 					real_width  = domGeom.getMarginBox(attach_node).w;
 					real_height = domGeom.getMarginBox(attach_node).h;
 					resize = false;
@@ -424,7 +426,7 @@ var Layout = declare(null,{
 			privateLayout.resize();
 			privateLayout.resize();
 		}
-		
+	
 		return layout;
 
 	},

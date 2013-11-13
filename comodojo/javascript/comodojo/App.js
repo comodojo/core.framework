@@ -304,7 +304,9 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 				applicationSpace.close = function() {
 					applicationSpace.destroyRecursive();
 				};
-				applicationSpace.on('close',function() {comodojo.App.kill(pid);});
+				aspect.after(applicationSpace, "close", function(){
+					comodojo.App.kill(pid);
+				});
 			}
 			else {
 				applicationSpace = domConstruct.create(prop.requestSpecialNode, {
@@ -333,7 +335,7 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 
 			applicationSpace.domNode.appendChild(applicationSpace.lockNode);
 
-			if (utils.inArray(prop.placeAt.toLowerCase(),['before', 'after', 'replace', 'only', 'first', 'last'])) {
+			if (utils.inArray(utils.defined(prop.placeAt.toLowerCase) ? prop.placeAt.toLowerCase() : '',['before', 'after', 'replace', 'only', 'first', 'last'])) {
 				domConstruct.place(applicationSpace.domNode, myNode, prop.placeAt.toLowerCase());
 			}
 			else {
@@ -409,11 +411,14 @@ App.launch = function(appExec, pid, applicationSpace, status) {
 	
 	try {
 		newApp.init();
-		applicationSpace.startup();
 		if (applicationSpace.isComodojoApplication == "MODAL") {
+			applicationSpace.startup();
 			setTimeout(function() {
 				registry.byId(pid)._position();
 			},500);
+		}
+		if (applicationSpace.isComodojoApplication == "WINDOWED") {
+			applicationSpace.startup();
 		}
 		bus.callEvent('comodojo_app_load_end');
 	}

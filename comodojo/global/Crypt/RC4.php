@@ -14,7 +14,7 @@
  *  - {@link http://en.wikipedia.org/wiki/RC4 - Wikipedia: RC4}
  *
  * RC4 is also known as ARCFOUR or ARC4.  The reason is elaborated upon at Wikipedia.  This class is named RC4 and not
- * ARCFOUR or ARC4 because RC4 is how it is refered to in the SSH1 specification.
+ * ARCFOUR or ARC4 because RC4 is how it is referred to in the SSH1 specification.
  *
  * Here's a short example of how to use this library:
  * <code>
@@ -58,7 +58,6 @@
  * @author     Jim Wigginton <terrafrost@php.net>
  * @copyright  MMVII Jim Wigginton
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License
- * @version    $Id: RC4.php,v 1.8 2009/06/09 04:00:38 terrafrost Exp $
  * @link       http://phpseclib.sourceforge.net
  */
 
@@ -167,7 +166,6 @@ class Crypt_RC4 {
      *
      * Determines whether or not the mcrypt extension should be used.
      *
-     * @param optional Integer $mode
      * @return Crypt_RC4
      * @access public
      */
@@ -192,6 +190,9 @@ class Crypt_RC4 {
                     case defined('MCRYPT_RC4');
                         $this->mode = MCRYPT_RC4;
                 }
+                $this->encryptStream = mcrypt_module_open($this->mode, '', MCRYPT_MODE_STREAM, '');
+                $this->decryptStream = mcrypt_module_open($this->mode, '', MCRYPT_MODE_STREAM, '');
+
         }
     }
 
@@ -209,6 +210,8 @@ class Crypt_RC4 {
         $this->key = $key;
 
         if ( CRYPT_RC4_MODE == CRYPT_RC4_MODE_MCRYPT ) {
+            mcrypt_generic_init($this->encryptStream, $this->key, '');
+            mcrypt_generic_init($this->decryptStream, $this->key, '');
             return;
         }
 
@@ -250,7 +253,7 @@ class Crypt_RC4 {
                 if (!isset($hash)) {
                     $hash = 'sha1';
                 }
-                // WPA and WPA use the SSID as the salt
+                // WPA and WPA2 use the SSID as the salt
                 if (!isset($salt)) {
                     $salt = 'phpseclib/salt';
                 }
@@ -264,7 +267,8 @@ class Crypt_RC4 {
                 }
 
                 if (!class_exists('Crypt_Hash')) {
-                    require_once('Crypt/Hash.php');
+                    //require_once('Crypt/Hash.php');
+                    comodojo_load_resource('Crypt/Hash');
                 }
 
                 $i = 1;
@@ -349,18 +353,11 @@ class Crypt_RC4 {
         if ( CRYPT_RC4_MODE == CRYPT_RC4_MODE_MCRYPT ) {
             $keyStream = $mode == CRYPT_RC4_ENCRYPT ? 'encryptStream' : 'decryptStream';
 
-            if ($this->$keyStream === false) {
-                $this->$keyStream = mcrypt_module_open($this->mode, '', MCRYPT_MODE_STREAM, '');
-                mcrypt_generic_init($this->$keyStream, $this->key, '');
-            } else if (!$this->continuousBuffer) {
-                mcrypt_generic_init($this->$keyStream, $this->key, '');
-            }
-            $newText = mcrypt_generic($this->$keyStream, $text);
             if (!$this->continuousBuffer) {
-                mcrypt_generic_deinit($this->$keyStream);
+                mcrypt_generic_init($this->$keyStream, $this->key, '');
             }
 
-            return $newText;
+            return mcrypt_generic($this->$keyStream, $text);
         }
 
         if ($this->encryptStream === false) {
@@ -442,6 +439,11 @@ class Crypt_RC4 {
      */
     function enableContinuousBuffer()
     {
+        if ( CRYPT_RC4_MODE == CRYPT_RC4_MODE_MCRYPT ) {
+            mcrypt_generic_init($this->encryptStream, $this->key, '');
+            mcrypt_generic_init($this->decryptStream, $this->key, '');
+        }
+
         $this->continuousBuffer = true;
     }
 
@@ -457,7 +459,7 @@ class Crypt_RC4 {
     {
         if ( CRYPT_RC4_MODE == CRYPT_RC4_MODE_INTERNAL ) {
             $this->encryptIndex = $this->decryptIndex = array(0, 0);
-            $this->setKey($this->key);
+            $this->encryptStream = $this->decryptStream = false;
         }
 
         $this->continuousBuffer = false;
@@ -485,47 +487,7 @@ class Crypt_RC4 {
     function disablePadding()
     {
     }
-
-    /**
-     * Class destructor.
-     *
-     * Will be called, automatically, if you're using PHP5.  If you're using PHP4, call it yourself.  Only really
-     * needs to be called if mcrypt is being used.
-     *
-     * @access public
-     */
-    function __destruct()
-    {
-        if ( CRYPT_RC4_MODE == CRYPT_RC4_MODE_MCRYPT ) {
-            $this->_closeMCrypt();
-        }
-    }
-
-    /**
-     * Properly close the MCrypt objects.
-     *
-     * @access prviate
-     */
-    function _closeMCrypt()
-    {
-        if ( $this->encryptStream !== false ) {
-            if ( $this->continuousBuffer ) {
-                mcrypt_generic_deinit($this->encryptStream);
-            }
-
-            mcrypt_module_close($this->encryptStream);
-
-            $this->encryptStream = false;
-        }
-
-        if ( $this->decryptStream !== false ) {
-            if ( $this->continuousBuffer ) {
-                mcrypt_generic_deinit($this->decryptStream);
-            }
-
-            mcrypt_module_close($this->decryptStream);
-
-            $this->decryptStream = false;
-        }
-    }
 }
+
+// vim: ts=4:sw=4:et:
+// vim6: fdl=1:

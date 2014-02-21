@@ -367,7 +367,7 @@ function comodojo_mimeByFile($file) {
 			$icon = "application_octet_stream.png";
 		}
 	}
-	return Array($mime, $image);
+	return Array($mime, $icon);
 }
 
 /**

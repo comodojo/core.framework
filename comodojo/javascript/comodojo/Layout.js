@@ -238,7 +238,7 @@ var Layout = declare(null,{
 		
 		layout.newGridBox = function(to, name, title, image) { 
 			var child = new ContentPane({
-				content: '<div class="layout_gridbox_icon" style="background-image: url('+image+')"></div> <div class="layout_gridbox_title">'+title+'</div>',
+				content: '<div class="layout_gridbox_icon" style="background: url('+image+') no-repeat center center;"></div> <div class="layout_gridbox_title">'+title+'</div>',
 				className: "layout_gridbox_element_"+comodojoConfig.dojoTheme,
 				onMouseOver: function() {domClass.add(this.domNode,"layout_gridbox_element_"+comodojoConfig.dojoTheme+"_selected");},
 				onMouseLeave: function() {domClass.remove(this.domNode,"layout_gridbox_element_"+comodojoConfig.dojoTheme+"_selected");},
@@ -479,7 +479,7 @@ var Layout = declare(null,{
 				case "GridBox":
 					wtype = "dijit.layout.ContentPane";
 					lang.mixin(gridBoxDef, hierarchy[i].gridBox);
-					wparams.content = '<div class="layout_gridbox_icon" style="background-image: url('+gridBoxDef.image+')"></div> <div class="layout_gridbox_title">'+gridBoxDef.title+'</div>';
+					wparams.content = '<div class="layout_gridbox_icon" style="background: url('+gridBoxDef.image+') no-repeat center center;"></div> <div class="layout_gridbox_title">'+gridBoxDef.title+'</div>';
 					hierarchy[i].cssClass = "layout_gridbox_element_"+comodojoConfig.dojoTheme;
 					wparams.onMouseOver = function() {domClass.add(this.domNode,"layout_gridbox_element_"+comodojoConfig.dojoTheme+"_selected");};
 					wparams.onMouseLeave = function() {domClass.remove(this.domNode,"layout_gridbox_element_"+comodojoConfig.dojoTheme+"_selected");};

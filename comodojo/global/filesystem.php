@@ -1033,7 +1033,7 @@ class filesystem {
 				"mimetype"			=>	$mime,
 				"icon"				=>	$icon,
 				"thumb"				=>	$thumb,
-				"file_url"			=>	$this->expose_file_url ? $complete_directory : COMODOJO_SITE_URL.'get_content.php?p='.relative_path.'&n='.$file,
+				"file_url"			=>	$this->expose_file_url ? $complete_directory : COMODOJO_SITE_URL.'download.php?p='.$directory.'&n='.$file,
 				"size"				=>	filesize($complete_file),
 				"last_mod" 			=>	filemtime($complete_file)
 			);
@@ -1716,7 +1716,7 @@ class filesystem {
 		else {
 			
 			comodojo_load_resource('mime_types');
-			if ($this->generateThumbnails) comodojo_load_resource('image_tools');
+			/*if ($this->generateThumbnails)*/ comodojo_load_resource('image_tools');
 			
 			$toReturn = $this->list_helper((substr($this->filePath,-1) == '/' ? $this->filePath : $this->filePath . "/") . $this->fileName);
 			

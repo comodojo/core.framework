@@ -22,47 +22,57 @@ class imageselector extends application {
 	public function listDirectories() {
 		
 		comodojo_load_resource('filesystem');
-
+		
 		$fs = new filesystem();
-		$fs->filePath = "/";
-		$fs->fileName = false;
-		$fs->showHidden = false;
-		$fs->filterBy = "directory";
-		$fs->generateIcons = true;
-		$fs->generateThumbnails = true;
-		$fs->deepListing = true;
 		
-		$ret = $fs->listDirectory();
+		try {
+			$fs->filePath = "/";
+			$fs->fileName = false;
+			
+			$fs->showHidden = false;
+			$fs->filterBy = "directory";
+			
+			$fs->accessLevelFilter = 'reader';
+			
+			$fs->deepListing = true;
+			
+			$result = $fs->listDirectory();
+		}
+		catch (Exception $e){
+			throw $e;
+		}
 		
-		$this->success = $ret['success'];
-		$completeRet = $ret['result'];
-		
-		return $completeRet;
+		return $result;
 		
 	}
 	
-	private function listDirectory() {
+	public function listDirectory($params) {
 	
-		if (!function_exists("loadHelper_fsLayer")) {
-			require($_SESSION[SITE_UNIQUE_IDENTIFIER]['sitePath'] . "comodojo/abstractionLayers/fsLayer.php");
+		comodojo_load_resource('filesystem');
+		
+		$fs = new filesystem();
+		
+		try {
+			$fs->filePath = $params['filePath'];
+			$fs->fileName = $params['fileName'];
+			
+			$fs->showHidden = false;
+			$fs->filterBy = "extension";
+			$fs->filter = array("jpeg","jpg","png","gif");
+			
+			$fs->generateThumbnails = true;
+
+			$fs->accessLevelFilter = 'reader';
+			
+			$fs->deepListing = false;
+			
+			$result = $fs->listDirectory();
+		}
+		catch (Exception $e){
+			throw $e;
 		}
 		
-		$fs = new fs();
-		$fs->filePath = $this->filePath;
-		$fs->fileName = $this->fileName;
-		$fs->showHidden = false;
-		$fs->filterBy = "extension";
-		$fs->filter = array("jpeg","jpg","png","gif");
-		$fs->generateIcons = true;
-		$fs->generateThumbnails = true;
-		$fs->deepListing = false;
-		
-		$ret = $fs->listDirectory();
-
-		$this->success = $ret['success'];
-		$completeRet = $ret['result'];
-		
-		return $completeRet;
+		return $result;
 		
 	}
 	

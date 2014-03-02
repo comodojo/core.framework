@@ -7,14 +7,13 @@ define([
 	"dojo/string",
 	"dojo/query",
 	"dijit/registry",
+	"dijit/_BidiSupport",
 	"dojox/html/ellipsis",
 	"dojox/html/metrics",
 	"./DistinctComboBoxMenu",
 	"../Filter",
 	"dojo/text!../../templates/FilterPane.html",
-	"dojo/i18n!../../nls/FilterBar",
 	"dijit/layout/ContentPane",
-	"dijit/_BidiSupport",
 	"dijit/form/Select",
 	"dijit/form/TextBox",
 	"dijit/form/DateTextBox",
@@ -22,7 +21,7 @@ define([
 	"dijit/form/RadioButton",
 	"dijit/form/NumberTextBox",
 	"dijit/form/ComboBox"
-], function(declare, lang, array, dom, css, string, query, registry, ellipsis, metrics, DistinctComboBoxMenu, Filter, template, i18n, ContentPane, _BidiSupport){
+], function(declare, lang, array, dom, css, string, query, registry, _BidiSupport, ellipsis, metrics, DistinctComboBoxMenu, Filter, template, ContentPane){
 
 /*=====
 	return declare([], {
@@ -41,8 +40,8 @@ define([
 		grid: null,
 		postCreate: function(){
 			this.inherited(arguments);
-			this.i18n = this.grid.filterBar._nls;
-			this.set('title', this.i18n.defaultRuleTitle);
+			this.i18n = this.grid.nls;
+			this.set('title', this.grid.nls.defaultRuleTitle);
 			this.set('content', string.substitute(template, this));
 			this._initFields();
 			this._initSltCol();
@@ -58,7 +57,6 @@ define([
 			var value = this._getValue(), 
 				colId = this.sltColumn.get('value'),
 				condition = this.sltCondition.get('value');
-			
 			if(condition === 'isEmpty' || (value !== null && (condition !== 'range' || (value.start && value.end)))){
 				return {
 					colId: isAnyColumn(colId) ? '' : colId,
@@ -84,7 +82,11 @@ define([
 			window.setTimeout(function(){
 				_this.sltCondition.set('value', data.condition, null);
 				_this._onConditionChange();
-				_this._setValue(data.value);
+				window.setTimeout(function(){
+					//FIXME: Need another set timeout since something has became async for the new dijit.
+					_this._setValue(data.value);
+				},50);
+				// _this._setValue(data.value);
 			}, 10);
 		},
 		close: function(){
@@ -219,7 +221,7 @@ define([
 				var ruleNumber = array.indexOf(this._getContainer().getChildren(), this) + 1;
 				title = string.substitute(this.i18n.ruleTitleTemplate, {ruleNumber: ruleNumber});
 			}
-			txtNode.innerHTML = title;
+			txtNode.innerHTML = title.replace(/&/g, '&amp;');
 			txtNode.title = title.replace(/<\/?span[^>]*>/g, '').replace('&nbsp;', ' ');
 		},
 		_needComboBox: function(){
@@ -295,6 +297,7 @@ define([
 			}
 		},
 		_setValue: function(value){
+
 			if(!this._isValidValue(value)){return;}
 			var type = this._getType(), combo = this._needComboBox();
 			switch(type){

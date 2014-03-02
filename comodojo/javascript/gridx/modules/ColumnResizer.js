@@ -83,6 +83,8 @@ define([
 					headerNodeStyle = headerNode.style,
 					oldWidth = domStyle.get(headerNode, 'width'),
 					minWidth = t.arg('minWidth'),
+					padExtents = domGeometry.getPadExtents(headerNode),
+					pads = padExtents.l + padExtents.r,
 					cols = g._columns;
 
 				width = parseInt(width, 10);
@@ -92,7 +94,7 @@ define([
 				headerNodeStyle.width = width + 'px';
 				headerNodeStyle.minWidth = width + 'px';
 				headerNodeStyle.maxWidth = width + 'px';
-				width = headerNode.clientWidth;
+				width = headerNode.clientWidth - pads;
 				//set again in case actual effect is different from what we expect.
 				headerNodeStyle.width = width + 'px';
 				headerNodeStyle.minWidth = width + 'px';
@@ -188,6 +190,10 @@ define([
 				t._updateResizer(e);
 				//Only mouse down, not moved yet
 				t._moving = 0;
+				//If column resizing should not cause any part of grid to be focused
+				setTimeout(function(){
+					g.focus.blur();
+				}, 0);
 			}else{
 				t._ismousedown = 1;
 			}

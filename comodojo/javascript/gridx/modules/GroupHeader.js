@@ -137,6 +137,11 @@ define([
 			}
 		},
 
+		refresh: function(){
+			this.inherited(arguments);
+			this._curNode = 0;
+		},
+
 		_parse: function(){
 			var columns = this.grid._columns,
 				columnCount = columns.length,
@@ -331,7 +336,7 @@ define([
 						fid = g._columns[colIdx].id;
 					}
 				}
-				if(fid){
+				if(fid && g._columnsById[fid]){
 					t._blurNode();
 					if(g.hScroller){
 						g.hScroller.scrollToColumn(fid);

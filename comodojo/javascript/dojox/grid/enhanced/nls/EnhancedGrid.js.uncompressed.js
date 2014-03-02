@@ -27,6 +27,7 @@ define("dojox/grid/enhanced/nls/EnhancedGrid", { root:
 "hr": true,
 "hu": true,
 "hr": true,
+"id": true,
 "it": true,
 "ja": true,
 "kk": true,

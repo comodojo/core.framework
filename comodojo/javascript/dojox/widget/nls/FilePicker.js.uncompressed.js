@@ -26,6 +26,7 @@ define("dojox/widget/nls/FilePicker", { root:
 "kk": true,
 "ja": true,
 "it": true,
+"id": true,
 "hu": true,
 "hr": true,
 "he": true,

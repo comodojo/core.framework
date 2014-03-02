@@ -100,6 +100,7 @@ define("dojox/grid/enhanced/nls/Filter", { root:
 "hr": true,
 "hu": true,
 "hr": true,
+"id": true,
 "it": true,
 "ja": true,
 "kk": true,

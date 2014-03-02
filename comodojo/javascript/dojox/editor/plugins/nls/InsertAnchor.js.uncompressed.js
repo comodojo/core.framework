@@ -29,6 +29,7 @@ define("dojox/editor/plugins/nls/InsertAnchor", { root:
 "kk": true,
 "ja": true,
 "it": true,
+"id": true,
 "hu": true,
 "hr": true,
 "he": true,

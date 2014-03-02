@@ -2,7 +2,8 @@ define([
 	"dojo/_base/declare",
 	"dojo/_base/array",
 	"dojo/_base/Deferred",
-	"dojo/query",
+	// "dojo/query",
+	'gridx/support/query',
 	"dojo/_base/sniff",
 	"dojo/dom-geometry",
 	"dojo/dom-class",
@@ -145,6 +146,7 @@ define([
 				g = t.grid,
 				dn = g.domNode,
 				header = g.header,
+				autoResize = t.arg('autoResize'),
 				ltr = g.isLeftToRight(),
 				marginLead = ltr ? 'marginLeft' : 'marginRight',
 				marginTail = ltr ? 'marginRight' : 'marginLeft',
@@ -177,7 +179,7 @@ define([
 				t.onUpdate();
 				return;
 			}
-			if(!t.arg('autoResize')){
+			if(autoResize){
 				if(needHackPadBorder){
 					query('.gridxCell', innerNode).forEach(function(node){
 						var c = g._columnsById[node.getAttribute('colid')];
@@ -212,7 +214,7 @@ define([
 				});
 				bs.width = totalWidth + 'px';
 				dn.style.width = (lead + tail + totalWidth + mainBorder) + 'px';
-			}else if(t.arg('autoResize')){
+			}else if(autoResize){
 				hs.borderWidth = g.vScrollerNode.style.display == 'none' ? 0 : '';
 			}else{
 				var autoCols = [],
@@ -225,7 +227,7 @@ define([
 					if(c.declaredWidth == 'auto'){
 						autoCols.push(c);
 					}else if(/%$/.test(c.declaredWidth)){
-						var w = parseInt(bodyWidth * parseFloat(c.declaredWidth, 10) / 100 - padBorder, 10);
+						var w = parseFloat(bodyWidth * parseFloat(c.declaredWidth, 10) / 100 - padBorder, 10);
 						//Check if less than zero, prevent error in IE.
 						if(w < 0){
 							w = 0;
@@ -243,7 +245,7 @@ define([
 					if(c.declaredWidth != 'auto'){
 						var headerNode = header.getHeaderNode(c.id),
 							w = !isGroupHeader && needHackPadBorder ? parseFloat(headerNode.style.width, 10) :
-								headerNode.offsetWidth || (domStyle.get(headerNode, 'width') + padBorder);
+								(domStyle.get(headerNode, 'width') + padBorder);
 						if(/%$/.test(c.declaredWidth)){
 							c.width = (w > padBorder ? w - padBorder : 0) + 'px';
 						}
@@ -288,6 +290,18 @@ define([
 						}
 					}
 				});
+				if(g.autoWidth){
+					query('.gridxCell', g.bodyNode).forEach(function(cellNode){
+						var col = g._columnsById[cellNode.getAttribute('colId')],
+							w = col && col.width,
+							s = cellNode.style;
+						if(w){
+							s.width = w;
+							s.minWidth = w;
+							s.maxWidth = w;
+						}
+					});
+				}
 			}
 			g.hScroller.scroll(0);
 			header._onHScroll(0);
@@ -315,6 +329,8 @@ define([
 				g.tree._initExpandLevel();
 			}
 			g.body.refresh();
+			//Now header and body are matched, so we can fire onRender.
+			g.header.onRender();
 		}
 	});
 });

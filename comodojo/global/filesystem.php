@@ -1113,30 +1113,30 @@ class filesystem {
 			
 			if (strtolower($this->filterBy) == 'extension') {
 				$ext = @substr(strrchr($item,'.'),1);
-				if ( !in_array($ext, is_array($this->filter) ? $this->filter : array($this->filter) ) ) continue 2;
+				if ( !in_array($ext, is_array($this->filter) ? $this->filter : array($this->filter) ) ) continue 1;
 			}
 			
 			if (strtolower($this->filterBy) == '!extension') {
 				$ext = @substr(strrchr($item,'.'),1);
-				if ( in_array($ext, is_array($this->filter) ? $this->filter : array($this->filter) ) ) continue 2;
+				if ( in_array($ext, is_array($this->filter) ? $this->filter : array($this->filter) ) ) continue 1;
 			}
 			
 			if (strtolower($this->filterBy) == 'type' AND (strtolower($this->filter) == 'file' OR strtolower($this->filter) == 'folder')) {
 				$nature = is_dir($completeDirectory."/".$item);
-				if ( (strtolower($this->filter) == 'file' AND $nature) OR (strtolower($this->filter) == 'folder' AND !$nature) ) continue 2;
+				if ( (strtolower($this->filter) == 'file' AND $nature) OR (strtolower($this->filter) == 'folder' AND !$nature) ) continue 1;
 			}
 			
 			if (strtolower($this->filterBy) == '!type' AND (strtolower($this->filter) == 'file' OR strtolower($this->filter) == 'folder')) {
 				$nature = is_dir($completeDirectory."/".$item);
-				if ( (strtolower($this->filter) == 'file' AND !$nature) OR (strtolower($this->filter) == 'folder' AND $nature) ) continue 2;
+				if ( (strtolower($this->filter) == 'file' AND !$nature) OR (strtolower($this->filter) == 'folder' AND $nature) ) continue 1;
 			}
 			
 			if (strtolower($this->filterBy) == 'name') {
-				if (strpos($item,$this->filter) === false) continue 2;
+				if (strpos($item,$this->filter) === false) continue 1;
 			}
 			
 			if (strtolower($this->filterBy) == '!name') {
-				if (strpos($item,$this->filter) !== false) continue 2;
+				if (strpos($item,$this->filter) !== false) continue 1;
 			}
 			
 			//now read permissions and manage

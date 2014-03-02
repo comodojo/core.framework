@@ -7,9 +7,7 @@ define("dojo/on", ["./has!dom-addeventlistener?:./aspect", "./_base/kernel", "./
 		has.add("event-orientationchange", has("touch") && !has("android")); // TODO: how do we detect this?
 		has.add("event-stopimmediatepropagation", window.Event && !!window.Event.prototype && !!window.Event.prototype.stopImmediatePropagation);
 		has.add("event-focusin", function(global, doc, element){
-			// All browsers except firefox support focusin, but too hard to feature test webkit since element.onfocusin
-			// is undefined.  Just return true for IE and use fallback path for other browsers.
-			return !!element.attachEvent;
+			return 'onfocusin' in element;
 		});
 	}
 	var on = function(target, type, listener, dontFix){
@@ -183,7 +181,7 @@ define("dojo/on", ["./has!dom-addeventlistener?:./aspect", "./_base/kernel", "./
 			var matchesTarget = typeof selector == "function" ? {matches: selector} : this,
 				bubble = eventType.bubble;
 			function select(eventTarget){
-				// see if we have a valid matchesTarget or default to dojo.query
+				// see if we have a valid matchesTarget or default to dojo/query
 				matchesTarget = matchesTarget && matchesTarget.matches ? matchesTarget : dojo.query;
 				// there is a selector, so make sure it matches
 				while(!matchesTarget.matches(eventTarget, selector, target)){
@@ -251,17 +249,20 @@ define("dojo/on", ["./has!dom-addeventlistener?:./aspect", "./_base/kernel", "./
 		//		to appear in a textbox.
 		// example:
 		//		To fire our own click event
-		//	|	on.emit(dojo.byId("button"), "click", {
-		//	|		cancelable: true,
-		//	|		bubbles: true,
-		//	|		screenX: 33,
-		//	|		screenY: 44
-		//	|	});
+		//	|	require(["dojo/on", "dojo/dom"
+		//	|	], function(on, dom){
+		//	|		on.emit(dom.byId("button"), "click", {
+		//	|			cancelable: true,
+		//	|			bubbles: true,
+		//	|			screenX: 33,
+		//	|			screenY: 44
+		//	|		});
 		//		We can also fire our own custom events:
-		//	|	on.emit(dojo.byId("slider"), "slide", {
-		//	|		cancelable: true,
-		//	|		bubbles: true,
-		//	|		direction: "left-to-right"
+		//	|		on.emit(dom.byId("slider"), "slide", {
+		//	|			cancelable: true,
+		//	|			bubbles: true,
+		//	|			direction: "left-to-right"
+		//	|		});
 		//	|	});
 		var args = slice.call(arguments, 2);
 		var method = "on" + type;
@@ -309,7 +310,8 @@ define("dojo/on", ["./has!dom-addeventlistener?:./aspect", "./_base/kernel", "./
 				// that would be a lot of extra code, with little benefit that I can see, seems 
 				// best to use the generic constructor and copy properties over, making it 
 				// easy to have events look like the ones created with specific initializers
-				var nativeEvent = target.ownerDocument.createEvent("HTMLEvents");
+				var ownerDocument = target.ownerDocument || document;
+				var nativeEvent = ownerDocument.createEvent("HTMLEvents");
 				nativeEvent.initEvent(type, !!event.bubbles, !!event.cancelable);
 				// and copy all our properties over
 				for(var i in event){

@@ -1,5 +1,4 @@
 define([
-	"dojo/_base/kernel",
 	"dojo/_base/declare",
 	"dojo/_base/array",
 	"dojo/dom-class",
@@ -12,8 +11,7 @@ define([
 	"../core/_Module"
 //    "dojo/NodeList-dom",
 //    "dojo/NodeList-traverse"
-], function(kernel, declare, array, domClass, domGeometry, lang, Deferred, DeferredList, query, keys, _Module){
-	kernel.experimental('gridx/modules/Tree');
+], function(declare, array, domClass, domGeometry, lang, Deferred, DeferredList, query, keys, _Module){
 
 /*=====
 	Row.canExpand = function(){
@@ -360,7 +358,7 @@ define([
 		},
 
 		isExpanded: function(id){
-			return !!this.grid.view._openInfo[id];
+			return this.model.isId(id) && !!this.grid.view._openInfo[id];
 		},
 
 		isPaddingCell: function(rowId, colId){
@@ -381,7 +379,7 @@ define([
 		expand: function(id, skipUpdateBody){
 			var d = new Deferred(),
 				t = this;
-			if(id && !t.isExpanded(id) && t.canExpand(id)){
+			if(!t.isExpanded(id) && t.canExpand(id)){
 				t._beginLoading(id);
 				t.grid.view.logicExpand(id).then(function(){
 					Deferred.when(t._updateBody(id, skipUpdateBody, true), function(){
@@ -399,7 +397,7 @@ define([
 		collapse: function(id, skipUpdateBody){
 			var d = new Deferred(),
 				t = this;
-			if(id && t.isExpanded(id)){
+			if(t.isExpanded(id)){
 				t.grid.view.logicCollapse(id);
 				Deferred.when(t._updateBody(id, skipUpdateBody), function(){
 					d.callback();
@@ -555,7 +553,7 @@ define([
 			var rowNode = this.grid.body.getRowNode({rowId: id}),
 				isOpen = this.isExpanded(id);
 			if(rowNode){
-				var nls = this.grid.body._nls;
+				var nls = this.grid.nls;
 				query('.gridxTreeExpandoCell', rowNode).
 					removeClass('gridxTreeExpandoLoading').
 					toggleClass('gridxTreeExpandoCellOpen', isOpen).
@@ -595,7 +593,7 @@ define([
 					expanded = this.isExpanded();
 				rowNode.setAttribute('aria-expanded', expanded);
 				//This is only to make JAWS readk
-				var nls = this.grid.body._nls;
+				var nls = this.grid.nls;
 				query('.gridxTreeExpandoCell', rowNode).closest('.gridxCell').
 					attr('aria-expanded', String(expanded)).
 					attr('aria-label', expanded ? nls.treeExpanded : nls.treeCollapsed);

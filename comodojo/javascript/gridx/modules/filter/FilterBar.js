@@ -11,19 +11,18 @@ define([
 	"dojo/string",
 	"dojo/parser",
 	"dojo/query",
+	"dojo/keys",
+	"dijit/_BidiSupport",
 	"../../core/_Module",
 	"dojo/text!../../templates/FilterBar.html",
-	"dojo/i18n",
 	"../Filter",
 	"./FilterDialog",
 	"./FilterConfirmDialog",
 	"./FilterTooltip",
-	"dijit/_BidiSupport",
 	"dijit/TooltipDialog",
 	"dijit/popup",
-	"dijit/form/Button",
-	"dojo/i18n!../../nls/FilterBar"
-], function(kernel, declare, registry, lang, array, event, dom, domAttr, css, string, parser, query, _Module, template, i18n, Filter, FilterDialog, FilterConfirmDialog, FilterTooltip, _BidiSupport){
+	"dijit/form/Button"
+], function(kernel, declare, registry, lang, array, event, dom, domAttr, css, string, parser, query, keys, _BidiSupport, _Module, template, Filter, FilterDialog, FilterConfirmDialog, FilterTooltip){
 
 /*=====
 	var FilterBar = declare(_Module, {
@@ -175,9 +174,21 @@ define([
 		name: 'filterBar',
 		forced: ['filter'],
 		preload: function(){
-			var rules = this.arg('filterData');
+			var t = this,
+				g = t.grid,
+				rules;
+			if(g.persist){
+				rules = g.persist.registerAndLoad('filterBar', function(){
+					return t.filterData;
+				});
+			}
 			if(rules){
-				this.grid.filter.setFilter(this._createFilterExpr(rules), 1);
+				t.filterData = rules;
+			}else{
+				rules = t.arg('filterData');
+			}
+			if(rules){
+				g.filter.setFilter(t._createFilterExpr(rules), 1);
 			}
 		},
 		//Public-----------------------------------------------------------
@@ -190,6 +201,8 @@ define([
 		maxRuleCount: 0,
 		
 		ruleCountToConfirmClearFilter: 2,
+
+		//useShortMessage: false,
 		
 		conditions: {
 			string: ['contain', 'equal', 'startWith', 'endWith', 'notEqual','notContain', 'notStartWith', 'notEndWith',	'isEmpty'],
@@ -205,14 +218,14 @@ define([
 			var F = Filter;
 			F.before = F.lessEqual;
 			F.after = F.greaterEqual;
-			this._nls = i18n.getLocalization('gridx', 'FilterBar', this.grid.lang);
+			this._nls = this.grid.nls;
 			this.domNode = dom.create('div', {
 				innerHTML: string.substitute(template, this._nls),
 				'class': 'gridxFilterBar'
 			});
 			parser.parse(this.domNode);
 			css.toggle(this.domNode, 'gridxFilterBarHideCloseBtn', !this.arg('closeButton'));
-			this.grid.vLayout.register(this, 'domNode', 'headerNode', -1);
+			this.grid.vLayout.register(this, 'domNode', 'headerNode', -0.5);
 			this._initWidgets();
 			this._initFocus();
 			this.refresh();
@@ -284,8 +297,7 @@ define([
 			if(this.filterData && (this.filterData.conditions.length >= max || max <= 0)){
 				if(!this._cfmDlg){
 					this._cfmDlg = new FilterConfirmDialog({
-						title: this._nls.clearFilterDialogTitle,
-						_nls: this._nls
+						grid: this.grid
 					});
 				}
 				this._cfmDlg.execute = lang.hitch(scope, callback);
@@ -366,7 +378,6 @@ define([
 			var dlg = this._filterDialog;
 			if(!dlg){
 				this._filterDialog = dlg = new FilterDialog({
-					title: this._nls.filterDefDialogTitle,
 					grid: this.grid
 				});
 			}
@@ -440,6 +451,7 @@ define([
 		_initWidgets: function(){
 			this.btnFilter = registry.byNode(query('.dijitButton', this.domNode)[0]);
 			this.btnClose = query('.gridxFilterBarCloseBtn', this.domNode)[0];
+			this.connect(this.btnClose, 'onkeydown', '_onCloseKey');
 			this.statusNode = query('.gridxFilterBarStatus', this.domNode)[0].firstChild;
 			domAttr.remove(this.btnFilter.focusNode, 'aria-labelledby');
 		},
@@ -448,13 +460,14 @@ define([
 			// summary:
 			//		Build the tooltip dialog to show all applied filters.
 			if(!this.filterData || !this.filterData.conditions.length){
-				this.statusNode.innerHTML = this.arg('noFilterMessage', this._nls.filterBarMsgNoFilterTemplate);
+				this.statusNode.innerHTML = this.arg('noFilterMessage', this.grid.nls.filterBarMsgNoFilterTemplate);
 				return;
 			}
-			this.statusNode.innerHTML = string.substitute(this.arg('hasFilterMessage', this._nls.filterBarMsgHasFilterTemplate),
-				[this._currentSize, this._totalSize, this._nls.defaultItemsName]) + 
-				'&nbsp; &nbsp; <a href="javascript:void(0);" action="clear" title="' + this._nls.filterBarClearButton + '">'
-					 + this._nls.filterBarClearButton + '</a>';
+			this.statusNode.innerHTML = string.substitute(
+				this.arg('hasFilterMessage', this.arg('useShortMessage') ? this.grid.nls.summary : this.grid.nls.filterBarMsgHasFilterTemplate),
+				[this._currentSize, this._totalSize, this.grid.nls.defaultItemsName]) + 
+				'&nbsp; &nbsp; <span action="clear" tabindex="-1" title="' + this.grid.nls.filterBarClearButton + '">'
+					 + this.grid.nls.filterBarClearButton + '</span>';
 			this._buildTooltip();
 		},
 		_buildTooltip: function(){
@@ -494,7 +507,7 @@ define([
 				if(/^time/i.test(type)){f = this._formatTime;}
 				
 				if(condition === 'range'){
-					var tpl = this.arg('rangeTemplate', this._nls.rangeTemplate);
+					var tpl = this.arg('rangeTemplate', this.grid.nls.rangeTemplate);
 					valueString = string.substitute(tpl, [f(value.start), f(value.end)]);
 				}else{
 					valueString = f(value);
@@ -513,7 +526,7 @@ define([
 		},
 		_getConditionDisplayName: function(c){
 			var k = c.charAt(0).toUpperCase() + c.substring(1);
-			return this.arg('condition' + k, this._nls['condition' + k]);
+			return this.arg('condition' + k, this.grid.nls['condition' + k]);
 		},
 		_getConditionOptions: function(colId){
 			var cache = this._conditionOptions = this._conditionOptions || {};
@@ -522,7 +535,7 @@ define([
 				array.forEach(this._getColumnConditions(colId), function(s){
 					var k = s.charAt(0).toUpperCase() + s.substring(1);
 					arr.push({
-						label: this.arg('condition' + k, this._nls['condition' + k]),
+						label: this.arg('condition' + k, this.grid.nls['condition' + k]),
 						value: s
 					});
 				}, this);
@@ -619,7 +632,7 @@ define([
 		},
 		_doFocusClearLink: function(evt){
 			this.btnFilter.focus();
-			var link = query('a[action="clear"]')[0];
+			var link = query('span[action="clear"]')[0];
 			if(link){
 				link.focus();
 				if(evt){event.stop(evt);}
@@ -636,6 +649,12 @@ define([
 		_doBlur: function(){
 			return true;
 		},
+		_onCloseKey: function(evt){
+			if(evt.keyCode === keys.ENTER){
+				this.hide();
+			}
+		},
+
 		destroy: function(){
 			this._filterDialog && this._filterDialog.destroy();
 			this._cfmDlg && this._cfmDlg.destroy();

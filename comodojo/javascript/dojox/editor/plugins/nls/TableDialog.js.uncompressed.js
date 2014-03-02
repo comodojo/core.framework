@@ -55,6 +55,7 @@ define("dojox/editor/plugins/nls/TableDialog", { root:
 "kk": true,
 "ja": true,
 "it": true,
+"id": true,
 "hu": true,
 "hr": true,
 "he": true,

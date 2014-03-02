@@ -25,6 +25,7 @@ define("dojox/editor/plugins/nls/TextColor", { root:
 "kk": true,
 "ja": true,
 "it": true,
+"id": true,
 "hu": true,
 "hr": true,
 "he": true,

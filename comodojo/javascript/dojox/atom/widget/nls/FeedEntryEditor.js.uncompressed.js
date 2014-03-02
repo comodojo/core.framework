@@ -23,6 +23,7 @@ define("dojox/atom/widget/nls/FeedEntryEditor", { root:
 "hu": true,
 "hr": true,
 "it": true,
+"id": true,
 "ja": true,
 "kk": true,
 "ko": true,

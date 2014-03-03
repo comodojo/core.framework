@@ -20,6 +20,8 @@ $c.App.load("taskmanager",
 	function(pid, applicationSpace, status){
 		
 		this.showSystemProcesses = false;
+
+		this.refreshLoadAverage = 3000;
 		
 		$d.mixin(this,status);
 		
@@ -98,15 +100,21 @@ $c.App.load("taskmanager",
 					myself.stop();
 				}
 			}).domNode);
-
-			$c.Kernel.newCall(myself.loadCallback,{
-				application: "taskmanager",
-				method: "get_load",
-				content: {}
-			});
 			
 		};
 		
+		this.onstart = function() {
+			$c.Kernel.subscribe("taskmanager_loadaverage",myself.loadCallback,{
+				application: "taskmanager",
+				method: "get_load",
+				content: {}
+			},this.refreshLoadAverage);
+		};
+
+		this.onstop = function() {
+			$c.Kernel.unsubscribe("taskmanager_loadaverage");
+		};
+
 		this.getProcessListStore = function() {
 			var processList = {
 				identifier: 'pid',

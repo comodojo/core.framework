@@ -401,6 +401,8 @@ App.launch = function(appExec, pid, applicationSpace, status) {
 	applicationSpace.lockNode.style.display = "none";
 
 	newApp.close = applicationSpace.close;
+	newApp.onstart = lang.isFunction(newApp.onstart) ? newApp.onstart : function() {return;};
+	newApp.onstop = lang.isFunction(newApp.onstop) ? newApp.onstop : function() {return;};
 
 	if (applicationSpace.isComodojoApplication == "WINDOWED") {
 		newApp.focus = function() {
@@ -421,6 +423,7 @@ App.launch = function(appExec, pid, applicationSpace, status) {
 			applicationSpace.startup();
 		}
 		bus.callEvent('comodojo_app_load_end');
+		newApp.onstart();
 	}
 	catch (e) {
 		comodojo.debug('Application '+appExec+' got error:');
@@ -450,6 +453,13 @@ App.stop = function(pid) {
 		comodojo.debug('Could not stop application, invalid pid reference or application not running (pid not found): '+pid);
 	}
 	else {
+		comodojo.debugDeep('Stopping application with pid: '+pid);
+		try{
+			app.onstop();
+		}
+		catch (e) {
+			comodojo.debug('Could not process internal app onstop: '+e);
+		}
 		switch (app.isComodojoApplication){
 			case "WINDOWED":
 				app.close();

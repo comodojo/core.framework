@@ -200,10 +200,6 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 			applicationSpace.lockNode = loadingState;
 			applicationSpace.canvas.appendChild(applicationSpace.lockNode);
 
-			if (lang.isFunction(on_stop)) {
-				aspect.after(applicationSpace,'close',on_stop);
-			}
-			
 			aspect.after(applicationSpace, 'close', function(){
 				applicationSpace.minNode.style.display = "none";
 				applicationSpace.closeNode.style.display = "none";
@@ -215,8 +211,12 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 
 			applicationSpace.bringToTop();
 
-			if (lang.isFunction(on_start)) {
-				on_start();
+			aspect.before(applicationSpace,'close',function() {
+				comodojo.App.triggerOnStop(pid);
+			});
+
+			if (lang.isFunction(on_stop)) {
+				aspect.after(applicationSpace,'close',on_stop);
 			}
 
 		break;
@@ -228,44 +228,27 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 
 			applicationSpace = dialog.application(pid, prop.title, "", false, _w, _h)._dialog;
 
-			//var reSize = {};
-			//if (prop.width != false) {
-			//	reSize.w = _w+'px';
-			//} 
-			//if (prop.height != false) {
-			//	reSize.h = parseInt(prop.height,10)+'px';
-			//}
-			
 			applicationSpace.set('isComodojoApplication',"MODAL");
 			applicationSpace.containerNode.style.display = "none";
 			applicationSpace.lockNode = loadingState;
 			applicationSpace.domNode.appendChild(applicationSpace.lockNode);
 			
-			//if (utils.defined(reSize.w) || utils.defined(reSize.h)) {
-			//	applicationSpace._layout(false, reSize);
-			//}
-			
 			applicationSpace.close = function() {
 				applicationSpace.hide();
 			};
 
-			if (lang.isFunction(on_stop)) {
-				aspect.after(applicationSpace,'close',on_stop);
-			}
-			
 			applicationSpace._position();
-			
+
 			aspect.after(applicationSpace, "hide", function(){
-				utils.destroyWidget(this.id);
 				comodojo.App.kill(pid);
 			});
 
-			//applicationSpace.on('close',function() {
-			//	comodojo.App.kill(pid);
-			//});
+			aspect.before(applicationSpace,'hide',function() {
+				comodojo.App.triggerOnStop(pid);
+			});
 
-			if (lang.isFunction(on_start)) {
-				on_start();
+			if (lang.isFunction(on_stop)) {
+				aspect.after(applicationSpace,'hide',on_stop);
 			}
 
 		break;
@@ -342,12 +325,12 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 				domConstruct.place(applicationSpace.domNode, myNode);
 			}
 
+			aspect.before(applicationSpace,'close',function() {
+				comodojo.App.triggerOnStop(pid);
+			});
+
 			if (lang.isFunction(on_stop)) {
 				aspect.after(applicationSpace,'close',on_stop);
-			}
-			
-			if (lang.isFunction(on_start)) {
-				on_start();
 			}
 
 		break;
@@ -359,6 +342,10 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 			return false;
 		break; 
 
+	}
+
+	if (lang.isFunction(on_start)) {
+		on_start();
 	}
 
 	App.preload(appExec, pid, applicationSpace, status);
@@ -447,6 +434,15 @@ App.restart = function(pid) {
 	}
 };
 
+App.triggerOnStop = function(pid) {
+	try{
+		App.byPid(pid).onstop();
+	}
+	catch (e) {
+		comodojo.debug('Could not process internal app onstop: '+e);
+	}
+}
+
 App.stop = function(pid) {
 	var app = App.byPid(pid);
 	if (!app) {
@@ -454,12 +450,12 @@ App.stop = function(pid) {
 	}
 	else {
 		comodojo.debugDeep('Stopping application with pid: '+pid);
-		try{
-			app.onstop();
-		}
-		catch (e) {
-			comodojo.debug('Could not process internal app onstop: '+e);
-		}
+		//try{
+		//	app.onstop();
+		//}
+		//catch (e) {
+		//	comodojo.debug('Could not process internal app onstop: '+e);
+		//}
 		switch (app.isComodojoApplication){
 			case "WINDOWED":
 				app.close();

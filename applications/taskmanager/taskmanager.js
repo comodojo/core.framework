@@ -90,10 +90,6 @@ $c.App.load("taskmanager",
 				myself.updateTaskManagerStore();
 			});
 			
-			dojo.aspect.before(applicationSpace, 'close', function(){
-				$c.Bus.removeConnection('taskManager_applicationsRunningTableChange');
-			});
-
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('close',16)+'" alt="Close" />&nbsp;'+$c.getLocalizedMessage('10011'),
 				onClick: function() {
@@ -112,6 +108,7 @@ $c.App.load("taskmanager",
 		};
 
 		this.onstop = function() {
+			$c.Bus.removeConnection('taskManager_applicationsRunningTableChange');
 			$c.Kernel.unsubscribe("taskmanager_loadaverage");
 		};
 

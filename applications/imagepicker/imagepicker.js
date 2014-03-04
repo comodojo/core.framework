@@ -8,6 +8,7 @@
  * @license		GPL Version 3
  */
 
+$c.App.loadCss('imagepicker');
 $d.require("dojo.data.ItemFileWriteStore");
 $d.require("dijit.tree.ForestStoreModel");
 $d.require('comodojo.Layout');
@@ -16,11 +17,15 @@ $c.App.load("imagepicker",
 
 	function(pid, applicationSpace, status){
 	
+		this.allowMultipleSelection = false;
+
 		dojo.mixin(this, status);
 	
 		var myself = this;
 
-		var selected = false;
+		this.selectbuffer = {};
+
+		this.gridbuffer = [];
 
 		this.init = function(){
 			
@@ -40,6 +45,8 @@ $c.App.load("imagepicker",
 				attachNode: applicationSpace,
 				splitter: false,
 				id: pid,
+				width: 500,
+				height: 400,
 				hierarchy: [{
 					type: 'Tree',
 					name: 'left',
@@ -70,44 +77,45 @@ $c.App.load("imagepicker",
 			this.container.main.left.on('click',function(item){
 				myself.filePath = item.relative_path;
 				myself.fileName = item.file_name;
-				//myself.fileType = item.type;
-				//myself.selectButton.set('disabled',myself.fileType == 'file' ? false : 'disabled');
-				//myself.selectButton.set('disabled',false);
 				myself.listDirectory(myself.filePath, myself.fileName);
 			});
 			
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
-				label: '<img src="'+$c.icons.getIcon('close',16)+'" />&nbsp;'+this.getLocalizedMessage('0002'),
+				label: '<img src="'+$c.icons.getIcon('close',16)+'" />&nbsp;'+$c.getLocalizedMessage('10011'),
 				onClick: function() {
 					myself.stop();
 				}
 			}).domNode);
 			
-			//this.selectButton = new dijit.form.Button({
-			//	label: this.getLocalizedMessage('0001')+'&nbsp;<img src="'+$c.icons.getIcon('right_arrow',16)+'" />',
-			//	disabled: 'disabled',
-			//	onClick: function() {
-			//		//if (myself.fileType[0] != 'file') {
-			//		//	return;
-			//		//}
-			//		//else {
-			//			if ($d.isFunction(myself.callback)) {
-			//				myself.callback({
-			//					filePath: myself.filePath[0],
-			//					fileName: myself.fileName[0]
-			//				});
-			//			};
-			//			myself.stop();
-			//		//}
-			//	}
-			//});
-			//
-			//this.container.main.bottom.containerNode.appendChild(this.selectButton.domNode);
+			this.selectButton = new dijit.form.Button({
+				label: $c.getLocalizedMessage('10005')+'&nbsp;<img src="'+$c.icons.getIcon('right_arrow',16)+'" />',
+				disabled: 'disabled',
+				onClick: function() {
+					var result,i=0;
+					var keys = Object.keys(myself.selectbuffer);
+					if (!myself.allowMultipleSelection) {
+						result = myself.selectbuffer[keys[0]];
+					}
+					else {
+						result = [];
+						for (i in keys) {
+							result.push(myself.selectbuffer[keys[i]]);
+						}
+					}
+					if ($d.isFunction(myself.callback)) {
+						myself.callback(result);
+					};
+					myself.stop();
+				}
+			});
+			
+			this.container.main.bottom.containerNode.appendChild(this.selectButton.domNode);
 			
 		};
 
 		this.listDirectory = function(filePath, fileName) {
 			this.container.main.center.destroyDescendants();
+			this.gridbuffer = [];
 			$c.Kernel.newCall(myself.listDirectoryCallback,{
 				application: "imagepicker",
 				method: "list_directory",
@@ -120,8 +128,10 @@ $c.App.load("imagepicker",
 
 		this.listDirectoryCallback  = function(success, result) {
 			if (success) {
+				var box;
 				for (var i in result) {
-					myself.container.newGridBox(myself.container.main.center, result[i].file_name, result[i].file_name, !result[i].thumb ? $c.icons.getIcon(result[i].icon,64) : result[i].thumb);
+					box = myself.container.newGridBox(myself.container.main.center, result[i].file_name, result[i].file_name, !result[i].thumb ? $c.icons.getIcon(result[i].icon,64) : result[i].thumb);
+					myself.gridboxHelper(box,result[i]);
 				}
 			}
 			else {
@@ -129,7 +139,32 @@ $c.App.load("imagepicker",
 			}
 		};
 
-		this.selectElement = function() {};
+		this.gridboxHelper = function(box,result) {
+			this.gridbuffer.push(box);
+			box.on('click',function() {
+				myself.selectElement(box,result.relative_resource);
+			})
+		};
+
+		this.selectElement = function(box,resource) {
+			var i;
+			if ($d.hasClass(box.domNode,"imagepicker_selectedBox")) {
+				$d.removeClass(box.domNode,"imagepicker_selectedBox");
+				delete this.selectbuffer[box.id];
+			}
+			else {
+				if (!this.allowMultipleSelection) {
+					for (i in this.gridbuffer) {
+						$d.removeClass(this.gridbuffer[i].domNode,"imagepicker_selectedBox");
+					}
+					this.selectbuffer = {};
+				}
+				$d.addClass(box.domNode,"imagepicker_selectedBox");
+				this.selectbuffer[box.id] = resource;
+			}
+			if (Object.keys(this.selectbuffer).length > 0 ) { this.selectButton.set('disabled',false); }
+			else { this.selectButton.set('disabled','disabled'); }
+		};
 			
 	}
 	

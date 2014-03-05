@@ -131,9 +131,9 @@ $c.App.load("events",
 							{ name: this.getLocalizedMessage('0001'), width: '30%', field: 'type', formatter: function(data){
 								return $c.Utils.defined(myself.eventData[data.type]) ? myself.getLocalizedMessage(myself.eventData[data.type].name) : data.type
 							}},
-							{ name: this.getLocalizedMessage('0002'), width: '12%', field: 'referTo'},
-							{ name: this.getLocalizedMessage('0006'), width: '13%', field: 'userName'},
-							{ name: this.getLocalizedMessage('0004'), width: '10%', field: 'date',
+							{ name: this.getLocalizedMessage('0002'), width: '17%', field: 'referTo'},
+							{ name: this.getLocalizedMessage('0006'), width: '15%', field: 'userName'},
+							{ name: this.getLocalizedMessage('0004'), width: '13%', field: 'date',
 								dataType: 'date',
 								dateParser: function (value) {
 									return value;
@@ -180,7 +180,7 @@ $c.App.load("events",
 					name: 'bottom',
 					region: 'bottom',
 					params: {
-						style: 'height:30px'
+						style: 'height:30px; text-align:right;'
 					}
 				}]
 			}).build();
@@ -190,6 +190,12 @@ $c.App.load("events",
 				selected: false
 			});
 
+			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('close',16)+'" />&nbsp;'+$c.getLocalizedMessage('10011'),
+				onClick: function() {
+					myself.stop();
+				}
+			}).domNode);
 			//this.container.main.grid.hiddenColumns.add('8');
 
 		};
@@ -198,13 +204,19 @@ $c.App.load("events",
 			var context = this.container.main.grid.menu.context;
 			//console.log(context);
 			var data = this.container.main.grid.model.byId(context.cell.row.id).rawData;
-			var html_table = '<div style="height: 600; width: 700;"><table class="ym-table"><tbody>';
+
+			var html_table = '<table class="ym-table bordertable"><thead><tr><th>Param</th><th>Value</th></tr></thead><tbody>';
 
 			for (i in data) {
-				html_table += '<tr><td>'+i+'</td><td>'+data[i]+'</td></tr>';
+				if ($c.Utils.inArray(i,["id","userAgent","browser","OS","sessionId"])) {
+					html_table += '<tr><td>'+i+'</td><td>'+data[i]+'</td></tr>';
+				}
+				else {
+					continue;
+				}
 			}
 
-			html_table += '</tbody></table></div>';
+			html_table += '</tbody></table>';
 
 			$c.Dialog.modal('Details',html_table,false,false);
 		};

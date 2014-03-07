@@ -1,0 +1,26 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'',
+	'0001'	=>	'',
+	'0002'	=>	'',
+	'0003'	=>	'',
+	'0004'	=>	'',
+	'0005'	=>	'',
+	'0006'	=>	'',
+	'0007'	=>	'',
+	'0008'	=>	'',
+	'0009'	=>	''
+);
+
+?>

@@ -25,17 +25,15 @@ $d.require("gridx.modules.Menu");
 $d.require("dijit.Menu");
 $d.require("dijit.MenuItem");
 
-$c.App.load("events",
+$c.App.load("eventviewer",
 
 	function(pid, applicationSpace, status){
-	
-		//dojo.mixin(this, status);
 	
 		var myself = this;
 		
 		this.init = function(){
 
-			$d.request.get($c.applicationsPath + 'events' + '/resources/known_events.json', {
+			$d.request.get($c.applicationsPath + 'eventviewer' + '/resources/known_events.json', {
 				handleAs: 'json',
 				sync: true
 			}).then(function(obj){
@@ -44,13 +42,13 @@ $c.App.load("events",
 				console.log(err);
 				myself.eventData = {};
 			});
-			//console.log(myself.eventData);
 			
-			this.store = new comodojo.KernelStore({application: 'events'});
+			this.store = new comodojo.KernelStore({application: 'eventviewer'});
 
 			this.eventsMenu = new dijit.Menu({
 				id: 'eventsMenu_'+pid
 			});
+
 			this.filterByValue = new dijit.MenuItem({
 				label: 'filter by true',
 				onClick: function() {
@@ -69,16 +67,17 @@ $c.App.load("events",
 					myself.eventDetail();
 				}
 			});
-			//this.followSession = new dijit.MenuItem({
-			//	label: myself.getLocalizedMessage('0015'),
-			//	onClick: function() {
-			//		myself.followSessionId();
-			//	}
-			//});
+			this.followSession = new dijit.MenuItem({
+				label: myself.getLocalizedMessage('0015'),
+				onClick: function() {
+					myself.startFollowingSession();
+				}
+			});
+			
 			this.eventsMenu.addChild(this.filterByValue);
 			this.eventsMenu.addChild(this.filterByNotValue);
 			this.eventsMenu.addChild(this.showEventDetails);
-			//this.eventsMenu.addChild(this.followSession);
+			this.eventsMenu.addChild(this.followSession);
 
 			$d.aspect.before(this.eventsMenu,'_openMyself',function(){
 				var context = myself.container.main.grid.menu.context;
@@ -89,18 +88,21 @@ $c.App.load("events",
 						cellName = myself.getLocalizedMessage('0003');
 					break;
 					case "2":
-						cellName = myself.getLocalizedMessage('0001');
+						cellName = myself.getLocalizedMessage('0016');
 					break;
 					case "3":
-						cellName = myself.getLocalizedMessage('0002');
+						cellName = myself.getLocalizedMessage('0001');
 					break;
 					case "4":
-						cellName = myself.getLocalizedMessage('0006');
+						cellName = myself.getLocalizedMessage('0002');
 					break;
 					case "5":
-						cellName = myself.getLocalizedMessage('0004');
+						cellName = myself.getLocalizedMessage('0006');
 					break;
 					case "6":
+						cellName = myself.getLocalizedMessage('0004');
+					break;
+					case "7":
 						cellName = myself.getLocalizedMessage('0005');
 					break;
 					case "7":
@@ -128,12 +130,11 @@ $c.App.load("events",
 								var color = cell.row.rawData().success == 1 ? "#8c8;" : "#c88;";
 								return "text-align: center; background: "+color+"; color: "+color+";";
 							}},
-							{ name: this.getLocalizedMessage('0001'), width: '30%', field: 'type', formatter: function(data){
-								return $c.Utils.defined(myself.eventData[data.type]) ? myself.getLocalizedMessage(myself.eventData[data.type].name) : data.type
-							}},
-							{ name: this.getLocalizedMessage('0002'), width: '17%', field: 'referTo'},
-							{ name: this.getLocalizedMessage('0006'), width: '15%', field: 'userName'},
-							{ name: this.getLocalizedMessage('0004'), width: '13%', field: 'date',
+							{ name: this.getLocalizedMessage('0016'), width: '8%', field: 'id'},
+							{ name: this.getLocalizedMessage('0001'), width: '27%', field: 'type'},
+							{ name: this.getLocalizedMessage('0002'), width: '15%', field: 'referTo'},
+							{ name: this.getLocalizedMessage('0006'), width: '14%', field: 'userName'},
+							{ name: this.getLocalizedMessage('0004'), width: '11%', field: 'date',
 								dataType: 'date',
 								dateParser: function (value) {
 									return value;
@@ -147,20 +148,11 @@ $c.App.load("events",
 							},
 							{ name: this.getLocalizedMessage('0005'), width: '10%', field: 'time',
 								dataType: 'time'
-								//timeParser: function (value) {
-								//	return value;
-								//},
-								//decorator: function (cellData) {
-								//	return cellData;
-								//	var dateString = cellData ? dojo.date.locale.format(new Date(cellData),
-								//		{"timePattern": "HHmmss", "selector": "time"/*, "formatLength": "medium"*/}) : "";
-								//	return "" + dateString + "";
-								//},
-								//useRawData: false
 							},
 							{ name: this.getLocalizedMessage('0007'), width: '10%', field: 'host'}//,
 							//{ name: this.getLocalizedMessage('0011'), width: '10%', field: 'sessionId'}
 						],
+						sortInitialOrder: { colId: '2', descending: true },
 						style: 'padding: 0px; margin: 0px !important;',
 						store: this.store,
 						modules: [
@@ -171,7 +163,6 @@ $c.App.load("events",
 							"gridx/modules/Filter",
 							"gridx/modules/filter/FilterBar",
 							"gridx/modules/Menu",
-							//"gridx/modules/HiddenColumns",
 							"gridx/modules/extendedSelect/Row"
 						]
 					}
@@ -191,18 +182,34 @@ $c.App.load("events",
 			});
 
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('run',16)+'" />&nbsp;'+this.getLocalizedMessage('0022'),
+				onClick: function() {
+					myself.consolidateEvents();
+				}
+			}).domNode);
+
+			this.stopFollowingSessionButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('cancel',16)+'" />&nbsp;'+this.getLocalizedMessage('0018'),
+				disabled: 'disabled',
+				onClick: function() {
+					myself.stopFollowingSession();
+				}
+			});
+
+			this.container.main.bottom.containerNode.appendChild(this.stopFollowingSessionButton.domNode);
+
+			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('close',16)+'" />&nbsp;'+$c.getLocalizedMessage('10011'),
 				onClick: function() {
 					myself.stop();
 				}
 			}).domNode);
-			//this.container.main.grid.hiddenColumns.add('8');
 
 		};
 
 		this.eventDetail = function() {
 			var context = this.container.main.grid.menu.context;
-			//console.log(context);
+
 			var data = this.container.main.grid.model.byId(context.cell.row.id).rawData;
 
 			var html_table = '<table class="ym-table bordertable"><thead><tr><th>Param</th><th>Value</th></tr></thead><tbody>';
@@ -210,6 +217,9 @@ $c.App.load("events",
 			for (i in data) {
 				if ($c.Utils.inArray(i,["id","userAgent","browser","OS","sessionId"])) {
 					html_table += '<tr><td>'+i+'</td><td>'+data[i]+'</td></tr>';
+				}
+				else if (i == "type" && $c.Utils.defined(myself.eventData[data[i]])) {
+					html_table += '<tr><td>'+myself.getLocalizedMessage('0017')+'</td><td>'+myself.getLocalizedMessage(myself.eventData[data[i]].name)+'</td></tr>';
 				}
 				else {
 					continue;
@@ -221,58 +231,55 @@ $c.App.load("events",
 			$c.Dialog.modal('Details',html_table,false,false);
 		};
 
-		//this.followSessionId = function() {
-		//	var context = this.container.main.grid.menu.context;
-		//	//console.log(context.cell.column.id);
-		//	this.filterBy({
-		//		colId: 8,
-		//		condition: 'equal',
-		//		type: 'Text',
-		//		value: context.cell.row.data()[8]
-		//	});
-		//};
-
-		this.filterByPattern = function() {
+		this.startFollowingSession = function() {
 			var context = this.container.main.grid.menu.context;
-			var type, value, dtValue, pattern;
-			//console.log(context.cell.rawData());
-			switch(context.cell.column.dataType()) {
+			var data = this.container.main.grid.model.byId(context.cell.row.id).rawData;
+			console.log();
+			this.container.main.grid.body.model.query({sessionId:data.sessionId});
+			this.container.main.grid.body.refresh();
+			this.stopFollowingSessionButton.set('disabled',false);
+		};
+
+		this.stopFollowingSession = function() {
+			this.container.main.grid.body.model.query({});
+			this.container.main.grid.body.refresh();
+			this.stopFollowingSessionButton.set('disabled','disabled');
+		};
+
+		this.filterFieldsComposition = function(datatype, data) {
+			var type,value,dtValue;
+			switch(datatype) {
 				case 'date':
 					type = 'Date';
-					/*pattern = /(\d{4})\/(\d\d?)\/(\d\d?)/;
-					pattern.test(context.cell.rawData());
-					dtValue = new Date();
-					dtValue.setFullYear(parseInt(RegExp.$1));
-					dtValue.setMonth(parseInt(RegExp.$2)-1);*/
-					dtValue = new Date(context.cell.data());
+					dtValue = new Date(data);
 					dtValue.setHours(0);
 					dtValue.setMinutes(0);
 					dtValue.setSeconds(0);
 					dtValue.setMilliseconds(0);
-					/*value = dtValue.getTime();*/
 					value = dtValue;
 				break;
 				case 'time':
 					type = 'Time';
-					//dtValue = new Date(context.cell.data());
-					dtFields = context.cell.data().split(":");
+					dtFields = data.split(":");
 					dtValue = new Date(2000,2,23,dtFields[0],dtFields[1],dtFields[2])
-					//dtValue.setDate(1);
-					//dtValue.setMonth(0);
-					//dtValue.setFullYear(2000);
 					value = dtValue;
 				break;
 				default:
 					type = 'Text';
-					value = context.cell.data();
+					value = data;
 				break;
 			}
-			//console.log(value);
+			return {type:type,value:value};
+		};
+
+		this.filterByPattern = function() {
+			var context = this.container.main.grid.menu.context;
+			var pattern = this.filterFieldsComposition(context.cell.column.dataType(),context.cell.data());
 			this.filterBy({
 				colId: context.cell.column.id,
 				condition: 'equal',
-				type: type,
-				value: value
+				type: pattern.type,
+				value: pattern.value
 			});
 		};
 
@@ -288,9 +295,9 @@ $c.App.load("events",
 
 		this.filterBy = function(condition) {
 			var type, conditions;
-			if ($c.Utils.defined(this.container.main.grid.filterBar.filterData) && this.container.main.grid.filterBar.filterData != 'null') {
-				type = $c.Utils.defined(this.container.main.grid.filterBar.filterData.type) ? this.container.main.grid.filterBar.filterData.type : 'all';
-				conditions = $c.Utils.defined(this.container.main.grid.filterBar.filterData.conditions) ? this.container.main.grid.filterBar.filterData.conditions : [];
+			if ($c.Utils.defined(this.container.main.grid.filterBar.filterData) && this.container.main.grid.filterBar.filterData != null) {
+				type = this.container.main.grid.filterBar.filterData.type;
+				conditions = this.container.main.grid.filterBar.filterData.conditions.length == 0 ? [] : this.container.main.grid.filterBar.filterData.conditions;
 				conditions.push(condition);
 			}
 			else {
@@ -302,7 +309,27 @@ $c.App.load("events",
 				type: type,
 				conditions: conditions
 			});
-		}
+		};
+
+		this.consolidateEvents = function() {
+			$c.Loader.start(false,this.getLocalizedMessage('0019'));
+			$c.Kernel.newCall(myself.consolidateEventsCallback,{
+				application: "eventviewer",
+				method: "consolidate_events",
+				content: {}
+			});
+		};
+
+		this.consolidateEventsCallback = function(success, result) {
+			if (success) {
+				$c.Loader.changeContent($c.icons.getIcon(result == 0 ? 'warning' : 'apply',32),result == 0 ? myself.getLocalizedMessage('0021') : myself.getLocalizedMutableMessage('0020',[result]));
+				$c.Loader.stopIn(3000);
+			}
+			else {
+				$c.Loader.stop();
+				$c.Error.minimal(result.name);
+			}
+		};
 			
 	}
 	

@@ -234,7 +234,7 @@ class events {
 		
 		comodojo_load_resource('database');
 		
-		$ua_store = Array();
+		//$ua_store = Array();
 		
 		try {
 			$db = new database();
@@ -264,7 +264,10 @@ class events {
 		} catch (Exception $e) {
 			comodojo_debug('Error consolidating events: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','events');
 			if (!$this->fail_silently) throw $e;
+			else return -1;
 		}
+
+		return $result['resultLength'];
 		
 	}
 	

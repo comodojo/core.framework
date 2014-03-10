@@ -1462,14 +1462,14 @@ class database {
 			}
 
 		}
-		elseif (is_scalar($column) AND is_scalar($value)) {
+		elseif (is_scalar($column) AND ( is_scalar($value) OR is_null($value) )) {
 			
 			$clause_pattern = in_array($this->dbDataModel, Array('MYSQLI','MYSQL','MYSQL_PDO')) ? "`%s` %s %s" : "%s %s %s";
 
 			if ($operator == 'IS') {
 				$_column = $column;
 				$_operator = $operator;
-				$_value = (is_null($value) OR $value == 'NULL') ? 'IS NULL' : 'IS NOT NULL';
+				$_value = (is_null($value) OR $value == 'NULL') ? 'NULL' : 'NOT NULL';
 			}
 			elseif ($operator == 'LIKE' OR $operator == 'NOT LIKE') {
 				$_column = $column;

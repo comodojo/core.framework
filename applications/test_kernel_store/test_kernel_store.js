@@ -34,7 +34,7 @@ $c.App.load("test_kernel_store",
 			this.store = new comodojo.KernelStore({application: 'test_kernel_store'});
 
 			this.container = new $c.Layout({
-				modules: ['Grid','GridSortSimple','GridEdit','GridPaginationBar','GridFilterBar','GridRowHeader','GridExtendedSelectRow'],
+				modules: ['Grid'],
 				attachNode: applicationSpace,
 				splitter: false,
 				id: pid,

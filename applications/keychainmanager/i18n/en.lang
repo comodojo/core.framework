@@ -1,7 +1,7 @@
 <?php
-
+ 
 /**
- * [APP DESCRIPTION]
+ * Comodojo application locale pack
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -10,14 +10,17 @@
  * @license		GPL Version 3
  */
 
-comodojo_load_resource('application');
-
-class events extends application {
-	
-	public function init() {
-		$this->add_store_methods('events',Array("GET","QUERY"));
-	}
-	
-}
+$lang = Array(
+	'0000'	=>	'',
+	'0001'	=>	'',
+	'0002'	=>	'',
+	'0003'	=>	'',
+	'0004'	=>	'',
+	'0005'	=>	'',
+	'0006'	=>	'',
+	'0007'	=>	'',
+	'0008'	=>	'',
+	'0009'	=>	''
+);
 
 ?>

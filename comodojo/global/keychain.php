@@ -269,6 +269,8 @@ class keychain {
 	
 	/**
 	 * Get all currently defined keychains (list).
+	 *
+	 * A keychain is automatically created when first account is set.
 	 * 
 	 * PLEASE NOTE: an user will see only it's own keychain; administrator will have a full list from this method
 	 * 
@@ -283,11 +285,13 @@ class keychain {
 		else {
 			try {
 				$db = new database();
-				$result = $db->table('keychains')->keys("keychain")->group_by("keychain")->get();
+				$result = $db->table('keychains')->keys("keychain")->group_by("keychain")->where("keychain","!=",'SYSTEM')->get();
 			}
 			catch (Exception $e){
 				throw $e;
 			}
+			array_push($result['result'], Array("keychain"=>"SYSTEM"));
+			return $result['result'];
 		}
 		
 	}

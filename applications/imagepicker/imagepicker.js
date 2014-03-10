@@ -165,7 +165,7 @@ $c.App.load("imagepicker",
 			if (Object.keys(this.selectbuffer).length > 0 ) { this.selectButton.set('disabled',false); }
 			else { this.selectButton.set('disabled','disabled'); }
 		};
-			
+		
 	}
 	
 );

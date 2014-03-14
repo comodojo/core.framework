@@ -250,7 +250,7 @@ class users_management {
 			}
 			else {
 				$db = new database();
-				$db->table('users')
+				$result = $db->table('users')
 				->keys(Array("userName","completeName","email","gravatar"))
 				->where("userName","=",$userName)
 				->and_where("enabled","=",1)
@@ -264,6 +264,59 @@ class users_management {
 					comodojo_debug('Unknown user','ERROR','users_management');
 					throw new Exception("Unknown user", 2603);
 				}
+			}
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		
+		return $to_return;
+	}
+
+	/**
+	 * Get user details (extensive version)
+	 * 
+	 * @param	string 	$userName	
+	 * @param	integer	$userImageDimensions	
+	 * 
+	 * @return	array
+	 */
+	public function get_user_extensive($userName, $userImageDimensions=64) {
+		
+		if (empty($userName)) {
+			comodojo_debug('Invalid username','ERROR','users_management');
+			throw new Exception("Invalid username", 2604);
+		}
+
+		comodojo_load_resource('database');
+		comodojo_load_resource('user_avatar');
+	
+		try {
+			$db = new database();
+			$result = $db->table('users')
+			->keys(Array("userRole","enabled","ldap","rpc","completeName","gravatar","email","birthday","gender","url"))
+			->where("userName","=",$userName)
+			->get();
+
+			if ($result['resultLength'] == 1) {
+				$to_return = Array(
+					"userName"	=>	$userName,
+					"completeName"=>$result['result'][0]['completeName'],
+					"userRole"	=>	$result['result'][0]['userRole'],
+					"enabled"	=>	$result['result'][0]['enabled'],
+					"ldap"		=>	$result['result'][0]['ldap'],
+					"rpc"		=>	$result['result'][0]['rpc'],
+					"gravatar"	=>	$result['result'][0]['gravatar'],
+					"email"		=>	$result['result'][0]['email'],
+					"birthday"	=>	$result['result'][0]['birthday'],
+					"gender"	=>	$result['result'][0]['gender'],
+					"url"		=>	$result['result'][0]['url'],
+					"userImage" =>	!$userImageDimensions ? false : get_user_avatar($userName,$result['result'][0]['email'],$result['result'][0]['gravatar'],$userImageDimensions),
+				);
+			} 
+			else {
+				comodojo_debug('Unknown user','ERROR','users_management');
+				throw new Exception("Unknown user", 2603);
 			}
 		}
 		catch (Exception $e){
@@ -386,6 +439,33 @@ class users_management {
 
 	}
 	
+	public function set_user_image($userName, $image, $userImageDimensions=64) {
+
+		if (empty($userName) OR empty($image)) {
+			comodojo_debug('Invalid user parameters','ERROR','users_management');
+			throw new Exception("Invalid user parameters", 2612);
+		}
+
+		$imagePath = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER . COMODOJO_USERS_FOLDER;
+		$thumbPath = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER . COMODOJO_THUMBNAILS_FOLDER;
+		$imageFile = $userName . '/._avatar.png';
+
+		comodojo_load_resource("filesystem");
+		comodojo_load_resource('image_tools');
+
+		try {
+			$fs = new filesystem();
+			$it = new image_tools();
+			$fs->copyFile($image, $imageFile, true);
+			$image = $thumbPath . $it->thumbnail($imagePath.$imageFile,$userImageDimensions);
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+
+		return $image;
+	}
+
 	public function delete_user($userName) {
 		
 		if (empty($userName)) {

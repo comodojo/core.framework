@@ -261,7 +261,7 @@ class filesystem {
 			}
 			elseif ($this->_checkRealFilePermissions($this->_fileGlobalGhost)) {
 				comodojo_debug('Ghost file reference computed as global: '.$this->_fileGlobalGhost,'INFO','filesystem');
-				$toReturn = $this->_fileGlobalGhost;
+				return $this->_fileGlobalGhost;
 			}
 			else {
 				comodojo_debug('Error computing ghost file reference','ERROR','filesystem');
@@ -779,12 +779,13 @@ class filesystem {
 	 */
 	private function _copyFile() {
 
+		$realPerm = $this->_checkRealFilePermissions($this->_destinationFile);
 		//if ( ((is_readable($this->_destinationFile) AND is_writable($this->_destinationFile)) AND !$this->overwrite) ){
-		if ( $this->_checkRealFilePermissions($this->_destinationFile) AND !$this->overwrite) {
+		if ( $realPerm AND !$this->overwrite ) {
 			comodojo_debug('File ('.$this->_destinationFile.') exists and no overwrite flag selected','ERROR','filesystem');
 			return false;
 		}
-		else if ($this->_checkRealFilePermissions($this->_destinationFile) AND $this->overwrite) {
+		else if ( $realPerm AND $this->overwrite ) {
 				
 			if (is_dir($this->_destinationFile)) $this->_removeDirectoryHelper($this->_destinationFile);
 			else {
@@ -1540,6 +1541,8 @@ class filesystem {
 
 		if ($file !== false) $this->splitFileReference($file);
 		if ($destinationFile !== false) $this->splitDestinationFileReference($destinationFile);
+
+		$this->overwrite = $overwrite === true ? true : false;
 
 		if (!$this->_readUserPermissions()) {
 			comodojo_debug('No file founded or no acl for this directory','ERROR','filesystem');

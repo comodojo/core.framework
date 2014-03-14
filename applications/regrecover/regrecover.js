@@ -67,7 +67,7 @@ $c.App.load("regrecover",
 				myself.recoverform.fields.gobutton.cancel();
 			}
 			else {
-				$c.dialog.info(myself.getLocalizedMessage('0002'));
+				$c.Dialog.info(myself.getLocalizedMessage('0002'));
 				myself.stop();
 			}
 		};

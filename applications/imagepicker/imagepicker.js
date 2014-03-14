@@ -19,6 +19,8 @@ $c.App.load("imagepicker",
 	
 		this.allowMultipleSelection = false;
 
+		this.callback = false;
+
 		dojo.mixin(this, status);
 	
 		var myself = this;

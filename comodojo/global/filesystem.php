@@ -907,7 +907,7 @@ class filesystem {
 			null;
 		}
 
-		$tmp_file_complete = COMODOJO_SITE_PATH.COMODOJO_TEMP_FOLDER.$tmp_file;
+		$tmp_file_complete = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_TEMP_FOLDER.$tmp_file;
 
 		if (!rename($tmp_file_complete, $this->_destinationFile)) {
 			comodojo_debug('File ('.$tmp_file_complete.') can\'t be moved to '.$this->_destinationFile,'ERROR','filesystem');
@@ -1017,10 +1017,13 @@ class filesystem {
 			
 			if (in_array($mime, Array('image/jpeg','image/png','image/gif'))) {
 				$img = new image_tools();
-				$thumb = COMODOJO_SITE_URL.COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$img->thumbnail($complete_file, $this->thumbSize);
+				$generated_thumb = $img->thumbnail($complete_file, $this->thumbSize);
+				$thumb = $generated_thumb == false ? false : COMODOJO_SITE_URL.COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$generated_thumb;
 				
 			}
 			else $thumb = false;
+
+			unset($img);
 			
 			$toReturn = Array(
 				"file_name"			=>	$file,

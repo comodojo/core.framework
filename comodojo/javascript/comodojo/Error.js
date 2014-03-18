@@ -77,7 +77,7 @@ Error.modal = function(Code, Detail) {
 		primaryCloseButton: false,
 		secondaryCloseButton: true,
 		parseOnLoad: false,
-		blocker: true
+		blocker: false
 	});
 
 };

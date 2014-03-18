@@ -627,7 +627,7 @@ class database {
 		}
 		else {
 			$k = trim($group_column_or_array);
-			$this->group_by = "ORDER BY ".sprintf($group_column_pattern,$k);
+			$this->group_by = "GROUP BY ".sprintf($group_column_pattern,$k);
 		}
 
 		comodojo_debug('Result will be grouped by: '.$this->group_by,'INFO','database');

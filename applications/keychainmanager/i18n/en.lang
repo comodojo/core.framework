@@ -11,16 +11,27 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Account name',
+	'0001'	=>	'Desription',
+	'0002'	=>	'Type',
+	'0003'	=>	'Field - Name',
+	'0004'	=>	'Field - Host',
+	'0005'	=>	'Field - Port',
+	'0006'	=>	'Field - Model',
+	'0007'	=>	'Field - Prefix',
+	'0008'	=>	'Field - Custom',
+	'0009'	=>	'Keychain',
+	'0010'	=>	'Account attributes',
+	'0011'	=>	'Save account',
+	'0012'	=>	'View or change account user and password',
+	'0013'	=>	'Account {0} in {1} keychain',
+	'0014'	=>	'Delete account',
+	'0015'	=>	'Account User',
+	'0016'	=>	'Account Password',
+	'0017'	=>	'Insert your password to unlock account',
+	'0018'	=>	'Add new account',
+	'0019'	=>	'Credentials updated correctly',
+	'0020'	=>	'Account saved correctly'
 );
 
 ?>

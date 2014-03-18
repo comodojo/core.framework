@@ -11,16 +11,27 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Nome account',
+	'0001'	=>	'Descrizione',
+	'0002'	=>	'Tipo',
+	'0003'	=>	'Campo - Nome',
+	'0004'	=>	'Campo - Host',
+	'0005'	=>	'Campo - Porta',
+	'0006'	=>	'Campo - Modello',
+	'0007'	=>	'Campo - Prefisso',
+	'0008'	=>	'Campo - Personalizzato',
+	'0009'	=>	'Portachiavi',
+	'0010'	=>	'Attributi dell\'account',
+	'0011'	=>	'Salva account',
+	'0012'	=>	'Visualizza o modifica utenza e password',
+	'0013'	=>	'Account {0} nel portachiavi {1}',
+	'0014'	=>	'Elimina ',
+	'0015'	=>	'Nome Utenza',
+	'0016'	=>	'Password Utenza',
+	'0017'	=>	'Inserisci la tua password per continuare',
+	'0018'	=>	'Crea nuovo account',
+	'0019'	=>	'Credenziali salvate correttamente',
+	'0020'	=>	'Account salvato correttamente'
 );
 
 ?>

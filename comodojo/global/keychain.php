@@ -93,13 +93,99 @@ class keychain {
 			}
 		}
 		elseif (COMODOJO_USER_ROLE == 1 AND $keychain == "SYSTEM") {
-			$aes->setKey(COMODOJO_UNIQUE_IDENTIFIER);
-			$result['result'][0]['keyUser'] = $aes->decrypt($result['result'][0]['keyUser']);
-			$result['result'][0]['keyPass'] = $aes->decrypt($result['result'][0]['keyPass']);
+			try {
+				$aes = new Crypt_AES();
+				$aes->setKey(COMODOJO_UNIQUE_IDENTIFIER);
+				$result['result'][0]['keyUser'] = $aes->decrypt($result['result'][0]['keyUser']);
+				$result['result'][0]['keyPass'] = $aes->decrypt($result['result'][0]['keyPass']);
+			}
+			catch (Exception $e){
+				throw $e;
+			}
 		}
 		else {
 			$result['result'][0]['keyUser'] = null;
 			$result['result'][0]['keyPass'] = null;
+		}
+		
+		$events->record('keychain_get_account', $account_name.':'.$keychain, true);
+		
+		return $result['result'][0];
+		
+	}
+
+	/**
+	 * Get account username and password
+	 * 
+	 * This funciton will return an array containing account information like:
+	 * 
+	 * ('keyUser','keyPass')
+	 * 
+	 * @param	string	$account_name	The account name
+	 * @param	string	$keychain		[optional] The keychain to ue (SYSTEM will address system chain)
+	 * @param	string	$userPass		[optional] The user password (in clear) only if keychain != SYSTEM AND COMODOJO_USER_NAME==$keychain
+	 * 
+	 * @return	array 	Array containing all account information.
+	 * 	
+	 */
+	public final function get_account_keys($account_name, $keychain=COMODOJO_USER_NAME, $userPass=null) {
+		
+		if (COMODOJO_USER_ROLE != 1 AND $keychain != COMODOJO_USER_NAME) throw new Exception("Not enough privileges to access selected account", 2404);
+		
+		if (is_null($account_name) /*OR ($keychain != 'SYSTEM' AND is_null($userPass))*/) throw new Exception("Missing account name or password", 2407);
+		
+		try {
+			$db = new database();
+			$result = $db->table('keychains')
+				->keys(Array('keyUser','keyPass','account_name','keychain'))
+				->where("account_name","=",$account_name)
+				->and_where("keychain","=",$keychain)
+				->get();
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		
+		$events = new events(true);
+		
+		if ($result['resultLength'] == 0) {
+			comodojo_debug("Undefined or invalid account",'ERROR','keychain');
+			$events->record('keychain_get_account', $account_name.':'.$keychain, false);
+			throw new Exception("Undefined or invalid account", 2405);
+		}
+		
+		if ($keychain == COMODOJO_USER_NAME AND !is_null($userPass)) {
+			try {
+				$um = new users_management();
+				$id = $um->get_private_identifier(COMODOJO_USER_NAME, $userPass);
+				$aes = new Crypt_AES();
+				$aes->setKey($id);
+				$result['result'][0]['keyUser'] = $aes->decrypt($result['result'][0]['keyUser']);
+				$result['result'][0]['keyPass'] = $aes->decrypt($result['result'][0]['keyPass']);
+			}
+			catch (Exception $e){
+				throw $e;
+			}
+		}
+		elseif ($keychain == COMODOJO_USER_NAME AND is_null($userPass)) {
+			comodojo_debug("Missing password for user keychain",'ERROR','keychain');
+			throw new Exception("Missing account name or password", 2407);
+		}
+		elseif (COMODOJO_USER_ROLE == 1 AND $keychain == "SYSTEM") {
+			try {
+				$aes = new Crypt_AES();
+				$aes->setKey(COMODOJO_UNIQUE_IDENTIFIER);
+				$result['result'][0]['keyUser'] = $aes->decrypt($result['result'][0]['keyUser']);
+				$result['result'][0]['keyPass'] = $aes->decrypt($result['result'][0]['keyPass']);
+			}
+			catch (Exception $e){
+				throw $e;
+			}
+		}
+		else {
+			comodojo_debug("Undefined or invalid account",'ERROR','keychain');
+			$events->record('keychain_get_account', $account_name.':'.$keychain, false);
+			throw new Exception("Undefined or invalid account", 2405);
 		}
 		
 		$events->record('keychain_get_account', $account_name.':'.$keychain, true);
@@ -132,20 +218,105 @@ class keychain {
 	}
 	
 	/**
-	 * Create new account or edit an existing one
+	 * Edit attributes for existing account
+	 * 
+	 * @param	string	$account_name	The account name
+	 * @param	string	$keychain		[optional] The keychain to ue (SYSTEM will address system chain)
+	 * @param	string	$description	[optional]
+	 * @param	string	$type			[optional]
+	 * @param	string	$name			[optional]
+	 * @param	string	$host			[optional]
+	 * @param	string	$port			[optional]
+	 * @param	string	$model			[optional]
+	 * @param	string	$prefix			[optional]
+	 * @param	string	$custom			[optional]
+	 * 
+	 * @return	bool	True in case of success, exception otherwise
+	 * 
+	 */
+	public final function set_account($account_name, $keychain=COMODOJO_USER_NAME,
+		$description = null,
+		$type = null,
+		$name = null,
+		$host = null,
+		$port = null,
+		$model = null,
+		$prefix = null,
+		$custom = null) {
+		
+		if (
+			(COMODOJO_USER_ROLE != 1 AND $keychain != COMODOJO_USER_NAME)
+			OR 
+			(COMODOJO_USER_ROLE == 1 AND 
+				($keychain != COMODOJO_USER_NAME 
+				AND 
+				$keychain != 'SYSTEM')
+			)
+		) throw new Exception("Not enough privileges to create or edit account in selected keychain", 2406);
+		
+		if (is_null($account_name)) throw new Exception("Missing account name or password", 2407);
+		
+		$events = new events(true);
+		
+		$description = empty($description) ? null : $description;
+		$type = empty($type) ? null : $type;
+		$name = empty($name) ? null : $name;
+		$host = empty($host) ? null : $host;
+		$port = empty($port) ? null : $port;
+		$model = empty($model) ? null : $model;
+		$prefix = empty($prefix) ? null : $prefix;
+		$custom = empty($custom) ? null : $custom;
+
+		//Check if account exists
+		try {
+			$db = new database();
+			$result = $db->table('keychains')
+				->keys(Array('type','name','host','port','model','prefix','custom'))
+				->where("account_name","=",$account_name)
+				->and_where("keychain","=",$keychain)
+				->get();
+			
+			$db->clean();
+
+			if ($result['resultLength'] == 0) {
+				comodojo_debug("Undefined or invalid account",'ERROR','keychain');
+				$events->record('keychain_set_account', $account_name.':'.$keychain, false);
+				throw new Exception("Undefined or invalid account", 2405);
+			}
+			else {
+				$result = $db->table('keychains')
+					->keys(Array('description','type','name','host','port','model','prefix','custom'))
+					->values(Array($description,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
+					->where('account_name','=',$account_name)
+					->and_where('keychain','=',$keychain)
+					->update();
+			}
+			
+		}
+		catch (Exception $e){
+			$events->record('keychain_set_account', $account_name.':'.$keychain, false);
+			throw $e;
+		}
+		
+		$events->record('keychain_set_account', $account_name.':'.$keychain, true);
+		return true;
+		
+	}
+
+	/**
+	 * Edit account credentials
 	 * 
 	 * @param	string	$account_name	The account name
 	 * @param	string	$keyUser		UserName (will be encrypted)
 	 * @param	string	$keyPass		Password (will be encrypted)
 	 * @param	string	$keychain		[optional] The keychain to ue (SYSTEM will address system chain)
 	 * @param	string	$userPass		[optional] The user password for encryption (set it to null if SYSTEM chain)
-	 * @param	array	$parameters		[optional] Array of additional optional parameters ('description','type','host','port','model'.'prefix','custom')
 	 * 
 	 * @return	bool	True in case of success, exception otherwise
 	 * 
 	 */
-	public final function set_account($account_name, $keyUser, $keyPass, $keychain=COMODOJO_USER_NAME, $userPass=null, $parameters=Array()) {
-		
+	public final function set_account_keys($account_name, $keyUser, $keyPass, $keychain=COMODOJO_USER_NAME, $userPass=null) {
+
 		if (
 			(COMODOJO_USER_ROLE != 1 AND $keychain != COMODOJO_USER_NAME)
 			OR 
@@ -173,15 +344,6 @@ class keychain {
 		
 		$events = new events(true);
 		
-		$description = isset($parameters['description']) ? $parameters['description'] : null;
-		$type = isset($parameters['type']) ? $parameters['type'] : 'GENERIC';
-		$name = isset($parameters['name']) ? $parameters['name'] : null;
-		$host = isset($parameters['host']) ? $parameters['host'] : null;
-		$port = isset($parameters['port']) ? $parameters['port'] : null;
-		$model = isset($parameters['model']) ? $parameters['model'] : null;
-		$prefix = isset($parameters['prefix']) ? $parameters['prefix'] : null;
-		$custom = isset($parameters['custom']) ? $parameters['custom'] : null;
-		
 		$aes = new Crypt_AES();
 		$aes->setKey($keychain == 'SYSTEM' ? COMODOJO_UNIQUE_IDENTIFIER : $id);
 		
@@ -192,7 +354,7 @@ class keychain {
 		try {
 			$db = new database();
 			$result = $db->table('keychains')
-				->keys(Array('keyUser','keyPass','type','name','host','port','model','prefix','custom'))
+				->keys(Array('keyUser','keyPass'))
 				->where("account_name","=",$account_name)
 				->and_where("keychain","=",$keychain)
 				->get();
@@ -200,15 +362,14 @@ class keychain {
 			$db->clean();
 
 			if ($result['resultLength'] == 0) {
-				$result = $db->table('keychains')
-					->keys(Array('account_name','description','keyUser','keyPass','type','name','host','port','model','prefix','custom','keychain'))
-					->values(Array($account_name,$description,$encrypted_keyUser,$encrypted_keyPass,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom,$keychain))
-					->store();
+				comodojo_debug("Undefined or invalid account",'ERROR','keychain');
+				$events->record('keychain_set_account', $account_name.':'.$keychain, false);
+				throw new Exception("Undefined or invalid account", 2405);
 			}
 			else {
 				$result = $db->table('keychains')
-					->keys(Array('description','keyUser','keyPass','type','name','host','port','model','prefix','custom'))
-					->values(Array($description,$encrypted_keyUser,$encrypted_keyPass,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
+					->keys(Array('keyUser','keyPass'))
+					->values(Array($encrypted_keyUser,$encrypted_keyPass))
 					->where('account_name','=',$account_name)
 					->and_where('keychain','=',$keychain)
 					->update();
@@ -222,9 +383,95 @@ class keychain {
 		
 		$events->record('keychain_set_account', $account_name.':'.$keychain, true);
 		return true;
-		
 	}
 	
+	/**
+	 * Add new account to keychain
+	 * 
+	 * @param	string	$account_name	The account name
+	 * @param	string	$keyUser		UserName (will be encrypted)
+	 * @param	string	$keyPass		Password (will be encrypted)
+	 * @param	string	$keychain		[optional] The keychain to ue (SYSTEM will address system chain)
+	 * @param	string	$userPass		[optional] The user password for encryption (set it to null if SYSTEM chain)
+	 * @param	string	$description	[optional]
+	 * @param	string	$type			[optional]
+	 * @param	string	$name			[optional]
+	 * @param	string	$host			[optional]
+	 * @param	string	$port			[optional]
+	 * @param	string	$model			[optional]
+	 * @param	string	$prefix			[optional]
+	 * @param	string	$custom			[optional] 
+	 *
+	 * @return	bool	True in case of success, exception otherwise
+	 * 
+	 */
+	public final function add_account($account_name, $keyUser, $keyPass, $keychain=COMODOJO_USER_NAME, $userPass=null,
+		$description = null,
+		$type = null,
+		$name = null,
+		$host = null,
+		$port = null,
+		$model = null,
+		$prefix = null,
+		$custom = null) {
+		
+		if (
+			(COMODOJO_USER_ROLE != 1 AND $keychain != COMODOJO_USER_NAME)
+			OR 
+			(COMODOJO_USER_ROLE == 1 AND 
+				($keychain != COMODOJO_USER_NAME 
+				AND 
+				$keychain != 'SYSTEM')
+			)
+		) throw new Exception("Not enough privileges to create or edit account in selected keychain", 2406);
+		
+		if (is_null($account_name) OR is_null($keyUser) OR is_null($keyPass)) throw new Exception("Missing account name or password", 2407);
+		
+		$events = new events(true);
+		
+		$description = empty($description) ? null : $description;
+		$type = empty($type) ? null : $type;
+		$name = empty($name) ? null : $name;
+		$host = empty($host) ? null : $host;
+		$port = empty($port) ? null : $port;
+		$model = empty($model) ? null : $model;
+		$prefix = empty($prefix) ? null : $prefix;
+		$custom = empty($custom) ? null : $custom;
+
+		//Check if account exists
+		try {
+			$db = new database();
+			$result = $db->table('keychains')
+				->keys(Array('type'))
+				->where("account_name","=",$account_name)
+				->and_where("keychain","=",$keychain)
+				->get();
+			
+			$db->clean();
+
+			if ($result['resultLength'] != 0) {
+				comodojo_debug("Duplicate account!",'ERROR','keychain');
+				$events->record('keychain_add_account', $account_name.':'.$keychain, false);
+				throw new Exception("Duplicate account!", 2411);
+			}
+			else {
+				$result = $db->table('keychains')
+					->keys(Array('account_name','keyUser','keyPass','keychain','description','type','name','host','port','model','prefix','custom'))
+					->values(Array($account_name,$keyUser,$keyPass,$keychain,$description,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
+					->store();
+			}
+			
+		}
+		catch (Exception $e){
+			$events->record('keychain_add_account', $account_name.':'.$keychain, false);
+			throw $e;
+		}
+		
+		$events->record('keychain_add_account', $account_name.':'.$keychain, true);
+		return true;
+		
+	}
+
 	/**
 	 * Delete an existing account.
 	 * 
@@ -285,12 +532,13 @@ class keychain {
 		else {
 			try {
 				$db = new database();
-				$result = $db->table('keychains')->keys("keychain")->group_by("keychain")->where("keychain","!=",'SYSTEM')->get();
+				$result = $db->table('keychains')->keys("keychain")->group_by("keychain")->where("keychain","!=",'SYSTEM')->and_where("keychain","!=",COMODOJO_USER_NAME)->get();
 			}
 			catch (Exception $e){
 				throw $e;
 			}
 			array_push($result['result'], Array("keychain"=>"SYSTEM"));
+			array_push($result['result'], Array("keychain"=>COMODOJO_USER_NAME));
 			return $result['result'];
 		}
 		

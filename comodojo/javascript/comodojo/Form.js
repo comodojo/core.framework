@@ -421,8 +421,8 @@ var form = declare(null,{
 					style: this.inputExtraCss,
 					pattern: !hierarchyElement.pattern ? $d.number.regexp : hierarchyElement.pattern,
 					constraints: {
-						min: !hierarchyElement.min ? null : hierarchyElement.min,
-						max: !hierarchyElement.max ? null : hierarchyElement.max,
+						min: !hierarchyElement.min ? (hierarchyElement.min === 0 ? 0 : null) : hierarchyElement.min,
+						max: !hierarchyElement.max ? (hierarchyElement.max === 0 ? 0 : null) : hierarchyElement.max,
 						places: !hierarchyElement.places ? 0 : hierarchyElement.places
 					}
 				});
@@ -442,9 +442,9 @@ var form = declare(null,{
 					smallDelta: !hierarchyElement.smallDelta ? 1 : hierarchyElement.smallDelta,
 					largeDelta: !hierarchyElement.largeDelta ? 10 : hierarchyElement.largeDelta,
 					constraints: {
-						min: !hierarchyElement.min ? null : hierarchyElement.min,
-						max: !hierarchyElement.max ? null : hierarchyElement.max,
-						places: !hierarchyElement.max ? 0 : hierarchyElement.max
+						min: !hierarchyElement.min ? (hierarchyElement.min === 0 ? 0 : null) : hierarchyElement.min,
+						max: !hierarchyElement.max ? (hierarchyElement.max === 0 ? 0 : null) : hierarchyElement.max,
+						places: !hierarchyElement.places ? 0 : hierarchyElement.places
 					}
 				});
 				domClass.add(myField.domNode,this._selectFieldClass);

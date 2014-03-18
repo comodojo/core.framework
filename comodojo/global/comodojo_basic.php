@@ -58,6 +58,12 @@ class comodojo_basic {
 	public $auto_set_header = true;
 	
 	/**
+	 * If true, c_basic will check if post size > allowed post size (DISABLE WITH CARE)
+	 * @var	bool
+	 */
+	public $do_safe_post_check = true;
+
+	/**
 	 * If true, c_basic will init logic() method with raw post data
 	 * @var	string
 	 */
@@ -83,8 +89,6 @@ class comodojo_basic {
 		if ($this->use_session_transport) { session_start(); }
 		
 		$this->get_boot_path_and_url();
-		
-		$attributes = $this->get_attributes();
 		
 		if (!is_readable(COMODOJO_BOOT_PATH."comodojo/configuration/static_configuration.php")) {
 			@include COMODOJO_BOOT_PATH."comodojo/global/header.php";
@@ -124,10 +128,20 @@ class comodojo_basic {
 		elseif ($this->basic_from_startup_cache()) $this->set_basic(true);
 		elseif ($this->basic_from_database()) $this->set_basic(true);
 		else die($this->error('Ops, fatal error occurred','Cannot load startup values; see error log for details.'));
-		
-		$this->eval_locale($attributes);
-		
+
 		comodojo_debug('--------------------------------------------------------------------------','INFO','comodojo_basic');
+
+		if ($this->do_safe_post_check) {
+			if (!$this->safe_post_check()) {
+				comodojo_debug('POST max size exceeded, execution aborted','WARNING','comodojo_basic');
+				comodojo_debug('--------------------------------------------------------------------------','WARNING','comodojo_basic');
+				die($this->error('POST max size exceeded'));
+			}
+		}
+		
+		$attributes = $this->get_attributes();
+
+		$this->eval_locale($attributes);
 		
 		comodojo_debug(' * Boot PATH is '.COMODOJO_BOOT_PATH,'INFO','comodojo_basic');
 		comodojo_debug(' * Boot URL is '.COMODOJO_BOOT_URL,'INFO','comodojo_basic');
@@ -521,6 +535,32 @@ class comodojo_basic {
 		define('COMODOJO_CURRENT_LOCALE',$this->locale);
 		
 	}
+
+	private final function safe_post_check() {
+
+		$post_limit = null;
+
+		if (preg_match('/^(\d+)(.)$/', ini_get('post_max_size'), $matches)) {
+			if ($matches[2] == 'K') {
+				$post_limit = $matches[1] * 1024;
+			}
+			else if ($matches[2] == 'M') {
+				$post_limit = $matches[1] * 1024 * 1024;
+			}
+			else if ($matches[2] == 'G') {
+				$post_limit = $matches[1] * 1024 * 1024 * 1024;
+			}
+		}
+
+		if (isset($_SERVER["CONTENT_LENGTH"]) AND !is_null($post_limit) AND $_SERVER["CONTENT_LENGTH"] > $post_limit) {
+			return false;
+		}
+		else {
+			return true;
+		}
+
+	}
+
 }
 
 ?>

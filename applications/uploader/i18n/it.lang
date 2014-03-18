@@ -11,10 +11,10 @@
  */
 
 $lang = Array(
-	'0000'	=>	'Utilizza gravatar',
-	'0001'	=>	'URL personale',
-	'0002'	=>	'Cambia password',
-	'0003'	=>	'Profilo aggiornato!',
+	'0000'	=>	'',
+	'0001'	=>	'',
+	'0002'	=>	'',
+	'0003'	=>	'',
 	'0004'	=>	'',
 	'0005'	=>	'',
 	'0006'	=>	'',

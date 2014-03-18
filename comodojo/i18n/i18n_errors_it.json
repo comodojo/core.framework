@@ -169,5 +169,13 @@
 	"3026":"No php ZipArchive extension",
 	"3027":"Extraction error",
 	"3028":"No file(s) specified",
-	"3029":"Error adding file"
+	"3029":"Error adding file",
+	"3101":"No destination path specified",
+	"3102":"Invalid parameters",
+	"3103":"No file sent",
+	"3104":"Exceeded filesize limit",
+	"3105":"Upload unknown error",
+	"3106":"No file received",
+	"3107":"Invalid destination path",
+	"3108":"Uploaded file cannot be moved"
 }

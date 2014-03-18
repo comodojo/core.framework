@@ -211,7 +211,6 @@ function yaml2array($dataString) {
 	
 }
 
-
 /**
  * Get serverside active locale 
  * 
@@ -377,21 +376,42 @@ function xml2txt($xmlString) {
 }
 
 /**
-* Encodes unix timestamp format to iso8601 time format.
-* @access private
-* @param integer $time Takes unix timestamp as input
-* @return string Returns the datetime in iso8601 format. UTC
-*/
+ * Check if $dateString represent a valid date
+ * 
+ * @param	string	$dateString	
+ * @return	string			
+ */
+function is_date($dateString) {
+	$dateArray = date_parse($dateString);
+	return checkdate($dateArray["month"], $dateArray["day"], $dateArray["year"]);
+}
+
+/**
+ * Check if $timeString represent a valid time (in the format THH:MM:SS)
+ * 
+ * @param	string	$timeString	
+ * @return	string			
+ */
+function is_time($timeString) {
+	return preg_match("/T(?:[01][0-9]|2[0-4]):[0-5][0-9]:[0-9][0-9]/", $timeString);
+}
+
+/**
+ * Encodes unix timestamp format to iso8601 time format.
+ * @access private
+ * @param integer $time Takes unix timestamp as input
+ * @return string Returns the datetime in iso8601 format. UTC
+ */
 function timestamp2iso8601time($timestamp) {
 	return date("Ymd\TH:i:s", $timestamp);
 }
 
 /**
-* Decodes iso8601 time format to unix timestamp format
-* @access private
-* @param string $iso8601_Date Takes iso8601 string as input
-* @return integer Returns the datetime in unix timestamp format. UTC
-*/
+ * Decodes iso8601 time format to unix timestamp format
+ * @access private
+ * @param string $iso8601_Date Takes iso8601 string as input
+ * @return integer Returns the datetime in unix timestamp format. UTC
+ */
 function iso8601time2timestamp($iso8601_Date) {
 	return strtotime($iso8601_Date);
 }

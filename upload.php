@@ -33,7 +33,7 @@ class upload extends comodojo_basic {
 		
 		if (!isset($attributes['destination'])) {
 			comodojo_debug("No destination path specified",'ERROR','upload');
-			throw new Exception("No destination path specified", 3001);
+			throw new Exception("No destination path specified", 3101);
 		}
 		
 		if (isset($attributes['overwrite'])) {
@@ -43,21 +43,45 @@ class upload extends comodojo_basic {
 			$overwrite = false;
 		}
 		
+		//SAFE CHECKS
+		if ( !isset($_FILES['upfile']['error']) || is_array($_FILES['upfile']['error']) ) {
+			throw new Exception('Invalid parameters', 3102);
+		}
+
+		switch ($_FILES['upfile']['error']) {
+			case UPLOAD_ERR_OK:
+				break;
+			case UPLOAD_ERR_NO_FILE:
+				throw new Exception('No file sent', 3103);
+			case UPLOAD_ERR_INI_SIZE:
+			case UPLOAD_ERR_FORM_SIZE:
+				throw new Exception('Exceeded filesize limit', 3104);
+			default:
+				throw new Exception('Upload unknown error', 3105);
+		}
+
+		// You should also check filesize here. 
+		//if ($_FILES['upfile']['size'] > 1000000) {
+		//	throw new ...
+		//}
+
 		if(isset($_FILES['flashUploadFiles']) || isset($_FILES['uploadedfileFlash'])) { $this->upload_method = 'FLASH'; }
 		elseif(isset($_FILES['uploadedfiles'])) { $this->upload_method = 'HTML5'; }
 		elseif (isset($_FILES['uploadedfile'])) { $this->upload_method = 'HTML'; }
 		elseif (isset($_FILES['uploadedfile0'])) { $this->upload_method = 'MULTIHTML'; }
 		else {
 			comodojo_debug("No file received",'ERROR','upload');
-			throw new Exception("No file received", 3003);
+			throw new Exception("No file received", 3106);
 		}
+
+		comodojo_debug("Upload will use method: ".$this->upload_method,'INFO','upload');
 		
 		$this->fs = new filesystem();
 		$this->event = new events();
 		
 		if (!$this->fs->checkPermissions(COMODOJO_USER_NAME,'writer',$attributes['destination'])) {
 			comodojo_debug("Invalid destination path",'ERROR','upload');
-			throw new Exception("Invalid destination path", 3002);
+			throw new Exception("Invalid destination path", 3107);
 		}
 		
 		try {
@@ -140,7 +164,7 @@ class upload extends comodojo_basic {
 		if (!move_uploaded_file($_FILES['uploadedfile']['tmp_name'],  COMODOJO_SITE_PATH . COMODOJO_TEMP_FOLDER . $temp_file)) {
 			comodojo_debug("Uploaded file cannot be moved via move_uploaded_file",'ERROR','upload');
 			$this->event->record('upload_file', $temp_file_name, false);
-			throw new Exception("Uploaded file cannot be moved", 3004);
+			throw new Exception("Uploaded file cannot be moved", 3108);
 		}
 		
 		try {
@@ -230,7 +254,7 @@ class upload extends comodojo_basic {
 		if (!move_uploaded_file($temp_file_origin,  COMODOJO_SITE_PATH . COMODOJO_TEMP_FOLDER . $temp_file)) {
 			comodojo_debug("Uploaded file cannot be moved via move_uploaded_file",'ERROR','upload');
 			$this->event->record('upload_file', $temp_file_name, false);
-			throw new Exception("Uploaded file cannot be moved", 3004);
+			throw new Exception("Uploaded file cannot be moved", 3108);
 		}
 
 		try {
@@ -243,7 +267,7 @@ class upload extends comodojo_basic {
 		}
 		
 		$this->event->record('upload_file', $temp_file_name, true);
-		return ='success=true,file='.$destination_file.',name='.$temp_file_name.',size='.filesize(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_USERS_FOLDER.$destination_file);
+		return 'success=true,file='.$destination_file.',name='.$temp_file_name.',size='.filesize(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_USERS_FOLDER.$destination_file);
 		
 	}
 	/**
@@ -254,22 +278,24 @@ class upload extends comodojo_basic {
 		$postdata = array();
 		$files_array_length = count($_FILES['uploadedfiles']['name']);
 
-		for($i=0;$i<$len;$i++){
+		for($i=0;$i<$files_array_length;$i++){
 		
 			$temp_file_name = stripslashes($_FILES['uploadedfiles']['name'][$i]);
 			$temp_file_sffx = random(10);
 			$temp_file = $temp_file_name . "." . $temp_file_sffx;
-			$destination_file = $destination.$temp_file_name;
+			$destination_file = ($destination[0] == "/" ? substr($destination, 1) : $destination).$temp_file_name;
 
-			if (!move_uploaded_file($_FILES['uploadedfiles']['tmp_name'][$i],  COMODOJO_SITE_PATH . COMODOJO_TEMP_FOLDER . $temp_file)) {
+			if (move_uploaded_file($_FILES['uploadedfiles']['tmp_name'][$i],  COMODOJO_SITE_PATH . COMODOJO_HOME_FOLDER . COMODOJO_TEMP_FOLDER . $temp_file) == false) {
 				comodojo_debug("Uploaded file cannot be moved via move_uploaded_file",'ERROR','upload');
-				$postdata[$cnt] = array( 'success' => false, 'error' => 'Uploaded file cannot be moved' );
+				$postdata[$i] = array( 'success' => false, 'error' => 'Uploaded file cannot be moved' );
 				$this->event->record('upload_file', $temp_file_name, false);
 				continue;
 			}
 
 			try {
 				$this->fs->moveFileFromTemp($temp_file,$destination_file,$overwrite);
+				$resource_owner = COMODOJO_USER_ROLE == 0 ? 'everybody' : COMODOJO_USER_NAME;
+				$this->fs->setPermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
 			}
 			catch (Exception $e) {
 				comodojo_debug("Uploaded file cannot be moved: ".$e->getMessage(),'ERROR','upload');

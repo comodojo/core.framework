@@ -261,7 +261,7 @@ class filesystem {
 			}
 			elseif ($this->_checkRealFilePermissions($this->_fileGlobalGhost)) {
 				comodojo_debug('Ghost file reference computed as global: '.$this->_fileGlobalGhost,'INFO','filesystem');
-				$toReturn = $this->_fileGlobalGhost;
+				return $this->_fileGlobalGhost;
 			}
 			else {
 				comodojo_debug('Error computing ghost file reference','ERROR','filesystem');
@@ -779,12 +779,13 @@ class filesystem {
 	 */
 	private function _copyFile() {
 
+		$realPerm = $this->_checkRealFilePermissions($this->_destinationFile);
 		//if ( ((is_readable($this->_destinationFile) AND is_writable($this->_destinationFile)) AND !$this->overwrite) ){
-		if ( $this->_checkRealFilePermissions($this->_destinationFile) AND !$this->overwrite) {
+		if ( $realPerm AND !$this->overwrite ) {
 			comodojo_debug('File ('.$this->_destinationFile.') exists and no overwrite flag selected','ERROR','filesystem');
 			return false;
 		}
-		else if ($this->_checkRealFilePermissions($this->_destinationFile) AND $this->overwrite) {
+		else if ( $realPerm AND $this->overwrite ) {
 				
 			if (is_dir($this->_destinationFile)) $this->_removeDirectoryHelper($this->_destinationFile);
 			else {
@@ -906,7 +907,7 @@ class filesystem {
 			null;
 		}
 
-		$tmp_file_complete = COMODOJO_SITE_PATH.COMODOJO_TEMP_FOLDER.$tmp_file;
+		$tmp_file_complete = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_TEMP_FOLDER.$tmp_file;
 
 		if (!rename($tmp_file_complete, $this->_destinationFile)) {
 			comodojo_debug('File ('.$tmp_file_complete.') can\'t be moved to '.$this->_destinationFile,'ERROR','filesystem');
@@ -1016,10 +1017,13 @@ class filesystem {
 			
 			if (in_array($mime, Array('image/jpeg','image/png','image/gif'))) {
 				$img = new image_tools();
-				$thumb = COMODOJO_SITE_URL.COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$img->thumbnail($complete_file, $this->thumbSize);
+				$generated_thumb = $img->thumbnail($complete_file, $this->thumbSize);
+				$thumb = $generated_thumb == false ? false : COMODOJO_SITE_URL.COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$generated_thumb;
 				
 			}
 			else $thumb = false;
+
+			unset($img);
 			
 			$toReturn = Array(
 				"file_name"			=>	$file,
@@ -1540,6 +1544,8 @@ class filesystem {
 
 		if ($file !== false) $this->splitFileReference($file);
 		if ($destinationFile !== false) $this->splitDestinationFileReference($destinationFile);
+
+		$this->overwrite = $overwrite === true ? true : false;
 
 		if (!$this->_readUserPermissions()) {
 			comodojo_debug('No file founded or no acl for this directory','ERROR','filesystem');

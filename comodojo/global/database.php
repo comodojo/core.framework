@@ -115,6 +115,12 @@ class database {
 	private $return_raw = false;
 
 	/**
+	 * Enable date/time values serialization (values handled like string if disabled)
+	 * @var bool
+	 */
+	private $date_time_serialization = true;
+
+	/**
 	 * Queries' keys
 	 * @var	string
 	 */
@@ -198,6 +204,14 @@ class database {
 	public final function return_raw($value=true) {
 
 		$this->return_raw = !$value ? false : true;
+
+		return $this;
+
+	}
+
+	public final function date_time_serialization($value=true) {
+
+		$this->date_time_serialization = !$value ? false : true;
 
 		return $this;
 
@@ -350,6 +364,8 @@ class database {
 				}
 				elseif	(is_numeric($key_val))	$value_or_array[$key] = $key_val;
 				elseif	(is_null($key_val))		$value_or_array[$key] = $value_null_pattern;
+				elseif	(is_date($key_val) AND $this->date_time_serialization)	$value_or_array[$key] = sprintf($value_string_pattern,$this->date_to_database($key_val));
+				elseif	(is_time($key_val) AND $this->date_time_serialization)	$value_or_array[$key] = sprintf($value_string_pattern,$this->time_to_database($key_val));
 				else {
 					switch ($this->dbDataModel) {
 						case 'MYSQL':
@@ -403,6 +419,8 @@ class database {
 				}
 			elseif	(is_numeric($value_or_array))	$k = $value_or_array;
 			elseif	(is_null($value_or_array))		$k = $value_null_pattern;
+			elseif	(is_date($value_or_array) AND $this->date_time_serialization)	$k = sprintf($value_string_pattern,$this->date_to_database($value_or_array));
+			elseif	(is_time($value_or_array) AND $this->date_time_serialization)	$k = sprintf($value_string_pattern,$this->time_to_database($value_or_array));
 			else {
 				switch ($this->dbDataModel) {
 					case 'MYSQL':
@@ -1499,6 +1517,8 @@ class database {
 				}
 				elseif	(is_numeric($value))	$_value = $value;
 				elseif	(is_null($value))		$_value = "NULL";
+				elseif	(is_date($value) AND $this->date_time_serialization)	$_value = "'".$this->date_to_database($value)."'";
+				elseif	(is_time($value) AND $this->date_time_serialization)	$_value = "'".$this->time_to_database($value)."'";
 				else {
 					/*
 					switch ($this->dbDataModel) {
@@ -1637,6 +1657,52 @@ class database {
 			"affectedRows"	=>	$affectedRows
 		);
 		
+	}
+
+	private function date_to_database($dateString) {
+		$dateReal = strtotime($dateString);
+		$dateObject = null;
+		switch ($this->dbDataModel) {
+			case 'MYSQL':
+			case 'MYSQLI':
+			case 'MYSQL_PDO':
+			case 'DBLIB_PDO':
+			case 'POSTGRESQL':
+			case 'DB2':
+				$dateObject = date("Y-m-d", $dateReal);
+				break;
+			case 'INFORMIX_PDO':
+				$dateObject = date("m/d/Y", $dateReal);
+				break;
+			case 'ORACLE_PDO':
+				$dateObject = date("d-M-y", $dateReal);
+				break;
+			case 'SQLITE_PDO':
+				$dateObject = date("c", $dateReal);
+				break;
+		}
+		return $dateObject;
+	}
+
+	private function time_to_database($timeString) {
+		//$timeReal = strtotime($timeString);
+		//$timeObject = null;
+		//switch ($this->dbDataModel) {
+		//	case 'MYSQL':
+		//	case 'MYSQLI':
+		//	case 'MYSQL_PDO':
+		//	case 'DBLIB_PDO':
+		//	case 'POSTGRESQL':
+		//	case 'DB2':
+		//	case 'INFORMIX_PDO':
+		//	case 'ORACLE_PDO':
+		//	case 'SQLITE_PDO':
+		//		$timeObject = date("H:i:s", $timeReal);
+		//		break;
+		//}
+		//return $timeObject;
+		//return date("H:i:s", $timeReal);
+		return ltrim($timeString,'T');
 	}
 /********************* PRIVATE METHODS *******************/
 

@@ -19,6 +19,8 @@ $c.App.load("imagepicker",
 	
 		this.allowMultipleSelection = false;
 
+		this.callback = false;
+
 		dojo.mixin(this, status);
 	
 		var myself = this;
@@ -130,7 +132,7 @@ $c.App.load("imagepicker",
 			if (success) {
 				var box;
 				for (var i in result) {
-					box = myself.container.newGridBox(myself.container.main.center, result[i].file_name, result[i].file_name, !result[i].thumb ? $c.icons.getIcon(result[i].icon,64) : result[i].thumb);
+					box = myself.container.newGridBox(myself.container.main.center, result[i].file_name, result[i].file_name, !result[i].thumb ? $c.icons.getIcon(result[i].icon,64).split(".")[0] : result[i].thumb);
 					myself.gridboxHelper(box,result[i]);
 				}
 			}
@@ -165,7 +167,7 @@ $c.App.load("imagepicker",
 			if (Object.keys(this.selectbuffer).length > 0 ) { this.selectButton.set('disabled',false); }
 			else { this.selectButton.set('disabled','disabled'); }
 		};
-			
+		
 	}
 	
 );

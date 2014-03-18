@@ -57,6 +57,7 @@ class image_tools {
 
 	public final function __destruct() {
 		$this->close_image();
+		comodojo_debug("Image tools closing",'INFO','image_tools');
 	}
 
 	/**
@@ -227,6 +228,8 @@ class image_tools {
 			return false;
 		}
 		
+		comodojo_debug("Generating thumb for resource: ".$image,'INFO','image_tools');
+
 		$this->work_image = ImageCreateTrueColor($this->new_width,$this->new_height);
 		if ($this->image_type == 'PNG' OR $this->image_type == 'GIF') {
 			imagealphablending($this->work_image, false);
@@ -398,6 +401,27 @@ class image_tools {
 			
 		if (!is_readable($image)) {
 			comodojo_debug("Cannot open image: invalid image reference",'ERROR','image_tools');
+			return false;
+		}
+
+		$image_size = getimagesize($image);
+		$mem_usage = $image_size[0] * $image_size[1] * 4; //4 bytes per pixel (RGBA)
+		$mem_available = ini_get('memory_limit');
+
+		if (preg_match('/^(\d+)(.)$/', $mem_available, $matches)) {
+			if ($matches[2] == 'K') {
+				$mem_available = $matches[1] * 1024;
+			}
+			else if ($matches[2] == 'M') {
+				$mem_available = $matches[1] * 1024 * 1024;
+			}
+			else if ($matches[2] == 'G') {
+				$mem_available = $matches[1] * 1024 * 1024 * 1024;
+			}
+		}
+
+		if ($mem_usage > $mem_available) {
+			comodojo_debug("Cannot open image: image is too large - " . $mem_usage . " > " . $mem_available,'ERROR','image_tools');
 			return false;
 		}
 				

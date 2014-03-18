@@ -66,12 +66,12 @@ function get_user_avatar($userName, $userEmail, $gravatar, $size=64) {
 	else if (realFileExists($userImage)) {
 		comodojo_load_resource('image_tools');
 		$it = new image_tools();
-		$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . $it->thumbnail($userImage,$size);
+		$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER . $it->thumbnail($userImage,$size);
 	}
 	else {
 		comodojo_load_resource('image_tools');
 		$it = new image_tools();
-		$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$it->thumbnail(COMODOJO_SITE_PATH . 'comodojo/images/logo.png',$size);
+		$image = (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER . $it->thumbnail(COMODOJO_SITE_PATH . 'comodojo/images/logo.png',$size);
 	}
 	
 	return $image;

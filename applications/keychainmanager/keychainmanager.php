@@ -21,6 +21,7 @@ class keychainmanager extends application {
 		$this->add_application_method('get_account_keys', 'getAccountKeys', Array("account_name","keychain"), 'No description yes, sorry', false);
 		$this->add_application_method('set_account_keys', 'setAccountKeys', Array("account_name","keyUser","keyPass","keychain"), 'No description yes, sorry', false);
 		$this->add_application_method('add_account', 'addAccount', Array("account_name","keyUser","keyPass","keychain"), 'No description yes, sorry', false);
+		$this->add_application_method('delete_account', 'deleteAccount', Array("account_name","keychain"), 'No description yes, sorry', false);
 	}
 
 	public function getKeychainsAndAccounts($params) {
@@ -57,7 +58,6 @@ class keychainmanager extends application {
 		try {
 			$k = new keychain();
 			$account = $k->get_account($params["account_name"],$params["keychain"]);
-			comodojo_debug($account);
 		}
 		catch (Exception $e){
 			throw $e;
@@ -146,6 +146,22 @@ class keychainmanager extends application {
 
 		return $account;
 		
+	}
+
+	public function deleteAccount($params) {
+
+		comodojo_load_resource('keychain');
+
+		try {
+			$k = new keychain();
+			$account = $k->delete_account($params["account_name"],$params["keychain"]);
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+
+		return $account;
+
 	}
 	
 }

@@ -82,6 +82,7 @@ $c.App.load("keychainmanager",
 
 		this.availableKeychain = [];
 		
+		this.selectedId = false;
 		this.selectedAccount = false;
 		this.selectedKeychain = false;
 
@@ -133,7 +134,7 @@ $c.App.load("keychainmanager",
 			});
 
 			this.kModel.mayHaveChildren = function(item) {
-				console.log(item);
+				//console.log(item);
 				return item.leaf == false;
 			};
 
@@ -174,6 +175,8 @@ $c.App.load("keychainmanager",
 			//	return myself.kStoreObservable.query(item, 'leaf') ? (opened ? "dijitFolderOpened" : "dijitFolderClosed") : "dijitLeaf";
 			//};
 
+			$c.treee = this.container.main.left;
+
 			this.container.main.left.on('click',function(item){
 				if (item.leaf) {
 					myself.openAccount(item.name, item.keychain);
@@ -209,6 +212,7 @@ $c.App.load("keychainmanager",
 		this.openAccountCallback = function(success, result) {
 			if (success) {
 				myself.container.main.center.destroyDescendants();
+				myself.selectedId = result.id;
 				myself.selectedAccount = result.account_name;
 				myself.selectedKeychain = result.keychain;
 				myself.aForm = new $c.Form({
@@ -326,7 +330,7 @@ $c.App.load("keychainmanager",
 						type: "Button",
 						label: myself.getLocalizedMessage('0014'),
 						onClick: function() {
-							
+							$c.Dialog.warning(myself.getLocalizedMessage('0014'), myself.getLocalizedMutableMessage('0021',[myself.selectedId, myself.selectedAccount, myself.selectedKeychain]), myself.deleteAccount);
 						}
 					}],
 					attachNode: myself.container.main.center.containerNode
@@ -340,8 +344,8 @@ $c.App.load("keychainmanager",
 
 		this.newAccount = function() {
 			myself.container.main.center.destroyDescendants();
-			console.log(myself.availableKeychain);
-			console.log(myself.availableTypes);
+			//console.log(myself.availableKeychain);
+			//console.log(myself.availableTypes);
 			myself.aForm = new $c.Form({
 				modules:['NumberSpinner','TextBox','Textarea','ValidationTextBox','Select','Button','PasswordTextBox'],
 				formWidth: 'auto',
@@ -468,12 +472,16 @@ $c.App.load("keychainmanager",
 				$c.Dialog.info(myself.getLocalizedMessage('0020'));
 				var values = myself.aForm.get('value');
 				myself.kStoreObservable.add({
-					id: values.account_name,
-					name: values.account_name,
-					keychain: values.keychain,
-					type: values.type,
+					id: result.id,
+					name: result.account_name,
+					keychain: result.keychain,
+					type: result.type,
 					leaf: true
 				});
+				
+				myself.container.main.left.set('paths', [ [ 'krootnode', result.keychain, result.id ] ] );
+				myself.openAccount(result.account_name, result.keychain);
+				myself.container.main.center.containerNode.scrollTop = 0;
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -633,7 +641,28 @@ $c.App.load("keychainmanager",
 			}
 		};
 
-			
+		this.deleteAccount = function() {
+			$c.Kernel.newCall(myself.deleteAccountCallback,{
+				application: "keychainmanager",
+				method: "delete_account",
+				content: {
+					id: myself.selectedId,
+					account_name: myself.selectedAccount,
+					keychain: myself.selectedKeychain
+				}
+			});
+		};
+		
+		this.deleteAccountCallback = function(success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0022'));
+				myself.container.main.center.destroyDescendants();
+				myself.kStoreObservable.remove(myself.selectedId);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
 	}
 	
 );

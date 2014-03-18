@@ -62,7 +62,7 @@ class keychain {
 		try {
 			$db = new database();
 			$result = $db->table('keychains')
-				->keys(Array('account_name','description','keychain','keyUser','keyPass','type','name','host','port','model','prefix','custom'))
+				->keys(Array('id','account_name','description','keychain','keyUser','keyPass','type','name','host','port','model','prefix','custom'))
 				->where("account_name","=",$account_name)
 				->and_where("keychain","=",$keychain)
 				->get();
@@ -458,6 +458,7 @@ class keychain {
 				$result = $db->table('keychains')
 					->keys(Array('account_name','keyUser','keyPass','keychain','description','type','name','host','port','model','prefix','custom'))
 					->values(Array($account_name,$keyUser,$keyPass,$keychain,$description,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
+					->return_id()
 					->store();
 			}
 			
@@ -468,7 +469,12 @@ class keychain {
 		}
 		
 		$events->record('keychain_add_account', $account_name.':'.$keychain, true);
-		return true;
+		return Array(
+			"id"			=>	$result["transactionId"],
+			"account_name"	=>	$account_name,
+			"keychain"		=>	$keychain,
+			"type"			=>	$type
+		);
 		
 	}
 

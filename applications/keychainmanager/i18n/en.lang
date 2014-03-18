@@ -31,7 +31,9 @@ $lang = Array(
 	'0017'	=>	'Insert your password to unlock account',
 	'0018'	=>	'Add new account',
 	'0019'	=>	'Credentials updated correctly',
-	'0020'	=>	'Account saved correctly'
+	'0020'	=>	'Account saved correctly',
+	'0021'	=>	'You are about to delete account: ({0}) - {1} from keychain {2}; please confirm.',
+	'0022'	=>	'Account removed correctly'
 );
 
 ?>

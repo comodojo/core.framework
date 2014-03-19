@@ -192,7 +192,7 @@ class upload extends comodojo_basic {
 		try {
 			$this->fs->moveFileFromTemp($temp_file,$destination_file,$overwrite);
 			$resource_owner = COMODOJO_USER_ROLE == 0 ? 'everybody' : COMODOJO_USER_NAME;
-			$this->fs->setPermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
+			$this->fs->forcePermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
 		}
 		catch (Exception $e) {
 			comodojo_debug("Uploaded file cannot be moved: ".$e->getMessage(),'ERROR','upload');
@@ -264,7 +264,7 @@ class upload extends comodojo_basic {
 			try {
 				$this->fs->moveFileFromTemp($temp_file,$destination_file,$overwrite);
 				$resource_owner = COMODOJO_USER_ROLE == 0 ? 'everybody' : COMODOJO_USER_NAME;
-				$this->fs->setPermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
+				$this->fs->forcePermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
 			}
 			catch (Exception $e) {
 				comodojo_debug("Uploaded file cannot be moved: ".$e->getMessage(),'ERROR','upload');
@@ -388,7 +388,7 @@ class upload extends comodojo_basic {
 			try {
 				$this->fs->moveFileFromTemp($temp_file,$destination_file,$overwrite);
 				$resource_owner = COMODOJO_USER_ROLE == 0 ? 'everybody' : COMODOJO_USER_NAME;
-				$this->fs->setPermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
+				$this->fs->forcePermissions($destination_file,$resource_owner,$resource_owner,$resource_owner);
 			}
 			catch (Exception $e) {
 				comodojo_debug("Uploaded file cannot be moved: ".$e->getMessage(),'ERROR','upload');

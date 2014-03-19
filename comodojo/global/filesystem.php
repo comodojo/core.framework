@@ -311,7 +311,7 @@ class filesystem {
 
 		else {
 				
-			$this->_destinationFileGhost = $this->_filePath . "._" . $this->fileName . ".acl";
+			$this->_destinationFileGhost = $this->_destinationFilePath . "._" . $this->destinationFileName . ".acl";
 				
 			//if(is_readable($this->_destinationFileGhost) && is_writable($this->_destinationFileGhost)) return $this->_destinationFileGhost;
 			

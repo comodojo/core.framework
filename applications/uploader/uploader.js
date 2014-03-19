@@ -25,7 +25,7 @@ $c.App.load("uploader",
 
 	function(pid, applicationSpace, status){
 	
-		this.destination = "/"+$c.userName;
+		this.destination = "/"+(!$c.userName ? 'guest' : $c.userName);
 
 		this.overwrite = false;
 		

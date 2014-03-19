@@ -429,6 +429,23 @@ class keychain {
 		
 		$events = new events(true);
 		
+		if ($keychain == COMODOJO_USER_NAME) {
+			try {
+				$um = new users_management();
+				$id = $um->get_private_identifier(COMODOJO_USER_NAME, $userPass);
+			}
+			catch (Exception $e){
+				throw $e;
+			}
+			if (is_null($id)) throw new Exception("Wrong password", 2410);
+		}
+
+		$aes = new Crypt_AES();
+		$aes->setKey($keychain == 'SYSTEM' ? COMODOJO_UNIQUE_IDENTIFIER : $id);
+		
+		$encrypted_keyUser = $aes->encrypt($keyUser);
+		$encrypted_keyPass = $aes->encrypt($keyPass);
+		
 		$description = empty($description) ? null : $description;
 		$type = empty($type) ? null : $type;
 		$name = empty($name) ? null : $name;
@@ -457,7 +474,7 @@ class keychain {
 			else {
 				$result = $db->table('keychains')
 					->keys(Array('account_name','keyUser','keyPass','keychain','description','type','name','host','port','model','prefix','custom'))
-					->values(Array($account_name,$keyUser,$keyPass,$keychain,$description,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
+					->values(Array($account_name,$encrypted_keyUser,$encrypted_keyPass,$keychain,$description,$type,$name,$host,$port,$model,$prefix,is_array($custom) ? array2json($custom) : $custom))
 					->return_id()
 					->store();
 			}
@@ -532,6 +549,10 @@ class keychain {
 	 */
 	public final function get_keychains() {
 		
+		if (COMODOJO_USER_ROLE == 0) {
+			throw new Exception("No keychain available for guest account", 1);
+		}
+
 		if (COMODOJO_USER_ROLE != 1) {
 			return Array(COMODOJO_USER_NAME);
 		}

@@ -185,6 +185,7 @@ $c.App.load("keychainmanager",
 
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+myself.getLocalizedMessage('0018'),
+				style: 'float: left;',
 				onClick: function() {
 					myself.newAccount();
 				}

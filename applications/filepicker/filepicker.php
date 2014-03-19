@@ -67,6 +67,8 @@ class filepicker extends application {
 			$fs->accessLevelFilter = $access;
 			
 			$fs->deepListing = true;
+
+			$fs->generateThumbnails = false;
 			
 			$result = $fs->listDirectory();
 		}

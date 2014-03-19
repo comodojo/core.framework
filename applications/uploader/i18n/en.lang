@@ -11,16 +11,16 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Upload files',
+	'0001'	=>	'Reset uploader',
+	'0002'	=>	'Selected destination: {0}',
+	'0003'	=>	'Overwrite existing files',
+	'0004'	=>	'Do not overwrite existing files',
+	'0005'	=>	'Select files',
+	'0006'	=>	'Max upload size: {0}',
+	'0007'	=>	'File name',
+	'0008'	=>	'Size',
+	'0009'	=>	'State'
 );
 
 ?>

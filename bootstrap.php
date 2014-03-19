@@ -68,10 +68,10 @@ class bootstrap extends comodojo_basic {
 		
 	}
 	
-	public function error($error_name, $error_detail) {
+	public function error($error_code, $error_content) {
 		
-		$index = "comodojo.debug('".$error_name.": " . $error_detail . "');\n"; 
-		$index .= "comodojo.Error.critical('".$error_name.": " . $error_detail . "');\n";
+		$index = "comodojo.debug('".$error_code.": " . $error_content . "');\n"; 
+		$index .= "comodojo.Error.critical('".$error_code.": " . $error_content . "');\n";
 		
 		set_header(Array(
 			'statusCode'	=>	200,

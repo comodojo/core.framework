@@ -11,16 +11,16 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Carica file',
+	'0001'	=>	'Inizializza uploader',
+	'0002'	=>	'Cartella selezionata: {0}',
+	'0003'	=>	'Sovrascrivi file esistenti',
+	'0004'	=>	'Non sovrascrivere file esistenti',
+	'0005'	=>	'Seleziona files',
+	'0006'	=>	'Dimensione massima di caricamento: {0}',
+	'0007'	=>	'Nome file',
+	'0008'	=>	'Dimensione',
+	'0009'	=>	'Stato'
 );
 
 ?>

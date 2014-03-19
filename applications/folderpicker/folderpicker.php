@@ -63,11 +63,15 @@ class folderpicker extends application {
 			$fs->fileName = false;
 			
 			$fs->showHidden = false;
-			$fs->filterBy = "directory";
 			
+			$fs->filterBy = "type";
+			$fs->filter = "folder";
+
 			$fs->accessLevelFilter = $access;
 			
 			$fs->deepListing = true;
+
+			$fs->generateThumbnails = false;
 			
 			$result = $fs->listDirectory();
 		}

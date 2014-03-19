@@ -15,7 +15,16 @@ comodojo_load_resource('application');
 class uploader extends application {
 	
 	public function init() {
-		//$this->add_application_method('METHOD', 'LOCAL_METHOD', Array(), 'DESCRIPTION',CACHE);
+		$this->add_application_method('get_max_filesize', 'getMaxFilesize', Array(), 'Get server max filesize',false);
+	}
+
+	public function getMaxFilesize() {
+		$max_post = ini_get('post_max_size');
+		$max_file = ini_get('upload_max_filesize');
+		return Array(
+			'max_post' => $max_post,
+			'max_file' => $max_file
+		);
 	}
 	
 }

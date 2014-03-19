@@ -567,8 +567,19 @@ class filesystem {
 			if($item != '.' && $item != '..') {
 				$path = $directory.'/'.$item;
 				if(is_dir($path)) {
-					$this->_removeDirectoryHelper($path);
-				}else{
+					//try {
+						if (!$this->_removeDirectoryHelper($path)) {
+							closedir($handle);
+							comodojo_debug('Directory '.$directory.' can\'t be removed','ERROR','filesystem');
+							return false;
+						}
+					//}
+					//catch (Exception $e) {
+					//	closedir($handle);
+					//	throw $e;
+					//}
+				}
+				else{
 					comodojo_debug('Unlinking directory: '.$path,'INFO','filesystem');
 					unlink($path);
 				}
@@ -579,6 +590,7 @@ class filesystem {
 		
 		if(!rmdir($directory)) {
 			comodojo_debug('Directory '.$directory.' can\'t be removed','ERROR','filesystem');
+			//throw new Exception("Directory cannot be removed", 1115);
 			return false;
 		}
 
@@ -601,7 +613,7 @@ class filesystem {
 				if (!$this->_removeDirectoryHelper($this->_file)) {
 					$toReturn = false;
 				}
-				elseif (!mkrid($this->_file, umask(), true)) {
+				elseif (!mkdir($this->_file, umask(), true)) {
 					comodojo_debug('Directory '.$this->_file.' can\'t be created','ERROR','filesystem');
 					$toReturn = false;
 				}
@@ -630,7 +642,7 @@ class filesystem {
 			}
 			else {
 
-				if (!mkrid($this->_file, umask(), true)) {
+				if (!mkdir($this->_file, umask(), true)) {
 					comodojo_debug('Directory '.$this->_file.' can\'t be created','ERROR','filesystem');
 					$toReturn = false;
 				}
@@ -890,28 +902,26 @@ class filesystem {
 
 		if ( $this->_checkRealFilePermissions($this->_destinationFile) AND !$this->overwrite) {
 			comodojo_debug('File ('.$this->_destinationFile.') exists and no overwrite flag selected','ERROR','filesystem');
-			return false;
+			throw new Exception("File exists", 1113);
 		}
-		else if ($this->_checkRealFilePermissions($this->_destinationFile) AND $this->overwrite) {
+		
+		if ($this->_checkRealFilePermissions($this->_destinationFile) AND $this->overwrite) {
 				
 			if (is_dir($this->_destinationFile)) $this->_removeDirectoryHelper($this->_destinationFile);
 			else {
 				if (!unlink($this->_destinationFile)) {
 					comodojo_debug('Destination file ('.$this->_destinationFile.') can\'t be removed','ERROR','filesystem');
-					return false;
+					throw new Exception("File cannot be removed", 1106);
 				}
 			}
 				
 		}
-		else {
-			null;
-		}
-
+		
 		$tmp_file_complete = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_TEMP_FOLDER.$tmp_file;
 
 		if (!rename($tmp_file_complete, $this->_destinationFile)) {
 			comodojo_debug('File ('.$tmp_file_complete.') can\'t be moved to '.$this->_destinationFile,'ERROR','filesystem');
-			return false;
+			throw new Exception("File cannot be moved", 1109);
 		}
 
 		$this->fileName = $this->destinationFileName;
@@ -919,7 +929,7 @@ class filesystem {
 
 		if (!$this->_writeUserPermissions()) {
 			comodojo_debug('File or directory ('.$this->_file.') moved WITHOUT ACL (error writing permissions)','ERROR','filesystem');
-			return false;
+			throw new Exception("File copied without ACL", 1114);
 		}
 
 		$this->_resource = $this->_destinationFile;
@@ -1015,7 +1025,7 @@ class filesystem {
 			
 			list($mime,$icon) = comodojo_mimeByFile($complete_file);
 			
-			if (in_array($mime, Array('image/jpeg','image/png','image/gif'))) {
+			if (in_array($mime, Array('image/jpeg','image/png','image/gif')) AND $this->generateThumbnails) {
 				$img = new image_tools();
 				$generated_thumb = $img->thumbnail($complete_file, $this->thumbSize);
 				$thumb = $generated_thumb == false ? false : COMODOJO_SITE_URL.COMODOJO_HOME_FOLDER.COMODOJO_THUMBNAILS_FOLDER.$generated_thumb;
@@ -1545,7 +1555,7 @@ class filesystem {
 		if ($file !== false) $this->splitFileReference($file);
 		if ($destinationFile !== false) $this->splitDestinationFileReference($destinationFile);
 
-		$this->overwrite = $overwrite === true ? true : false;
+		$this->overwrite = filter_var($overwrite, FILTER_VALIDATE_BOOLEAN);
 
 		if (!$this->_readUserPermissions()) {
 			comodojo_debug('No file founded or no acl for this directory','ERROR','filesystem');
@@ -1608,6 +1618,8 @@ class filesystem {
 	 */
 	public function moveFile($file=false, $destinationFile=false, $overwrite=false) {
 
+		$this->overwrite = filter_var($overwrite, FILTER_VALIDATE_BOOLEAN);
+
 		if ($file !== false) $this->splitFileReference($file);
 		if ($destinationFile !== false) $this->splitDestinationFileReference($destinationFile);
 
@@ -1651,27 +1663,30 @@ class filesystem {
 	 */
 	public function moveFileFromTemp($file, $destinationFile=false, $overwrite=false) {
 
+		$this->overwrite = filter_var($overwrite, FILTER_VALIDATE_BOOLEAN);
+
 		if ($destinationFile !== false) $this->splitDestinationFileReference($destinationFile);
 
 		if (!$this->_readUserDestinationPermissions()) {
 			comodojo_debug('User has not enough privileges','INFO','filesystem');
 			throw new Exception("Not enough privileges", 1112);
 		}
-		elseif(!$this->_checkUserAccessByLevel('writer',false)) {
+		
+		if(!$this->_checkUserAccessByLevel('writer',false)) {
 			comodojo_debug('User has not enough privileges','INFO','filesystem');
 			throw new Exception("Not enough privileges", 1112);
 		}
-		else {
-				
-			if (!$this->_moveFileFromTemp($file)) {
-				comodojo_debug('File cannot be moved','ERROR','filesystem');
-				throw new Exception("File cannot be moved", 1109);
-			}
-			
-			return true;
-				
+		
+		try {
+			$this->_moveFileFromTemp($file);
+		}
+		catch (Exception $e) {
+			comodojo_debug('File cannot be moved','ERROR','filesystem');
+			throw $e;
 		}
 
+		return true;
+		
 	}
 
 	/**
@@ -1722,7 +1737,7 @@ class filesystem {
 		else {
 			
 			comodojo_load_resource('mime_types');
-			/*if ($this->generateThumbnails)*/ comodojo_load_resource('image_tools');
+			comodojo_load_resource('image_tools');
 			
 			$toReturn = $this->list_helper((substr($this->filePath,-1) == '/' ? $this->filePath : $this->filePath . "/") . $this->fileName);
 			
@@ -1763,7 +1778,7 @@ class filesystem {
 		else {
 			
 			comodojo_load_resource('mime_types');
-			if ($this->generateThumbnails) comodojo_load_resource('image_tools');
+			comodojo_load_resource('image_tools');
 			
 			if ($this->filePath == "/") $completeDirectory = $this->_homePath;
 			else $completeDirectory = $this->_homePath . ($directory[0] == "/" ? substr($directory, 1) : $directory);

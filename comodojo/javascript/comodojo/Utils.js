@@ -388,6 +388,17 @@ Utils.destroyAll = function(message) {
 		domConstruct.destroy(s);
 	});
 	comodojo.debug('Destroy complete');
+};
+
+Utils.destroyDescendants = function(node_or_id) {
+	// summary:
+	//		Destroy node descendants
+	var node = this.nodeOrId(node_or_id);
+	if (node != false) {
+		while (node.firstChild) {
+			node.removeChild(node.firstChild);
+		}
+	}
 };	
 
 return Utils;

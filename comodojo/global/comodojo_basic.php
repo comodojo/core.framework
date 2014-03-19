@@ -92,7 +92,7 @@ class comodojo_basic {
 		
 		if (!is_readable(COMODOJO_BOOT_PATH."comodojo/configuration/static_configuration.php")) {
 			@include COMODOJO_BOOT_PATH."comodojo/global/header.php";
-			die($this->error("Not installed","<script type=\"text/javascript\">setTimeout(\"location.href='installer.php';\",3000);</script><strong>It seems that comodojo is not installed; redirecting to installer in 3 seconds...</strong>"));
+			die($this->error(9991,"<script type=\"text/javascript\">setTimeout(\"location.href='installer.php';\",3000);</script><strong>It seems that comodojo is not installed; redirecting to installer in 3 seconds...</strong>"));
 		} 
 		
 		@include COMODOJO_BOOT_PATH."comodojo/configuration/static_configuration.php";
@@ -103,10 +103,10 @@ class comodojo_basic {
 			die($this->error(2107,'Session lost'));
 		}
 		if (!defined('COMODOJO_UNIQUE_IDENTIFIER')) {
-			die($this->error('Fatal error','Cannot load comodojo configuration file.'));
+			die($this->error(9992,'Cannot load comodojo configuration file'));
 		}
 		if (!function_exists('loadHelper_common_functions') OR !function_exists('loadHelper_header') ) {
-			die($this->error('Fatal error','Cannot load required api; see error log for details.'));
+			die($this->error(9993,'Cannot load required api; see error log for details'));
 		}
 		
 		comodojo_debug('--------------------------------------------------------------------------','INFO','comodojo_basic');
@@ -127,7 +127,7 @@ class comodojo_basic {
 		if ($this->basic_from_session()) $this->set_basic(false);
 		elseif ($this->basic_from_startup_cache()) $this->set_basic(true);
 		elseif ($this->basic_from_database()) $this->set_basic(true);
-		else die($this->error('Ops, fatal error occurred','Cannot load startup values; see error log for details.'));
+		else die($this->error(9994,'Cannot load startup values, see error log for details'));
 
 		comodojo_debug('--------------------------------------------------------------------------','INFO','comodojo_basic');
 
@@ -135,7 +135,7 @@ class comodojo_basic {
 			if (!$this->safe_post_check()) {
 				comodojo_debug('POST max size exceeded, execution aborted','WARNING','comodojo_basic');
 				comodojo_debug('--------------------------------------------------------------------------','WARNING','comodojo_basic');
-				die($this->error('POST max size exceeded'));
+				die($this->error(9995,'POST max size exceeded'));
 			}
 		}
 		
@@ -269,7 +269,6 @@ class comodojo_basic {
 			$au->loginFromSession = $fromSession;
 			$auth = $au->login($userName, $userPass);
 		} catch (Exception $e) {
-			//die($this->error($e->getMessage()));
 			die($this->error($e->getCode(),$e->getMessage()));
 		}
 		if (!$auth) {
@@ -286,7 +285,6 @@ class comodojo_basic {
 			$au = new authentication();
 			$auth = $au->logout($userName);
 		} catch (Exception $e) {
-			//die($this->error($e->getMessage()));
 			die($this->error($e->getCode(),$e->getMessage()));
 		}
 		$this->set_auth_session();
@@ -343,14 +341,14 @@ class comodojo_basic {
 		}
 	}
 
-	public function error($error_name, $error_detail) {
+	public function error($error_code, $error_content) {
 		
 		include COMODOJO_BOOT_PATH.'comodojo/global/qotd.php';
 		
 		$index = file_get_contents(COMODOJO_BOOT_PATH . "comodojo/templates/web_error.html");
 		
-		$index = str_replace("*_ERRORNAME_*",$error_name,$index);
-		$index = str_replace("*_ERRORDETAILS_*",$error_detail,$index);
+		$index = str_replace("*_ERRORNAME_*",$error_code,$index);
+		$index = str_replace("*_ERRORDETAILS_*",$error_content,$index);
 		$index = str_replace("*_ERRORQUOTE_*","<em>".get_quote()."</em>",$index);
 		
 		set_header(Array(
@@ -447,7 +445,7 @@ class comodojo_basic {
 			break;
 			
 			default:
-				die($this->error('Ops, fatal error occurred','Cannot load startup values; see error log for details.'));
+				die($this->error(9994,'Cannot load startup values, see error log for details'));
 			break;
 		}
 		
@@ -536,7 +534,7 @@ class comodojo_basic {
 		
 	}
 
-	private final function safe_post_check() {
+	public final function safe_post_check() {
 
 		$post_limit = null;
 

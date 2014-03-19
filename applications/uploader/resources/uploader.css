@@ -1,0 +1,58 @@
+.dojoxUploaderIcon {
+	display: none;
+}
+
+.dojoxUploaderFileName {
+	text-align: left;
+}
+
+.uploader_top_selector {
+	cursor: pointer;
+	text-decoration: underline;
+	color: blue;
+}
+
+.uploader_top_indicator{
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-image: url('../../../comodojo/images/medium_loader.gif');	
+	display: none;
+}
+
+.uploader_top_fields {
+	margin-top: 4px;
+	font-size: 110%;
+	font-family: sans-serif;
+}
+
+.uploader_top_button {
+	font-size: 110%;
+	font-family: sans-serif;
+}
+
+.uploader_top_form {
+	text-align: center;
+	margin: 10px auto;
+}
+
+.uploader_center_list {
+	/*display: none;*/
+}
+
+.uploader_center_results {
+	display: none;
+}
+
+.uploader_center_error {
+	display: none;
+}
+
+.uploader_center_upload_success {
+	color:#8c8;
+}
+
+.uploader_center_upload_failure {
+	color:#c88;
+}

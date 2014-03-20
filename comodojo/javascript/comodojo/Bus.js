@@ -335,14 +335,28 @@ Bus.getRunningApplication = function(pid) {
 	return app;
 };
 
-Bus.getRunningApplications = function(pids_only) {
+Bus.getRunningApplications = function(exclude_system,only_pid_ist) {
 	// summary:
 	//		Get all running applications
 	// returns:
 	//		Object containing applications name, exec, link referenced by pid
-	var apps = {};
+	var apps = only_pid_ist ? [] : {};
+
 	for (var i in Bus._runningApplications) {
-		apps[Bus._runningApplications[i][0]] = {name:Bus._runningApplications[i][2],exec:Bus._runningApplications[i][1],link:Bus._runningApplications[i][4]};
+		if (exclude_system && Bus._runningApplications[i][3] == 'system') {
+			continue;
+		}
+		if (only_pid_ist) {
+			apps.push(Bus._runningApplications[i][0]);
+		}
+		else {
+			apps[Bus._runningApplications[i][0]] = {
+				exec:Bus._runningApplications[i][1],
+				name:Bus._runningApplications[i][2],
+				mode:Bus._runningApplications[i][3],
+				link:Bus._runningApplications[i][4]
+			};
+		}
 	};
 	return apps;
 };

@@ -27,10 +27,13 @@ class comodojo_startup extends comodojo_basic {
 	private $js_loader = false;
 
 	private $current_message_code = null;
+	
 	private $current_message_values = null;
 	
 	public function logic($attributes) {
 		
+		comodojo_debug("Starting comodojo startup process",'INFO','startup');
+
 		comodojo_load_resource('events');
 		$events = new events();
 		
@@ -123,6 +126,8 @@ class comodojo_startup extends comodojo_basic {
 
 	private function buildJsLoader($attributes) {
 		
+		$queryString = array2json($attributes);
+
 		//****** CSS ******
 		$myCssLoader = "
 		<link rel=\"stylesheet\" type=\"text/css\" href=\"comodojo/javascript/dojo/resources/dojo.css\" />
@@ -134,18 +139,23 @@ class comodojo_startup extends comodojo_basic {
 		$myJsLoader = "
 			<script type=\"text/javascript\">
 			var dojoConfig = {
-				async: false,
+				async: 0,
 				parseOnLoad: false,
-				baseUrl: '" . COMODOJO_JS_BASE_URL . "',";
-		if (COMODOJO_JS_XD_LOADING) {
-		$myJsLoader .= "
-				dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
-				packages: [{
-					name: 'comodojo',
-					location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
-				}],
-				waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
-		}
+				baseUrl: '" . COMODOJO_JS_BASE_URL . "',
+				";
+		//if (COMODOJO_JS_XD_LOADING) {
+		//$myJsLoader .= "
+		//		dojoBlankHtmlUrl: location.pathname.replace(/\/[^/]+$/, '') + '/comodojo/javascript/dojo/resources/blank.html',
+		//		packages: [{
+		//			name: 'comodojo',
+		//			location: location.pathname.replace(/\/[^/]+$/, '') + '/comodojo/javascript/comodojo'
+		//		},{
+		//			name: 'gridx',
+		//			location: location.pathname.replace(/\/[^/]+$/, '') + '/comodojo/javascript/gridx'
+		//		}],
+		//		//waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
+		//}
+		
 		$myJsLoader .= "
 				locale: '" . $this->locale . "',
 				has: {
@@ -166,7 +176,7 @@ class comodojo_startup extends comodojo_basic {
 					registrationMode: ".COMODOJO_REGISTRATION_MODE.",
 					locale: '" . $this->locale . "',
 					phpLocale: '" . $this->locale . "',
-					queryString: " . array2json($attributes) . ",
+					queryString: " . $queryString . ",
 					dojoTheme: '" . COMODOJO_SITE_THEME_DOJO . "',
 					defaultContainer: '" . COMODOJO_SITE_DEFAULT_CONTAINER . "',
 					serverTimezoneOffset: '" . getServerTimezoneOffset() . "',
@@ -178,35 +188,25 @@ class comodojo_startup extends comodojo_basic {
 		$myJsLoader .="
 				}
 			</script>
-			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js.uncompressed.js') . "\"></script>
 		";
+		//if (COMODOJO_JS_XD_LOADING) {
+		//	$myJsLoader .="
+		//	<script type=\"text/javascript\" src=\"//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js.uncompressed.js\" ></script>
+		//	";
+		//}
+		//else {
+			$myJsLoader .="
+			<script type=\"text/javascript\" src=\"comodojo/javascript/dojo/dojo.js.uncompressed.js\"></script>
+			";			
+		//}
 		//************************
-		
-		//****** DOJO.JS ******
-		/*if (COMODOJO_JS_XD_LOADING) {
-			$myJsLoader .= '
-			<script type="text/javascript" src="' . COMODOJO_JS_XD_LOCATION . '"></script>
-			<script type="text/javascript">
-				dojo.registerModulePath("custom", "../custom");
-			</script>
-			';
-		}
-		else {
-			$myJsLoader .= '
-			<script type="text/javascript" src="comodojo/javascript/dojo/dojo.js" ></script>
-			<script type="text/javascript">
-				dojo.registerModulePath("custom", "../custom");
-			</script>
-			';
-		}*/
-		//*********************
 		
 		//****** DOJO REQUIRES ******
 		$myJsLoader .= "
 			<script type=\"text/javascript\">
-				//dojo.require('comodojo.Notification');
 				dojo.require('comodojo.Config');
 				dojo.require('comodojo.Basic');
+				//dojo.require('dojo.back');
 		";
 		
 		$myDojoRequires = json2array(COMODOJO_JS_REQUIRES);
@@ -226,8 +226,17 @@ class comodojo_startup extends comodojo_basic {
 		$myJsLoader .= "
 			</script>
 			<script type=\"text/javascript\">
+				//dojo.back.init();
 				dojo.ready(function() {
 					comodojo.startup();";
+
+		if (!empty($attributes)) {
+			$myJsLoader .= "
+					if (!dojo.isIe || dojo.isIe > 8) {
+						history.replaceState({}, 'p', '" . (COMODOJO_SITE_EXTERNAL_URL == "" ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "');
+					}";
+		}
+
 		if ($this->current_message_code != null) {
 			$myJsLoader .= "
 					var notifier  = new comodojo.Notification();

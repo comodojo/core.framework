@@ -51,7 +51,7 @@ class usersubscription extends application {
 			throw $e;
 		}
 
-		return $result;
+		return true;
 
 	}
 	

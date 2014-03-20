@@ -25,7 +25,7 @@ class users_management {
 	  /**
 	  * Reserved usernames (same as users_management)
 	  */
-	 private $reserved_usernames = Array('admin','administrator','root','toor','comodojo','guest');
+	 private $reserved_usernames = Array('admin','administrator','root','toor','comodojo','guest','shared');
 
 	  /**
 	  * If true, localized email template will be used.
@@ -36,6 +36,8 @@ class users_management {
 	  */
 	 private $use_localized_email_templates = true;
 
+	 private $reset_by_pwdrecover = false;
+
 /********************** PRIVATE VARS *********************/
 
 /********************** PUBLIC VARS *********************/
@@ -45,6 +47,13 @@ class users_management {
 	 * @default false;
 	 */
 	 public $do_not_encrypt_userPass = false;
+
+	 /**
+	 * If true, user will added skipping promised username control.
+	 *
+	 * @default false;
+	 */
+	 public $add_user_from_registration = false;
 /********************** PUBLIC VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -126,7 +135,7 @@ class users_management {
 			throw new Exception("Invalid username", 2604);
 		}
 		
-		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1 AND !$this->reset_by_pwdrecover) {
 			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
@@ -138,11 +147,11 @@ class users_management {
 			$presence = $this->findRegisteredUser($userName, false, false);
 			if ($presence == 'LOCAL') {
 				comodojo_debug('Changing local password from user: '.$userName,'INFO','users_management');
-				$success = $this->reset_user_password_local();
+				$success = $this->reset_user_password_local($userName);
 			}
 			else if ($presence == 'RPC') {
 				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
-				$success = $this->reset_user_password_external_rpc();
+				$success = $this->reset_user_password_external_rpc($userName);
 			}
 			else if ($presence == 'LDAP') {
 				comodojo_debug('Unsupported action','ERROR','users_management');
@@ -346,7 +355,7 @@ class users_management {
 		comodojo_load_resource('database');
 		comodojo_load_resource('filesystem');
 
-		if ($this->findRegisteredUser($userName, true, true)) {
+		if ($this->findRegisteredUser($userName, true, !$this->add_user_from_registration)) {
 			comodojo_debug('User already registered','ERROR','users_management');
 			throw new Exception("User already registered", 2613);
 		}
@@ -698,7 +707,7 @@ class users_management {
 				0
 			))->store();
 			
-			$this->send_recovery_email($userName, is_null($isInDatabase['result'][0]['completeName']) ? $userName : $isInDatabase['result'][0]['completeName'], $email, $code, $timestamp);
+			$this->send_recovery_email($isInDatabase['result'][0]['userName'], is_null($isInDatabase['result'][0]['completeName']) ? $isInDatabase['result'][0]['userName'] : $isInDatabase['result'][0]['completeName'], $email, $code, $timestamp);
 			
 			$ev->record('user_recovery_request', $email, true);
 			
@@ -734,7 +743,14 @@ class users_management {
 				throw new Exception("No request found for this email address or request expired", 2616);
 			}
 
-			$new_pass = $this->reset_user_password($isInDatabase['result'][0]['userName']);
+			try {
+				$this->reset_by_pwdrecover = true;
+				$new_pass = $this->reset_user_password($isInDatabase['result'][0]['userName']);
+			}
+			catch (Exception $e) {
+				throw $e;
+			}
+			
 
 			$db->table('users_recovery')
 			->keys("confirmed")
@@ -743,7 +759,7 @@ class users_management {
 			->and_where('email','=',$email)
 			->store();
 			
-			$this->send_reset_email($userName, is_null($isInDatabase['result'][0]['completeName']) ? $userName : $isInDatabase['result'][0]['completeName'], $email, $new_pass);
+			$this->send_reset_email($isInDatabase['result'][0]['userName'], empty($isInDatabase['result'][0]['completeName']) ? $isInDatabase['result'][0]['userName'] : $isInDatabase['result'][0]['completeName'], $email, $new_pass);
 			
 			$ev->record('user_recovery_confirm', $email, true);
 			
@@ -806,8 +822,10 @@ class users_management {
 			}
 			$result = $result->get();
 
-			if ($result['resultLength'] == 1) $found = $result['result'][0]['ldap'] ? 'LDAP' : ($result['result'][0]['rpc'] ? 'RPC' : 'LOCAL');
-			
+			if ($result['resultLength'] == 1) {
+				$found = $result['result'][0]['ldap'] ? 'LDAP' : ($result['result'][0]['rpc'] ? 'RPC' : 'LOCAL');
+			}
+
 			if ($includePromised AND is_null($found)) {
 				
 				$db->clean();
@@ -889,7 +907,7 @@ class users_management {
 			
 			$result = $db->table('users')
 			->keys("userPass")
-			->values(d5($new_password))
+			->values(md5($new_password))
 			->where("userName","=",$userName)
 			->and_where("enabled","=",1)
 			->update();
@@ -978,7 +996,7 @@ class users_management {
 				 ->subject("Password Reset Request")
 				 ->add_tag("*_COMPLETENAME_*",$completeName)
 				 ->add_tag("*_USERNAME_*",$userName)
-				 ->add_tag("*_EMAIL_*",$userName)
+				 ->add_tag("*_EMAIL_*",$email)
 				 ->add_tag("*_CODE_*",$code)
 				 ->add_tag("*_TIME_*",date(DATE_RFC850,$timestamp))
 				 ->embed(COMODOJO_SITE_PATH."comodojo/images/logo.png","COMODOJO_LOGO","logo")

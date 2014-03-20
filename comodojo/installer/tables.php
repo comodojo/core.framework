@@ -6,7 +6,7 @@ $create = Array(
 	'roles'	=>	Array(
 		'columns'	=>	Array(
 			Array('id','INTEGER',Array('unsigned'=>true,'null'=>false,'autoincrement'=>true,'primary'=>true)),
-			Array('reference','INTEGER',Array('unsigned'=>true,'null'=>false)),
+			Array('reference','INTEGER',Array('unsigned'=>true,'null'=>false,'primary'=>true)),
 			Array('description','TEXT',Array('null'=>false))
 			)
 		),

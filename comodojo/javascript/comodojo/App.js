@@ -206,7 +206,7 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 				applicationSpace.maxNode.style.display = "none";
 				applicationSpace.restoreNode.style.display = "none";
 				applicationSpace.closeNode.style.display = "none";
-				comodojo.App.kill(pid);
+				comodojo.App.kill(pid,appExec);
 			});
 
 			applicationSpace.bringToTop();
@@ -240,7 +240,7 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 			applicationSpace._position();
 
 			aspect.after(applicationSpace, "hide", function(){
-				comodojo.App.kill(pid);
+				comodojo.App.kill(pid,appExec);
 			});
 
 			aspect.before(applicationSpace,'hide',function() {
@@ -288,7 +288,7 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 					applicationSpace.destroyRecursive();
 				};
 				aspect.after(applicationSpace, "close", function(){
-					comodojo.App.kill(pid);
+					comodojo.App.kill(pid,appExec);
 				});
 			}
 			else {
@@ -302,7 +302,7 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 					if (typeof registry.byId(pid) !== "undefined") {
 						registry.byId(pid).destroyRecursive();
 					}
-					comodojo.App.kill(pid);
+					comodojo.App.kill(pid,appExec);
 				};
 
 				applicationSpace.containerNode = domConstruct.create(prop.requestSpecialNode, {
@@ -420,6 +420,19 @@ App.launch = function(appExec, pid, applicationSpace, status) {
 		bus.callEvent('comodojo_app_error');
 		App.kill(pid);
 	}
+
+	//if (comodojo.stateFired > 1) {
+	//	comodojo.stateFired--;
+	//}
+	//else if (comodojo.stateFired == 1) {
+	//	comodojo.stateFired--;
+	//	dojo.back.setInitialState(new comodojo.state('start','comodojo','pid_0'));
+	//	console.warn('back complete, firing initial state');
+	//}
+	//else {
+	//	console.warn('back on the way, firing app state');
+	//	dojo.back.addToHistory(new comodojo.state('start',appExec,pid));
+	//}
 	
 };
 
@@ -478,13 +491,14 @@ App.stop = function(pid) {
 	}
 };
 
-App.kill = function(pid) {
+App.kill = function(pid,appExec) {
 	App.pullRunning(pid);
 	comodojo.debug('Application stopped: '+pid);
 	if (dom.byId(pid)) {
 		comodojo.debug('Application presentation still running, killing it');
 		domConstruct.destroy(pid);
 	}
+	//if (comodojo.stateFired) { dojo.back.addToHistory(new comodojo.state('stop',appExec,pid)); }
 };
 
 App.stopAll = function(stopSystemApps, callback) {
@@ -534,7 +548,6 @@ App.stopAnyInstance = function(appExec) {
 	}
 	comodojo.debug('Stopped '+count+' instance(s) of '+appExec);
 };
-
 
 App.loadCss = function(appExec) {
 	return comodojo.loadCss(comodojo.applicationsPath + appExec + '/resources/' + appExec + '.css');

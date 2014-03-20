@@ -10,7 +10,7 @@
  * @license		GPL Version 3
  */
 
-require(COMODOJO_SITE_PATH."comodojo/others/available_cdn"); 
+//require(COMODOJO_SITE_PATH."comodojo/others/available_cdn"); 
 
 $panels = Array(
 	"performances" => Array(
@@ -19,7 +19,7 @@ $panels = Array(
 		"label"		=>	"0120",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
-		"include"	=>	Array("CACHE_ENABLED","CACHE_TTL","JS_XD_LOADING","JS_XD_LOCATION","JS_XD_TIMEOUT")
+		"include"	=>	Array("CACHE_ENABLED","CACHE_TTL"/*,"JS_XD_LOADING","JS_XD_LOCATION","JS_XD_TIMEOUT"*/)
 	)
 );
 
@@ -37,28 +37,28 @@ $options = Array(
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
-	),
-	"JS_XD_LOADING"	=>	Array(
-		"type"		=>	"OnOffSelect",
-		"label"		=>	"0123",
-		"required"	=>	true,
-		"onclick"	=>	false,
-		"options"	=>	false
-	),
-	"JS_XD_LOCATION"=>	Array(
-		"type"		=>	"Select",
-		"label"		=>	"0124",
-		"required"	=>	false,
-		"onclick"	=>	false,
-		"options"	=>	$available_cdn
-	),
-	"JS_XD_TIMEOUT"	=>	Array(
-		"type"		=>	"NumberSpinner",
-		"label"		=>	"0125",
-		"required"	=>	true,
-		"onclick"	=>	false,
-		"options"	=>	false
-	)
+	)//,
+	//"JS_XD_LOADING"	=>	Array(
+	//	"type"		=>	"OnOffSelect",
+	//	"label"		=>	"0123",
+	//	"required"	=>	true,
+	//	"onclick"	=>	false,
+	//	"options"	=>	false
+	//),
+	//"JS_XD_LOCATION"=>	Array(
+	//	"type"		=>	"Select",
+	//	"label"		=>	"0124",
+	//	"required"	=>	false,
+	//	"onclick"	=>	false,
+	//	"options"	=>	$available_cdn
+	//),
+	//"JS_XD_TIMEOUT"	=>	Array(
+	//	"type"		=>	"NumberSpinner",
+	//	"label"		=>	"0125",
+	//	"required"	=>	true,
+	//	"onclick"	=>	false,
+	//	"options"	=>	false
+	//)
 );
 
 ?>

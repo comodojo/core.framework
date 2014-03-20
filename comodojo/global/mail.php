@@ -166,7 +166,7 @@ class mail {
 			throw new Exception('Invalid template',1705);
 		}
 		else {
-			$this->template = $template_name;
+			$this->html_template = $template_name;
 		}
 
 		return $this;
@@ -211,8 +211,9 @@ class mail {
 
 	public function add_tag($tag,$replace) {
 
-		if (empty($tag) OR empty($replace) OR !is_string($tag) OR !is_string($replace)) {
+		if (empty($tag) OR empty($replace) OR !is_string($tag) OR !is_scalar($replace)) {
 			comodojo_debug('Invalid tag to replace','ERROR','mail');
+			comodojo_debug($tag.'::'.$replace,'ERROR','mail');
 			throw new Exception('Invalid tag to replace',1708);
 		}
 		else {
@@ -271,7 +272,7 @@ class mail {
 
 	public function send() {
 
-		if (empty($this->to) OR empty($this->cc)) {
+		if (empty($this->to) AND empty($this->cc)) {
 			comodojo_debug('No RCPT TO or CC specified','ERROR','mail');
 			throw new Exception('No RCPT TO or CC specified',1707);
 		}
@@ -281,7 +282,7 @@ class mail {
 
 		if ($this->send_mail_as=='HTML') {
 			$this->mail->IsHTML(true);
-			$body = file_get_contents($this->html_template);
+			$body = file_get_contents(COMODOJO_SITE_PATH."comodojo/templates/".$this->html_template);
 			$body = str_replace("*_MESSAGE_*",$this->message,$body);
 			$body = str_replace("*_SUBJECT_*",$this->subject,$body);
 			$body = str_replace("*_SITEURL_*",COMODOJO_SITE_URL,$body);
@@ -326,13 +327,13 @@ class mail {
 	 */
 	public function __construct($address=false, $encoding=false, $debugLevel=false) {
 		
-		if (!COMODOJO_MAIL_SERVER) throw new Exception("Invalid mail server or mail disabled", 1701);
+		if (!COMODOJO_SMTP_SERVER) throw new Exception("Invalid mail server or mail disabled", 1701);
 		
 		comodojo_load_resource('class.phpmailer');
 		
 		$this->mail = new PHPMailer(true);
 
-		switch (COMODOJO_MAIL_SERVICE) {
+		switch (COMODOJO_SMTP_SERVICE) {
 			case 'smtp':
 				$this->mail->IsSMTP();
 			break;
@@ -348,17 +349,17 @@ class mail {
 		}
 		
 		$this->mail->CharSet = !$encoding ? COMODOJO_DEFAULT_ENCODING : $encoding;
-		$this->mail->SMTPDebug = !$debugLevel ? $this->debugLevel : $debugLevel;
+		$this->mail->SMTPDebug = !$debugLevel ? $this->debug_level : $debugLevel;
 		
-		$this->mail->Host = COMODOJO_MAIL_SERVER;
-		$this->mail->Port = COMODOJO_MAIL_PORT;
+		$this->mail->Host = COMODOJO_SMTP_SERVER;
+		$this->mail->Port = COMODOJO_SMTP_PORT;
 		
-		$this->mail->SMTPAuth   = COMODOJO_MAIL_IS_AUTHENTICATED;
+		$this->mail->SMTPAuth   = COMODOJO_SMTP_AUTHENTICATED;
 		
-		$this->mail->Username   = COMODOJO_MAIL_USER;
-		$this->mail->Password   = COMODOJO_MAIL_PASS;
+		$this->mail->Username   = COMODOJO_SMTP_USER;
+		$this->mail->Password   = COMODOJO_SMTP_PASSWORD;
 
-		switch (COMODOJO_MAIL_SECURITY) {
+		switch (COMODOJO_SMTP_SECURITY) {
 			case 'ssl':
 				$this->mail->SMTPSecure = 'ssl';
 			break;
@@ -371,7 +372,7 @@ class mail {
 		}
 		
 		
-		$default_from_address = is_null(COMODOJO_MAIL_ADDRESS) ? 'comodojo@localhost' : COMODOJO_MAIL_ADDRESS;
+		$default_from_address = is_null(COMODOJO_SMTP_ADDRESS) ? 'comodojo@localhost' : COMODOJO_SMTP_ADDRESS;
 
 		$_address = $address == false ? $default_from_address : $address;
 

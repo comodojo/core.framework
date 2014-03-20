@@ -1,25 +1,5 @@
 <?php
 
-/*
-$controlpanel_kernelRequiredParameters = Array(
-	"get_state"				=>	Array("what"),
-	"set_options"			=>	Array("siteTitle","siteDescription","siteAuthor","creationDate","locale","statistics"),
-	"set_appearance"		=>	Array("dojoTheme","siteTheme"),
-	"set_meta"				=>	Array("metaTags"),
-	"set_smtp"				=>	Array("smtpServer","smtpPort","smtpIsAuthenticated","smtpUser","smtpPassword","smtpAddress","smtpService","smtpSecurity"),
-	"set_ldap"				=>	Array("ldapServer","ldapPort","dc","cn","listerUserName","listerUserPassword","compatibleMode","ldapDefaultFilter"),
-	"set_authentication"	=>	Array("authenticationMode","authenticateSession","cacheExternalUsers","externalAuthenticatorServer","externalAuthenticatorMode","externalAuthenticatorKey"),
-	"set_authenticator"		=>	Array("enableAuthenticator","authenticatorMode","authenticatorKey"),
-	"set_registration"		=>	Array("registrationMode","registrationAuthorization"),
-	"set_advanced"			=>	Array("siteUrl","sitePath","siteExternalUrl","privateMode","dojoBaseUrl"),
-	"set_crossDomain"		=>	Array("xdLoading","xdTimeout","xdList"),
-	"set_requires"			=>	Array("dojoRequires"),
-	"set_debug"				=>	Array("dojoDebug","dojoDebugPopup","dojoDebugDeep"),
-	"set_maintenance"		=>	Array("suspendedMode","suspendedMessage"),
-	"set_bootstrap"			=>	Array("bootstrap")
-);
-*/
-
 $controlpanel_stateExtendedParams = Array(
 	"general"			=>	Array("builder"=>"form",	"table"=>"options","where"=>array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),"include"=>Array("siteTitle","siteDescription","siteAuthor","creationDate","locale","statistics")),
 	"appearance"		=>	Array("builder"=>"theme",	"table"=>"options","where"=>array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),"include"=>Array("dojoTheme","siteTheme")),
@@ -38,13 +18,9 @@ $controlpanel_stateExtendedParams = Array(
 );
 	
 $controlpanel_fieldsCompositionProperties = Array(
-
-
-
 	"siteUrl"			=> Array("name" => "siteUrl", "type" => "ValidationTextBox", "labelCode" => '0134', "required" => true, "onClick" => false, "options" => false),
 	"sitePath" 			=> Array("name" => "sitePath", "type" => "ValidationTextBox", "labelCode" => '0135', "required" => true, "onClick" => false, "options" => false),
 	"siteExternalUrl"	=> Array("name" => "siteExternalUrl", "type" => "TextBox", "labelCode" => '0169', "required" => false, "onClick" => false, "options" => false),
-	
 	"metaTags" 			=> Array("name" => "metaTags", "type" => "Special", "labelCode" => '0181', "required" => true, "onClick" => false, "options" => false),
 	"siteTheme" 		=> Array("name" => "siteTheme", "type" => "Select", "labelCode" => '0137', "required" => true, "onClick" => false, "options" => false),
 	"dojoTheme" 		=> Array("name" => "dojoTheme", "type" => "Select", "labelCode" => '0138', "required" => true, "onClick" => false, "options" => Array(Array("name"=>"tundra","value"=>"tundra"),Array("name"=>"soria","value"=>"soria"),Array("name"=>"nihilo","value"=>"nihilo"),Array("name"=>"claro","value"=>"claro"))),
@@ -92,30 +68,5 @@ $controlpanel_fieldsCompositionProperties = Array(
 	"authenticatorKey"	=> Array("name" => "authenticatorKey", "type" => "TextBox", "labelCode" => '0163', "required" => false, "onClick" => false, "options" => false),
 	"bootstrap"			=> Array("name" => "bootstrap", "type" => "Special", "labelCode" => '0170', "required" => true, "onClick" => false, "options" => false)
 );
-
-/*
-+------------------------------+
-| option                       |
-+------------------------------+
-
-
-| 
-
-
-
-|                   |
-|                   |
-
-|                |
-|                 |
-|              |
-|   |
-
-
-
-
-| BOOTSTRAP                    |
-+------------------------------+
-*/
 
 ?>

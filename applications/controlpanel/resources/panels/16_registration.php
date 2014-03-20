@@ -16,7 +16,7 @@ function get_registration_default_role() {
 	$roles = $r->get_roles();
 	$roles_options = Array();
 	foreach ($roles as $role) {
-		array_push($roles_options,Array("name"=>$role["description"],"value"=>$role["reference"]));
+		array_push($roles_options,Array("label"=>$role["description"],"id"=>$role["id"]));
 	}
 	return $roles_options;
 }

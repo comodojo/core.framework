@@ -27,23 +27,23 @@ function makeIndex() {
 
 	$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/installer/installer.html");
 
-	$js_via_cdn = !is_readable(COMODOJO_SITE_PATH . "comodojo/javascript/dojo/dojo.js");
+	//$js_via_cdn = !is_readable(COMODOJO_SITE_PATH . "comodojo/javascript/dojo/dojo.js");
 
-	if (!$js_via_cdn) {
+	//if (!$js_via_cdn) {
 		$loader = '
 			<link rel="stylesheet" type="text/css" href="comodojo/javascript/dojo/resources/dojo.css" />
 			<link rel="stylesheet" type="text/css" href="comodojo/javascript/dijit/themes/claro/claro.css" />
 			<script type="text/javascript" src="comodojo/javascript/dojo/dojo.js" ></script>
 		';
-	}
-	else {
-		require(COMODOJO_SITE_PATH . "comodojo/others/available_cdn");
-		$loader = '
-			<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/resources/dojo.css" />
-			<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css" />
-			<script type="text/javascript" src="'.$available_cdn[0]["id"].'"></script>
-		';
-	}
+	//}
+	//else {
+	//	require(COMODOJO_SITE_PATH . "comodojo/others/available_cdn");
+	//	$loader = '
+	//		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/resources/dojo.css" />
+	//		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css" />
+	//		<script type="text/javascript" src="'.$available_cdn[0]["id"].'"></script>
+	//	';
+	//}
 
 	$index = str_replace("*_DOJOLOADER_*",$loader,$index);
 	$index = str_replace("*_BANNER_*",$comodojoCustomization['banner'],$index);

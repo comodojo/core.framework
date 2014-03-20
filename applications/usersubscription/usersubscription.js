@@ -95,7 +95,7 @@ $c.App.load("usersubscription",
 					label: this.getLocalizedMessage('0006'),
 					required: false
 				}, {
-					name: "birthDate",
+					name: "birthday",
 					value: "",
 					type: "DateTextBox",
 					label: this.getLocalizedMessage('0007'),
@@ -145,7 +145,7 @@ $c.App.load("usersubscription",
 				myself.registrationform.fields.gobutton.cancel();
 			}
 			else {
-				$c.Dialog.info(myself.getLocalizedMessage(result._registrationAuthorization == 0 ? '0012' : '0013'));
+				$c.Dialog.info(myself.getLocalizedMessage(myself._registrationAuthorization == 0 ? '0012' : '0013'));
 				myself.stop();
 			}
 

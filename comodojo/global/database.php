@@ -352,7 +352,7 @@ class database {
 						case 'INFORMIX_PDO':
 						case 'POSTGRESQL':
 						case 'DB2':
-							$value_or_array[$key] = $key_val;
+							$value_or_array[$key] = $key_val ? 'TRUE' : 'FALSE';
 							break;
 						case 'DBLIB_PDO':
 						case 'ORACLE_PDO':
@@ -407,7 +407,7 @@ class database {
 						case 'INFORMIX_PDO':
 						case 'POSTGRESQL':
 						case 'DB2':
-							$k = $value_or_array;
+							$k = $value_or_array ? 'TRUE' : 'FALSE';
 							break;
 						case 'DBLIB_PDO':
 						case 'ORACLE_PDO':
@@ -1505,7 +1505,7 @@ class database {
 						case 'INFORMIX_PDO':
 						case 'POSTGRESQL':
 						case 'DB2':
-							$_value = $value;
+							$_value = $value ? 'TRUE' : 'FALSE';
 							break;
 						case 'DBLIB_PDO':
 						case 'ORACLE_PDO':

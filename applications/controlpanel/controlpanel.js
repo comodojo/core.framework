@@ -10,6 +10,8 @@
 
 $c.App.loadCss('controlpanel');
 
+$d.require("dojo.on");
+$d.require("dojo.mouse");
 $d.require("comodojo.Form");
 $d.require("comodojo.Layout");
 $d.require("gridx.Grid");
@@ -107,10 +109,15 @@ $c.App.load("controlpanel",
 				className: 'box success',
 				innerHTML: myself.getLocalizedMessage('0001')
 			}));
-			myself.container.main.center.containerNode.appendChild($d.create('div',{
+			myself._postControl = $d.create('div',{
 				className: 'box warning',
 				innerHTML: myself.getLocalizedMutableMessage('0002',['<a href="javascript:window.location.reload();">','</a>'])
-			}));
+			});
+
+			dojo.on(myself._postControl, dojo.mouse.enter, function(){comodojo.force_unload = true;});
+			dojo.on(myself._postControl, dojo.mouse.leave, function(){comodojo.force_unload = false;});
+			
+			myself.container.main.center.containerNode.appendChild(myself._postControl);
 			myself._buttonsGoesToBack();
 		};
 		this._setErrorState = function(error) {

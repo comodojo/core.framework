@@ -153,7 +153,7 @@ class registration {
 				!COMODOJO_REGISTRATION_AUTHORIZATION ? 1 : 0
 			))->store();
 			
-			if (COMODOJO_REGISTRATION_AUTHORIZATION == 0) { $this->send_registration_email($userName, is_null($completeName) ? $userName : $completeName, $email, $result["transactionId"], $registration_code);}
+			if (COMODOJO_REGISTRATION_AUTHORIZATION == 0) { $this->send_registration_email($userName, empty($completeName) ? $userName : $completeName, $email, $result["transactionId"], $registration_code);}
 			
 			$ev->record('user_registered', $userName, true);
 			
@@ -373,9 +373,9 @@ class registration {
 			->and_where("code","=",$registrationCode)
 			->and_where("expired","!=",1)
 			->and_where("confirmed","!=",1)
-			->and_where("authorized","!=",1)
+			->and_where("authorized","=",1)
 			->get();
-			
+
 			if ($r["resultLength"] != 1) {
 				$ev->record('user_confirmed', $requestId, false);
 				throw new Exception("Cannot find request id ".$requestId, 2803);
@@ -400,13 +400,15 @@ class registration {
 			
 			$um = new users_management();
 			$um->do_not_encrypt_userPass = true;
+			$um->add_user_from_registration = true;
 			$um->add_user($userName,$userPass,$email,Array(
 				"completeName"	=>	$completeName,
 				"birthday"		=>	$birthday,
-				"gender"		=>	$gender
+				"gender"		=>	$gender,
+				"enabled"		=>	true
 			));
 			
-			$this->send_welcome_email($userName, is_null($completeName) ? $userName : $completeName, $email, $requestId, $registration_code);
+			$this->send_welcome_email($userName, is_null($completeName) ? $userName : $completeName, $email, $requestId, $registrationCode);
 			
 		}
 		catch (Exception $e) {

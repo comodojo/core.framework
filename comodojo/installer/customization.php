@@ -113,9 +113,9 @@ $comodojoCustomization = array(
 		
 		"JS_REQUIRES"				=>	'[{"name":"dojo.aspect"},{"name":"dojo.data.ItemFileReadStore"},{"name":"dojo.data.ItemFileWriteStore"},{"name":"dijit.form.Button"},{"name":"dijit.Dialog"},{"name":"dijit.layout.ContentPane"}]',
 		"JS_BASE_URL"				=>	'comodojo/javascript/dojo/',
-		"JS_XD_LOADING"				=>	0,
-		"JS_XD_LOCATION"			=>	'//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js',
-		"JS_XD_TIMEOUT"				=>	10,
+		//"JS_XD_LOADING"				=>	0,
+		//"JS_XD_LOCATION"			=>	'//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js',
+		//"JS_XD_TIMEOUT"				=>	10,
 		"JS_DEBUG"					=>	1,
 		"JS_DEBUG_POPUP"			=>	0,
 		"JS_DEBUG_DEEP"				=>	0,
@@ -149,7 +149,7 @@ $comodojoCustomization = array(
 		"AUTHENTICATION_CACHE_TTL"		=>	259200,
 		"REGISTRATION_MODE"				=>	0,
 		"REGISTRATION_AUTHORIZATION"	=>	0,
-		"REGISTRATION_DEFAULT_ROLE"		=>	3,
+		"REGISTRATION_DEFAULT_ROLE"		=>	1000,
 		"REGISTRATION_TTL"				=>	604800,
 		/**
 		 * LDAP

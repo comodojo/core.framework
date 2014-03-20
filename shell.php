@@ -47,15 +47,15 @@ class shell extends comodojo_basic {
 					async: true,
 					parseOnLoad: false,
 					baseUrl: '" . COMODOJO_JS_BASE_URL . "',";
-		if (COMODOJO_JS_XD_LOADING) {
-		$loader .= "
-					dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
-					packages: [{
-						name: 'comodojo',
-						location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
-					}],
-					waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
-		}
+		//if (COMODOJO_JS_XD_LOADING) {
+		//$loader .= "
+		//			dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
+		//			packages: [{
+		//				name: 'comodojo',
+		//				location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
+		//			}],
+		//			waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
+		//}
 		$loader .= "
 					locale: '" . $this->locale . "',
 					has: {
@@ -66,7 +66,7 @@ class shell extends comodojo_basic {
 					}
 				};
 			</script>
-			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js') . "\"></script>
+			<script type=\"text/javascript\" src=\"" . /*(COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : */'comodojo/javascript/dojo/dojo.js'/*)*/ . "\"></script>
 			<script type=\"text/javascript\">
 				require([\"dojo/ready\",\"comodojo/Shell\"], function(ready,shell){
 					ready(function(){
@@ -104,15 +104,15 @@ class shell extends comodojo_basic {
 					async: true,
 					parseOnLoad: false,
 					baseUrl: '" . COMODOJO_JS_BASE_URL . "',";
-		if (COMODOJO_JS_XD_LOADING) {
-			$loader .= "
-					dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
-					packages: [{
-						name: 'comodojo',
-						location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
-					}],
-					waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
-		}
+		//if (COMODOJO_JS_XD_LOADING) {
+		//	$loader .= "
+		//			dojoBlankHtmlUrl: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . COMODOJO_JS_BASE_URL . "resources/blank.html',
+		//			packages: [{
+		//				name: 'comodojo',
+		//				location: '" . (is_null(COMODOJO_SITE_EXTERNAL_URL) ? COMODOJO_SITE_URL : COMODOJO_SITE_EXTERNAL_URL) . "comodojo/javascript/comodojo'
+		//			}],
+		//			waitSeconds: '" . COMODOJO_JS_XD_TIMEOUT . "',";
+		//}
 		$loader .= "
 					locale: '" . $this->locale . "',
 					has: {
@@ -123,7 +123,7 @@ class shell extends comodojo_basic {
 					}
 				};
 			</script>
-			<script type=\"text/javascript\" src=\"" . (COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : 'comodojo/javascript/dojo/dojo.js') . "\"></script>
+			<script type=\"text/javascript\" src=\"" . /*(COMODOJO_JS_XD_LOADING ? COMODOJO_JS_XD_LOCATION : */'comodojo/javascript/dojo/dojo.js'/*)*/ . "\"></script>
 			<script type=\"text/javascript\">
 				require([\"dojo/ready\",\"dojo/dom\"], function(ready,dom){
 					ready(function(){

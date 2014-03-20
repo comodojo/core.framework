@@ -5,7 +5,7 @@ class stage extends stage_base {
 	public function output() {
 
 		global $comodojoCustomization;
-		require(COMODOJO_SITE_PATH . "comodojo/others/available_cdn");
+		//require(COMODOJO_SITE_PATH . "comodojo/others/available_cdn");
 		
 		return array(
 			array(
@@ -40,26 +40,26 @@ class stage extends stage_base {
 										)
 									)
 			),
-			array(
-				"type"			=>	"OnOffSelect",
-				"label"			=>	$this->i18n["0024"],
-				"name"			=>	"JS_XD_LOADING",
-				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['JS_XD_LOADING']
-			),
-			array(
-				"type"			=>	"Select",
-				"label"			=>	$this->i18n["0079"],
-				"name"			=>	"JS_XD_LOCATION",
-				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['JS_XD_LOCATION'],
-				"options"		=>	$available_cdn
-			),
-			array(
-				"type"			=>	"ValidationTextBox",
-				"label"			=>	$this->i18n["0025"],
-				"name"			=>	"JS_XD_TIMEOUT",
-				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['JS_XD_TIMEOUT'],
-				"required"		=>	true
-			),
+			//array(
+			//	"type"			=>	"OnOffSelect",
+			//	"label"			=>	$this->i18n["0024"],
+			//	"name"			=>	"JS_XD_LOADING",
+			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['JS_XD_LOADING']
+			//),
+			//array(
+			//	"type"			=>	"Select",
+			//	"label"			=>	$this->i18n["0079"],
+			//	"name"			=>	"JS_XD_LOCATION",
+			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['JS_XD_LOCATION'],
+			//	"options"		=>	$available_cdn
+			//),
+			//array(
+			//	"type"			=>	"ValidationTextBox",
+			//	"label"			=>	$this->i18n["0025"],
+			//	"name"			=>	"JS_XD_TIMEOUT",
+			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['JS_XD_TIMEOUT'],
+			//	"required"		=>	true
+			//),
 			array(
 				"type"			=>	"TextBox",
 				"label"			=>	$this->i18n["0029"],

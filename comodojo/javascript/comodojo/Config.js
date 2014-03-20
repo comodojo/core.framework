@@ -46,6 +46,16 @@ if (!Object.keys) {
 	};
 };
 
+lang.setObject("comodojo.force_unload", false);
+
+window.addEventListener("beforeunload", function (e) {
+	var confirmationMessage = "wowowowow";
+	if (comodojo.Bus.getRunningApplications(true,true).length != 0 && !comodojo.force_unload) {
+		(e || window.event).returnValue = confirmationMessage;
+		return confirmationMessage;
+	}
+});
+
 // Current user name
 // String
 lang.setObject("comodojo.userName", comodojoConfig.userName);
@@ -81,7 +91,8 @@ lang.setObject("comodojo.pidSeed", 100);
 // Applications path
 // String
 lang.setObject("comodojo.applicationsPath", "applications/");
-//lang.setObject("comodojo._applicationsPath", "devel/applications/");
+
+//lang.setObject("comodojo.stateFired", 0);
 
 var debug = function (message) {
 	// summary:
@@ -187,5 +198,32 @@ lang.setObject("comodojo.loadCss", loadCss);
 
 loadMessages();
 loadErrors();
+
+//var ApplicationState = function(applicationAction, applicationName, applicationPid){
+//	this.applicationAction = applicationAction;
+//	this.applicationName = applicationName;
+//	this.applicationPid = applicationPid;
+//};
+//
+//lang.setObject("comodojo.state", ApplicationState);
+//
+//lang.extend(comodojo.state, {
+//	back: function(){
+//		if (this.applicationAction == 'start') {
+//			console.info('Stopping app '+this.applicationName+' with PID '+this.applicationPid);
+//		}
+//		else {
+//			console.info('Starting app '+this.applicationName+' with EXEC '+this.applicationName);
+//		}
+//	},
+//	forward: function(){
+//		if (this.applicationAction == 'start') {
+//			console.info('Starting app '+this.applicationName+' with EXEC '+this.applicationName);
+//		}
+//		else {
+//			console.info('Stopping app '+this.applicationName+' with PID '+this.applicationPid);
+//		}
+//	}
+//});
 
 });

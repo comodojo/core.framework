@@ -54,16 +54,11 @@ class bootstrap extends comodojo_basic {
 		$to_return .= "comodojo.debug(' - ".count($autostart)." application/s to autostart');\n";
 
 		foreach($autostart as $key => $val) $to_return .= "comodojo.Bus.addAutostartApplication('" . $val . "');\n";
-		//$to_return .= "comodojo.Bus.addAutostartApplication('qotd');\n";
 		
+		//$to_return .= "comodojo.stateFired = ".count($autostart).";\n";
+
 		$to_return .= "comodojo.debug('Comodojo bootstrap process completed');\n";
 		
-		//$to_return .= "dojo.ready(function() {\n";
-		//foreach($autostart as $key => $val) $to_return .= "comodojo.App.start('" . $val . "');\n";
-		//$to_return .= "comodojo.App.start('qotd');\n";
-		//$to_return .= "comodojo.debug(Comodojo bootstrap process completed);\n";
-		//$to_return .= "});";
-
 		return $to_return;
 		
 	}

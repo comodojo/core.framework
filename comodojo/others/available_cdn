@@ -1,10 +1,12 @@
+NOTE: comodojo has left the CDN option in version 1.X due to application framework 1.X incompatibility.
+		Next version of framework (if any) will probably enable this feature.
 <?php
-
-$available_cdn = Array(
-	Array("label"=>"Google Code (1.9.0) [default]","id"=>"//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js"),
-	Array("label"=>"Google Code (1.9-0-uncompressed)","id"=>"//ajax.googleapis.com/ajax/libs/dojo/1.9.0/dojo/dojo.js.uncompressed.js"),
-	Array("label"=>"Yandex EU CDN (1.8.3)","id"=>"//yandex.st/dojo/1.9.1/dojo/dojo.js"),
-	Array("label"=>"Yandex EU CDN (1.8.3-uncompressed)","id"=>"//yandex.st/dojo/1.9.1/dojo/dojo.js.uncompressed.js")
-);
- 
+//
+//$available_cdn = Array(
+//	Array("label"=>"Google Code (1.9.3) [default]","id"=>"//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js"),
+//	Array("label"=>"Google Code (1.9-3-uncompressed)","id"=>"//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js.uncompressed.js"),
+//	Array("label"=>"Yandex EU CDN (1.9.1)","id"=>"//yandex.st/dojo/1.9.1/dojo/dojo.js"),
+//	Array("label"=>"Yandex EU CDN (1.9.1-uncompressed)","id"=>"//yandex.st/dojo/1.9.1/dojo/dojo.js.uncompressed.js")
+//);
+// 
 ?>

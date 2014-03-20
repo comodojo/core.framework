@@ -31,7 +31,7 @@ var loadScriptFile = function (src, params, callback) {
 	//		Array of parameters
 	var _params = {
 		preventCache: false,
-		skipXhr: true,
+		skipXhr: false,
 		forceReload: false,
 		sync: false
 	}
@@ -46,7 +46,6 @@ var loadScriptFile = function (src, params, callback) {
 	var q = query("script[src='"+src+"']");
 	if (q.length != 0) {
 		if (!_params.forceReload) {
-			console.log('REMIND TO REMOVE skipXhr! - skip touchcallback');
 			callback();
 		}
 		else {
@@ -58,7 +57,7 @@ var loadScriptFile = function (src, params, callback) {
 		}
 	}
 	else {
-		if (_params.skipXhr) {
+		if (_params.skipXhr || has("ie") <= 9) {
 			domConstruct.create("script", {
 				language: 'javascript',
 				type: 'text/javascript',
@@ -76,10 +75,7 @@ var loadScriptFile = function (src, params, callback) {
 				handleAs: 'javascript',
 				preventCache: _params.preventCache,
 				sync: _params.sync
-			}).then(/*loadfunction(){
-				console.log('touchcallback');
-				callback();
-			}*/callback,/*error*/function(error){
+			}).then(/*callback*/callback,/*error*/function(error){
 				comodojo.debug('Unable to load script: '+src+' (error was: '+e+')');
 			});
 		}
@@ -94,15 +90,15 @@ var bootstrap = function() {
 	var bootstrapFile = 'bootstrap.php';
 	//var bootstrapFile = 'comodojo/global/bootstrap.php?applicationsDirectory='+comodojo._applicationsPath;
 	query("script[src='"+bootstrapFile+"']").forEach(function(s){domConstruct.destroy(s);});
-	if (/*has("webkit") ||*/ has("opera") || has("ie")) {
-		request.get(bootstrapFile,{
-			headers: {'Content-Type':'application/x-javascript'},
-			handleAs: 'javascript'
-		});
-	}
-	else {
+	//if (/*has("webkit") ||*/ has("opera") || has("ie")) {
+	//	request.get(bootstrapFile,{
+	//		headers: {'Content-Type':'application/x-javascript'},
+	//		handleAs: 'javascript'
+	//	});
+	//}
+	//else {
 		loadScriptFile(bootstrapFile,{sync:true},comodojo.App.autostart);
-	}
+	//}
 };
 
 var debugStartup = function() {

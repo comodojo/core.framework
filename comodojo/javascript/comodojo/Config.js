@@ -49,7 +49,7 @@ if (!Object.keys) {
 lang.setObject("comodojo.force_unload", false);
 
 window.addEventListener("beforeunload", function (e) {
-	var confirmationMessage = "wowowowow";
+	var confirmationMessage = comodojo.getLocalizedMessage('10041');
 	if (comodojo.Bus.getRunningApplications(true,true).length != 0 && !comodojo.force_unload) {
 		(e || window.event).returnValue = confirmationMessage;
 		return confirmationMessage;

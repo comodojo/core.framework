@@ -21,6 +21,11 @@ class services_management {
 	 * @default true;
 	 */
 	private $restrict_management_to_administrators = true;
+
+	/**
+	 * Reserved service names
+	 */
+	private $reserved_services = Array('services','service','srootnode','alias','application'); 
 /********************** PRIVATE VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -40,33 +45,46 @@ class services_management {
 		$services = Array();
 		
     	$service_path = opendir(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER);
-		while(false !== ($service_file = readdir($service_path))) {
-			if (!is_dir(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_file) AND substr($service_file, -1, 11) == '.properties') {
+
+		while(false !== ($service_item = readdir($service_path))) {
+
+			$service_file_properties = pathinfo(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_item);
+
+			$service_file = $service_file_properties['dirname'].'/'.$service_file_properties['basename'];
+
+			if (!is_dir($service_file) AND $service_file_properties['extension'] == 'properties' AND $service_file_properties['basename'][0] != '.' ) {
 					
-				$service = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_file);
+				$service = file_get_contents($service_file);
 				
-				if (!$service) continue;
-				
-				$service = json2array($service);
-				
-				if ($service['is_service']) {
-					$services[substr($service, 0, strlen($service)-12)] = Array("name"=>$service["name"],"type"=>"service","enabled"=>$service["enabled"]);
-				}
-				else if ($service['is_alias']) {
-					$services[substr($service, 0, strlen($service)-12)] = Array("name"=>$service["name"],"type"=>"alias","enabled"=>$service["enabled"]);
-				}
-				else if ($service['is_application']) {
-					$services[substr($service, 0, strlen($service)-12)] = Array("name"=>$service["name"],"type"=>"application","enabled"=>$service["enabled"]);
-				}
-				else {
+				if (!$service) {
+					comodojo_debug('Unable to open service properties file: '.$service_file.'; error reading file (corrupt?)','WARNING',"services_management");
 					continue;
 				}
 				
+				$service = json2array($service);
+
+				if ($service_file_properties['filename'] != $service["name"]) {
+					comodojo_debug('Unable to open service properties file '.$service_file.' service name is inconsistent','WARNING',"services_management");
+					continue;
+				}
+				
+				array_push($services, Array(
+					"id"		=>	$service_file_properties['filename'],
+					"name"		=>	$service["name"],
+					"type"		=>	$service["type"],
+					"enabled"	=>	$service["enabled"],
+					"leaf"		=>	true
+				));
+				
 			}
 			else {
+
 				continue;
+
 			}
+
         }
+
 		closedir($service_path);
 		
 		return $services;

@@ -11,6 +11,7 @@
  */
 
 comodojo_load_resource('application');
+comodojo_load_resource('services_management');
 
 class servicesmanager extends application {
 	
@@ -19,7 +20,14 @@ class servicesmanager extends application {
 	}
 
 	public function getServices($params) {
-
+		$service = new services_management();
+		try {
+			$s = $service->get_services();
+		}
+		catch (Exception $e) {
+			throw $e;
+		}
+		return $s;
 	}
 
 }

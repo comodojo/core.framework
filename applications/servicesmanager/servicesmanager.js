@@ -8,6 +8,8 @@
  * @license		GPL Version 3
  */
 
+$c.App.loadCss('servicesmanager');
+
 $d.require("dojo.on");
 $d.require("dojo.store.Memory");
 $d.require("dojo.store.Observable");
@@ -24,15 +26,61 @@ $c.App.load("servicesmanager",
 
 		var myself = this;
 
+		this.availableServices = [];
+
 		this.init = function(){
-			this.layout();
+
+			this.sStore = new dojo.store.Memory({
+				data: [
+					{ id: 'srootnode', name:'Type', leaf: false},
+					{ id: 'SERVICE', name:'service', type: "srootnode", leaf: false},
+					{ id: 'APPLICATION', name:'application', type: "srootnode", leaf: false},
+					{ id: 'ALIAS', name:'alias', type: "srootnode", leaf: false}
+				],
+				getChildren: function(object){
+					return this.query({type: object.id});
+				}
+			});
+
+			$c.Kernel.newCall(myself.initCallback,{
+				application: "servicesmanager",
+				method: "get_services"
+			});
+
 		};
 		
 		this.initCallback = function(success,result) {
-		
+			if (success) {
+				var i=0;
+				for (i in result) {
+					myself.sStore.data.push(result[i]);
+					if (result[i]['type'] == 'SERVICE' || result[i]['type'] == 'APPLICATION') {
+						myself.availableServices.push({
+							label: result[i]['name'],
+							id: result[i]['name']
+						});
+					}
+				}
+				myself.layout();
+			}
+			else {
+				$c.Error.modal(result.code,result.name);
+				myself.stop();
+			}
 		};
 
 		this.layout = function() {
+
+			this.sStoreObservable = new dojo.store.Observable(this.sStore);
+
+			this.sModel = new dijit.tree.ObjectStoreModel({
+				store: this.sStoreObservable,
+				query: {id: 'srootnode'}
+			});
+
+			this.sModel.mayHaveChildren = function(item) {
+				return item.leaf == false;
+			};
 
 			this.container = new $c.Layout({
 				modules: ['Tree','TabContainer'],
@@ -40,10 +88,11 @@ $c.App.load("servicesmanager",
 				splitter: false,
 				id: pid,
 				hierarchy: [{
-					type: 'ContentPane',
+					type: 'Tree',
 					name: 'left',
 					region: 'left',
 					params: {
+						model: this.sModel,
 						style: "width: 200px;",
 						splitter: true,
 					}
@@ -77,6 +126,17 @@ $c.App.load("servicesmanager",
 					cssClass: 'layout_action_pane'
 				}]
 			}).build();
+
+			this.container.main.left.getIconClass = function(item, opened) {
+
+				if (!item || this.model.mayHaveChildren(item)) {
+					return opened ? "dijitFolderOpened" : "dijitFolderClosed";
+				}
+				else {
+					return item.enabled ? 'servicesmanager_service_enabled' : 'servicesmanager_service_disabled';
+				}
+
+			};
 
 			this.mirror = comodojo.Mirror.build({
 				attachNode: this.container.main.center.service_code.containerNode, 

@@ -105,7 +105,7 @@ class services extends comodojo_basic {
 		}
 		
 		try {
-			if ($service_properties['is_service']) {
+			if (strtoupper($service_properties['type']) == "SERVICE") {
 				if (!is_readable($service_service_file)) {
 					comodojo_debug('Cannot read service file: '.$service_service_file,'ERROR','services');
 					throw new Exception('Internal Server Error', 500);
@@ -134,7 +134,7 @@ class services extends comodojo_basic {
 				comodojo_debug('Serving result for service: '.$service_properties['name'].' (plain service)','INFO','services');
 				
 			}
-			elseif ($service_properties['is_application']) {
+			elseif (strtoupper($service_properties['type']) == "APPLICATION") {
 				$this->app_exec = COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER.$service_properties['application'].'/'.$service_properties['application'].'.php';
 				if (!is_readable($this->app_exec)) {
 					comodojo_debug('Cannot read app file for service: '.$service_service_file,'ERROR','services');
@@ -197,7 +197,7 @@ class services extends comodojo_basic {
 
 		$exec_name = $service_properties['name'];
 
-		if ($service_properties['is_alias']) {
+		if (strtoupper($service_properties['type']) == "ALIAS") {
 			
 			$service_properties_file = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_properties['alias_for'].'.properties';
 			$service_service_file = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_properties['alias_for'].'.service';
@@ -216,11 +216,11 @@ class services extends comodojo_basic {
 			else {
 				comodojo_debug("Service ".$service_properties['name']." is an alias for ".$service_properties['alias_for'].", now merging parameters",'ERROR','services');
 				
-				$service_properties['is_alias'] = false;
+				//$service_properties['is_alias'] = false;
 				$service_properties['alias_for'] = false;
-				$service_properties['is_service'] = $alias_service_properties['is_service'];
+				$service_properties['type'] = $alias_service_properties['type'];
 				$service_properties['required_parameters'] = $alias_service_properties['required_parameters'];
-				$service_properties['is_application'] = $alias_service_properties['is_application'];
+				//$service_properties['is_application'] = $alias_service_properties['is_application'];
 				$service_properties['application'] = $alias_service_properties['application'];
 				$service_properties['method'] = $alias_service_properties['method'];
 				$exec_name = $alias_service_properties['name'];

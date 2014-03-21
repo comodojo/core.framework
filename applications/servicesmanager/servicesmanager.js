@@ -28,6 +28,8 @@ $c.App.load("servicesmanager",
 
 		this.availableServices = [];
 
+		this.availableContentType = ["text/csv","text/plain","application/json","application/octet-stream","application/xml","application/zip"],
+
 		this.init = function(){
 
 			this.sStore = new dojo.store.Memory({
@@ -137,6 +139,125 @@ $c.App.load("servicesmanager",
 				}
 
 			};
+
+			//this.propertiesForm = new new $c.Form({
+			//	modules:['NumberSpinner','TextBox','Textarea','ValidationTextBox','Select','Button'],
+			//	formWidth: 'auto',
+			//	hierarchy:[{
+			//		name: "name",
+			//		value: '',
+			//		type: "ValidationTextBox",
+			//		label: myself.getLocalizedMessage('0000'),
+			//		required: true,
+			//	},{
+			//		name: "type",
+			//		value: '',
+			//		type: "Select",
+			//		label: myself.getLocalizedMessage('0009'),
+			//		required: true,
+			//		readonly: 'readOnly',
+			//		hidden: true
+			//	},{
+			//		name: "note_account",
+			//		type: "success",
+			//		content: myself.getLocalizedMutableMessage('0013',[result.account_name, result.keychain])
+			//	},{
+			//		name: "description",
+			//		value: result.description,
+			//		type: "Textarea",
+			//		label: myself.getLocalizedMessage('0001'),
+			//		required: false
+			//	},{
+			//		name: "type",
+			//		value: result.type,
+			//		type: "Select",
+			//		label: myself.getLocalizedMessage('0002'),
+			//		required: true,
+			//		options:myself.availableTypes
+			//	},{
+			//		name: "view_change_password_user",
+			//		type: "Button",
+			//		label: myself.getLocalizedMessage('0012'),
+			//		disabled: !($c.App.isRegistered('userdialog') || $c.App.isRegistered('readyform')),
+			//		hidden: result.keychain == 'SYSTEM',
+			//		onClick: function() {
+			//			$c.App.start('userdialog',{
+			//				message: myself.getLocalizedMessage('0017'),
+			//				showUserName: false,
+			//				showUserPass: true,
+			//				callback: myself.viewChangeUserAccount,
+			//				preventCancel: true
+			//			});
+			//		}
+			//	},{
+			//		name: "view_change_password_system",
+			//		type: "Button",
+			//		label: myself.getLocalizedMessage('0012'),
+			//		disabled: !$c.App.isRegistered('readyform'),
+			//		hidden: result.keychain != 'SYSTEM',
+			//		onClick: function() {
+			//			myself.viewChangeSystemAccount();
+			//		}
+			//	},{
+			//		name: "note_fields",
+			//		type: "info",
+			//		content: myself.getLocalizedMessage('0010')
+			//	},{
+			//		name: "name",
+			//		value: result.name,
+			//		type: "TextBox",
+			//		label: myself.getLocalizedMessage('0003'),
+			//		required: false
+			//	},{
+			//		name: "host",
+			//		value: result.host,
+			//		type: "TextBox",
+			//		label: myself.getLocalizedMessage('0004'),
+			//		required: false
+			//	},{
+			//		name: "port",
+			//		value: result.port,
+			//		type: "NumberSpinner",
+			//		label: myself.getLocalizedMessage('0005'),
+			//		required: true,
+			//		min: 0,
+			//		max: 65535
+			//	},{
+			//		name: "model",
+			//		value: result.model,
+			//		type: "Select",
+			//		label: myself.getLocalizedMessage('0006'),
+			//		required: false,
+			//		options:myself.availableModels
+			//	},{
+			//		name: "prefix",
+			//		value: result.prefix,
+			//		type: "TextBox",
+			//		label: myself.getLocalizedMessage('0007'),
+			//		required: false
+			//	},{
+			//		name: "custom",
+			//		value: result.custom,
+			//		type: "TextBox",
+			//		label: myself.getLocalizedMessage('0008'),
+			//		required: false
+			//	},{
+			//		name: "save_account",
+			//		type: "Button",
+			//		label: myself.getLocalizedMessage('0011'),
+			//		onClick: function() {
+			//			myself.changeAccount();
+			//		}
+			//	},{
+			//		name: "delete_account",
+			//		type: "Button",
+			//		label: myself.getLocalizedMessage('0014'),
+			//		onClick: function() {
+			//			$c.Dialog.warning(myself.getLocalizedMessage('0014'), myself.getLocalizedMutableMessage('0021',[myself.selectedId, myself.selectedAccount, myself.selectedKeychain]), myself.deleteAccount);
+			//		}
+			//	}],
+			//	attachNode: this.container.main.center.service_properties.containerNode
+			//}).build();
 
 			this.mirror = comodojo.Mirror.build({
 				attachNode: this.container.main.center.service_code.containerNode, 

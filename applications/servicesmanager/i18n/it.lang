@@ -11,16 +11,24 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Nome del servizio',
+	'0001'	=>	'Tipo',
+	'0002'	=>	'Alias per',
+	'0003'	=>	'Applicazione',
+	'0004'	=>	'Metodo',
+	'0005'	=>	'Descrizione',
+	'0006'	=>	'Abilita cache',
+	'0007'	=>	'Time To Live',
+	'0008'	=>	'Access control (allow origin)',
+	'0009'	=>	'Metodi HTTP supportati',
+	'0010'	=>	'Content Type',
+	'0011'	=>	'Parametri richiesti (separati da virgola, virgolettati)',
+	'0012'	=>	'Servizio',
+	'0013'	=>	'Applicazione',
+	'0014'	=>	'Alias',
+	'0015'	=>	'Solo Server',
+	'0014'	=>	'Solo Client',
+	'0015'	=>	'Server e Client'
 );
 
 ?>

@@ -11,16 +11,24 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Service name',
+	'0001'	=>	'Service type',
+	'0002'	=>	'Alias for',
+	'0003'	=>	'Application',
+	'0004'	=>	'Method',
+	'0005'	=>	'Description',
+	'0006'	=>	'Enable caching',
+	'0007'	=>	'Time To Live',
+	'0008'	=>	'Access control (allow origin)',
+	'0009'	=>	'Supported HTTP methods',
+	'0010'	=>	'Content Type',
+	'0011'	=>	'Required parameters (comma separated with quotation marks)',
+	'0012'	=>	'Service',
+	'0013'	=>	'Application',
+	'0014'	=>	'Alias',
+	'0015'	=>	'Server only',
+	'0014'	=>	'Client only',
+	'0015'	=>	'Server & Client'
 );
 
 ?>

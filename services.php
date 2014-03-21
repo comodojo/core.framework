@@ -156,7 +156,7 @@ class services extends comodojo_basic {
 				
 				if (!attributes_to_parameters_match($attributes, $method[1])) {
 					comodojo_debug('Unsustainable request for service '.$service_properties['name'].': parameters mismatch','WARNING','services');
-					throw new Exception("conversation error",__COPYRIGHT__ 400);
+					throw new Exception("conversation error",400);
 				}
 				
 				$result = $app_run->$method[0]($attributes);

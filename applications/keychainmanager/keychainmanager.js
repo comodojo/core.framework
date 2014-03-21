@@ -12,6 +12,7 @@ $d.require("dojo.store.Memory");
 $d.require("dojo.store.Observable");
 $d.require("dijit.tree.ObjectStoreModel");
 $d.require("comodojo.Layout");
+$d.require('comodojo.Form');
 
 $c.App.load("keychainmanager",
 

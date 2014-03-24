@@ -30,7 +30,11 @@ $lang = Array(
 	'0016'	=>	'Client only',
 	'0017'	=>	'Server & Client',
 	'0018'	=>	'No cache',
-	'0019'	=>	'Editor disabled due to type of service selected'
+	'0019'	=>	'Editor disabled for this service'
+	'0020'	=>	'Add new service',
+	'0021'	=>	'Disable service',
+	'0022'	=>	'Enable service',
+	'0023'	=>	'Delete service'
 );
 
 ?>

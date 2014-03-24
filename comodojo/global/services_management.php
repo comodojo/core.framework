@@ -105,7 +105,7 @@ class services_management {
 			$_properties = false;
 			$_service = false;
 			
-			$properties = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_file.'.properties');
+			$properties = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties');
 				
 			if (!$properties) throw new Exception("Unreadable service properties file", 2901);
 			
@@ -113,13 +113,14 @@ class services_management {
 			
 			if (!$_properties['name']) throw new Exception("Unreadable service properties file", 2901);
 			
-			if ($_properties['is_service']) {
-				$_service = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service_file.'.service');
+			if ($_properties['type'] == 'SERVICE') {
+				$_service = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.service');
+				if (!$_service) throw new Exception("Unreadable service file", 2907);
 			}
 			
 			return Array(
-				"properties"	=>	$_properties,
-				"service"		=>	$_service
+				"properties_file"	=>	$_properties,
+				"service_file"		=>	$_service
 			);
 			
 		}

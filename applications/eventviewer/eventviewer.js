@@ -111,8 +111,7 @@ $c.App.load("eventviewer",
 				}
 				myself.filterByValue.attr('label',myself.getLocalizedMessage('0013')+cellName+' = '+(!cellData ? 'null' : cellData));
 				myself.filterByNotValue.attr('label',myself.getLocalizedMessage('0013')+cellName+' != '+(!cellData ? 'null' : cellData));
-			})
-
+			});
 
 			this.container = new $c.Layout({
 				modules: ['Grid'],

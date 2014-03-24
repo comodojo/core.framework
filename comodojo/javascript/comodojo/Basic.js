@@ -57,7 +57,7 @@ var loadScriptFile = function (src, params, callback) {
 		}
 	}
 	else {
-		if (_params.skipXhr || has("ie") <= 9) {
+		if (_params.skipXhr || has("ie") <= 9 || comodojoConfig.debug) {
 			domConstruct.create("script", {
 				language: 'javascript',
 				type: 'text/javascript',

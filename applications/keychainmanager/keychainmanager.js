@@ -170,14 +170,6 @@ $c.App.load("keychainmanager",
 				}]
 			}).build();
 
-			//this.container.main.left.getIconClass = function(item,opened){
-			//	//return opened ? "dijitFolderOpened" : "dijitFolderClosed";
-			//	//return (!item || this.model.mayHaveChildren(item)) ? (opened ? "dijitFolderOpened" : "dijitFolderClosed") : "dijitLeaf"
-			//	return myself.kStoreObservable.query(item, 'leaf') ? (opened ? "dijitFolderOpened" : "dijitFolderClosed") : "dijitLeaf";
-			//};
-
-			$c.treee = this.container.main.left;
-
 			this.container.main.left.on('click',function(item){
 				if (item.leaf) {
 					myself.openAccount(item.name, item.keychain);

@@ -13,6 +13,8 @@ mirror.keyMapPath = "codemirror/keymap/%N";
 
 mirror.addonPath = "codemirror/addon/%N";
 
+mirror.unlock = false;
+
 var Mirror = {
 	// summary:
 	// description:
@@ -145,7 +147,9 @@ Mirror.lock = function(mir, message) {
 };
 
 Mirror.release = function(mir) {
-	mir.unlock();
+	if (lang.isFunction(mir.unlock)) {
+		mir.unlock();
+	}
 	mir.unlock = false;
 	mir.setOption("readOnly", false);
 };

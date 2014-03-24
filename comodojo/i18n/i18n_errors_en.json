@@ -145,6 +145,7 @@
 	"2904":"Invalid properties for a service",
 	"2905":"Service name is used",
 	"2906":"Error writing service properties",
+	"2907":"Unreadable service file",
 	"3001":"Multi-disk zip archives not supported",
 	"3002":"Renaming temporary file failed",
 	"3003":"Closing zip archive failed",

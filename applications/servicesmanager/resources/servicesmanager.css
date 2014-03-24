@@ -7,5 +7,13 @@
 .servicesmanager_service_disabled {
 	background-image: url('service_disabled.png'); 
 	width: 16px;
-	height: 16px;
+	height: 16px
+}
+
+.servicesmanager_service_enabled_label {
+	font-weight: bold;
+}
+
+.servicesmanager_service_disabled_label {
+	color: grey;
 }

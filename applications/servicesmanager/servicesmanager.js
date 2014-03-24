@@ -14,6 +14,8 @@ $d.require("dojo.on");
 $d.require("dojo.store.Memory");
 $d.require("dojo.store.Observable");
 $d.require("dijit.tree.ObjectStoreModel");
+$d.require("dijit.Menu");
+$d.require("dijit.MenuItem");
 $d.require("comodojo.Layout");
 $d.require('comodojo.Form');
 $d.require('comodojo.Mirror');
@@ -161,6 +163,7 @@ $c.App.load("servicesmanager",
 						model: this.sModel,
 						style: "width: 200px;",
 						splitter: true,
+						id: "main_services_tree_"+pid
 					}
 				},{
 					type: 'TabContainer',
@@ -172,7 +175,7 @@ $c.App.load("servicesmanager",
 						name: 'service_properties',
 						params: {
 							title: '[SERVICE] properties',
-							style: 'overflow: scroll; overflow-x: hidden;'
+							style: 'overflow: scroll; overflow-x: hidden; background-position: center center; background-repeat: no-repeat; background-image: url(\''+$c.icons.getSelfIcon('servicesmanager',64)+'\');'
 						}
 					},{
 						type: 'ContentPane',
@@ -204,6 +207,78 @@ $c.App.load("servicesmanager",
 				}
 
 			};
+
+			this.container.main.left.getLabelClass = function(item, opened) {
+
+				if (!item || this.model.mayHaveChildren(item)) {
+					return "";
+				}
+				else {
+					return item.enabled ? 'servicesmanager_service_enabled_label' : 'servicesmanager_service_disabled_label';
+				}
+
+			};
+
+			this.container.main.left.on('click',function(item){
+				if (item.leaf) {
+					myself.openService(item.name);
+					//var targetService = dijit.byNode(this.getParent().currentTarget);
+					//console.debug(targetService.item);
+					//myself.openAccount(item.name, item.keychain);
+				}
+			});
+
+			
+
+			this.serviceEnabledMenu = new dijit.Menu({
+				id: 'servicesEnabledMenu'+pid,
+				targetNodeIds: ["main_services_tree_"+pid],
+				selector: ".dijitTreeNode .servicesmanager_service_enabled_label"
+			});
+
+			this.switchStateEnabledSelector = new dijit.MenuItem({
+				label: this.getLocalizedMessage('0021'),
+				onClick: function() {
+					//myself.openService(dijit.byNode(this.getParent().currentTarget).item.name);
+					//var targetService = dijit.byNode(this.getParent().currentTarget);
+					//console.debug(targetService.item);
+				}
+			});
+			this.serviceEnabledMenu.addChild(this.switchStateEnabledSelector);
+
+
+
+			this.serviceDisabledMenu = new dijit.Menu({
+				id: 'servicesDisabledMenu'+pid,
+				targetNodeIds: ["main_services_tree_"+pid],
+				selector: ".dijitTreeNode .servicesmanager_service_disabled_label"
+			});
+
+			this.switchStateDisabledSelector = new dijit.MenuItem({
+				label: this.getLocalizedMessage('0022'),
+				onClick: function() {
+					//var targetService = dijit.byNode(this.getParent().currentTarget);
+					//console.debug(targetService.item);
+				}
+			});
+
+			this.deleteServiceDisabledSelector = new dijit.MenuItem({
+				label: this.getLocalizedMessage('0023'),
+				onClick: function() {
+					
+				}
+			});
+
+			this.serviceDisabledMenu.addChild(this.switchStateDisabledSelector);
+			this.serviceDisabledMenu.addChild(this.deleteServiceDisabledSelector);
+
+			//$d.aspect.before(this.servicesMenu,'_openMyself',function(value){
+			//	console.log(value);
+			//	//var item = dijit.byNode(this.getParent().currentTarget).item;
+			//	//if (!item.leaf) {
+			//	//	this.servicesMenu.set('disabled',true);
+			//	//}
+			//})
 
 			this.propertiesForm = new $c.Form({
 				modules:['NumberSpinner','TextBox','Textarea','ValidationTextBox','Select','MultiSelect','Button','ComboBox'],
@@ -326,6 +401,8 @@ $c.App.load("servicesmanager",
 				attachNode: this.container.main.center.service_properties.containerNode
 			}).build();
 
+			this.propertiesForm.domNode.style.display = 'none';
+
 			this.mirror = comodojo.Mirror.build({
 				attachNode: this.container.main.center.service_code.containerNode, 
 				lineNumbers: true,
@@ -352,7 +429,24 @@ $c.App.load("servicesmanager",
 				gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 			});
 
-			this.mirror.setSize('100%','100%')
+			this.mirror.setSize('100%','100%');
+
+			this.disableEditor();
+
+			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+myself.getLocalizedMessage('0020'),
+				style: 'float: left;',
+				onClick: function() {
+					myself.startNew();
+				}
+			}).domNode);
+
+			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('close',16)+'" />&nbsp;'+$c.getLocalizedMessage('10011'),
+				onClick: function() {
+					myself.stop();
+				}
+			}).domNode);
 
 		};
 
@@ -374,8 +468,52 @@ $c.App.load("servicesmanager",
 			myself.mirror.lock(myself.getLocalizedMessage('0019'));
 		};
 
-		this.enableEditor = function () {
+		this.enableEditor = function (content) {
 			myself.mirror.release();
+			if (content !== false) {
+				myself.mirror.setValue(content);
+			}
+		};
+
+		this.startNew = function() {
+			this.propertiesForm.reset();
+			this.propertiesForm.fields.name.set('readonly',false);
+			this.propertiesForm.domNode.style.display = 'block';
+			this.enableEditor(false);
+		};
+
+		this.startEditing = function(properties, file) {
+			this.propertiesForm.reset();
+			this.propertiesForm.set('value',properties);
+			this.propertiesForm.fields.name.set('readonly',true);
+			this.propertiesForm.domNode.style.display = 'block';
+			if (properties.type == "SERVICE") {
+				this.enableEditor(file);
+			}
+			else {
+				myself.mirror.setValue("");
+				this.disableEditor();
+			}
+		};
+
+		this.openService = function (service) {
+			$c.Kernel.newCall(myself.openServiceCallback,{
+				application: "servicesmanager",
+				method: "get_service",
+				content: {
+					name: service
+				}
+			});
+		};
+
+		this.openServiceCallback = function (success, result) {
+			if (success) {
+				result.properties_file.supported_http_methods = result.properties_file.supported_http_methods.split(',');
+				myself.startEditing(result.properties_file,result.service_file);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
 		};
 
 	}

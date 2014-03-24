@@ -17,12 +17,24 @@ class servicesmanager extends application {
 	
 	public function init() {
 		$this->add_application_method('get_services', 'getServices', Array(), 'No description yes, sorry', false);
+		$this->add_application_method('get_service', 'getService', Array("name"), 'No description yes, sorry', false);
 	}
 
 	public function getServices($params) {
 		$service = new services_management();
 		try {
 			$s = $service->get_services();
+		}
+		catch (Exception $e) {
+			throw $e;
+		}
+		return $s;
+	}
+
+	public function getService($params) {
+		$service = new services_management();
+		try {
+			$s = $service->get_service($params["name"]);
 		}
 		catch (Exception $e) {
 			throw $e;

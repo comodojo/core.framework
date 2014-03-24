@@ -147,6 +147,9 @@ var form = declare(null,{
 				case 'GenderSelect':
 					mods = ['dijit/form/Select'];
 				break;
+				case 'ComboBox':
+					mods = ['dijit/form/ComboBox'];
+				break;
 				case 'NumberSpinner':
 					mods = ['dijit/form/NumberSpinner'];
 				break;
@@ -510,16 +513,39 @@ var form = declare(null,{
 					maxHeight: -1
 				});
 				domClass.add(myField.domNode,this._selectFieldClass);
+				//if ($d.isFunction(hierarchyElement.onChange)) {
+				//	myField.on('change',hierarchyElement.onChange);
+				//}
+			break;
+
+			case "ComboBox":
+				myField = new this.deferred_modules.ComboBox ({
+					name: hierarchyElement.name,
+					store: new Memory({
+						data: hierarchyElement.options
+					}),
+					searchAttr: !hierarchyElement.searchAttr ? "name" : hierarchyElement.searchAttr,
+					value: hierarchyElement.value,
+					disabled: !hierarchyElement.disabled ? false : "disabled",
+					readOnly: !hierarchyElement.readonly ? false : "readOnly",
+					required: hierarchyElement.required,
+					invalidMessage: !hierarchyElement.invalidMessage ? "$_unset_$" : hierarchyElement.invalidMessage,
+					style: this.selectExtraCss,
+					onChange: !$d.isFunction(hierarchyElement.onChange) ? function() {} : hierarchyElement.onChange,
+					autoWidth: true,
+					maxHeight: -1
+				});
+				domClass.add(myField.domNode,this._selectFieldClass);
 			break;
 			
 			case "MultiSelect":
+				var i;
+				preField = domConstruct.create("select");
+					for (i in hierarchyElement.options) {
+						preField.appendChild(domConstruct.create("option",{value:hierarchyElement.options[i].id, innerHTML:hierarchyElement.options[i].label}));
+					}
 				myField = new this.deferred_modules.MultiSelect ({
 					name: hierarchyElement.name,
-					store: new ObjectStore({ 
-						objectStore: new Memory({
-							data: hierarchyElement.options
-						})
-					}),
 					value: hierarchyElement.value,
 					disabled: !hierarchyElement.disabled ? false : "disabled",
 					readOnly: !hierarchyElement.readonly ? false : "readOnly",
@@ -529,7 +555,7 @@ var form = declare(null,{
 					onChange: !lang.isFunction(hierarchyElement.onChange) ? function() {} : hierarchyElement.onChange,
 					autoWidth: true,
 					maxHeight: -1
-				});
+				},preField);
 				domClass.add(myField.domNode,this._selectFieldClass);
 				myField.containerNode.setAttribute('style',this.selectExtraCss);
 			break;

@@ -27,8 +27,10 @@ $lang = Array(
 	'0013'	=>	'Application',
 	'0014'	=>	'Alias',
 	'0015'	=>	'Server only',
-	'0014'	=>	'Client only',
-	'0015'	=>	'Server & Client'
+	'0016'	=>	'Client only',
+	'0017'	=>	'Server & Client',
+	'0018'	=>	'No cache',
+	'0019'	=>	'Editor disabled due to type of service selected'
 );
 
 ?>

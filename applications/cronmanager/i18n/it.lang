@@ -1,0 +1,40 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Nome del servizio',
+	'0001'	=>	'Tipo',
+	'0002'	=>	'Alias per',
+	'0003'	=>	'Applicazione',
+	'0004'	=>	'Metodo',
+	'0005'	=>	'Descrizione',
+	'0006'	=>	'Abilita cache',
+	'0007'	=>	'Time To Live',
+	'0008'	=>	'Access control (allow origin)',
+	'0009'	=>	'Metodi HTTP supportati',
+	'0010'	=>	'Content Type',
+	'0011'	=>	'Parametri richiesti (separati da virgola, virgolettati)',
+	'0012'	=>	'Servizio',
+	'0013'	=>	'Applicazione',
+	'0014'	=>	'Alias',
+	'0015'	=>	'Solo Server',
+	'0016'	=>	'Solo Client',
+	'0017'	=>	'Server e Client',
+	'0018'	=>	'Nessuna cache',
+	'0019'	=>	'Editor disabilitato per questo servizio',
+	'0020'	=>	'Aggiungi un nuovo servizio',
+	'0021'	=>	'Disabilita servizio',
+	'0022'	=>	'Abilita servizio',
+	'0023'	=>	'Elimina servizio'
+);
+
+?>

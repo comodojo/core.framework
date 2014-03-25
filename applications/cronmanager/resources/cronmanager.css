@@ -1,0 +1,19 @@
+.cronmanager_cron_enabled {
+	background-image: url('service_enabled.png'); 
+	width: 16px;
+	height: 16px;
+}
+
+.cronmanager_cron_disabled {
+	background-image: url('service_disabled.png'); 
+	width: 16px;
+	height: 16px
+}
+
+.cronmanager_cron_enabled_label {
+	font-weight: bold;
+}
+
+.cronmanager_cron_disabled_label {
+	color: grey;
+}

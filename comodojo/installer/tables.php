@@ -76,7 +76,7 @@ $create = Array(
 	'cron'	=>	Array(
 		'columns'	=>	Array(
 			Array('id','INTEGER',Array('unsigned'=>true,'null'=>false,'autoincrement'=>true,'primary'=>true)),
-			Array('name','STRING',Array('length'=>64,'null'=>false)),
+			Array('name','STRING',Array('length'=>64,'null'=>false),'primary'=>true),
 			Array('job','STRING',Array('length'=>64,'null'=>false)),
 			Array('description','TEXT',Array('default'=>null)),
 			Array('enabled','BOOL',Array('default'=>0)),

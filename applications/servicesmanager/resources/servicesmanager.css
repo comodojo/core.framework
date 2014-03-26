@@ -10,6 +10,12 @@
 	height: 16px
 }
 
+.servicesmanager_service_changing {
+	background-image: url('../../../comodojo/images/small_loader.gif'); 
+	width: 16px;
+	height: 16px
+}
+
 .servicesmanager_service_enabled_label {
 	font-weight: bold;
 }

@@ -19,10 +19,10 @@ $lang = Array(
 	'0005'	=>	'Descrizione',
 	'0006'	=>	'Abilita cache',
 	'0007'	=>	'Time To Live',
-	'0008'	=>	'Access control (allow origin)',
+	'0008'	=>	'Access control allow origin (fqdn separati da virgola)',
 	'0009'	=>	'Metodi HTTP supportati',
-	'0010'	=>	'Content Type',
-	'0011'	=>	'Parametri richiesti (separati da virgola, virgolettati)',
+	'0010'	=>	'Forza Content Type',
+	'0011'	=>	'Parametri richiesti (separati da virgola)',
 	'0012'	=>	'Servizio',
 	'0013'	=>	'Applicazione',
 	'0014'	=>	'Alias',
@@ -34,7 +34,12 @@ $lang = Array(
 	'0020'	=>	'Aggiungi un nuovo servizio',
 	'0021'	=>	'Disabilita servizio',
 	'0022'	=>	'Abilita servizio',
-	'0023'	=>	'Elimina servizio'
+	'0023'	=>	'Elimina servizio',
+	'0024'	=>	'Servizio aggiunto correttamente',
+	'0025'	=>	'E\' necessario definire la logica del servizio (codice)',
+	'0026'	=>	'Nuovo servizio',
+	'0027'	=>	'{0} - proprietà',
+	'0028'	=>	'{0} - codice'
 );
 
 ?>

@@ -72,13 +72,13 @@ class services extends comodojo_basic {
 		
 		if ($this->cache == 'SERVER' OR $this->cache == 'BOTH') comodojo_load_resource('cache');
 		
-		if ($service_properties['content_type'] != false) {
+		if (!empty($service_properties['content_type'])) {
 			$this->transport = false;
 			$this->content_type = $service_properties['content_type'];
 		}
 		
 		if ($service_properties['access_control_allow_origin'] == "*") $this->origin = '*';
-		elseif ($service_properties['access_control_allow_origin'] != false) {
+		elseif (!empty($service_properties['access_control_allow_origin'])) {
 			$this->origins = explode(",",$service_properties['access_control_allow_origin']);
 			if (!in_array($_SERVER['HTTP_ORIGIN'],$origins)) {
 				comodojo_debug("Not allowed orign (".$_SERVER['HTTP_ORIGIN'].") request for service: ".$service_properties['name'],'WARNING','services');
@@ -135,26 +135,31 @@ class services extends comodojo_basic {
 				
 			}
 			elseif (strtoupper($service_properties['type']) == "APPLICATION") {
-				$this->app_exec = COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER.$service_properties['application'].'/'.$service_properties['application'].'.php';
+				$this->app_exec = COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER.$service_properties['service_application'].'/'.$service_properties['service_application'].'.php';
 				if (!is_readable($this->app_exec)) {
 					comodojo_debug('Cannot read app file for service: '.$service_service_file,'ERROR','services');
 					throw new Exception('Internal Server Error', 500);
 				}
 
 				require $this->app_exec;
-				if (!class_exists($service_properties['application'])) {
+				if (!class_exists($service_properties['service_application'])) {
 					comodojo_debug('Wrong application class for service: '.$service_properties['name'],'ERROR','services');
 					throw new Exception('Internal Server Error', 500);
 				}
 				
-				$app_run = new $service_properties['application'];
-				$method = $app_run->get_registered_method($service_properties['method']);
+				$app_run = new $service_properties['service_application'];
+				$method = $app_run->get_registered_method($service_properties['service_method']);
 				if (!$method) {
 					comodojo_debug("Unsustainable request: method ".$this->method." not registered correctly",'ERROR','services');
 					throw new Exception('Internal Server Error', 500);
 				}
 				
 				if (!attributes_to_parameters_match($attributes, $method[1])) {
+					comodojo_debug('Unsustainable request for service '.$service_properties['name'].': parameters mismatch','WARNING','services');
+					throw new Exception("conversation error",400);
+				}
+
+				if (!attributes_to_parameters_match($attributes, $service_properties['required_parameters'])) {
 					comodojo_debug('Unsustainable request for service '.$service_properties['name'].': parameters mismatch','WARNING','services');
 					throw new Exception("conversation error",400);
 				}
@@ -216,13 +221,12 @@ class services extends comodojo_basic {
 			else {
 				comodojo_debug("Service ".$service_properties['name']." is an alias for ".$service_properties['alias_for'].", now merging parameters",'ERROR','services');
 				
-				//$service_properties['is_alias'] = false;
+				$service_properties['enabled'] = ($service_properties['enabled'] AND $alias_service_properties['enabled']);
 				$service_properties['alias_for'] = false;
 				$service_properties['type'] = $alias_service_properties['type'];
-				$service_properties['required_parameters'] = $alias_service_properties['required_parameters'];
-				//$service_properties['is_application'] = $alias_service_properties['is_application'];
-				$service_properties['application'] = $alias_service_properties['application'];
-				$service_properties['method'] = $alias_service_properties['method'];
+				//$service_properties['required_parameters'] = $alias_service_properties['required_parameters'];
+				$service_properties['service_application'] = $alias_service_properties['service_application'];
+				$service_properties['service_method'] = $alias_service_properties['service_method'];
 				$exec_name = $alias_service_properties['name'];
 				
 			}

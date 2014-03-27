@@ -73,7 +73,7 @@ $c.App.load("servicesmanager",
 					id: "BOTH"
 				},{
 					label: this.getLocalizedMessage('0018'),
-					id: 0
+					id: "NONE"
 				},
 			];
 
@@ -121,6 +121,7 @@ $c.App.load("servicesmanager",
 			if (success) {
 				var i=0;
 				for (i in result) {
+					result[i].leaf = true;
 					myself.sStore.data.push(result[i]);
 					if (result[i]['type'] == 'SERVICE' || result[i]['type'] == 'APPLICATION') {
 						myself.availableServices.push({
@@ -174,19 +175,14 @@ $c.App.load("servicesmanager",
 						type: 'ContentPane',
 						name: 'service_properties',
 						params: {
-							title: '[SERVICE] properties',
+							title: this.getLocalizedMutableMessage('0027',[this.getLocalizedMessage('0026')]),
 							style: 'overflow: scroll; overflow-x: hidden; background-position: center center; background-repeat: no-repeat; background-image: url(\''+$c.icons.getSelfIcon('servicesmanager',64)+'\');'
 						}
 					},{
 						type: 'ContentPane',
 						name: 'service_code',
 						params: {
-							title: '[SERVICE] code',
-							onShow: function(event) {
-								if ($c.Utils.defined(myself.mirror)) {
-									myself.mirror.focus();
-								}
-							}
+							title: this.getLocalizedMutableMessage('0028',[this.getLocalizedMessage('0026')]),
 						}
 					}]
 				},{
@@ -222,63 +218,59 @@ $c.App.load("servicesmanager",
 			this.container.main.left.on('click',function(item){
 				if (item.leaf) {
 					myself.openService(item.name);
-					//var targetService = dijit.byNode(this.getParent().currentTarget);
-					//console.debug(targetService.item);
-					//myself.openAccount(item.name, item.keychain);
 				}
 			});
 
-			
+			this.container.main.center.service_code.on('show',function(item){
+				myself.mirror.refresh();
+				myself.mirror.focus();
+			});
 
 			this.serviceEnabledMenu = new dijit.Menu({
 				id: 'servicesEnabledMenu'+pid,
 				targetNodeIds: ["main_services_tree_"+pid],
-				selector: ".dijitTreeNode .servicesmanager_service_enabled_label"
+				selector: ".servicesmanager_service_enabled_label"
 			});
 
 			this.switchStateEnabledSelector = new dijit.MenuItem({
 				label: this.getLocalizedMessage('0021'),
-				onClick: function() {
-					//myself.openService(dijit.byNode(this.getParent().currentTarget).item.name);
-					//var targetService = dijit.byNode(this.getParent().currentTarget);
-					//console.debug(targetService.item);
+				onClick: function(e) {
+					var targetNode = dijit.getEnclosingWidget(this.getParent().currentTarget);
+					dojo.removeClass(targetNode.iconNode,'servicesmanager_service_enabled');
+					dojo.removeClass(targetNode.labelNode,'servicesmanager_service_enabled_label');
+					dojo.addClass(targetNode.iconNode,'servicesmanager_service_changing');
+					myself.disableService(targetNode.item.name);
 				}
 			});
 			this.serviceEnabledMenu.addChild(this.switchStateEnabledSelector);
 
-
-
 			this.serviceDisabledMenu = new dijit.Menu({
 				id: 'servicesDisabledMenu'+pid,
 				targetNodeIds: ["main_services_tree_"+pid],
-				selector: ".dijitTreeNode .servicesmanager_service_disabled_label"
+				selector: ".servicesmanager_service_disabled_label"
 			});
 
 			this.switchStateDisabledSelector = new dijit.MenuItem({
 				label: this.getLocalizedMessage('0022'),
 				onClick: function() {
-					//var targetService = dijit.byNode(this.getParent().currentTarget);
-					//console.debug(targetService.item);
+					var targetNode = dijit.getEnclosingWidget(this.getParent().currentTarget);
+					dojo.removeClass(targetNode.iconNode,'servicesmanager_service_disabled');
+					dojo.removeClass(targetNode.labelNode,'servicesmanager_service_disabled_label');
+					dojo.addClass(targetNode.iconNode,'servicesmanager_service_changing');
+					myself.enableService(targetNode.item.name);
 				}
 			});
 
 			this.deleteServiceDisabledSelector = new dijit.MenuItem({
 				label: this.getLocalizedMessage('0023'),
 				onClick: function() {
-					
+					var targetNode = dijit.getEnclosingWidget(this.getParent().currentTarget);
+					myself.deleteService(targetNode.item.name);
 				}
 			});
 
 			this.serviceDisabledMenu.addChild(this.switchStateDisabledSelector);
 			this.serviceDisabledMenu.addChild(this.deleteServiceDisabledSelector);
-
-			//$d.aspect.before(this.servicesMenu,'_openMyself',function(value){
-			//	console.log(value);
-			//	//var item = dijit.byNode(this.getParent().currentTarget).item;
-			//	//if (!item.leaf) {
-			//	//	this.servicesMenu.set('disabled',true);
-			//	//}
-			//})
 
 			this.propertiesForm = new $c.Form({
 				modules:['NumberSpinner','TextBox','Textarea','ValidationTextBox','Select','MultiSelect','Button','ComboBox'],
@@ -298,18 +290,19 @@ $c.App.load("servicesmanager",
 					options: myself.availableServiceTypes,
 					onChange: function(value) {
 						if (value=='ALIAS') {
-							myself.disableFormPieces(['application','method']);
-							myself.enableFormPieces(['alias_for']);
-							myself.disableEditor();
+							myself._disableFormPieces(['service_application','service_method']);
+							myself._enableFormPieces(['alias_for','required_parameters']);
+							myself._disableEditor();
 						}
 						else if (value == 'APPLICATION') {
-							myself.disableFormPieces(['alias_for']);
-							myself.enableFormPieces(['application','method']);
-							myself.disableEditor();
+							myself._disableFormPieces(['alias_for','required_parameters']);
+							myself._enableFormPieces(['service_application','service_method']);
+							myself._disableEditor();
 						}
 						else {
-							myself.disableFormPieces(['alias_for','application','method']);
-							myself.enableEditor();
+							myself._disableFormPieces(['alias_for','service_application','service_method']);
+							myself._enableFormPieces(['required_parameters']);
+							myself._enableEditor();
 						}
 					}
 				},{
@@ -320,14 +313,14 @@ $c.App.load("servicesmanager",
 					required: true,
 					disabled:true
 				},{
-					name: "application",
+					name: "service_application",
 					value: '',
 					type: "ValidationTextBox",
 					label: myself.getLocalizedMessage('0003'),
 					required: true,
 					disabled: true
 				},{
-					name: "method",
+					name: "service_method",
 					value: '',
 					type: "ValidationTextBox",
 					label: myself.getLocalizedMessage('0004'),
@@ -341,17 +334,17 @@ $c.App.load("servicesmanager",
 					required: false
 				},{
 					name: "cache",
-					value: '',
+					value: 'NONE',
 					type: "Select",
 					label: myself.getLocalizedMessage('0006'),
 					required: true,
 					options: myself.availableCachingOptions,
 					onChange: function(value) {
-						if (value==0) {
-							myself.disableFormPieces(['ttl']);
+						if (value=='NONE') {
+							myself._disableFormPieces(['ttl']);
 						}
 						else {
-							myself.enableFormPieces(['ttl']);
+							myself._enableFormPieces(['ttl']);
 						}
 					}
 				},{
@@ -378,10 +371,10 @@ $c.App.load("servicesmanager",
 					options: myself.availableHTTPMethods
 				},{
 					name: "content_type",
-					value: 'text/plain',
+					value: '',
 					type: "ComboBox",
 					label: myself.getLocalizedMessage('0010'),
-					required: true,
+					required: false,
 					options: myself.suggestedContentTypes
 				},{
 					name: "required_parameters",
@@ -390,18 +383,15 @@ $c.App.load("servicesmanager",
 					label: myself.getLocalizedMessage('0011'),
 					required: false
 				},{
-					name: "action_btn",
+					name: "action_button",
 					type: "Button",
-					label: 'go',
+					label: $c.getLocalizedMessage('10021'),
 					onClick: function() {
-						console.log(myself.propertiesForm.validate());
-						console.log(myself.propertiesForm.get('value'));
+						myself.newService();
 					}
 				}],
 				attachNode: this.container.main.center.service_properties.containerNode
 			}).build();
-
-			this.propertiesForm.domNode.style.display = 'none';
 
 			this.mirror = comodojo.Mirror.build({
 				attachNode: this.container.main.center.service_code.containerNode, 
@@ -414,6 +404,7 @@ $c.App.load("servicesmanager",
 				theme: "monokai",
 				lineWrapping: true,
 				autofocus: false,
+				id: "servicesmanager_mirror_"+pid,
 				addons: [
 					"search/searchcursor",
 					"search/search",
@@ -431,7 +422,8 @@ $c.App.load("servicesmanager",
 
 			this.mirror.setSize('100%','100%');
 
-			this.disableEditor();
+			this._disableForm();
+			this._disableEditor();
 
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+myself.getLocalizedMessage('0020'),
@@ -450,49 +442,84 @@ $c.App.load("servicesmanager",
 
 		};
 
-		this.enableFormPieces = function(pieces) {
+		this._enableFormPieces = function(pieces) {
 			var i = 0;
 			for (i in pieces) {
 				myself.propertiesForm.fields[pieces[i]].set('disabled',false);
 			}
 		};
 
-		this.disableFormPieces = function(pieces) {
+		this._disableFormPieces = function(pieces) {
 			var i = 0;
 			for (i in pieces) {
 				myself.propertiesForm.fields[pieces[i]].set('disabled',true);
 			}
 		};
 
-		this.disableEditor = function() {
+		this._disableEditor = function() {
 			myself.mirror.lock(myself.getLocalizedMessage('0019'));
 		};
 
-		this.enableEditor = function (content) {
+		this._enableEditor = function () {
 			myself.mirror.release();
-			if (content !== false) {
-				myself.mirror.setValue(content);
-			}
+			myself.mirror.refresh();
+			dojo.query(".CodeMirror-dialog", this.container.main.center.service_code.containerNode).forEach(function(node) {
+				comodojo.Utils.destroyNode(node);
+			});
+		};
+
+		this._resetEditor = function() {
+			myself.mirror.setValue("");
+			myself.mirror.clearHistory();
+			myself.mirror.clearGutter("CodeMirror-linenumbers");
+			myself.mirror.clearGutter("CodeMirror-foldgutter");
+			myself.mirror.refresh();
+		};
+
+		this._enableForm = function() {
+			this.propertiesForm.domNode.style.display = 'block';
+		};
+
+		this._disableForm = function() {
+			this.propertiesForm.domNode.style.display = 'none';
+		};
+
+		this._resetForm = function() {
+			this.propertiesForm.reset();
+			this.propertiesForm.fields.name.set('readonly',false);
+			this.container.main.center.service_properties.set('title',this.getLocalizedMutableMessage('0027',[this.getLocalizedMessage('0026')]));
+			this.container.main.center.service_code.set('title',this.getLocalizedMutableMessage('0028',[this.getLocalizedMessage('0026')]));
+			this.propertiesForm.fields.action_button.set('onClick',function() {
+				myself.newService();
+			});
 		};
 
 		this.startNew = function() {
-			this.propertiesForm.reset();
-			this.propertiesForm.fields.name.set('readonly',false);
-			this.propertiesForm.domNode.style.display = 'block';
-			this.enableEditor(false);
+			this._resetForm();
+			this._enableForm();
+			this._resetEditor();
+			this.mirror.setValue("<?php\n\ncomodojo_load_resource('service');\n\nclass [SERVICENAME] extends service {\n\n\tpublic function get($attributes) {\n\t\t\n\t}\n\t\n\tpublic function put($attributes) {\n\t\t\n\t}\n\n\tpublic function post($attributes) {\n\t\t\n\t}\n\n\tpublic function delete($attributes) {\n\t\t\n\t}\n\n}\n\n?>");
+			this._enableEditor();
 		};
 
 		this.startEditing = function(properties, file) {
-			this.propertiesForm.reset();
+			this.container.main.center.service_properties.set('title',this.getLocalizedMutableMessage('0027',[properties.name]));
+			this.container.main.center.service_code.set('title',this.getLocalizedMutableMessage('0028',[properties.name]));
+			this._resetForm();
+			this.propertiesForm.fields.action_button.set('onClick',function() {
+				myself.editService();
+			});
 			this.propertiesForm.set('value',properties);
 			this.propertiesForm.fields.name.set('readonly',true);
-			this.propertiesForm.domNode.style.display = 'block';
+			this._enableForm();
 			if (properties.type == "SERVICE") {
-				this.enableEditor(file);
+				this._resetEditor();
+				this.mirror.setValue(file);
+				this._enableEditor();
 			}
 			else {
-				myself.mirror.setValue("");
-				this.disableEditor();
+				this._resetEditor();
+				this._disableEditor();
 			}
 		};
 
@@ -510,6 +537,150 @@ $c.App.load("servicesmanager",
 			if (success) {
 				result.properties_file.supported_http_methods = result.properties_file.supported_http_methods.split(',');
 				myself.startEditing(result.properties_file,result.service_file);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.enableService = function(service) {
+			$c.Kernel.newCall(myself.enableServiceCallback,{
+				application: "servicesmanager",
+				method: "enable_service",
+				content: {
+					name: service
+				}
+			});
+		};
+
+		this.enableServiceCallback = function (success, result) {
+			if (success) {
+				$d.removeClass(myself.container.main.left.getNodesByItem(result.name)[0].iconNode,"servicesmanager_service_changing");
+				$d.addClass(myself.container.main.left.getNodesByItem(result.name)[0].iconNode,"servicesmanager_service_enabled");
+				$d.addClass(myself.container.main.left.getNodesByItem(result.name)[0].labelNode,"servicesmanager_service_enabled_label");
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.disableService = function(service) {
+			$c.Kernel.newCall(myself.disableServiceCallback,{
+				application: "servicesmanager",
+				method: "disable_service",
+				content: {
+					name: service
+				}
+			});
+		};
+
+		this.disableServiceCallback = function (success, result) {
+			if (success) {
+				$d.removeClass(myself.container.main.left.getNodesByItem(result.name)[0].iconNode,"servicesmanager_service_changing");
+				$d.addClass(myself.container.main.left.getNodesByItem(result.name)[0].iconNode,"servicesmanager_service_disabled");
+				$d.addClass(myself.container.main.left.getNodesByItem(result.name)[0].labelNode,"servicesmanager_service_disabled_label");
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.deleteService = function(service) {
+			$c.Kernel.newCall(myself.deleteServiceCallback,{
+				application: "servicesmanager",
+				method: "delete_service",
+				content: {
+					name: service
+				}
+			});
+		};
+
+		this.deleteServiceCallback = function (success, result) {
+			if (success) {
+				myself.sStoreObservable.remove(result);
+				if (myself.propertiesForm.get('value')['name'] == result) {
+					myself._resetForm();
+					myself._disableForm();
+					myself._resetEditor();
+					myself._disableEditor();
+				}
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.newService = function() {
+			if (!myself.propertiesForm.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				return;
+			}
+			var values = myself.propertiesForm.get('value');
+			var editor = myself.mirror.getValue();
+			if (values.type == "SERVICE" && editor == "") {
+				$c.Error.minimal(myself.getLocalizedMessage('0025'));
+				return;
+			}
+			values.service_file = editor;
+			$c.Kernel.newCall(myself.newServiceCallback,{
+				application: "servicesmanager",
+				method: "new_service",
+				content: values
+			});
+		};
+
+		this.newServiceCallback = function(success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0024'));
+				myself.sStoreObservable.put({
+					id: result.id,
+					name: result.name,
+					type: result.type,
+					enabled: result.enabled,
+					leaf: true
+				});
+				myself.container.main.left.set('paths', [ [ 'srootnode', result.type, result.id ] ] );
+				myself.openService(result.name);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.editService = function() {
+			if (!myself.propertiesForm.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				return;
+			}
+			var values = myself.propertiesForm.get('value');
+			var editor = myself.mirror.getValue();
+			if (values.type == "SERVICE" && editor == "") {
+				$c.Error.minimal(myself.getLocalizedMessage('0025'));
+				return;
+			}
+			values.service_file = editor;
+			$c.Kernel.newCall(myself.editServiceCallback,{
+				application: "servicesmanager",
+				method: "edit_service",
+				content: values
+			});
+		};
+
+		this.editServiceCallback = function(success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0024'));
+				var old_tree_item = myself.container.main.left.getNodesByItem(result.name)[0].item;
+				if (old_tree_item.type != result.type) {
+					myself.sStoreObservable.remove(old_tree_item.id);
+					myself.sStoreObservable.put({
+						id: result.id,
+						name: result.name,
+						type: result.type,
+						enabled: result.enabled,
+						leaf: true
+					});
+					myself.container.main.left.set('paths', [ [ 'srootnode', result.type, result.id ] ] );
+				}
 			}
 			else {
 				$c.Error.modal(result.code, result.name);

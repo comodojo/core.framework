@@ -2,7 +2,7 @@ comodojo.loadCss('comodojo/CSS/layout.css');
 comodojo.loadCss('comodojo/javascript/dojox/layout/resources/ExpandoPane.css');
 //comodojo.loadCss('comodojo/javascript/dojox/grid/resources/'+comodojoConfig.dojoTheme+'Grid.css');
 //comodojo.loadCss('comodojo/javascript/dijit/themes/'+comodojoConfig.dojoTheme+'/document.css');
-comodojo.loadCss('comodojo/javascript/gridx/resources/'+comodojoConfig.dojoTheme+'/Gridx.css');
+comodojo.loadCss('comodojo/javascript/gridx/resources/'+(comodojoConfig.dojoTheme == 'claro' ? 'claro/' : '')+'Gridx.css');
 
 define("comodojo/Layout", [
 	"dojo/_base/lang",
@@ -111,11 +111,6 @@ var Layout = declare(null,{
 			this.id = comodojo.getPid();
 		}
 
-		//this._layout = false;
-		//this.layout = [];
-		//this._structure = false;
-		//this.real_attach_node = false;
-
 		this.deferred_calls = [];
 
 		for (i in args.modules) {
@@ -131,62 +126,11 @@ var Layout = declare(null,{
 					mods = ["dojox/layout/ExpandoPane"];
 				break;
 				case 'Tree':
-					mods = ["dijit/Tree"/*,"dijit/tree/ObjectStoreModel","dojo/store/Observable"*/];
+					mods = ["dijit/Tree"];
 				break;
 				case 'Grid':
 					mods = ["gridx/Grid"];
 				break;
-				/*case 'GridSortSimple':
-					mods = ["gridx/modules/SingleSort"];
-				break;
-				case 'GridSortNested':
-					mods = ["gridx/modules/NestedSort"];
-				break;
-				case 'GridEdit':
-					mods = ["gridx/modules/CellWidget","gridx/modules/Edit"];
-				break;
-				case 'GridPaginationBar':
-					mods = ["gridx/modules/Pagination","gridx/modules/pagination/PaginationBar"];
-				break;
-				case 'GridPaginationDropDown':
-					mods = ["gridx/modules/Pagination","gridx/modules/pagination/PaginationBarDD"];
-				break;
-				case 'GridFilterBar':
-					mods = ["gridx/modules/Filter","gridx/modules/filter/FilterBar"];
-				break;
-				case 'GridFilterQuick':
-					mods = ["gridx/modules/Filter","gridx/modules/filter/QuickFilter"];
-				break;
-				case 'GridRowHeader':
-					mods = ["gridx/modules/RowHeader"];
-				break;
-				case 'GridVirtualScroller':
-					mods = ["gridx/modules/VirtualVScroller"];
-				break;
-				case 'GridIndirectSelect':
-					mods = ["gridx/modules/IndirectSelect"];
-				break;
-				case 'GridSimpleSelectRow':
-					mods = ["gridx/modules/select/Row"];
-				break;
-				case 'GridSimpleSelectColumn':
-					mods = ["gridx/modules/select/Column"];
-				break;
-				case 'GridSimpleSelectCell':
-					mods = ["gridx/modules/select/Cell"];
-				break;
-				case 'GridExtendedSelectRow':
-					mods = ["gridx/modules/extendedSelect/Row"];
-				break;
-				case 'GridExtendedSelectColumn':
-					mods = ["gridx/modules/extendedSelect/Column"];
-				break;
-				case 'GridExtendedSelectCell':
-					mods = ["gridx/modules/extendedSelect/Cell"];
-				break;
-				case 'GridColumnResizer':
-					mods = ["gridx/modules/ColumnResizer"];
-				break;*/
 				
 			}
 
@@ -202,6 +146,7 @@ var Layout = declare(null,{
 	},
 
 	build: function() {
+
 		if (!this.attachNode) {
 			comodojo.debug("Cannot build layout without a valid attachNode.");
 			return false;
@@ -303,51 +248,69 @@ var Layout = declare(null,{
 
 	computeDimension: function(attachNode) {
 		
-		var attach_node, container_dimensions, real_width, real_height, extra_height, resize;
+		var attach_node, container_dimensions, real_width, real_height, extra_height, resize, width, height;
 		
 		if (Utils.defined(attachNode.isComodojoApplication)) {
 			
 			// it is a comodojo application
 			switch(attachNode.isComodojoApplication) {
 				case "WINDOWED":
-					//console.info('is win');
-					//console.info(attachNode.containerNode);
+					comodojo.debug('Computing dim for app node ('+attachNode.isComodojoApplication+') - containerNode');
 					attach_node = attachNode.containerNode;
 					real_width  = domGeom.getMarginBox(attachNode.containerNode).w;
 					real_height = domGeom.getMarginBox(attachNode.canvas).h;
 					resize = true;
 				break;
 				case "MODAL":
-					//console.info('is modal');
-					//console.info(attachNode.containerNode);
+					comodojo.debug('Computing dim for app node ('+attachNode.isComodojoApplication+') - containerNode');
 					attach_node = attachNode.containerNode;
 					real_width  = domGeom.getMarginBox(attach_node).w;
 					real_height = domGeom.getMarginBox(attach_node).h;
 					resize = false;
 				break;
 				case "ATTACHED":
-					//console.log(this.attachNode);
-					//attach_node = (this.attachNode.containerNode ? this.attachNode.containerNode : (this.attachNode.domNode ? this.attachNode.domNode : this.attachNode));
-					attach_node = (Utils.isNode(attachNode.containerNode) ? attachNode.containerNode : (Utils.isNode(attachNode.domNode) ? attachNode.domNode : attachNode));
-					real_width  = domGeom.getMarginBox(attach_node).w;
-					real_height = domGeom.getMarginBox(attach_node).h;
+					if (Utils.isNode(attachNode.containerNode)) {
+						comodojo.debug('Computing dim for app node ('+attachNode.isComodojoApplication+') - containerNode');
+						attach_node = attachNode.containerNode;
+						real_width  = domGeom.getMarginBox(attach_node).w;
+						real_height = domGeom.getMarginBox(attach_node).h;
+					}
+					else if (Utils.isNode(attachNode.domNode)) {
+						comodojo.debug('Computing dim for app node ('+attachNode.isComodojoApplication+') - domNode');
+						attach_node = attachNode.domNode;
+						real_width  = domGeom.getMarginBox(attach_node).w;
+						real_height = domGeom.getMarginBox(attach_node).h;
+					}
+					else {
+						comodojo.debug('Computing dim for app node ('+attachNode.isComodojoApplication+') - node');
+						attach_node = attachNode;
+						var computedStyle = domStyle.getComputedStyle(attach_node);
+						real_width  = domGeom.getMarginBox(attach_node,computedStyle).w;
+						real_height = domGeom.getMarginBox(attach_node,computedStyle).h;
+					}
 					resize = false;
 				break;
 			}
+
+			comodojo.debug('Layout will adapt to: '+real_width+'x'+real_height);
+
 		}
 		else if (Utils.defined(attachNode.containerNode)) {
 			// it is a dojo layout dom element
+			comodojo.debug('Computing dim for layout node');
 			attach_node = attachNode.containerNode;
 			container_dimensions = domGeom.getMarginBox(attachNode.containerNode);
 			real_width  = container_dimensions.w;
 			real_height = container_dimensions.h;
+			comodojo.debug('Layout will adapt to: '+real_width+'x'+real_height);
 		}
 		else {
-			// it is a non-dojo dom element 
+			comodojo.debug('Computing dim for dom node');
 			attach_node = attachNode;
-			container_dimensions = domGeom.getMarginBox(attachNode);
-			real_width  = container_dimensions.w;
-			real_height = container_dimensions.h;
+			var computedStyle = domStyle.getComputedStyle(attach_node);
+			real_width  = domGeom.getMarginBox(attach_node).w;
+			real_height = domGeom.getMarginBox(attach_node).h;
+			comodojo.debug('Layout will adapt to: '+real_width+'x'+real_height);
 		}
 		
 		if (attach_node.childNodes.length != 0) {
@@ -378,10 +341,44 @@ var Layout = declare(null,{
 		
 		privateLayout.resize = function(changeSize, resultSize) {
 			
-			real_width = domGeom.getMarginBox(that.attachNode.containerNode).w-2;
-			real_height = domGeom.getMarginBox(that.attachNode.canvas).h-2;
-			
-			var node = this.domNode, mb = {w:real_width,h:real_height,l:0,t:0};
+			var node = this.domNode;
+
+			// set margin box size, unless it wasn't specified, in which case use current size
+			//if(changeSize){
+			//	domGeom.setMarginBox(node, changeSize);
+			//}
+
+			switch(that.attachNode.isComodojoApplication) {
+				case "WINDOWED":
+					real_width  = domGeom.getMarginBox(that.attachNode.containerNode).w-2;
+					real_height = domGeom.getMarginBox(that.attachNode.canvas).h-2;
+				break;
+				case "MODAL":
+					real_width  = domGeom.getMarginBox(that.attachNode.containerNode).w-2;
+					real_height = domGeom.getMarginBox(that.attachNode.containerNode).h-2;
+				break;
+				case "ATTACHED":
+					var attach_node;
+					if (Utils.isNode(attachNode.containerNode)) {
+						attach_node = attachNode.containerNode;
+						real_width  = domGeom.getMarginBox(attach_node).w;
+						real_height = domGeom.getMarginBox(attach_node).h;
+					}
+					else if (Utils.isNode(attachNode.domNode)) {
+						attach_node = attachNode.domNode;
+						real_width  = domGeom.getMarginBox(attach_node).w;
+						real_height = domGeom.getMarginBox(attach_node).h;
+					}
+					else {
+						attach_node = attachNode;
+						var computedStyle = domStyle.getComputedStyle(attach_node);
+						real_width  = domGeom.getMarginBox(attach_node,computedStyle).w;
+						real_height = domGeom.getMarginBox(attach_node,computedStyle).h;
+					}
+				break;
+			}
+
+			var mb = {w:real_width,h:real_height,l:0,t:0};
 			
 			domGeom.setMarginBox(node, mb);
 			

@@ -22,10 +22,27 @@
 	
 	*_DOJOLOADER_*
 
+	<script type="text/javascript">
+		var comodojo_theme_autoresize = function () {
+			var mbar = document.getElementsByClassName("dijitMenuBar");
+			var h = {
+				w: window.innerHeight,
+				h: document.getElementById("comodojo_theme_header").offsetHeight,
+				f: document.getElementById("comodojo_theme_footer").offsetHeight,
+				m: mbar.length != 0 ? mbar[0].offsetHeight : 0
+			}
+			document.getElementById("*_CONTENT_*").style.height = (h.w - h.h - h.f - h.m) + "px";
+		}
+		if(window.attachEvent) { window.attachEvent('onresize', comodojo_theme_autoresize); }
+		else if(window.addEventListener) { window.addEventListener('resize', comodojo_theme_autoresize, true); }
+		else { window.onresize = function() { comodojo_theme_autoresize(); }; }
+		comodojo.Bus.addConnection('comodojo_theme_autoresize','comodojo_app_require_resize',comodojo_theme_autoresize);
+	</script>
+
 </head>
 <body class="*_DOJOTHEME_*">
 	
-<header>
+<header id="comodojo_theme_header">
 	<div class="ym-wrapper">
 		<div class="ym-wbox">
 			<h1>*_SITETITLE_*</h1>
@@ -33,8 +50,8 @@
 		</div>
 	</div>
 </header>
-*_CONTENT_*
-<footer>
+<div id="*_CONTENT_*" style="height: 100%;"></div>
+<footer id="comodojo_theme_footer">
 	<div class="ym-wrapper">
 		<div class="ym-wbox">
 			<p>Copyright *_SITEDATE_* *_SITEAUTHOR_* | All Rights Reserved | Powered by <a href="http://www.comodojo.org" target="_blank">Comodojo</a> | Layout based on <a href="http://www.yaml.de/">YAML</a></p>
@@ -42,5 +59,6 @@
 	</div>
 </footer>
 
+<script type="text/javascript">comodojo_theme_autoresize();</script>
 </body>
 </html>

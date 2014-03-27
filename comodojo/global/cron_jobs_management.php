@@ -41,9 +41,24 @@ class cron_jobs_management {
 		$crons = Array();
 		$jobs = Array();
 		
-    	$cron_path = opendir(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER);
+		$jobs_path = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER;
 
-    	try {
+		$jobs_items = scandir($jobs_path);
+
+		foreach ($jobs_items as $jobs_item) {
+			$job_file_properties = pathinfo($jobs_path.$jobs_item);
+			if (!is_dir($cron_path.$cron_item) AND $job_file_properties['extension'] == 'php' AND $job_file_properties['basename'][0] != '.' ) {
+				array_push($jobs, Array(
+					"id"	=> $job_file_properties['filename'],
+					"name"	=> $job_file_properties['filename']
+				));
+			}
+			else {
+				continue;
+			}
+		}
+
+		try {
 			$db = new database();
 			$result = $db->table("cron")->keys(Array("id","name","enabled"))->get();
 		}
@@ -54,21 +69,6 @@ class cron_jobs_management {
 		
 		$crons = $result['result'];
 
-		while(false !== ($cron_item = readdir($cron_path))) {
-
-			$cron_file_properties = pathinfo($cron_path.$cron_item);
-
-			if (!is_dir($cron_item) AND $cron_file_properties['extension'] == 'php' AND $cron_file_properties['basename'][0] != '.' ) {
-				array_push($jobs, $cron_file_properties['filename']);
-			}
-			else {
-				continue;
-			}
-
-        }
-
-		closedir($cron_path);
-		
 		return Array(
 			"cron"	=>	$crons,
 			"jobs"	=>	$jobs
@@ -76,6 +76,74 @@ class cron_jobs_management {
 		
 	}
 	
+	public function open_job($job_name) {
+
+		if (empty($job_name)) {
+			comodojo_debug('Error retrieving job: empty job file','ERROR','cron_jobs_management');
+			throw new Exception("Unreadable job file", 2901);
+		}
+
+		$job = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php');
+
+		if (!$job) {
+			comodojo_debug('Error retrieving job: unreadable job file','ERROR','cron_jobs_management');
+			throw new Exception("Unreadable job file", 2901);
+		}
+
+		return $job;
+
+	}
+
+	public function record_job($job_name, $job_content) {
+
+		if (empty($job_name) OR empty($job_content)) {
+			comodojo_debug('Error recording job: Invalid job name or empty content','ERROR','cron_jobs_management');
+			throw new Exception("Invalid job name or empty content", 2901);
+		}
+
+		$job = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php';
+
+		if (is_readable($job)) {
+			comodojo_debug('Error recording job: Job already exists','ERROR','cron_jobs_management');
+			throw new Exception("Job already exists", 2905);
+		}
+
+		$fh = fopen($job, 'w');
+		if (!fwrite($fh, stripcslashes($job_content))) {
+			fclose($fh);
+			throw new Exception("Error writing job", 2906);
+		}
+		fclose($fh);
+
+		return true;
+
+	}
+
+	public function save_job($job_name, $job_content) {
+
+		if (empty($job_name) OR empty($job_content)) {
+			comodojo_debug('Error recording job: Invalid job name or empty content','ERROR','cron_jobs_management');
+			throw new Exception("Invalid job name or empty content", 2901);
+		}
+
+		$job = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php';
+
+		if (!is_readable($job)) {
+			comodojo_debug('Error recording job: cannot find job','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find job", 2905);
+		}
+
+		$fh = fopen($job, 'w');
+		if (!fwrite($fh, stripcslashes($job_content))) {
+			fclose($fh);
+			throw new Exception("Error writing job", 2906);
+		}
+		fclose($fh);
+
+		return true;
+
+	}	
+
 /********************* PUBLIC METHODS ********************/
 	
 }

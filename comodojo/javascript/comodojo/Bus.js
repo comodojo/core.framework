@@ -388,6 +388,7 @@ Bus.addEvent('comodojo_app_running_registry_change');
 Bus.addEvent('comodojo_app_error');
 Bus.addEvent('comodojo_app_load_start');
 Bus.addEvent('comodojo_app_load_end');
+Bus.addEvent('comodojo_app_require_resize');
 Bus.addEvent('comodojo_kernel_start');
 Bus.addEvent('comodojo_kernel_end');
 Bus.addEvent('comodojo_kernel_error');

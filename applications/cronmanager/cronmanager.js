@@ -36,6 +36,8 @@ $c.App.load("cronmanager",
 
 		this.availableJobs = [];
 
+		this.selectedJob = false;
+
 		this.init = function(){
 
 			this.cStore = new dojo.store.Memory({
@@ -69,17 +71,17 @@ $c.App.load("cronmanager",
 			if (success) {
 				var i=0,o=0;
 				for (i in result.cron) {
-					result[i].leaf = true;
-					result[i].type = 'cronrootnode';
-					myself.sStore.data.push(result[i]);
+					result.cron[i].leaf = true;
+					result.cron[i].type = 'cronrootnode';
+					myself.sStore.data.push(result.cron[i]);
 				}
 				for (o in result.jobs) {
-					result[o].leaf = true;
-					result[o].type = 'jobsrootnode';
-					myself.jStore.data.push(result[o]);
+					result.jobs[o].leaf = true;
+					result.jobs[o].type = 'jobsrootnode';
+					myself.jStore.data.push(result.jobs[o]);
 					myself.availableJobs.push({
-						label: jobs[o],
-						id: jobs[o]
+						label: result.jobs[o],
+						id: result.jobs[o]
 					});
 				}
 				myself.layout();
@@ -251,9 +253,27 @@ $c.App.load("cronmanager",
 
 			};
 
+			this.container.main.center.jobs_management.jobs_tree.getIconClass = function(item, opened) {
+
+				if (!item || this.model.mayHaveChildren(item)) {
+					return opened ? "dijitFolderOpened" : "dijitFolderClosed";
+				}
+				else {
+					return 'cronmanager_job';
+				}
+
+			};
+
 			this.container.main.center.cron_management.cron_tree.on('click',function(item){
 				if (item.leaf) {
 
+				}
+			});
+
+			this.container.main.center.jobs_management.jobs_tree.on('click',function(item){
+				if (item.leaf) {
+					myself.selectedJob = item.name;
+					myself.openJob(item.name);
 				}
 			});
 
@@ -285,7 +305,47 @@ $c.App.load("cronmanager",
 			});
 
 			this.job_mirror.setSize('100%','100%');
+
+			this.container.main.center.jobs_management..job_actions.containerNode.appendChild(new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'),
+				style: 'float: left;',
+				onClick: function() {
+					
+				}
+			}).domNode);
 			
+		};
+
+		this.openJob = function(jobName) {
+			$c.Kernel.newCall(myself.openJobCallback,{
+				application: "cronmanager",
+				method: "open_job",
+				content: {
+					job_name: jobName
+				}
+			});
+		};
+
+		this.openJobCallback = function(success, result) {
+			if (success) {
+				myself.job_mirror.setValue(result);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.saveJob = function() {
+			
+		};
+
+		this.saveJobCallback = function(success, result) {
+			if (success) {
+				
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
 		};
 
 	}

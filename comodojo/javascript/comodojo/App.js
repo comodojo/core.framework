@@ -1,7 +1,7 @@
-define(["dojo/_base/lang","dojo/dom","dojo/aspect","dojo/on","dojo/dom-construct","dojo/dom-geometry",
+define(["dojo/_base/lang","dojo/dom","dojo/aspect","dojo/on","dojo/dom-construct","dojo/dom-geometry","dojo/dom-style",
 	"dijit/layout/ContentPane","dijit/registry",
 	"comodojo/Utils","comodojo/Bus","comodojo/Dialog","comodojo/Error","comodojo/Window"],
-function(lang,dom,aspect,on,domConstruct,domGeom,ContentPane,registry,utils,bus,dialog,error,Window){
+function(lang,dom,aspect,on,domConstruct,domGeom,domStyle,ContentPane,registry,utils,bus,dialog,error,Window){
 
 var App = {
 	// summary:
@@ -268,15 +268,19 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 
 			var as_width,as_height;
 			
+			var computedStyle = domStyle.getComputedStyle(myNode);
+			
 			if (!prop.width) {as_width = '';}
-			else if (prop.width == "auto") { as_width = 'width:' + (domGeom.getMarginBox(myNode).w - 2) + "px"; }
-			else if (isFinite(prop.width)) { as_width = 'width:' + prop.width + "px"; }
-			else { as_width = 'width:' + prop.width; }
+			else if (prop.width == "auto") { as_width = "width:" + (domGeom.getMarginBox(myNode,computedStyle).w - 2) + "px"; }
+			else if (prop.width == "adapt") { as_width = "width:100%"; }
+			else if (isFinite(prop.width)) { as_width = "width:" + prop.width + "px"; }
+			else { as_width = "width:" + prop.width; }
 
 			if (!prop.height) {as_height = '';}
-			if (prop.height == "auto") { as_height = 'height:' + (domGeom.getMarginBox(myNode).h - 2) + "px"; }
-			else if (isFinite(prop.height)) { as_height = 'height:' + prop.height + "px"; }
-			else { as_height = 'height:' + prop.height; }
+			if (prop.height == "auto") { as_height = "height:" + (domGeom.getMarginBox(myNode,computedStyle).h - 2) + "px"; }
+			else if (prop.height == "adapt") { as_width = "height:100%"; }
+			else if (isFinite(prop.height)) { as_height = "height:" + prop.height + "px"; }
+			else { as_height = "height:" + prop.height; }
 
 			if (!prop.requestSpecialNode) {
 				applicationSpace = new ContentPane({
@@ -400,14 +404,19 @@ App.launch = function(appExec, pid, applicationSpace, status) {
 	
 	try {
 		newApp.init();
-		if (applicationSpace.isComodojoApplication == "MODAL") {
-			applicationSpace.startup();
-			setTimeout(function() {
-				registry.byId(pid)._position();
-			},500);
-		}
-		if (applicationSpace.isComodojoApplication == "WINDOWED") {
-			applicationSpace.startup();
+		switch(applicationSpace.isComodojoApplication) {
+			case "WINDOWED":
+				applicationSpace.startup();
+			break;
+			case "MODAL":
+				applicationSpace.startup();
+				setTimeout(function() {
+					registry.byId(pid)._position();
+				},500);
+			break;
+			case "ATTACHED":
+				bus.callEvent('comodojo_app_require_resize');
+			break;
 		}
 		bus.callEvent('comodojo_app_load_end');
 		newApp.onstart();

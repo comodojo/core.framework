@@ -202,11 +202,11 @@ class comodojo_startup extends comodojo_basic {
 		//************************
 		
 		//****** DOJO REQUIRES ******
+		//dojo.require('dojo.back');
 		$myJsLoader .= "
 			<script type=\"text/javascript\">
 				dojo.require('comodojo.Config');
 				dojo.require('comodojo.Basic');
-				//dojo.require('dojo.back');
 		";
 		
 		$myDojoRequires = json2array(COMODOJO_JS_REQUIRES);
@@ -223,10 +223,10 @@ class comodojo_startup extends comodojo_basic {
 			}
 		}
 		//<script type=\"text/javascript\" src=\"comodojo/javascript/resources/comodojo.js\" ></script>
+		//dojo.back.init();
 		$myJsLoader .= "
 			</script>
 			<script type=\"text/javascript\">
-				//dojo.back.init();
 				dojo.ready(function() {
 					comodojo.startup();";
 
@@ -270,7 +270,7 @@ class comodojo_startup extends comodojo_basic {
 		$index = str_replace("*_META_*",$this->evalMeta(),$index);
 		$index = str_replace("*_DOJOTHEME_*",COMODOJO_SITE_THEME_DOJO,$index);
 		$index = str_replace("*_DOJOLOADER_*",$this->js_loader,$index);
-		$index = str_replace("*_CONTENT_*",'<div id="'.COMODOJO_SITE_DEFAULT_CONTAINER.'"></div>',$index);
+		$index = str_replace("*_CONTENT_*",COMODOJO_SITE_DEFAULT_CONTAINER,$index);
 		
 		return $index;
 		

@@ -47,7 +47,7 @@ class cron_jobs_management {
 
 		foreach ($jobs_items as $jobs_item) {
 			$job_file_properties = pathinfo($jobs_path.$jobs_item);
-			if (!is_dir($cron_path.$cron_item) AND $job_file_properties['extension'] == 'php' AND $job_file_properties['basename'][0] != '.' ) {
+			if (!is_dir($jobs_items.$jobs_item) AND $job_file_properties['extension'] == 'php' AND $job_file_properties['basename'][0] != '.' ) {
 				array_push($jobs, Array(
 					"id"	=> $job_file_properties['filename'],
 					"name"	=> $job_file_properties['filename']

@@ -46,7 +46,7 @@ class cronmanager extends application {
 		return $s;
 	}
 
-	public function editJob($params) {
+	public function newJob($params) {
 		$c = new cron_jobs_management();
 		try {
 			$s = $c->record_job($params['job_name'], $params['job_content']);
@@ -57,7 +57,7 @@ class cronmanager extends application {
 		return $params['job_name'];
 	}
 
-	public function newJob($params) {
+	public function editJob($params) {
 		$c = new cron_jobs_management();
 		try {
 			$s = $c->save_job($params['job_name'], $params['job_content']);

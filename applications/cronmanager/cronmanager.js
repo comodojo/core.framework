@@ -258,10 +258,7 @@ $c.App.load("cronmanager",
 				if (!item || this.model.mayHaveChildren(item)) {
 					return opened ? "dijitFolderOpened" : "dijitFolderClosed";
 				}
-				else {
-					return 'cronmanager_job';
-				}
-
+				
 			};
 
 			this.container.main.center.cron_management.cron_tree.on('click',function(item){
@@ -306,13 +303,15 @@ $c.App.load("cronmanager",
 
 			this.job_mirror.setSize('100%','100%');
 
-			this.container.main.center.jobs_management..job_actions.containerNode.appendChild(new dijit.form.Button({
+			this.addSaveJobButton = new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'),
 				style: 'float: left;',
 				onClick: function() {
 					
 				}
-			}).domNode);
+			});
+
+			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.addSaveJobButton.domNode);
 			
 		};
 
@@ -329,6 +328,12 @@ $c.App.load("cronmanager",
 		this.openJobCallback = function(success, result) {
 			if (success) {
 				myself.job_mirror.setValue(result);
+				myself.addSaveJobButton.set({
+					onClick: function() {
+						myself.saveJob();
+					},
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'),
+				});
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -336,12 +341,25 @@ $c.App.load("cronmanager",
 		};
 
 		this.saveJob = function() {
-			
+			var editor = myself.job_mirror.getValue();
+			if (editor == "") {
+
+			}
+			else {
+				$c.Kernel.newCall(myself.saveJobCallback,{
+					application: "cronmanager",
+					method: "edit_job",
+					content: {
+						job_name: myself.selectedJob,
+						job_content: editor
+					}
+				});
+			}
 		};
 
 		this.saveJobCallback = function(success, result) {
 			if (success) {
-				
+				$c.Dialog.info('saved');
 			}
 			else {
 				$c.Error.modal(result.code, result.name);

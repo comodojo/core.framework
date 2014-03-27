@@ -15,11 +15,10 @@ $d.require("comodojo.Layout");
 $d.require("comodojo.KernelStore");
 $d.require("gridx.modules.SingleSort");
 $d.require("gridx.modules.Pagination");
-$d.require("gridx.modules.pagination.PaginationBar");
+$d.require("gridx.modules.pagination.PaginationBarDD");
 $d.require("gridx.modules.Filter");
 $d.require("gridx.modules.filter.FilterBar");
 $d.require("gridx.modules.RowHeader");
-$d.require("gridx.modules.HiddenColumns");
 $d.require("gridx.modules.extendedSelect.Row");
 $d.require("gridx.modules.Menu");
 $d.require("dijit.Menu");
@@ -143,7 +142,7 @@ $c.App.load("eventviewer",
 										{"selector": "date", "formatLength": "medium"}) : "";
 									return "" + dateString + "";
 								},
-								useRawData: false
+								useRawData: true
 							},
 							{ name: this.getLocalizedMessage('0005'), width: '10%', field: 'time',
 								dataType: 'time'
@@ -158,7 +157,7 @@ $c.App.load("eventviewer",
 							"gridx/modules/SingleSort",
 							"gridx/modules/RowHeader",
 							"gridx/modules/Pagination",
-							"gridx/modules/pagination/PaginationBar",
+							"gridx/modules/pagination/PaginationBarDD",
 							"gridx/modules/Filter",
 							"gridx/modules/filter/FilterBar",
 							"gridx/modules/Menu",

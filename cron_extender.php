@@ -15,10 +15,17 @@
  * @license		GPL Version 3
  */
 
-require 'comodojo/global/comodojo_basic.php';
-require 'comodojo/global/cron.phar';
-
-date_default_timezone_set('Europe/Berlin');
+require_once 'comodojo/global/comodojo_basic.php';
+require_once 'comodojo/global/Cron/FieldInterface.php';
+require_once 'comodojo/global/Cron/AbstractField.php';
+require_once 'comodojo/global/Cron/DayOfMonthField.php';
+require_once 'comodojo/global/Cron/DayOfWeekField.php';
+require_once 'comodojo/global/Cron/HoursField.php';
+require_once 'comodojo/global/Cron/MinutesField.php';
+require_once 'comodojo/global/Cron/MonthField.php';
+require_once 'comodojo/global/Cron/YearField.php';
+require_once 'comodojo/global/Cron/FieldFactory.php';
+require_once 'comodojo/global/Cron/CronExpression.php';
 
 class cron_extender extends comodojo_basic {
 
@@ -34,7 +41,7 @@ class cron_extender extends comodojo_basic {
 	
 	public $auto_set_header = false; //CRON JOBS SHOULD NOT init any header
 	
-	private $multi_thread_enabled = false;
+	private $multi_thread_enabled = true;
 	
 	private $jobs = Array();
 	
@@ -50,6 +57,8 @@ class cron_extender extends comodojo_basic {
 	
 	public function logic($attributes) {
 		
+		comodojo_load_resource('database');
+
 		if (php_sapi_name() !== 'cli') {
 			die('Cron extender runs only in php-cli');
 			//throw new Exception("Cron extender runs only in php-cli", 2506);
@@ -61,15 +70,13 @@ class cron_extender extends comodojo_basic {
 		
 		$this->timestamp = strtotime('now');
 		
-		comodojo_load_resource('database');
-		
 		try{
 			$jobs = $this->get_jobs();
 			if (empty($jobs)) {
 				comodojo_debug('no jobs to process, exiting','INFO','cron');
-				//throw new Exception("no jobs to process, exiting", 2505);
 				return;
 			}
+			comodojo_debug("Current timestamp: ".$this->timestamp." - ".date('c',$this->timestamp),'INFO','cron');
 			foreach ($jobs as $id => $job) {
 				if ($this->should_run_job($job)) {
 					array_push($this->jobs,$job);
@@ -127,14 +134,13 @@ class cron_extender extends comodojo_basic {
 	
 	public function error($error_code, $error_name) {
 		comodojo_debug($error_code.' - '.$error_name,'ERROR','cron');
-		//echo $error_code.' - '.$error_name;
 	}
 	
 	private function get_jobs() {
 		
 		try{
 			$db = new database();
-			$db->table("cron")->keys("*")->where("enabled","=",true)->get();
+			$result = $db->table("cron")->keys("*")->where("enabled","=",true)->get();
 		}
 		catch (Exception $e) {
 			comodojo_debug($e->getMessage(),'ERROR','cron');
@@ -149,15 +155,18 @@ class cron_extender extends comodojo_basic {
 	
 	private function should_run_job($job) {
 		
-		return true;
-		
 		$expression = implode(" ",Array($job['min'],$job['hour'],$job['day_of_month'],$job['month'],$job['day_of_week'],$job['year'])); 
 		
 		$cron = Cron\CronExpression::factory($expression);
 		
 		$last_calculated_run = $cron->getPreviousRunDate()->format('U');
 		$next_calculated_run = $cron->getNextRunDate()->format('U');
-		
+
+		comodojo_debug("Job ".$job['name']." declared cron expression: ".$expression,'INFO','cron');
+		comodojo_debug("Job ".$job['name']." last run date: ".$job['last_run']." - ".date('c',$job['last_run']),'INFO','cron');
+		comodojo_debug("Job ".$job['name']." previous run date: ".$last_calculated_run." - ".date('c',$last_calculated_run),'INFO','cron');
+		comodojo_debug("Job ".$job['name']." next run date: ".$next_calculated_run." - ".date('c',$next_calculated_run),'INFO','cron');
+
 		if ($job['last_run'] < $last_calculated_run OR $next_calculated_run <= strtotime('now')) {
 			comodojo_debug("Job ".$job['name']." will be executed",'INFO','cron');
 			return true;

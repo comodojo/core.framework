@@ -142,7 +142,27 @@ class cron_jobs_management {
 
 		return true;
 
-	}	
+	}
+
+	public function delete_job($job_name) {
+
+		if (empty($job_name)) {
+			comodojo_debug('Error deleting job: Invalid job name','ERROR','cron_jobs_management');
+			throw new Exception("Invalid job name or empty content", 2901);
+		}
+
+		$job = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php';
+
+		if (!is_readable($job)) {
+			comodojo_debug('Error recording job: cannot find job','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find job", 2905);
+		}
+
+		$result = @unlink($job);
+		
+		if (!$result) throw new Exception("Cannot delete job file", 2903);
+
+	}
 
 /********************* PUBLIC METHODS ********************/
 	

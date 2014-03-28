@@ -38,6 +38,8 @@ $c.App.load("cronmanager",
 
 		this.selectedJob = false;
 
+		this.jobPattern = "<?php\n\ncomodojo_load_resource('cron_job');\n\nclass [JOB_NAME] extends cron_job {\n\t\n\tpublic function logic($params) {\n\t\n    }\n\n}\n\n?>";
+
 		this.init = function(){
 
 			this.cStore = new dojo.store.Memory({
@@ -73,7 +75,7 @@ $c.App.load("cronmanager",
 				for (i in result.cron) {
 					result.cron[i].leaf = true;
 					result.cron[i].type = 'cronrootnode';
-					myself.sStore.data.push(result.cron[i]);
+					myself.cStore.data.push(result.cron[i]);
 				}
 				for (o in result.jobs) {
 					result.jobs[o].leaf = true;
@@ -253,14 +255,6 @@ $c.App.load("cronmanager",
 
 			};
 
-			this.container.main.center.jobs_management.jobs_tree.getIconClass = function(item, opened) {
-
-				if (!item || this.model.mayHaveChildren(item)) {
-					return opened ? "dijitFolderOpened" : "dijitFolderClosed";
-				}
-				
-			};
-
 			this.container.main.center.cron_management.cron_tree.on('click',function(item){
 				if (item.leaf) {
 
@@ -303,16 +297,64 @@ $c.App.load("cronmanager",
 
 			this.job_mirror.setSize('100%','100%');
 
-			this.addSaveJobButton = new dijit.form.Button({
-				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'),
+			this.job_mirror.lock();
+
+			this.newJobButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+this.getLocalizedMessage('0001'),
 				style: 'float: left;',
 				onClick: function() {
-					
+					myself.newJob();
 				}
 			});
 
-			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.addSaveJobButton.domNode);
+			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.newJobButton.domNode);
+
+			this.deleteJobButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('delete',16)+'" />&nbsp;'+this.getLocalizedMessage('0010'),
+				style: 'float: right;',
+				onClick: function() {
+					myself.deleteJob();
+				},
+				disabled: true
+			});
+
+			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.deleteJobButton.domNode);
+
+			this.updateSaveJobButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+this.getLocalizedMessage('0003'),
+				style: 'float: right;',
+				disabled: true
+			});
+
+			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.updateSaveJobButton.domNode);
 			
+		};
+
+		this.newJob = function() {
+			myself.job_mirror.setValue(myself.jobPattern);
+			myself.job_mirror.release();
+			myself.job_mirror.refresh();
+			dojo.query(".CodeMirror-dialog", myself.container.main.center.jobs_management.job_code.containerNode).forEach(function(node) {
+				comodojo.Utils.destroyNode(node);
+			});
+			myself.updateSaveJobButton.set({
+				label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+this.getLocalizedMessage('0003'),
+				onClick: function() {
+					$c.App.start('readyform',{
+						modules: ['ValidationTextBox','Button'],
+						callback: myself.registerJob,
+						callbackOnClose: false,
+						hierarchy: [{
+							name: 'jobName',
+							type: "ValidationTextBox",
+							label: myself.getLocalizedMessage('0012'),
+							required:true
+						}]
+					}, false, false, {type: 'modal', width: 300, height: false});
+				},
+				disabled: false
+			});
+			myself.deleteJobButton.set('disabled',true);
 		};
 
 		this.openJob = function(jobName) {
@@ -328,12 +370,19 @@ $c.App.load("cronmanager",
 		this.openJobCallback = function(success, result) {
 			if (success) {
 				myself.job_mirror.setValue(result);
-				myself.addSaveJobButton.set({
+				myself.job_mirror.release();
+				myself.job_mirror.refresh();
+				dojo.query(".CodeMirror-dialog", myself.container.main.center.jobs_management.job_code.containerNode).forEach(function(node) {
+					comodojo.Utils.destroyNode(node);
+				});
+				myself.updateSaveJobButton.set({
 					onClick: function() {
 						myself.saveJob();
 					},
-					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'),
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0005'),
+					disabled: false
 				});
+				myself.deleteJobButton.set('disabled',false);
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -343,23 +392,91 @@ $c.App.load("cronmanager",
 		this.saveJob = function() {
 			var editor = myself.job_mirror.getValue();
 			if (editor == "") {
-
+				$c.Dialog.info(myself.getLocalizedMessage('0013'));
+				return;
 			}
-			else {
-				$c.Kernel.newCall(myself.saveJobCallback,{
-					application: "cronmanager",
-					method: "edit_job",
-					content: {
-						job_name: myself.selectedJob,
-						job_content: editor
-					}
-				});
-			}
+			$c.Kernel.newCall(myself.saveJobCallback,{
+				application: "cronmanager",
+				method: "edit_job",
+				content: {
+					job_name: myself.selectedJob,
+					job_content: editor
+				}
+			});
 		};
 
 		this.saveJobCallback = function(success, result) {
 			if (success) {
-				$c.Dialog.info('saved');
+				$c.Dialog.info(myself.getLocalizedMessage('0014'));
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.registerJob = function(data) {
+			var editor = myself.job_mirror.getValue();
+			if (editor == "") {
+				$c.Dialog.info(myself.getLocalizedMessage('0013'));
+				return;
+			}
+			$c.Kernel.newCall(myself.registerJobCallback,{
+				application: "cronmanager",
+				method: "new_job",
+				content: {
+					job_name: data.jobName,
+					job_content: editor
+				}
+			});
+		};
+
+		this.registerJobCallback = function(success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0014'));
+				myself.selectedJob = result;
+				myself.jStoreObservable.put({
+					id: result,
+					name: result,
+					type: 'jobsrootnode',
+					leaf: true
+				});
+				myself.container.main.center.jobs_management.jobs_tree.set('paths', [ [ 'jobsrootnode', result ] ] );
+				myself.updateSaveJobButton.set({
+					onClick: function() {
+						myself.saveJob();
+					},
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0005'),
+				});
+				myself.deleteJobButton.set('disabled',false);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.deleteJob = function(data) {
+			$c.Kernel.newCall(myself.deleteJobCallback,{
+				application: "cronmanager",
+				method: "delete_job",
+				content: {
+					job_name: myself.selectedJob
+				}
+			});
+		};
+
+		this.deleteJobCallback = function(success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0015'));
+				myself.jStoreObservable.remove(result);		
+				myself.updateSaveJobButton.set({
+					onClick: function() {
+						myself.saveJob();
+					},
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0003'),
+					disabled: true
+				});
+				myself.deleteJobButton.set('disabled',true);
+				myself.job_mirror.setValue('');
 			}
 			else {
 				$c.Error.modal(result.code, result.name);

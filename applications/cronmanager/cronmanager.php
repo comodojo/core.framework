@@ -21,6 +21,7 @@ class cronmanager extends application {
 		$this->add_application_method('open_job', 'openJob', Array("job_name"), 'No description yes, sorry', false);
 		$this->add_application_method('edit_job', 'editJob', Array("job_name","job_content"), 'No description yes, sorry', false);
 		$this->add_application_method('new_job', 'newJob', Array("job_name","job_content"), 'No description yes, sorry', false);
+		$this->add_application_method('delete_job', 'deleteJob', Array("job_name"), 'No description yes, sorry', false);
 		//$this->add_application_method('get_service', 'getService', Array("name"), 'No description yes, sorry', false);
 	}
 
@@ -61,6 +62,17 @@ class cronmanager extends application {
 		$c = new cron_jobs_management();
 		try {
 			$s = $c->save_job($params['job_name'], $params['job_content']);
+		}
+		catch (Exception $e) {
+			throw $e;
+		}
+		return $params['job_name'];
+	}
+
+	public function deleteJob($params) {
+		$c = new cron_jobs_management();
+		try {
+			$s = $c->delete_job($params['job_name']);
 		}
 		catch (Exception $e) {
 			throw $e;

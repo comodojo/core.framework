@@ -202,7 +202,7 @@ class cron_job {
 			$db = new database();
 			$result = $db
 				->table("cron_worklog")
-				->keys(Array(Array("status","success","result","end"))
+				->keys(Array("status","success","result","end"))
 				->values(Array("FINISHED",$this->job_success,$this->job_result,$this->end_timestamp))
 				->where("id","=",$this->worklog_id)
 				->update();

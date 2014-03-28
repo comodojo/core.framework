@@ -36,6 +36,14 @@ $c.App.load("readyform",
 		
 		this.init = function(){
 			
+			if ($c.Utils.inArray('Button',this.modules)) {
+				this.modules.push('Button');
+			}
+
+			if ($c.Utils.inArray('TextBox',this.modules)) {
+				this.modules.push('TextBox');
+			}
+
 			if (!this.buttonLabel) {
 				this.buttonLabel = this.getLocalizedMessage('0001');
 			}

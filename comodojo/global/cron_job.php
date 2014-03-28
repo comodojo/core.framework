@@ -25,6 +25,13 @@ class cron_job {
 	public $force_no_multi_thread = false;
 	
 	/**
+	 * Force a script to be executed in single-thread mode.
+	 * 
+	 * @var	bool
+	 */
+	public $max_result_in_multi_thread = 1024;
+
+	/**
 	 * The job name
 	 * 
 	 * @var	string
@@ -109,17 +116,17 @@ class cron_job {
 		
 		if (!is_null($job_name)) $this->job_name = $job_name;
 		
-		$this->multi_thread = $multi_thread;
+		$this->multi_thread = ($multi_thread AND !$this->force_no_multi_thread);
 		
 		if (is_null($timestamp)) $this->start_timestamp = time();
 		else $this->start_timestamp = $timestamp;
 		
 		$this->job_class = get_class($this);
 		
-		comodojo_debug("Executing job ".$job_name." in ".(($multi_thread AND !$this->force_no_multi_thread AND function_exists('pcntl_fork')) ? 'multi-thread' : 'single-thread')." mode","INFO","cron");
+		comodojo_debug("Executing job ".$job_name." in ".($multi_thread ? 'multi-thread' : 'single-thread')." mode","INFO","cron");
 		
 		try{
-			if ($multi_thread AND !$this->force_no_multi_thread AND function_exists('pcntl_fork')) {
+			if ($multi_thread) {
 				$this->run_as_thread($_params);
 			}
 			else {
@@ -128,8 +135,6 @@ class cron_job {
 		}
 		catch (Exception $e) {
 			comodojo_debug('Job error: '.$e->getMessage(),'ERROR','cron');
-			//$this->job_success = false;
-			//$this->job_result = $e->getMessage();
 		}
 		
 	}
@@ -158,14 +163,60 @@ class cron_job {
 		
 		$this->end_timestamp = time();
 		
-		comodojo_debug('Job '.$this->job_name.' ('.$this->job_class.') completed at '.date(DATE_RFC822,$this->end_timestamp),'INFO','cron');
+		comodojo_debug('Job '.$this->job_name.' ('.$this->job_class.') completed at '.date('c',$this->end_timestamp),'INFO','cron');
 		
 		if (!$this->close_worklog(true)) {
 			comodojo_debug('Error closing worklog for job '.$this->job_name,'ERROR','cron');
 			throw new Exception("Could not close work log", 2503);
 		}
 		
-	} 
+	}
+
+	/**
+	 * Run the job as a thread.
+	 * 
+	 * @return	void
+	 */
+	private function run_as_thread($params) {
+
+		$ipc_array = Array();
+
+		if (socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $ipc_array) === false) {
+			comodojo_debug('No IPC communication, exiting - '.socket_strerror(socket_last_error()),'ERROR','cron');
+			throw new Exception('No IPC communication, exiting - '.socket_strerror(socket_last_error()), 2506);
+		}
+
+		$pid = @pcntl_fork();
+		
+		if( $pid == -1 ) {
+			throw new Exception('Could not fok job', 2501);
+		}
+		elseif ($pid) {
+			$this->pid = $pid;
+			socket_close($ipc_array[0]);
+			$this->result = socket_read($ipc_array[1], $this->max_result_in_multi_thread, PHP_BINARY_READ);
+			socket_close($ipc_array[1]);
+			pcntl_wait($status);
+		}
+		else {
+			pcntl_signal( SIGTERM, function($signo) { exit(0); } );
+			$this->should_get_pid = true;
+			socket_close($ipc_array[1]);
+			try{
+				$result = $this->run_logic($params);
+				socket_write($ipc_array[0], $result);
+				socket_close($ipc_array[0]);
+			}
+			catch (Exception $e) {
+				socket_write($ipc_array[0], $e->getMessage());
+				socket_close($ipc_array[0]);
+				exit(1);
+			}
+			exit(0);
+			
+		}
+		
+	}
 	
 	/**
 	 * Create the worklog for current job
@@ -225,7 +276,9 @@ class cron_job {
      * @return int
      */
 	public final function get_pid() {
+
 		return $this->pid;
+
 	}
     
 	/**
@@ -234,45 +287,20 @@ class cron_job {
 	 * @return	bool
 	 */
 	public final function is_running() {
+
 		return (pcntl_waitpid($this->pid, $this->status, WNOHANG) === 0);
+
 	}
 	
-	/**
-	 * Run the job as a thread.
-	 * 
-	 * @return	void
-	 */
-    private function run_as_thread($params) {
-    	
-		$pid = @pcntl_fork();
-		
-		if( $pid == -1 ) {
-			throw new Exception('Could not fok job', 2501);
-		}
-		elseif($pid == 0) {
-  			pcntl_signal( SIGTERM, function($signo) { exit(0); } );
-			$this->should_get_pid = true;
-			try{
-				$this->run_logic($params);
-			}
-			catch (Exception $e) {
-				exit(1);
-			}
-			exit(0);
-		}
-		else {
-			$this->pid = $pid;
-		}
-		
-    }
-    
 	/**
 	 * Stop a running thread
 	 * 
 	 * @return	void
 	 */
     public final function stop_thread() {
+
     	if ($this->is_running()) posix_kill($this->pid, SIGKILL);
+
     }
 	
 	/**
@@ -280,7 +308,7 @@ class cron_job {
 	 */
 	public final function get_job_results() {
 		
-		return Array($this->job_name, $this->job_success, $this->start_timestamp, $this->end_timestamp);
+		return Array($this->job_name, $this->job_success, $this->start_timestamp, $this->end_timestamp, $this->job_result);
 		
 	}
 	

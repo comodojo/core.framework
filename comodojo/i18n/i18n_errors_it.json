@@ -113,6 +113,7 @@
 	"2503":"Could not close work log",
 	"2504":"cron disabled",
 	"2505":"No jobs to process, exiting",
+	"2506":"No IPC communication, exiting",
 	"2510":"Could not get job list",
 	"2601":"Invalid username, wrong old password or empty new password provided",
 	"2602":"Password can be changed only by user",

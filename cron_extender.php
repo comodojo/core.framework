@@ -61,33 +61,49 @@ class cron_extender extends comodojo_basic {
 
 		if (php_sapi_name() !== 'cli') {
 			die('Cron extender runs only in php-cli');
-			//throw new Exception("Cron extender runs only in php-cli", 2506);
 		}
 		
 		if (!defined('COMODOJO_CRON_ENABLED') OR @!COMODOJO_CRON_ENABLED) throw new Exception("cron disabled", 2504);
 		
-		$this->multi_thread_enabled = COMODOJO_CRON_MULTI_THREAD_ENABLED;
-		
+		$multithread_support = function_exists('pcntl_fork');
+
+		if (COMODOJO_CRON_MULTI_THREAD_ENABLED AND $multithread_support) {
+			comodojo_debug('Cron will work in multithread mode','INFO','cron');
+			$this->multi_thread_enabled = true;
+		}
+		else {
+			comodojo_debug('Cron will work in singlethread mode ('.(COMODOJO_CRON_MULTI_THREAD_ENABLED ? 'no pcntl support' : 'administratively disabled').')','INFO','cron');
+			$this->multi_thread_enabled = false;
+		}
+
 		$this->timestamp = strtotime('now');
 		
 		try{
+
 			$jobs = $this->get_jobs();
+
 			if (empty($jobs)) {
 				comodojo_debug('no jobs to process, exiting','INFO','cron');
 				return;
 			}
+
 			comodojo_debug("Current timestamp: ".$this->timestamp." - ".date('c',$this->timestamp),'INFO','cron');
+			
 			foreach ($jobs as $id => $job) {
 				if ($this->should_run_job($job)) {
 					array_push($this->jobs,$job);
-					if (!class_exists($job['job'])) require(COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job['job'].'.php');
+					if (!class_exists($job['job'])) require(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job['job'].'.php');
 				}
 			}
+
 			$this->update_jobs_info();
+
 		}
 		catch (Exception $e) {
+
 			comodojo_debug('There was an error processing job list; cron execution aborted','ERROR','cron');
 			throw $e;
+
 		}
 		
 		foreach ($this->jobs as $key => $job) {
@@ -99,26 +115,29 @@ class cron_extender extends comodojo_basic {
 			$pid = $_job->get_pid();
 			
 			if (is_null($pid)) {
-				list($job_name, $job_success, $job_start, $job_end) = $_job->get_job_results();
-				array_push($this->completed_processes,Array($pid,$job_name,$job_success,$job_start, $job_end));
+				list($job_name, $job_success, $job_start, $job_end, $job_result) = $_job->get_job_results();
+				array_push($this->completed_processes,Array($pid, $job_name, $job_success, $job_start, $job_end, $job_result));
 			}
 			else {
 				$this->running_processes[$pid] = $_job;
 			}
+
 		}
 		
 		while(!empty($this->running_processes)) {
+
 			foreach($this->running_processes as $pid=>$process) {
+
 				if(!$process->is_running()) {
-					//list($job_name, $job_success, $job_result, $job_start, $job_end) = $process->get_job_results();
-					
-					list($job_name, $job_success, $job_start, $job_end) = $process->get_job_results();
-					$job_success = !pcntl_wexitstatus($process->status);
+
+					list($job_name, $job_success, $job_start, $job_end, $job_result) = $process->get_job_results();
 					
 					//is a fake time, but it return end timestamp with a precision of ~1 sec
 					$job_end = time();
+
+					$job_success = !pcntl_wexitstatus($process->status);
 					
-					array_push($this->completed_processes,Array($pid, $job_name, $job_success, $job_start, $job_end));
+					array_push($this->completed_processes,Array($pid, $job_name, $job_success, $job_start, $job_end, $job_result));
 					unset($this->running_processes[$pid]);
 				}
 				//error_log('waiting for '.$pid);
@@ -270,6 +289,7 @@ class cron_extender extends comodojo_basic {
 		foreach ($this->completed_processes as $key => $completed_process) {
 			$output_string .= sprintf($mask, $completed_process[0], $completed_process[1], $completed_process[2] ? 'YES' : 'NO', $completed_process[2] ? ($completed_process[4]-$completed_process[3]) : "-");
 			//$output_string .= "\n".$completed_process[5]." - ".$completed_process[4]."\n";
+			comodojo_debug($completed_process[5]);
 		}
 		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------');
 

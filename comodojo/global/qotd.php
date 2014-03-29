@@ -41,4 +41,6 @@ function get_quotes_store() {
 	return $toReturn;
 }
 
+function loadHelper_qotd() { return false; }
+
 ?>

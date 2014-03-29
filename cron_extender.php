@@ -52,12 +52,17 @@ class cron_extender extends comodojo_basic {
 	private $timestamp;
 	
 	private $start_timestamp;
+
+	private $ipc_array = Array();
 	
 	private $echo_results = true;
+
+	public $max_result_in_multi_thread = 2048;
 	
 	public function logic($attributes) {
 		
 		comodojo_load_resource('database');
+		comodojo_load_resource('cron_job');
 
 		if (php_sapi_name() !== 'cli') {
 			die('Cron extender runs only in php-cli');
@@ -96,8 +101,6 @@ class cron_extender extends comodojo_basic {
 				}
 			}
 
-			$this->update_jobs_info();
-
 		}
 		catch (Exception $e) {
 
@@ -106,44 +109,86 @@ class cron_extender extends comodojo_basic {
 
 		}
 		
+		$forked = Array();
+
 		foreach ($this->jobs as $key => $job) {
 			
-			$this->start_timestamp = time();
-			
-			$_job = new $job['job']($job['params'], $job['name'], $this->multi_thread_enabled, $this->start_timestamp);
-			
-			$pid = $_job->get_pid();
-			
-			if (is_null($pid)) {
-				list($job_name, $job_success, $job_start, $job_end, $job_result) = $_job->get_job_results();
-				array_push($this->completed_processes,Array($pid, $job_name, $job_success, $job_start, $job_end, $job_result));
+			if (!$this->multi_thread_enabled) {
+				$pid = null;
+				array_push($this->completed_processes,$this->run_singlethread($job));
 			}
 			else {
-				$this->running_processes[$pid] = $_job;
+				
+				$multithread_status = $this->run_multithread($job);
+				
+				if (!is_null($multithread_status["pid"])) {
+					$this->running_processes[$multithread_status["pid"]] = Array($multithread_status["name"], $multithread_status["uid"], $multithread_status["timestamp"],$multithread_status["id"]);
+					array_push($forked, $multithread_status["pid"]);
+				}
+
 			}
 
 		}
 		
+		//pcntl_wait($this->status);
+
+		comodojo_debug("Extender forked ".sizeof($forked)." process(es) in the running queue: ".implode(',', $forked),"INFO","cron");
+
 		while(!empty($this->running_processes)) {
 
-			foreach($this->running_processes as $pid=>$process) {
+			foreach($this->running_processes as $pid => $job) {
 
-				if(!$process->is_running()) {
+				//$job[0] is name
+				//$job[1] is uid
+				//$job[2] is start timestamp
+				//$job[3] is job id
 
-					list($job_name, $job_success, $job_start, $job_end, $job_result) = $process->get_job_results();
+				if(!$this->is_running($pid)) {
+
+					list($reader,$writer) = $this->ipc_array[$job[1]];
+
+					socket_close($writer);
 					
-					//is a fake time, but it return end timestamp with a precision of ~1 sec
-					$job_end = time();
-
-					$job_success = !pcntl_wexitstatus($process->status);
+					$parent_result = socket_read($reader, $this->max_result_in_multi_thread, PHP_BINARY_READ);
+					if ($parent_result === false) {
+						comodojo_debug("socket_read() failed. Reason: ".socket_strerror(socket_last_error($reader)),'ERROR','cron');
+						array_push($this->completed_processes,Array(
+							null,
+							$job[0],//$job_name,
+							false,
+							$job[2],//$start_timestamp,
+							null,
+							"socket_read() failed. Reason: ".socket_strerror(socket_last_error($reader)),
+							$job[3]
+						));
+					}
+					else {
+						$result = unserialize(rtrim($parent_result));
+					}
+					//error_log('parent receive: '.$this->result);
+					socket_close($reader);
 					
-					array_push($this->completed_processes,Array($pid, $job_name, $job_success, $job_start, $job_end, $job_result));
+					array_push($this->completed_processes,Array(
+						$pid,
+						$job[0],//$job_name,
+						$result["success"],
+						$job[2],//$start_timestamp,
+						$result["timestamp"],
+						$result["result"],
+						$job[3]
+					));
+					
 					unset($this->running_processes[$pid]);
+
+					comodojo_debug("Removed pid ".$pid." from the running queue, job terminated","INFO","cron");
+
 				}
-				//error_log('waiting for '.$pid);
+
 			}
-    		sleep(1);
+
 		}
+
+		$this->update_jobs_info();
 
 		$this->send_notification();
 		
@@ -173,20 +218,23 @@ class cron_extender extends comodojo_basic {
 	}
 	
 	private function should_run_job($job) {
-		
+
 		$expression = implode(" ",Array($job['min'],$job['hour'],$job['day_of_month'],$job['month'],$job['day_of_week'],$job['year'])); 
 		
 		$cron = Cron\CronExpression::factory($expression);
 		
-		$last_calculated_run = $cron->getPreviousRunDate()->format('U');
-		$next_calculated_run = $cron->getNextRunDate()->format('U');
+		$last_date = date_create();
+
+		date_timestamp_set($last_date, $job['last_run']);
+		
+		$next_calculated_run = $cron->getNextRunDate($last_date)->format('U');
 
 		comodojo_debug("Job ".$job['name']." declared cron expression: ".$expression,'INFO','cron');
 		comodojo_debug("Job ".$job['name']." last run date: ".$job['last_run']." - ".date('c',$job['last_run']),'INFO','cron');
-		comodojo_debug("Job ".$job['name']." previous run date: ".$last_calculated_run." - ".date('c',$last_calculated_run),'INFO','cron');
 		comodojo_debug("Job ".$job['name']." next run date: ".$next_calculated_run." - ".date('c',$next_calculated_run),'INFO','cron');
 
-		if ($job['last_run'] < $last_calculated_run OR $next_calculated_run <= strtotime('now')) {
+		if ($next_calculated_run <= $this->timestamp) {
+		//if ($cron->isDue($last_date)) {
 			comodojo_debug("Job ".$job['name']." will be executed",'INFO','cron');
 			return true;
 		}
@@ -194,26 +242,173 @@ class cron_extender extends comodojo_basic {
 			comodojo_debug("Job ".$job['name']." will NOT be executed",'INFO','cron');
 			return false;
 		}
-		
+
 	}
-	
+
+	private function run_singlethread($job) {
+
+		$start_timestamp = time();
+		$job_name = $job['name'];
+		$job_id = $job['id'];
+		$_job = new $job['job']($job['params'], null, $job['name'], $start_timestamp);
+		$pid = $_job->get_pid();
+		
+		try {
+
+			$job_result = $_job->start();
+		
+		}
+		catch (Exception $e) {
+		
+			return Array($pid, $job_name, false, $start_timestamp, null, $e->getMessage());
+		
+		}
+
+		return Array($pid, $job_name, $job_result["success"], $start_timestamp, $job_result["timestamp"], $job_result["result"],$job_id);
+
+	}
+
+	private function run_multithread($job) {
+		
+		$start_timestamp = time();
+		$job_name = $job['name'];
+		$job_id = $job['id'];
+		$job_uid = random();
+
+		$this->ipc_array[$job_uid] = Array();
+		
+		if (socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $this->ipc_array[$job_uid]) === false) {
+			comodojo_debug('No IPC communication, exiting - '.socket_strerror(socket_last_error()),'ERROR','cron');
+			array_push($this->completed_processes,Array(
+				null,
+				$job_name,
+				false,
+				$start_timestamp,
+				time(),
+				'No IPC communication, exiting - '.socket_strerror(socket_last_error()),
+				$job_id
+			));
+			return Array(
+				"pid"		=>	null,
+				"name"		=>	$job_name,
+				"uid"		=>	$job_uid,
+				"timestamp"	=>	$start_timestamp,
+				"id"		=>	$job_id
+			);
+		}
+		
+		list($reader,$writer) = $this->ipc_array[$job_uid];
+
+		$pid = @pcntl_fork();
+
+		if( $pid == -1 ) {
+
+			comodojo_debug('Could not fok job','ERROR','cron');
+			array_push($this->completed_processes,Array(
+				null,
+				$job_name,
+				false,
+				$start_timestamp,
+				time(),
+				'Could not fok job',
+				$job_id
+			));
+
+		}
+		elseif ($pid) {
+
+			//PARENT will take actions on processes later
+
+		}
+		else {
+			
+			socket_close($reader);
+			pcntl_signal( SIGTERM, function($signo) { exit(0); } );
+			
+			$_job = new $job['job']($job['params'], null, $job['name'], $start_timestamp);
+
+			try{
+
+				$job_result = $_job->start();
+
+				$job_result = serialize(Array(
+					"success"	=>	$job_result["success"],
+					"result"	=>	$job_result["result"],
+					"timestamp"	=>	$job_result["timestamp"]
+				));
+
+			}
+			catch (Exception $e) {
+
+				$message = $e->getMessage();
+				
+				$job_result = serialize(Array(
+					"success"	=>	false,
+					"result"	=>	$message,
+					"timestamp"	=>	time()
+				));
+				
+				if (socket_write($writer, $job_result, strlen($job_result)) === false) {
+					comodojo_debug("socket_write() failed. Reason: ".socket_strerror(socket_last_error($writer)),'ERROR','cron');
+				}
+				socket_close($writer);
+				
+				exit(1);
+
+			}
+
+			if (socket_write($writer, $job_result, strlen($job_result)) === false) {
+				comodojo_debug("socket_write() failed. Reason: ".socket_strerror(socket_last_error($writer)),'ERROR','cron');
+			}
+			socket_close($writer);
+
+			exit(0);
+
+		}
+
+		return Array(
+			"pid"		=>	$pid == -1 ? null : $pid,
+			"name"		=>	$job_name,
+			"uid"		=>	$job_uid,
+			"id"		=>	$job_id,
+			"timestamp"	=>	$start_timestamp
+		);
+
+	}
+
+	/**
+     * Return PID from system (null if no multi-thread active)
+     * 
+     * @return int
+     */
+	private final function get_pid() {
+
+		return $this->pid;
+
+	}
+
+	/**
+	 * Return true if process is still running, false otherwise
+	 * 
+	 * @return	bool
+	 */
+	public final function is_running($pid) {
+
+		return (pcntl_waitpid($pid, $this->status, WNOHANG) === 0);
+		//return posix_kill($pid, 0);
+
+	}
+
 	private function update_jobs_info() {
 		
-		if (empty($this->jobs)) return;
+		if (empty($this->completed_processes)) return;
 		
-		$run = false;
-
 		try{
 			$db = new database();
-			$result = $db->table("cron")->keys("last_run")->values($this->timestamp);
-			foreach ($this->jobs as $job) {
-				if (!$run) {
-					$result = $result->where('id','=',$job['id']);
-					$run = true;
-				}
-				else $result = $result->or_where('id','=',$job['id']);
+			foreach ($this->completed_processes as $process) {
+				$db->table("cron")->keys("last_run")->values($process[3])->where('id','=',$process[6])->update();
+				$db->clean();
 			}
-			$result = $result->update();
 		}
 		catch (Exception $e) {
 			unset($db);
@@ -222,6 +417,7 @@ class cron_extender extends comodojo_basic {
 		unset($db);
 	}
 	
+
 	private function send_notification() {
 		
 		comodojo_load_resource("mail");
@@ -278,20 +474,18 @@ class cron_extender extends comodojo_basic {
 	
 	private function show_results() {
 		
-		$mask = "|%10.10s|%-40.40s|%3.3s|%11.11s|\n";
+		$mask = "|%10.10s|%-40.40s|%3.3s|%11.11s|%-80.80s|\n";
 		
-		$output_string = "\n\n --- Cron Extender Job resume --- \n\n";
+		$output_string = "\n\n --- Cron Extender Job resume --- ".date('c',$this->timestamp)."\n\n";
 		
-		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------');
-		$output_string .= sprintf($mask, 'PID  ', 'Name', 'Su', 'Time (secs)');
-		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------');
+		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------','--------------------------------------------------------------------------------');
+		$output_string .= sprintf($mask, 'PID', 'Name', 'Su', 'Time (secs)', 'Result (truncated)');
+		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------','--------------------------------------------------------------------------------');
 		
 		foreach ($this->completed_processes as $key => $completed_process) {
-			$output_string .= sprintf($mask, $completed_process[0], $completed_process[1], $completed_process[2] ? 'YES' : 'NO', $completed_process[2] ? ($completed_process[4]-$completed_process[3]) : "-");
-			//$output_string .= "\n".$completed_process[5]." - ".$completed_process[4]."\n";
-			comodojo_debug($completed_process[5]);
+			$output_string .= sprintf($mask, $completed_process[0], $completed_process[1], $completed_process[2] ? 'YES' : 'NO', $completed_process[2] ? ($completed_process[4]-$completed_process[3]) : "-",str_replace(array("\r", "\n"), "", $completed_process[5]));
 		}
-		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------');
+		$output_string .= sprintf($mask, '-----------', '----------------------------------------', '---', '-----------','--------------------------------------------------------------------------------');
 
 		$output_string .= "\n\n";
 		$output_string .= "Total script runtime: ".(strtotime('now')-$this->timestamp)." seconds";

@@ -40,6 +40,8 @@ var form = declare(null,{
 	// Bool
 	autoFocus: true,
 
+	hidden: false,
+
 	// Hierarchy that will built (json)
 	hierarchy: [],
 
@@ -222,12 +224,14 @@ var form = declare(null,{
 			id: this.id,
 			action: !this.action ? "javascript:;" : this.action,
 			_fields: {},
-			fields: {},
-			//override default resize (broken for forms!)
-			//resize: function() { }
+			fields: {}
 		});
 
 		domClass.add(this._form.domNode,this.baseCssClass+'_mainForm_'+dojo.body().getAttribute('class'));
+
+		if (this.hidden) {
+			this._form.domNode.style.display = "none";
+		}
 		
 		return this._form.domNode;
 
@@ -334,6 +338,8 @@ var form = declare(null,{
 					constraints: !hierarchyElement.constraints ? false : hierarchyElement.constraints,
 					promptMessage: !hierarchyElement.promptMessage ? false : hierarchyElement.promptMessage,
 					invalidMessage: !hierarchyElement.invalidMessage ? "$_unset_$" : hierarchyElement.invalidMessage,
+					intermediateChanges: !hierarchyElement.intermediateChanges ? false : hierarchyElement.intermediateChanges,
+					regExp: !hierarchyElement.regExp ? "" : hierarchyElement.regExp,
 					style: this.inputExtraCss
 				});
 				domClass.add(myField.domNode,this._inputFieldClass);
@@ -474,7 +480,7 @@ var form = declare(null,{
 			
 			case "FilteringSelect": 
 				myField = new this.deferred_modules.FilteringSelect ({
-					name: hierarchyElement.name,
+					name: !hierarchyElement.options ? null : hierarchyElement.name,
 					store: new ObjectStore({ 
 						objectStore: new Memory({
 							data: hierarchyElement.options
@@ -497,7 +503,7 @@ var form = declare(null,{
 			case "Select":
 				myField = new this.deferred_modules.Select ({
 					name: hierarchyElement.name,
-					store: new ObjectStore({ 
+					store: !hierarchyElement.options ? null : new ObjectStore({ 
 						objectStore: new Memory({
 							data: hierarchyElement.options
 						})
@@ -521,7 +527,7 @@ var form = declare(null,{
 			case "ComboBox":
 				myField = new this.deferred_modules.ComboBox ({
 					name: hierarchyElement.name,
-					store: new Memory({
+					store: !hierarchyElement.options ? null : new Memory({
 						data: hierarchyElement.options
 					}),
 					searchAttr: !hierarchyElement.searchAttr ? "name" : hierarchyElement.searchAttr,

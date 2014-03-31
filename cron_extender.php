@@ -29,6 +29,24 @@ require_once 'comodojo/global/Cron/CronExpression.php';
 
 class cron_extender extends comodojo_basic {
 
+	/**
+	 * Max result lenght retrieved from parent in miltithread mode
+	 * (will be included in controlpanel in next release)
+	 */
+	public $max_result_in_multi_thread = 2048;
+
+	/**
+	 * Show result in command line when executing
+	 * (will be included in controlpanel in next release)
+	 */
+	public $echo_results = true;
+
+	/**
+	 * Maximum time (in seconds) the parent will wait childs in miltithread mode prior to start killing
+	 * (will be included in controlpanel in next release)
+	 */
+	public $max_childs_run_time = 300;	
+
 	public $script_name = 'cron_extender.php';
 	
 	public $use_session_transport = false; //CRON cannot use session
@@ -41,7 +59,7 @@ class cron_extender extends comodojo_basic {
 	
 	public $auto_set_header = false; //CRON JOBS SHOULD NOT init any header
 	
-	private $multi_thread_enabled = true;
+	private $multi_thread_enabled = false;
 	
 	private $jobs = Array();
 	
@@ -55,10 +73,6 @@ class cron_extender extends comodojo_basic {
 
 	private $ipc_array = Array();
 	
-	private $echo_results = true;
-
-	public $max_result_in_multi_thread = 2048;
-	
 	public function logic($attributes) {
 		
 		comodojo_load_resource('database');
@@ -68,7 +82,7 @@ class cron_extender extends comodojo_basic {
 			die('Cron extender runs only in php-cli');
 		}
 		
-		if (!defined('COMODOJO_CRON_ENABLED') OR @!COMODOJO_CRON_ENABLED) throw new Exception("cron disabled", 2504);
+		if (!defined('COMODOJO_CRON_ENABLED') OR @!COMODOJO_CRON_ENABLED) throw new Exception("Extender administratively disabled", 2501);
 		
 		$multithread_support = function_exists('pcntl_fork');
 
@@ -96,8 +110,18 @@ class cron_extender extends comodojo_basic {
 			
 			foreach ($jobs as $id => $job) {
 				if ($this->should_run_job($job)) {
-					array_push($this->jobs,$job);
-					if (!class_exists($job['job'])) require(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job['job'].'.php');
+					if (!class_exists($job['job'])) {
+						$job_file = include(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job['job'].'.php');
+						if (!$job_file) {
+							comodojo_debug('Cron '.$job['name'].' will not be executed due to a compile error (it was impossible to include job '.$job['job'].')','ERROR','cron');
+						}
+						else {
+							array_push($this->jobs,$job);
+						}
+					}
+					else {
+						array_push($this->jobs,$job);
+					}
 				}
 			}
 
@@ -133,6 +157,8 @@ class cron_extender extends comodojo_basic {
 		//pcntl_wait($this->status);
 
 		comodojo_debug("Extender forked ".sizeof($forked)." process(es) in the running queue: ".implode(',', $forked),"INFO","cron");
+
+		$exec_time = time();
 
 		while(!empty($this->running_processes)) {
 
@@ -183,6 +209,13 @@ class cron_extender extends comodojo_basic {
 					comodojo_debug("Removed pid ".$pid." from the running queue, job terminated","INFO","cron");
 
 				}
+				else {
+					if (time() > $startTime + $timeout) {
+						comodojo_debug("Killing pid ".$pid." due to maximum exec time reached (>".$this->max_childs_run_time.")","INFO","cron");
+						$kill = $this->kill($pid);
+						comodojo_debug("Pid ".$pid." ".($kill ? "killed" : "could not be killed"),"INFO","cron");
+					}
+				}
 
 			}
 
@@ -197,7 +230,9 @@ class cron_extender extends comodojo_basic {
 	}
 	
 	public function error($error_code, $error_name) {
+
 		comodojo_debug($error_code.' - '.$error_name,'ERROR','cron');
+
 	}
 	
 	private function get_jobs() {
@@ -221,13 +256,17 @@ class cron_extender extends comodojo_basic {
 
 		$expression = implode(" ",Array($job['min'],$job['hour'],$job['day_of_month'],$job['month'],$job['day_of_week'],$job['year'])); 
 		
-		$cron = Cron\CronExpression::factory($expression);
-		
 		$last_date = date_create();
 
 		date_timestamp_set($last_date, $job['last_run']);
-		
-		$next_calculated_run = $cron->getNextRunDate($last_date)->format('U');
+
+		try {
+			$cron = Cron\CronExpression::factory($expression);
+			$next_calculated_run = $cron->getNextRunDate($last_date)->format('U');
+		}
+		catch (Exception $e) {
+			comodojo_debug("Job ".$job['name']." will NOT be executed due to CRON PARSING ERROR",'INFO','cron');
+		}
 
 		comodojo_debug("Job ".$job['name']." declared cron expression: ".$expression,'INFO','cron');
 		comodojo_debug("Job ".$job['name']." last run date: ".$job['last_run']." - ".date('c',$job['last_run']),'INFO','cron');
@@ -392,10 +431,16 @@ class cron_extender extends comodojo_basic {
 	 * 
 	 * @return	bool
 	 */
-	public final function is_running($pid) {
+	private final function is_running($pid) {
 
 		return (pcntl_waitpid($pid, $this->status, WNOHANG) === 0);
 		//return posix_kill($pid, 0);
+
+	}
+
+	private final function kill($pid) {
+
+		return posix_kill($pid, SIGKILL);
 
 	}
 
@@ -449,6 +494,7 @@ class cron_extender extends comodojo_basic {
 		
 		if (!count($cron_event_to_report)) {
 			comodojo_debug('no jobs to report, exiting','INFO','cron');
+			return;
 		}
 		
 		$message = "";

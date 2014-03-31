@@ -106,7 +106,7 @@ function array2json($array) {
 		$string = $json->encode($array);
 	}
 	else {
-		$string = json_encode($array);	
+		$string = json_encode($array, JSON_NUMERIC_CHECK);	
 	}
 	return $string;
 	
@@ -127,7 +127,7 @@ function json2array($string, $rawConversion = false) {
 		$array = $json->decode($string);
 	}
 	else {
-		$array = json_decode($string);
+		$array = json_decode($string, JSON_NUMERIC_CHECK);
 	}
 	if ($rawConversion) return $array;
 	else return stdObj2array($array);

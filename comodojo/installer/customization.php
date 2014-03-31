@@ -50,7 +50,7 @@ $comodojoCustomization = array(
 		)
 	),
 	
-	"minPPHRequired"	=>	"5.3.0",
+	"minPPHRequired"	=>	"5.3.3",
 
 	"stages"			=>	Array(0,1,10,20,30,40,50,60,70,80,85,90,100),
 

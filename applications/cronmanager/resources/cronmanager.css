@@ -1,11 +1,17 @@
 .cronmanager_cron_enabled {
-	background-image: url('service_enabled.png'); 
+	background-image: url('cron_enabled.png'); 
 	width: 16px;
 	height: 16px;
 }
 
 .cronmanager_cron_disabled {
-	background-image: url('service_disabled.png'); 
+	background-image: url('cron_disabled.png'); 
+	width: 16px;
+	height: 16px
+}
+
+.cronmanager_cron_changing {
+	background-image: url('../../../comodojo/images/small_loader.gif'); 
 	width: 16px;
 	height: 16px
 }

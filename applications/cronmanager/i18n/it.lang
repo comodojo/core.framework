@@ -27,14 +27,17 @@ $lang = Array(
 	'0013'	=>	'Il contenuto di un job non può essere vuoto',
 	'0014'	=>	'Job salvato correttamente',
 	'0015'	=>	'Job eliminato correttamente',
-	'0016'	=>	'',
-	'0017'	=>	'',
-	'0018'	=>	'',
-	'0019'	=>	'',
-	'0020'	=>	'',
-	'0021'	=>	'',
-	'0022'	=>	'',
-	'0023'	=>	''
+	'0016'	=>	'Nome cron',
+	'0017'	=>	'Espressione cron',
+	'0018'	=>	'Job associato',
+	'0019'	=>	'Descrizione',
+	'0020'	=>	'Parametri (JSON)',
+	'0021'	=>	'Gestione dei Cron',
+	'0022'	=>	'Gestione dei JOB',
+	'0023'	=>	'Cron Worklog',
+	'0024'	=>	'Puoi utilizzare questa form per definire un nuovo cron',
+	'0025'	=>	'Espressione valida. Prossima esecuzione stimata: {0}',
+	'0026'	=>	'Espressione non valida: {0}',
 );
 
 ?>

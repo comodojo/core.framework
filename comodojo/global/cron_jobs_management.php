@@ -60,7 +60,7 @@ class cron_jobs_management {
 
 		try {
 			$db = new database();
-			$result = $db->table("cron")->keys(Array("id","name","enabled"))->get();
+			$result = $db->table("cron")->keys(Array("id","name","enabled","job","min","hour","day_of_month","month","day_of_week","year"))->get();
 		}
 		catch (Exception $e) {
 			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
@@ -80,14 +80,14 @@ class cron_jobs_management {
 
 		if (empty($job_name)) {
 			comodojo_debug('Error retrieving job: empty job file','ERROR','cron_jobs_management');
-			throw new Exception("Unreadable job file", 2901);
+			throw new Exception("Unreadable job file", 2502);
 		}
 
 		$job = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php');
 
 		if (!$job) {
 			comodojo_debug('Error retrieving job: unreadable job file','ERROR','cron_jobs_management');
-			throw new Exception("Unreadable job file", 2901);
+			throw new Exception("Unreadable job file", 2502);
 		}
 
 		return $job;
@@ -98,20 +98,20 @@ class cron_jobs_management {
 
 		if (empty($job_name) OR empty($job_content)) {
 			comodojo_debug('Error recording job: Invalid job name or empty content','ERROR','cron_jobs_management');
-			throw new Exception("Invalid job name or empty content", 2901);
+			throw new Exception("Invalid job name or empty content", 2503);
 		}
 
 		$job = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php';
 
 		if (is_readable($job)) {
 			comodojo_debug('Error recording job: Job already exists','ERROR','cron_jobs_management');
-			throw new Exception("Job already exists", 2905);
+			throw new Exception("Job already exists", 2504);
 		}
 
 		$fh = fopen($job, 'w');
 		if (!fwrite($fh, stripcslashes($job_content))) {
 			fclose($fh);
-			throw new Exception("Error writing job", 2906);
+			throw new Exception("Error writing job", 2505);
 		}
 		fclose($fh);
 
@@ -123,20 +123,20 @@ class cron_jobs_management {
 
 		if (empty($job_name) OR empty($job_content)) {
 			comodojo_debug('Error recording job: Invalid job name or empty content','ERROR','cron_jobs_management');
-			throw new Exception("Invalid job name or empty content", 2901);
+			throw new Exception("Invalid job name or empty content", 2503);
 		}
 
 		$job = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php';
 
 		if (!is_readable($job)) {
 			comodojo_debug('Error recording job: cannot find job','ERROR','cron_jobs_management');
-			throw new Exception("Cannot find job", 2905);
+			throw new Exception("Cannot find job", 2506);
 		}
 
 		$fh = fopen($job, 'w');
 		if (!fwrite($fh, stripcslashes($job_content))) {
 			fclose($fh);
-			throw new Exception("Error writing job", 2906);
+			throw new Exception("Error writing job", 2505);
 		}
 		fclose($fh);
 
@@ -148,19 +148,182 @@ class cron_jobs_management {
 
 		if (empty($job_name)) {
 			comodojo_debug('Error deleting job: Invalid job name','ERROR','cron_jobs_management');
-			throw new Exception("Invalid job name or empty content", 2901);
+			throw new Exception("Invalid job name or empty content", 2503);
 		}
 
 		$job = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job_name.'.php';
 
 		if (!is_readable($job)) {
-			comodojo_debug('Error recording job: cannot find job','ERROR','cron_jobs_management');
-			throw new Exception("Cannot find job", 2905);
+			comodojo_debug('Error deleting job: cannot find job','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find job", 2506);
+		}
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result = $db->table("cron")->keys("id")->where("job","=",$job_name)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result["resultLength"] > 0) {
+			comodojo_debug('Error deleting job: job used in one or more cron','ERROR','cron_jobs_management');
+			throw new Exception("Cannot delete a job file used in one or more cron", 2508);
 		}
 
 		$result = @unlink($job);
 		
-		if (!$result) throw new Exception("Cannot delete job file", 2903);
+		if (!$result) throw new Exception("Cannot delete job file", 2507);
+
+	}
+
+	public function open_cron($cron) {
+
+		if (empty($cron)) throw new Exception("Cannot find cron", 2509);
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result_ask = $db->table("cron")->keys(Array("id","job","description","min","hour","day_of_month","month","day_of_week","year","params"))->where("name","=",$cron)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result_ask["resultLength"] != 1) {
+			comodojo_debug('Cannot find cron','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find cron", 2506);
+		}
+
+		$re = $result_ask["result"][0];
+
+		$expression = implode(" ",Array($re['min'],$re['hour'],$re['day_of_month'],$re['month'],$re['day_of_week'],$re['year']));
+
+		return Array(
+			"id"			=>	$re["id"],
+			"name"			=>	$cron,
+			"job"			=>	$re["job"],
+			"description"	=>	$re["description"],
+			"expression"	=>	$expression,
+			"params"		=>	$re["params"]
+		);
+
+	}
+
+	public function enable_cron($cron) {
+
+		if (empty($cron)) throw new Exception("Cannot find cron", 2509);
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result_ask = $db->table("cron")->keys("id")->where("name","=",$cron)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result_ask["resultLength"] == 0) {
+			comodojo_debug('Cannot find cron','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find cron", 2506);
+		}
+
+		try {
+			$db->clean();
+			$result = $db->table("cron")->keys("enabled")->values(true)->where("name","=",$cron)->update();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+		
+		return Array(
+			"id"		=>	$result_ask["result"][0]["id"],
+			"name"		=>	$cron,
+			"enabled"	=>	true
+		);
+
+	}
+
+	public function disable_cron($cron) {
+		
+		if (empty($cron)) throw new Exception("Cannot find cron", 2509);
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result_ask = $db->table("cron")->keys("id")->where("name","=",$cron)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result_ask["resultLength"] == 0) {
+			comodojo_debug('Cannot find cron','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find cron", 2506);
+		}
+
+		try {
+			$db->clean();
+			$result = $db->table("cron")->keys("enabled")->values(false)->where("name","=",$cron)->update();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+		
+		return Array(
+			"id"		=>	$result_ask["result"][0]["id"],
+			"name"		=>	$cron,
+			"enabled"	=>	false
+		);
+
+	}
+
+	public function delete_cron($cron) {
+		
+		if (empty($cron)) throw new Exception("Cannot find cron", 2509);
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result = $db->table("cron")->keys("id")->where("name","=",$cron)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result["resultLength"] == 0) {
+			comodojo_debug('Cannot find cron','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find cron", 2506);
+		}
+
+		try {
+			$db->clean();
+			$result = $db->table("cron")->where("name","=",$cron)->delete();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error deleting cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+		
+		if ($result['affectedRows'] != 1) {
+			comodojo_debug('Error deleting cron','ERROR','cron_jobs_management');
+			throw new Exception("Error deleting cron", 2510);
+		}
+
+		return true;
 
 	}
 

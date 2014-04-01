@@ -34,6 +34,7 @@ $lang = Array(
 	'0020'	=>	'Successfully consolidated {0} events',
 	'0021'	=>	'There are no events to consolidate',,
 	'0022'	=>	'Consolidate events',
+	'0023'	=>	'Update events',
 	//events translation
 	'10100'	=>	'Site hit',
 	'10101'	=>	'User Login',

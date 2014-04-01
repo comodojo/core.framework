@@ -361,7 +361,15 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.currentArea.set('readonly',true);
 			
 			this.currentSignal.remove();
-			
+
+			this.currentArea.on("keypress", function(evt) {
+				if (!(evt.ctrlKey || evt.metaKey)) {
+					evt.preventDefault();
+					myself.currentArea.focus();
+					myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
+				}
+			});
+
 			this.shellNode.appendChild(domConstruct.create("div",{style: {
 				width: "100%",
 				border: "0px solid white",
@@ -507,16 +515,25 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					top: "0px",
 					padding: "0",
 					border: "0px solid white"
-				}
+				},
+				tabindex: 1
 			});
 			
 			this.shellNode.appendChild(this.currentResult);
-			
+
 			this.pastAreas.push(this.currentArea);
 			
 			this.currentArea = this.newArea();
 			
 			this.setReadyState();
+
+			on(this.currentResult,"keypress",function(evt) {
+				if (!(evt.ctrlKey || evt.metaKey)) {
+					evt.preventDefault();
+					myself.currentArea.focus();
+					myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
+				}
+			});
 			
 		},
 		

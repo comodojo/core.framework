@@ -22,8 +22,6 @@ $lang = Array(
 	'0007'	=>	'',
 	'0008'	=>	'',
 	'0009'	=>	'',
-	
-	//GENERAL.PHP
 	'0100'	=>	'Impostazioni Generali',
 	'0101'	=>	'Titolo del sito',
 	'0102'	=>	'Descrizione del sito',

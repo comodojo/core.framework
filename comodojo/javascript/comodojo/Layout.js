@@ -519,7 +519,7 @@ var Layout = declare(null,{
 			lang.mixin(wparams, hierarchy[i].params);
 
 			if (wtype == "gridx.Grid") {
-				wparams.cacheClass = wparams.cacheClass == 'sync' ? SyncCache : AsyncCache;
+				wparams.cacheClass = wparams.cacheClass == 'async' ? AsyncCache : SyncCache;
 			}
 
 			wreference = {

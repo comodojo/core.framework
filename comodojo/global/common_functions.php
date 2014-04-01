@@ -98,15 +98,18 @@ function comodojo_debug($message,$type='ERROR',$reference="UNKNOWN") {
  * @param	array		$array			The array to encode
  * @return	string/json					The encoded string
  */
-function array2json($array) {
+function array2json($array, $numeric_check=true) {
 	
 	if (!function_exists("json_encode")) {
 		comodojo_load_resource('JSON');
 		$json = new Services_JSON();
 		$string = $json->encode($array);
 	}
-	else {
+	else if ($numeric_check) {
 		$string = json_encode($array, JSON_NUMERIC_CHECK);	
+	}
+	else {
+		$string = json_encode($array);	
 	}
 	return $string;
 	

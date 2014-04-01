@@ -21,6 +21,7 @@ $d.require("gridx.modules.filter.FilterBar");
 $d.require("gridx.modules.RowHeader");
 $d.require("gridx.modules.extendedSelect.Row");
 $d.require("gridx.modules.Menu");
+$d.require("gridx.modules.VirtualVScroller");
 $d.require("dijit.Menu");
 $d.require("dijit.MenuItem");
 
@@ -123,9 +124,10 @@ $c.App.load("eventviewer",
 					region: 'center',
 					params: {
 						title: this.getLocalizedMessage('0000'),
+						cacheClass: "async",
 						structure: [
 							{ name: this.getLocalizedMessage('0003'), field: 'success', dataType: 'bool', width: '5%', style: function(cell) {
-								var color = cell.row.rawData().success == 1 ? "#8c8;" : "#c88;";
+								var color = cell.data() == 1 ? "#8c8;" : "#c88;";
 								return "text-align: center; background: "+color+"; color: "+color+";";
 							}},
 							{ name: this.getLocalizedMessage('0016'), width: '8%', field: 'id'},
@@ -136,13 +138,13 @@ $c.App.load("eventviewer",
 								dataType: 'date',
 								dateParser: function (value) {
 									return value;
-								},
-								decorator: function (cellData) {
-									var dateString = cellData ? dojo.date.locale.format(new Date(cellData),
-										{"selector": "date", "formatLength": "medium"}) : "";
-									return "" + dateString + "";
-								},
-								useRawData: true
+								}
+								//decorator: function (cellData) {
+								//	var dateString = cellData ? dojo.date.locale.format(new Date(cellData),
+								//		{"selector": "date", "formatLength": "medium"}) : "";
+								//	return "" + dateString + "";
+								//},
+								//useRawData: true
 							},
 							{ name: this.getLocalizedMessage('0005'), width: '10%', field: 'time',
 								dataType: 'time'
@@ -161,7 +163,8 @@ $c.App.load("eventviewer",
 							"gridx/modules/Filter",
 							"gridx/modules/filter/FilterBar",
 							"gridx/modules/Menu",
-							"gridx/modules/extendedSelect/Row"
+							"gridx/modules/extendedSelect/Row",
+							"gridx/modules/VirtualVScroller"
 						]
 					}
 				},{
@@ -178,6 +181,16 @@ $c.App.load("eventviewer",
 				hookPoint: 'cell',
 				selected: false
 			});
+
+			this.updateEventsButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('reload',16)+'" />&nbsp;'+this.getLocalizedMessage('0023'),
+				onClick: function() {
+					myself.container.main.grid.model.clearCache();
+					myself.container.main.grid.body.refresh();
+				}
+			});
+
+			this.container.main.bottom.containerNode.appendChild(this.updateEventsButton.domNode);
 
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('run',16)+'" />&nbsp;'+this.getLocalizedMessage('0022'),

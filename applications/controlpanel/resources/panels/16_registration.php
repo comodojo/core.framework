@@ -25,7 +25,7 @@ $panels = Array(
 	"registration" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"registration.png",
-		"label"		=>	"0240",
+		"label"		=>	"reg_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("REGISTRATION_MODE","REGISTRATION_AUTHORIZATION","REGISTRATION_DEFAULT_ROLE","REGISTRATION_TTL")
@@ -35,28 +35,28 @@ $panels = Array(
 $options = Array(
 	"REGISTRATION_MODE"			=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0241",
+		"label"		=>	"reg_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"REGISTRATION_AUTHORIZATION"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0242",
+		"label"		=>	"reg_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"REGISTRATION_DEFAULT_ROLE" 		=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0243",
+		"label"		=>	"reg_3",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_registration_default_role()
 	),
 	"REGISTRATION_TTL" 		=>	Array(
 		"type"		=>	"NumberSpinner",
-		"label"		=>	"0244",
+		"label"		=>	"reg_4",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

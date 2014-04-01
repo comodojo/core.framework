@@ -14,7 +14,7 @@ $panels = Array(
 	"meta_tags" => Array(
 		"builder"	=>	"meta",
 		"icon"		=>	"meta.png",
-		"label"		=>	"0260",
+		"label"		=>	"met_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SITE_TAGS")

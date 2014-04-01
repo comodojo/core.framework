@@ -14,7 +14,7 @@ $panels = Array(
 	"maintenance" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"maintenance.png",
-		"label"		=>	"0140",
+		"label"		=>	"mai_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SITE_SUSPENDED","SITE_SUSPENDED_MESSAGE")
@@ -24,14 +24,14 @@ $panels = Array(
 $options = Array(
 	"SITE_SUSPENDED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0141",
+		"label"		=>	"mai_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_SUSPENDED_MESSAGE"		=>	Array(
 		"type"		=>	"SmallEditor",
-		"label"		=>	"0142",
+		"label"		=>	"mai_2",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false

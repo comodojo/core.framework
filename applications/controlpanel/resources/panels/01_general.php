@@ -22,7 +22,7 @@ $panels = Array(
 	"general" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"general.png",
-		"label"		=>	"0100",
+		"label"		=>	"gen_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SITE_TITLE","SITE_DESCRIPTION","SITE_AUTHOR","SITE_DATE","GRAVATAR_RATING","SITE_LOCALE","DEFAULT_ENCODING")
@@ -32,35 +32,35 @@ $panels = Array(
 $options = Array(
 	"SITE_TITLE"		=>	Array(
 		"type"		=>	"ValidationTextBox",
-		"label"		=>	"0101",
+		"label"		=>	"gen_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_DESCRIPTION"	=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0102",
+		"label"		=>	"gen_2",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_AUTHOR"		=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0103",
+		"label"		=>	"gen_3",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_DATE"			=>	Array(
 		"type"		=>	"DateTextBox",
-		"label"		=>	"0104",
+		"label"		=>	"gen_4",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"GRAVATAR_RATING"=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0105",
+		"label"		=>	"gen_5",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	Array(
@@ -84,14 +84,14 @@ $options = Array(
 	),
 	"SITE_LOCALE"		=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0107",
+		"label"		=>	"gen_7",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_locale_options()
 	),
 	"DEFAULT_ENCODING"		=>	Array(
 		"type"		=>	"ValidationTextBox",
-		"label"		=>	"0106",
+		"label"		=>	"gen_6",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

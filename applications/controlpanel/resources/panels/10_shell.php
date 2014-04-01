@@ -14,7 +14,7 @@ $panels = Array(
 	"shell" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"shell.png",
-		"label"		=>	"0190",
+		"label"		=>	"she_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SHELL_ENABLED"),
@@ -25,7 +25,7 @@ $panels = Array(
 $options = Array(
 	"SHELL_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0191",
+		"label"		=>	"she_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

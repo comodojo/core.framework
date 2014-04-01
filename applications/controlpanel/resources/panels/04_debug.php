@@ -14,7 +14,7 @@ $panels = Array(
 	"debug" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"debug.png",
-		"label"		=>	"0130",
+		"label"		=>	"deb_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("JS_DEBUG","JS_DEBUG_POPUP","JS_DEBUG_DEEP"),
@@ -25,21 +25,21 @@ $panels = Array(
 $options = Array(
 	"JS_DEBUG"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0131",
+		"label"		=>	"deb_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"JS_DEBUG_POPUP"		=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0132",
+		"label"		=>	"deb_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"JS_DEBUG_DEEP"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0133",
+		"label"		=>	"deb_3",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

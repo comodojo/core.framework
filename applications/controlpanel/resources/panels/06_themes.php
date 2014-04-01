@@ -46,7 +46,7 @@ $panels = Array(
 	"themes" => Array(
 		"builder"	=>	"theme",
 		"icon"		=>	"themes.png",
-		"label"		=>	"0150",
+		"label"		=>	"the_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SITE_THEME","SITE_THEME_DOJO")
@@ -56,14 +56,14 @@ $panels = Array(
 $options = Array(
 	"SITE_THEME"	=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0151",
+		"label"		=>	"the_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_available_site_themes()
 	),
 	"SITE_THEME_DOJO"		=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0152",
+		"label"		=>	"the_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_available_dojo_themes()

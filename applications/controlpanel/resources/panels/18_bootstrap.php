@@ -30,7 +30,7 @@ $panels = Array(
 	"bootstrap" => Array(
 		"builder"	=>	"bootstrap",
 		"icon"		=>	"bootstrap.png",
-		"label"		=>	"0270",
+		"label"		=>	"boo_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("BOOTSTRAP")

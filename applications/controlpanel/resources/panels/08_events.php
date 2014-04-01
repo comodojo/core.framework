@@ -14,7 +14,7 @@ $panels = Array(
 	"events" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"events.png",
-		"label"		=>	"0170",
+		"label"		=>	"eve_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("EVENTS_ENABLED"),
@@ -25,7 +25,7 @@ $panels = Array(
 $options = Array(
 	"EVENTS_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0171",
+		"label"		=>	"eve_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

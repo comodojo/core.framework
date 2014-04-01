@@ -16,7 +16,7 @@ $panels = Array(
 	"performances" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"performances.png",
-		"label"		=>	"0120",
+		"label"		=>	"per_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("CACHE_ENABLED","CACHE_TTL"/*,"JS_XD_LOADING","JS_XD_LOCATION","JS_XD_TIMEOUT"*/)
@@ -26,14 +26,14 @@ $panels = Array(
 $options = Array(
 	"CACHE_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0121",
+		"label"		=>	"per_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"CACHE_TTL"		=>	Array(
 		"type"		=>	"NumberSpinner",
-		"label"		=>	"0122",
+		"label"		=>	"per_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

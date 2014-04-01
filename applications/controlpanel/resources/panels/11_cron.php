@@ -31,7 +31,7 @@ $panels = Array(
 	"cron" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"cron.png",
-		"label"		=>	"0200",
+		"label"		=>	"cro_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("CRON_ENABLED","CRON_MULTI_THREAD_ENABLED","CRON_NOTIFICATION_MODE","CRON_NOTIFICATION_ADDRESSES")
@@ -41,28 +41,28 @@ $panels = Array(
 $options = Array(
 	"CRON_ENABLED"		=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0201",
+		"label"		=>	"cro_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"CRON_MULTI_THREAD_ENABLED"		=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0202",
+		"label"		=>	"cro_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"CRON_NOTIFICATION_MODE" =>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0203",
+		"label"		=>	"cro_3",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	get_cron_notification_options()
 	),
 	"CRON_NOTIFICATION_ADDRESSES"=>	Array(
 		"type"		=>	"EmailTextBox",
-		"label"		=>	"0204",
+		"label"		=>	"cro_4",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false

@@ -30,7 +30,7 @@ $panels = Array(
 	"smtp" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"smtp.png",
-		"label"		=>	"0160",
+		"label"		=>	"smt_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SMTP_SERVER","SMTP_PORT","SMTP_SERVICE","SMTP_AUTHENTICATED","SMTP_SECURITY","SMTP_USER","SMTP_PASSWORD","SMTP_ADDRESS")
@@ -40,14 +40,14 @@ $panels = Array(
 $options = Array(
 	"SMTP_SERVER"		=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0161",
+		"label"		=>	"smt_1",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SMTP_PORT"		=>	Array(
 		"type"		=>	"NumberTextBox",
-		"label"		=>	"0162",
+		"label"		=>	"smt_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false,
@@ -56,42 +56,42 @@ $options = Array(
 	),
 	"SMTP_SERVICE"=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0163",
+		"label"		=>	"smt_3",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	get_smtp_service()
 	),
 	"SMTP_AUTHENTICATED"=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0164",
+		"label"		=>	"smt_4",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SMTP_SECURITY"=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0165",
+		"label"		=>	"smt_5",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_smtp_security()
 	),
 	"SMTP_USER"=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0166",
+		"label"		=>	"smt_6",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SMTP_PASSWORD"=>	Array(
 		"type"		=>	"PasswordTextBox",
-		"label"		=>	"0167",
+		"label"		=>	"smt_7",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SMTP_ADDRESS"=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0168",
+		"label"		=>	"smt_8",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false

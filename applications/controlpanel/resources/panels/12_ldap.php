@@ -14,7 +14,7 @@ $panels = Array(
 	"ldap" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"ldap.png",
-		"label"		=>	"0210",
+		"label"		=>	"lda_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("LDAP_SERVER","LDAP_PORT","LDAP_DC","LDAP_OTHER_DN","LDAP_DEFAULT_FILTER","LDAP_LISTER_USERNAME","LDAP_LISTER_PASSWORD","LDAP_COMPATIBILE_MODE")
@@ -24,14 +24,14 @@ $panels = Array(
 $options = Array(
 	"LDAP_SERVER"	=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0211",
+		"label"		=>	"lda_1",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"LDAP_PORT"		=>	Array(
 		"type"		=>	"NumberTextBox",
-		"label"		=>	"0212",
+		"label"		=>	"lda_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false,
@@ -40,42 +40,42 @@ $options = Array(
 	),
 	"LDAP_DC" 		=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0213",
+		"label"		=>	"lda_3",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"LDAP_OTHER_DN"	=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0214",
+		"label"		=>	"lda_4",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"LDAP_DEFAULT_FILTER"=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0215",
+		"label"		=>	"lda_5",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"LDAP_LISTER_USERNAME"=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0216",
+		"label"		=>	"lda_6",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"LDAP_LISTER_PASSWORD"=>	Array(
 		"type"		=>	"PasswordTextBox",
-		"label"		=>	"0217",
+		"label"		=>	"lda_7",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"LDAP_COMPATIBILE_MODE"=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0218",
+		"label"		=>	"lda_8",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false

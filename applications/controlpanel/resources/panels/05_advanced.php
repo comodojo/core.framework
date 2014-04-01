@@ -14,7 +14,7 @@ $panels = Array(
 	"advanced" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"advanced.png",
-		"label"		=>	"0110",
+		"label"		=>	"adv_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SITE_PATH","SITE_URL","SITE_EXTERNAL_URL","SITE_DEFAULT_CONTAINER","JS_BASE_URL","SESSION_ENABLED","SESSION_AUTHENTICATED","JS_REQUIRES")
@@ -24,56 +24,56 @@ $panels = Array(
 $options = Array(
 	"SITE_PATH"		=>	Array(
 		"type"		=>	"ValidationTextBox",
-		"label"		=>	"0111",
+		"label"		=>	"adv_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_URL"		=>	Array(
 		"type"		=>	"ValidationTextBox",
-		"label"		=>	"0112",
+		"label"		=>	"adv_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_EXTERNAL_URL"=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0113",
+		"label"		=>	"adv_3",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SITE_DEFAULT_CONTAINER"=>	Array(
 		"type"		=>	"ValidationTextBox",
-		"label"		=>	"0114",
+		"label"		=>	"adv_4",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"JS_BASE_URL"	=>	Array(
 		"type"		=>	"ValidationTextBox",
-		"label"		=>	"0117",
+		"label"		=>	"adv_7",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"JS_REQUIRES"	=>	Array(
 		"type"		=>	"Textarea",
-		"label"		=>	"0118",
+		"label"		=>	"adv_8",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SESSION_ENABLED"=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0115",
+		"label"		=>	"adv_5",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"SESSION_AUTHENTICATED"=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0116",
+		"label"		=>	"adv_6",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

@@ -14,7 +14,7 @@ $panels = Array(
 	"services" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"services.png",
-		"label"		=>	"0180",
+		"label"		=>	"ser_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("SERVICES_ENABLED"),
@@ -25,7 +25,7 @@ $panels = Array(
 $options = Array(
 	"SERVICES_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0181",
+		"label"		=>	"ser_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

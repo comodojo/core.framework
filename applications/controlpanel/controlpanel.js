@@ -225,7 +225,7 @@ $c.App.load("controlpanel",
 		};
 		
 		this._buildGridElement = function(name, label, icon) {
-			myself.container.newGridBox(myself.container.main.center,'gridbox_'+name,myself.getLocalizedMessage(label),'applications/controlpanel/resources/'+icon);
+			myself.container.newGridBox(myself.container.main.center,'gridbox_'+name,myself.getLocalizedMessage(label.toString()),'applications/controlpanel/resources/'+icon);
 			myself.container.main.center['gridbox_'+name].on('click',function() {
 				myself.state = name;
 				myself.moveTo();

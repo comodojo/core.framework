@@ -30,7 +30,7 @@ $panels = Array(
 	"local_rpc" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"local_rpc.png",
-		"label"		=>	"0220",
+		"label"		=>	"loc_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("RPC_ENABLED","RPC_MODE","RPC_ALLOWED_TRANSPORT","RPC_KEY")
@@ -40,28 +40,28 @@ $panels = Array(
 $options = Array(
 	"RPC_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0221",
+		"label"		=>	"loc_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"RPC_MODE"		=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0222",
+		"label"		=>	"loc_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_local_rpc_mode()
 	),
 	"RPC_ALLOWED_TRANSPORT" 		=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0223",
+		"label"		=>	"loc_3",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	get_local_allowed_transport()
 	),
 	"RPC_KEY"	=>	Array(
 		"type"		=>	"TextBox",
-		"label"		=>	"0224",
+		"label"		=>	"loc_4",
 		"required"	=>	false,
 		"onclick"	=>	false,
 		"options"	=>	false

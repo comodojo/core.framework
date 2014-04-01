@@ -23,7 +23,7 @@ $panels = Array(
 	"authentication" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"authentication.png",
-		"label"		=>	"0230",
+		"label"		=>	"aut_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("AUTHENTICATION_MODE","AUTHENTICATION_CACHE_ENABLED","AUTHENTICATION_CACHE_TTL")
@@ -33,21 +33,21 @@ $panels = Array(
 $options = Array(
 	"AUTHENTICATION_MODE"			=>	Array(
 		"type"		=>	"Select",
-		"label"		=>	"0231",
+		"label"		=>	"aut_1",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	get_authentication_mode()
 	),
 	"AUTHENTICATION_CACHE_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
-		"label"		=>	"0232",
+		"label"		=>	"aut_2",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false
 	),
 	"AUTHENTICATION_CACHE_TTL" 		=>	Array(
 		"type"		=>	"NumberSpinner",
-		"label"		=>	"0233",
+		"label"		=>	"aut_3",
 		"required"	=>	true,
 		"onclick"	=>	false,
 		"options"	=>	false

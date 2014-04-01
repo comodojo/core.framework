@@ -227,6 +227,11 @@ class roles_management {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_roles_management
+ */
 function loadHelper_roles_management() { return false; }
 
 ?>

@@ -243,4 +243,11 @@ class rpc_client {
 
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_rpc_client
+ */
+ function loadHelper_rpc_client() { return false; }
+
 ?>

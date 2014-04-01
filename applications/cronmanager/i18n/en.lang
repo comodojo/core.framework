@@ -38,6 +38,10 @@ $lang = Array(
 	'0024'	=>	'This form could be used to record a new cron',
 	'0025'	=>	'Valid expression. Next estimated run on: {0}',
 	'0026'	=>	'Invalid expression: {0}',
+	'0027'	=>	'Running job {0}...',
+	'0028'	=>	'Cron saved correctly',
+	'0029'	=>	'Cron updated correctly',
+	'0030'	=>	'Update worklog'
 );
 
 ?>

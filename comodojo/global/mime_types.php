@@ -381,6 +381,11 @@ function comodojo_iconByMime($mime) {
 	return isset($comodojo_mimeIcons[$mime]) ? $comodojo_mimeIcons[$mime] : "application_octet_stream.png";
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_mime_types
+ */
 function loadHelper_mime_types() { return false; }
 
 ?>

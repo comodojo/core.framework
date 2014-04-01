@@ -503,6 +503,11 @@ class authentication {
 
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_authentication
+ */
 function loadHelper_authentication() { return false; }
 
 ?>

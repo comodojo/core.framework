@@ -1,5 +1,5 @@
 /**
- * [APP DESCRIPTION]
+ * Cacheman - get statistics about cache usage and clean cache
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org

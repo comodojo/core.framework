@@ -1043,3 +1043,10 @@ do {
   printf ("Spyc loading file: %s\n", $file);
   print_r (spyc_load_file ($file));
 } while (0);
+
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_Spyc
+ */
+function loadHelper_Spyc() { return false; }

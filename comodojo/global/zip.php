@@ -336,4 +336,11 @@ class zip {
 	}
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_zip
+ */
+function loadHelper_zip() { return false; }
+
 ?>

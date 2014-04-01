@@ -23,9 +23,9 @@ class cron_jobs_management {
 	private $restrict_management_to_administrators = true;
 
 	/**
-	 * Reserved service names
+	 * Reserved cron/job names
 	 */
-	private $reserved_jobs = Array('services','service','cronrootnode','cron','application','method'); 
+	private $reserved_cron_jobs = Array('services','service','cronrootnode','cron','application','method','cronrootnode','job','cronjob','cron_job','root');
 /********************** PRIVATE VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -324,6 +324,146 @@ class cron_jobs_management {
 		}
 
 		return true;
+
+	}
+
+	public function new_cron($name, $job, $expression, $description=null, $params=null) {
+
+		if (empty($name) OR empty($job) OR empty($expression)) throw new Exception("Invalid cron parameters", 2511);
+
+		if (in_array($name, $this->reserved_cron_jobs)) throw new Exception("Invalid or exsistent cron name", 2513);
+
+		$expression = trim($expression);
+
+		require_once 'comodojo/global/Cron/FieldInterface.php';
+		require_once 'comodojo/global/Cron/AbstractField.php';
+		require_once 'comodojo/global/Cron/DayOfMonthField.php';
+		require_once 'comodojo/global/Cron/DayOfWeekField.php';
+		require_once 'comodojo/global/Cron/HoursField.php';
+		require_once 'comodojo/global/Cron/MinutesField.php';
+		require_once 'comodojo/global/Cron/MonthField.php';
+		require_once 'comodojo/global/Cron/YearField.php';
+		require_once 'comodojo/global/Cron/FieldFactory.php';
+		require_once 'comodojo/global/Cron/CronExpression.php';
+		
+		try {
+			$cron = Cron\CronExpression::factory($expression);
+			$s = $cron->getNextRunDate()->format('c');
+		}
+		catch (Exception $e) {
+			throw new Exception("Invalid cron expression", 2512);
+		}
+
+		list($min,$hour,$day_of_month,$month,$day_of_week,$year) = explode(" ",$expression);
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result_ask = $db->table("cron")->keys("id")->where("name","=",$name)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result_ask["resultLength"] != 0) {
+			comodojo_debug('Cron name '.$name.' used','ERROR','cron_jobs_management');
+			throw new Exception("Invalid or exsistent cron name", 2513);
+		}
+
+		try {
+			$db->clean();
+			$result = $db->return_id()->table("cron")->keys(Array(
+				"name", "job", "description", "enabled",
+				"min", "hour", "day_of_month", "month", "day_of_week", "year",
+				"params"
+			))->values(Array(
+				$name, $job, $description, false,
+				$min, $hour, $day_of_month, $month, $day_of_week, $year,
+				$params
+			))->store();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error saving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+		
+		return Array(
+			"id"		=>	$result["transactionId"],
+			"name"		=>	$name,
+			"enabled"	=>	false
+		);
+
+	}
+
+	public function save_cron($name, $job, $expression, $description=null, $params=null) {
+
+		if (empty($name) OR empty($job) OR empty($expression)) throw new Exception("Invalid cron parameters", 2511);
+
+		if (in_array($name, $this->reserved_cron_jobs)) throw new Exception("Invalid or exsistent cron name", 2513);
+
+		$expression = trim($expression);
+
+		require_once 'comodojo/global/Cron/FieldInterface.php';
+		require_once 'comodojo/global/Cron/AbstractField.php';
+		require_once 'comodojo/global/Cron/DayOfMonthField.php';
+		require_once 'comodojo/global/Cron/DayOfWeekField.php';
+		require_once 'comodojo/global/Cron/HoursField.php';
+		require_once 'comodojo/global/Cron/MinutesField.php';
+		require_once 'comodojo/global/Cron/MonthField.php';
+		require_once 'comodojo/global/Cron/YearField.php';
+		require_once 'comodojo/global/Cron/FieldFactory.php';
+		require_once 'comodojo/global/Cron/CronExpression.php';
+		
+		try {
+			$cron = Cron\CronExpression::factory($expression);
+			$s = $cron->getNextRunDate()->format('c');
+		}
+		catch (Exception $e) {
+			throw new Exception("Invalid cron expression", 2512);
+		}
+
+		list($min,$hour,$day_of_month,$month,$day_of_week,$year) = explode(" ",$expression);
+
+		comodojo_load_resource('database');
+
+		try {
+			$db = new database();
+			$result_ask = $db->table("cron")->keys("id","enabled")->where("name","=",$name)->get();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error retrieving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+
+		if ($result_ask["resultLength"] != 1) {
+			comodojo_debug('Error retrieving cron '.$name.' from database','ERROR','cron_jobs_management');
+			throw new Exception("Cannot find cron", 2509);
+		}
+
+		try {
+			$db->clean();
+			$result = $db->table("cron")->keys(Array(
+				"job", "description",
+				"min", "hour", "day_of_month", "month", "day_of_week", "year",
+				"params"
+			))->values(Array(
+				$job, $description,
+				$min, $hour, $day_of_month, $month, $day_of_week, $year,
+				$params
+			))->where("name","=",$name)->update();
+		}
+		catch (Exception $e) {
+			comodojo_debug('Error saving cron: '.'('.$e->getCode().') '.$e->getMessage(),'ERROR','cron_jobs_management');
+			throw $e;
+		}
+		
+		return Array(
+			"id"		=>	$result["result"][0]["id"],
+			"name"		=>	$name,
+			"enabled"	=>	$result["result"][0]["enabled"]
+		);
 
 	}
 

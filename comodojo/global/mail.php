@@ -383,6 +383,11 @@ class mail {
 
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_mail
+ */
 function loadHelper_mail() { return false; }
 
 ?>

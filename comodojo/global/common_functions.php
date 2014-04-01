@@ -81,7 +81,7 @@ function comodojo_debug($message,$type='ERROR',$reference="UNKNOWN") {
 			_write_log_string(")");
 		}
 		elseif (is_object($message)) {
-			comodojo_debug($this->stdObj2array($message),$type,$reference);
+			comodojo_debug(stdObj2array($message),$type,$reference);
 		}
 		elseif(is_scalar($message)) {
 			_write_log_string("(".$type.") ".$reference." | ".$message);
@@ -119,18 +119,18 @@ function array2json($array) {
  * @param	bool			$rawConversion	If true, DO NOT attempt to convert stdObj to array, instead return raw JSON2PHP data; default: false
  * @return	array							The decoded array
  */
-function json2array($string, $rawConversion = false) {
+function json2array($string, $raw = false) {
 	
 	if (!function_exists("json_decode")) {
 		comodojo_load_resource('JSON');
 		$json = new Services_JSON();
 		$array = $json->decode($string);
+		$return = $raw ? $array : stdObj2array($array);
 	}
 	else {
-		$array = json_decode($string, JSON_NUMERIC_CHECK);
+		$return = json_decode($string, !$raw);
 	}
-	if ($rawConversion) return $array;
-	else return stdObj2array($array);
+	return $return;
 	
 }
 

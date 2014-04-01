@@ -10,8 +10,6 @@
  * @license		GPL Version 3
  */
 
-comodojo_load_resource('application');
-
 class filemanager extends application {
 	
 	public function init() {

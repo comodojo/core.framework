@@ -199,6 +199,8 @@ class rpc_server extends comodojo_basic {
 	public $require_valid_session = false; //rpc cannot use session
 	
 	public $do_authentication = false; //rpc could be authenticated, but with embedded directives
+
+	public $clean_auth_constants = false;
 	
 	public $raw_attributes = true; //RPC server SHOULD receive RAW post data
 	
@@ -326,7 +328,7 @@ class rpc_server extends comodojo_basic {
 			else {
 				$this->is_native_rpc = true;
 				$method = null;
-				$data = xmlrpc_decode_request($attributes,&$method);
+				$data = xmlrpc_decode_request($attributes,$method);
 			}
 			
 			if (is_null($method)) throw new Exception("Invalid Request", -32600);
@@ -409,7 +411,10 @@ class rpc_server extends comodojo_basic {
 		}
 		else throw new Exception("Not structured param", -32600);
 		
-		if (!$this->json_rpc_auth_runs_once) $this->auth_login($userName, $userPass, false);
+		if (!$this->json_rpc_auth_runs_once) {
+			$this->auth_login($userName, $userPass, false);
+			$this->json_rpc_auth_runs_once = true;
+		}
 		
 		return Array($method,$data,$map_to_attributes);
 				
@@ -418,6 +423,7 @@ class rpc_server extends comodojo_basic {
 	private function process_request($method, $params, $mapToAttributes=false) {
 		
 		comodojo_load_resource('events');
+		comodojo_load_resource('application');
 		
 		list($_application, $_method) = explode('.',$method);
 		
@@ -688,5 +694,12 @@ class rpc_server extends comodojo_basic {
 	}
 	
 }
+
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_rpc_server
+ */
+ function loadHelper_rpc_server() { return false; }
 
 ?>

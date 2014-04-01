@@ -224,6 +224,11 @@ class ssh {
 
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_ssh
+ */
 function loadHelper_ssh() { return false; }
 
 ?>

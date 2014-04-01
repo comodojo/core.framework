@@ -1040,6 +1040,11 @@ class users_management {
 
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_users_management
+ */
 function loadHelper_users_management() { return false; }
 
 ?>

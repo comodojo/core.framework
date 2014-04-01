@@ -380,7 +380,7 @@ class services_management {
 
 		if ($properties['type'] == 'SERVICE') {
 			$fh = fopen($service_file_name, 'w');
-			if (!fwrite($fh, stripcslashes($current['properties']['type']))) {
+			if (!fwrite($fh, $current['file'])) {
 				fclose($fh);
 				unlink($properties_file_name);
 				throw new Exception("Error writing service properties", 2906);
@@ -423,6 +423,11 @@ class services_management {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_services_management
+ */
 function loadHelper_services_management() { return false; }
 
 ?>

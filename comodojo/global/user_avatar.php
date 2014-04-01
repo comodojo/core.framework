@@ -78,6 +78,11 @@ function get_user_avatar($userName, $userEmail, $gravatar, $size=64) {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_user_avatar
+ */
 function loadHelper_user_avatar() { return false; }
 
 ?>

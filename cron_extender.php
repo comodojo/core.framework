@@ -110,18 +110,8 @@ class cron_extender extends comodojo_basic {
 			
 			foreach ($jobs as $id => $job) {
 				if ($this->should_run_job($job)) {
-					if (!class_exists($job['job'])) {
-						$job_file = include(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job['job'].'.php');
-						if (!$job_file) {
-							comodojo_debug('Cron '.$job['name'].' will not be executed due to a compile error (it was impossible to include job '.$job['job'].')','ERROR','cron');
-						}
-						else {
-							array_push($this->jobs,$job);
-						}
-					}
-					else {
-						array_push($this->jobs,$job);
-					}
+					if (!class_exists($job['job'])) { require(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$job['job'].'.php'); }
+					array_push($this->jobs,$job);
 				}
 			}
 
@@ -210,10 +200,24 @@ class cron_extender extends comodojo_basic {
 
 				}
 				else {
-					if (time() > $startTime + $timeout) {
-						comodojo_debug("Killing pid ".$pid." due to maximum exec time reached (>".$this->max_childs_run_time.")","INFO","cron");
+					$t = time();
+					if ($t > $exec_time + $this->max_childs_run_time) {
+						comodojo_debug("Killing pid ".$pid." due to maximum exec time reached (>".$this->max_childs_run_time.")","WARNING","cron");
 						$kill = $this->kill($pid);
-						comodojo_debug("Pid ".$pid." ".($kill ? "killed" : "could not be killed"),"INFO","cron");
+						comodojo_debug("Pid ".$pid." ".($kill ? "killed" : "could not be killed"),"WARNING","cron");
+						list($reader,$writer) = $this->ipc_array[$job[1]];
+						socket_close($writer);
+						socket_close($reader);
+						array_push($this->completed_processes,Array(
+							$pid,
+							$job[0],//$job_name,
+							false,
+							$job[2],//$start_timestamp,
+							$t,
+							"Job ".$job[0]." killed due to maximum exec time reached (>".$this->max_childs_run_time.")",
+							$job[3]
+						));
+						unset($this->running_processes[$pid]);
 					}
 				}
 
@@ -289,7 +293,7 @@ class cron_extender extends comodojo_basic {
 		$start_timestamp = time();
 		$job_name = $job['name'];
 		$job_id = $job['id'];
-		$_job = new $job['job']($job['params'], null, $job['name'], $start_timestamp);
+		$_job = new $job['job']($job['params'], null, $job['name'], $start_timestamp, false);
 		$pid = $_job->get_pid();
 		
 		try {
@@ -362,9 +366,8 @@ class cron_extender extends comodojo_basic {
 		else {
 			
 			socket_close($reader);
-			pcntl_signal( SIGTERM, function($signo) { exit(0); } );
 			
-			$_job = new $job['job']($job['params'], null, $job['name'], $start_timestamp);
+			$_job = new $job['job']($job['params'], null, $job['name'], $start_timestamp, true);
 
 			try{
 
@@ -439,9 +442,12 @@ class cron_extender extends comodojo_basic {
 	}
 
 	private final function kill($pid) {
-
-		return posix_kill($pid, SIGKILL);
-
+		if (function_exists("pcntl_signal")) {
+			return posix_kill($pid, SIGTERM); //JOB can handle the SIGTERM
+		}
+		else {
+			return posix_kill($pid, SIGKILL); //JOB cannot handle the SIGTERM, so terminate it w SIGKILL
+		}
 	}
 
 	private function update_jobs_info() {

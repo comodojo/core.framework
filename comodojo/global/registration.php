@@ -565,8 +565,11 @@ class registration {
 
 }
 
-function loadHelper_registration() {
-	return false;
-}
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_registration
+ */
+function loadHelper_registration() { return false; }
 
 ?>

@@ -245,6 +245,11 @@ class cache {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_browser_cache
+ */
 function loadHelper_cache() { return false; }
 
 ?>

@@ -238,4 +238,11 @@ class application {
 	public function init() {}
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_application
+ */
+function loadHelper_application() { return false; }
+
 ?>

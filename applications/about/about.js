@@ -1,5 +1,5 @@
 /**
- * [APP DESCRIPTION]
+ * About comodojo
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org

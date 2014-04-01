@@ -260,6 +260,11 @@ class XML {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_JSON
+ */
 function loadHelper_XML() { return false; }
 
 ?>

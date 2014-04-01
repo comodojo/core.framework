@@ -39,7 +39,8 @@ $lang = Array(
 	'0025'	=>	'Service logic (code) needed',
 	'0026'	=>	'New service',
 	'0027'	=>	'{0} - properties',
-	'0028'	=>	'{0} - code'
+	'0028'	=>	'{0} - code',
+	'0029'	=>	'Service updated correctly'
 );
 
 ?>

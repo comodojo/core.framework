@@ -329,6 +329,11 @@ class metaweblog {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_metaweblog
+ */
 function loadHelper_metaweblog() { return false; }
 
 ?>

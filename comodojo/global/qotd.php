@@ -41,6 +41,11 @@ function get_quotes_store() {
 	return $toReturn;
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_qotd
+ */
 function loadHelper_qotd() { return false; }
 
 ?>

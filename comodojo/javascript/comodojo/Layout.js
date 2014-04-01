@@ -95,11 +95,11 @@ var Layout = declare(null,{
 	// Array
 	modules: [],
 
-	load_modules: function(dfrrd,module) {
-		require(module, function(mod) {
-			dfrrd.resolve(mod);
-		})
-	},
+	//load_modules: function(dfrrd,module) {
+	//	require(module, function(mod) {
+	//		dfrrd.resolve(mod);
+	//	})
+	//},
 
 	constructor: function(args) {
 
@@ -111,36 +111,63 @@ var Layout = declare(null,{
 			this.id = comodojo.getPid();
 		}
 
-		this.deferred_calls = [];
+		// this.deferred_calls = [];
+
+		// for (i in args.modules) {
+		// 	var mods;
+		// 	switch(args.modules[i]) {
+		// 		case 'TabContainer':
+		// 			mods = ["dijit/layout/TabContainer"];
+		// 		break;
+		// 		case 'AccordionContainer':
+		// 			mods = ["dijit/layout/AccordionContainer"];
+		// 		break;
+		// 		case 'ExpandoPane':
+		// 			mods = ["dojox/layout/ExpandoPane"];
+		// 		break;
+		// 		case 'Tree':
+		// 			mods = ["dijit/Tree"];
+		// 		break;
+		// 		case 'Grid':
+		// 			mods = ["gridx/Grid"];
+		// 		break;
+				
+		// 	}
+
+		// 	this.deferred_calls[i] = new Deferred();
+
+		// 	this.deferred_calls[i].then(function(v) {
+		// 		comodojo.debug('Loaded layout module (deferred): '+args.modules[i]);
+		// 	});
+			
+		// 	this.load_modules(this.deferred_calls[i],mods);
+
+		//}
+
+		this.required = [];
 
 		for (i in args.modules) {
-			var mods;
 			switch(args.modules[i]) {
 				case 'TabContainer':
-					mods = ["dijit/layout/TabContainer"];
+					this.required.push("dijit/layout/TabContainer");
 				break;
 				case 'AccordionContainer':
-					mods = ["dijit/layout/AccordionContainer"];
+					this.required.push("dijit/layout/AccordionContainer");
 				break;
 				case 'ExpandoPane':
-					mods = ["dojox/layout/ExpandoPane"];
+					this.required.push("dojox/layout/ExpandoPane");
 				break;
 				case 'Tree':
-					mods = ["dijit/Tree"];
+					this.required.push("dijit/Tree");
 				break;
 				case 'Grid':
-					mods = ["gridx/Grid"];
+					this.required.push("gridx/Grid");
 				break;
-				
 			}
+		}
 
-			this.deferred_calls[i] = new Deferred();
-
-			this.deferred_calls[i].then(function(v) {
-				comodojo.debug('Loaded layout module (deferred): '+args.modules[i]);
-			});
-			
-			this.load_modules(this.deferred_calls[i],mods);
+		if (this.required.length != 0) {
+			require(this.required);
 		}
 
 	},

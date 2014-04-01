@@ -10,7 +10,6 @@
  * @license		GPL Version 3
  */
 
-comodojo_load_resource('application');
 comodojo_load_resource('services_management');
 
 class servicesmanager extends application {

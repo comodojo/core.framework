@@ -34,8 +34,6 @@ $c.App.load("cronmanager",
 
 		var myself = this;
 
-		$c.blaaa = this;
-
 		this.availableJobs = [];
 
 		this.availableCron = [];
@@ -44,7 +42,17 @@ $c.App.load("cronmanager",
 
 		this.selectedCronId = false;
 
-		this.jobPattern = "<?php\n\ncomodojo_load_resource('cron_job');\n\nclass [JOB_NAME] extends cron_job {\n\t\n\tpublic function logic($params) {\n\t\n    }\n\n}\n\n?>";
+		this.jobPattern = "<?php\n\nclass [JOB_NAME] extends cron_job {\n\t\n\tpublic function logic($params) {\n\t\n    }\n\n}\n\n?>";
+
+		this.jobExecTemplate = '<h3>Comodojo job resume - job {0}</h3><table class="ym-table bordertable"><thead><tr><th>'+'RESULT'+'</th><th>'+'TIME (sec)'+'</th></tr></thead><tbody><tr><td>{1}</td><td>{2}</td></tr></tbody></table><pre>{3}</pre>';
+
+		this.worklogTemplate = '<h3>Comodojo cron resume - cron {0} ({1})</h3><table class="ym-table bordertable"><tbody>'+
+			'<tr><td>PID</td><td>{2}</td></tr>'+
+			'<tr><td>START</td><td>{3}</td></tr>'+
+			'<tr><td>END</td><td>{4}</td></tr>'+
+			'<tr><td>TIME (sec)</td><td>{5}</td></tr>'+
+			'<tr><td>STATUS</td><td>{6}</td></tr>'+
+			'</tbody></table><pre>{7}</pre>';
 
 		this.init = function(){
 
@@ -78,6 +86,7 @@ $c.App.load("cronmanager",
 		};
 		
 		this.initCallback = function(success,result) {
+			
 			if (success) {
 				var i=0,o=0;
 				for (i in result.cron) {
@@ -95,19 +104,14 @@ $c.App.load("cronmanager",
 						value: result.jobs[o].name
 					});
 				}
-				myself.updateCrontab();
+				myself.updateCrontab(false);
 				myself.cronForm.fields.job.addOption(myself.availableJobs);
-				//console.log(myself.availableJobs);
-				//myself.cronForm.fields.job.store.objectStore = new dojo.store.Memory({
-				//	data: myself.availableCron
-				//});
-				//myself.cronForm.fields.job.store.close();
-				//myself.cronForm.fields.job.store.fetch();
 			}
 			else {
 				$c.Error.modal(result.code,result.name);
 				myself.stop();
 			}
+
 		};
 
 		this.layout = function() {
@@ -224,17 +228,15 @@ $c.App.load("cronmanager",
 							params: {
 								title: 'CRON WORKLOG',
 								structure: [
-									{ name: 's', field: 'success', dataType: 'bool', width: '5%', style: function(cell) {
+									{ name: '', field: 'success', dataType: 'bool', width: '5%', style: function(cell) {
 										var color = cell.row.rawData().success == 1 ? "#8c8;" : "#c88;";
 										return "text-align: center; background: "+color+"; color: "+color+";";
 									}},
-									{ name: /*this.getLocalizedMessage('0016')*/'id', width: '8%',  field: 'id'},
-									{ name: /*this.getLocalizedMessage('0001')*/'pid', width: '27%', field: 'pid'},
-									{ name: /*this.getLocalizedMessage('0002')*/'name', width: '15%', field: 'name'},
-									{ name: /*this.getLocalizedMessage('0006')*/'job', width: '14%', field: 'job'},
-									{ name: /*this.getLocalizedMessage('0006')*/'status', width: '14%', field: 'status'},
-									{ name: /*this.getLocalizedMessage('0006')*/'start', width: '14%', field: 'start'},
-									{ name: /*this.getLocalizedMessage('0006')*/'end', width: '14%', field: 'end'}
+									{ name: 'id', width: '10%',  field: 'id'},
+									{ name: 'pid', width: '10%', field: 'pid'},
+									{ name: 'cron', width: '30%', field: 'name'},
+									{ name: 'job', width: '30%', field: 'job'},
+									{ name: 'status', width: '15%', field: 'status'}
 								],
 								sortInitialOrder: { colId: '2', descending: true },
 								style: 'padding: 0px; margin: 0px !important;',
@@ -245,8 +247,6 @@ $c.App.load("cronmanager",
 									"gridx/modules/pagination/PaginationBar",
 									"gridx/modules/Filter",
 									"gridx/modules/filter/FilterBar"
-									//"gridx/modules/Menu",
-									//"gridx/modules/extendedSelect/Row"
 								]
 							}
 						},{
@@ -295,6 +295,21 @@ $c.App.load("cronmanager",
 					myself.selectedJob = item.name;
 					myself.openJob(item.name);
 				}
+			});
+
+			this.container.main.center.cron_worklog_management.cron_worklog.connect(this.container.main.center.cron_worklog_management.cron_worklog, "onCellDblClick", function(evt){
+				var val = myself.container.main.center.cron_worklog_management.cron_worklog.model.byId(evt.rowId).rawData;
+				var win = $c.Window.info(val.name+' (id:'+val.id+')',$d.replace(myself.worklogTemplate,[
+					val.name,
+					val.job,
+					val.pid,
+					val.start ? $c.Utils.dateFromServer(val.start) : '-',
+					val.end ? $c.Utils.dateFromServer(val.end) : '-',
+					val.end && val.start ? val.end-val.start : '-',
+					val.success ? '<span style="color:green;font-weight:bold;">'+val.status+' (OK)</span>' : '<span style="color:red;font-weight:bold;">'+val.status+' (NOK)</span>',
+					val.result
+				]), 500, 500);
+				win.bringToTop();
 			});
 
 			/****** TREE MENUS ******/
@@ -359,7 +374,7 @@ $c.App.load("cronmanager",
 						content: this.getLocalizedMessage('0024')
 					},{
 					name: "id",
-					value: '',
+					value: '0',
 					type: "ValidationTextBox",
 					label: 'id',
 					required: true,
@@ -449,7 +464,15 @@ $c.App.load("cronmanager",
 				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+this.getLocalizedMessage('0000'),
 				style: 'float: left;',
 				onClick: function() {
-					myself.newCron();
+					myself.cronForm.reset();
+					myself.cronForm.fields.name.set('readonly',false);
+					myself.cronForm.fields.note.changeContent(myself.getLocalizedMessage('0024'));
+					myself.cronForm.fields.note.changeType('info');
+					myself.updateSaveCronButton.set({
+						label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0002'),
+						onClick: function() { myself.registerCron(); },
+						disabled: false
+					});
 				}
 			});
 
@@ -458,7 +481,8 @@ $c.App.load("cronmanager",
 			this.updateSaveCronButton = new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+this.getLocalizedMessage('0002'),
 				style: 'float: right;',
-				disabled: true
+				disabled: false,
+				onClick: function() { myself.registerCron(); }
 			});
 
 			this.container.main.center.cron_management.cron_actions.containerNode.appendChild(this.updateSaveCronButton.domNode);
@@ -492,6 +516,38 @@ $c.App.load("cronmanager",
 
 			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.updateSaveJobButton.domNode);
 			
+			this.runJobButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('run',16)+'" />&nbsp;'+this.getLocalizedMessage('0006'),
+				style: 'float: right;',
+				onClick: function() {
+					$c.App.start('readyform',{
+						modules: ['Textarea','Button'],
+						callback: myself.execJob,
+						callbackOnClose: false,
+						hierarchy: [{
+							name: 'p',
+							type: "Textarea",
+							label: myself.getLocalizedMessage('0020'),
+							required:true
+						}]
+					}, false, false, {type: 'modal', width: 450, height: false});
+				},
+				disabled: true
+			});
+
+			this.container.main.center.jobs_management.job_actions.containerNode.appendChild(this.runJobButton.domNode);
+
+			this.updateWorklogButton = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('reload',16)+'" />&nbsp;'+this.getLocalizedMessage('0030'),
+				style: 'float: right;',
+				onClick: function() {
+					myself.container.main.center.cron_worklog_management.cron_worklog.model.clearCache();
+					myself.container.main.center.cron_worklog_management.cron_worklog.body.refresh()
+				}
+			});
+
+			this.container.main.center.cron_worklog_management.cron_worklog_actions.containerNode.appendChild(this.updateWorklogButton.domNode);
+
 		};
 
 		/****** JOB ACTIONS AND CALLBACK ******/
@@ -521,6 +577,7 @@ $c.App.load("cronmanager",
 				disabled: false
 			});
 			myself.deleteJobButton.set('disabled',true);
+			myself.runJobButton.set('disabled',true);
 		};
 
 		this.openJob = function(jobName) {
@@ -549,6 +606,7 @@ $c.App.load("cronmanager",
 					disabled: false
 				});
 				myself.deleteJobButton.set('disabled',false);
+				myself.runJobButton.set('disabled',false);
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -621,7 +679,7 @@ $c.App.load("cronmanager",
 			}
 		};
 
-		this.deleteJob = function(data) {
+		this.deleteJob = function() {
 			$c.Kernel.newCall(myself.deleteJobCallback,{
 				application: "cronmanager",
 				method: "delete_job",
@@ -643,6 +701,7 @@ $c.App.load("cronmanager",
 					disabled: true
 				});
 				myself.deleteJobButton.set('disabled',true);
+				myself.runJobButton.set('disabled',true);
 				myself.job_mirror.setValue('');
 				myself.cronForm.fields.job.removeOption(result);
 			}
@@ -651,21 +710,78 @@ $c.App.load("cronmanager",
 			}
 		};
 
+		this.execJob = function(data) {
+			$c.Loader.start(false, myself.getLocalizedMutableMessage('0027',[myself.selectedJob]));
+			$c.Kernel.newCall(myself.execJobCallback,{
+				application: "cronmanager",
+				method: "exec_job",
+				content: {
+					job_name: myself.selectedJob,
+					job_params: (!data.p || data.p == '') ? {} : data.p
+				}
+			});
+		};
+
+		this.execJobCallback = function(success, result) {
+			if (success) {
+				var _success = result.success ? '<span style="color:green;font-weight:bold;">OK</span>' : '<span style="color:red;font-weight:bold;">NOK</span>';
+				var timeSpent = result.timestamp-result.start;
+				var _result = result.success ? result.result : result;
+				var win = $c.Window.info(myself.selectedJob,$d.replace(myself.jobExecTemplate,[myself.selectedJob,_success,timeSpent,_result]), 500, 500);
+				win.bringToTop();
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+			$c.Loader.stop();
+		};
+
 		/****** CRON ACTIONS AND CALLBACK ******/
 
-		this.updateCrontab = function() {
-			myself.container.main.center.cron_management.cron_tab.set('content','');
-
-			var html_table = '<table class="ym-table bordertable"><thead><tr><th>'+myself.getLocalizedMessage('0017')+'</th><th>'+myself.getLocalizedMessage('0016')+'</th></tr></thead><tbody>';
-			var exp;
-			for (i in myself.availableCron) {
-				exp = myself.availableCron[i].min+' '+myself.availableCron[i].hour+' '+myself.availableCron[i].day_of_month+' '+myself.availableCron[i].month+' '+myself.availableCron[i].day_of_week+' '+myself.availableCron[i].year;
-				html_table += '<tr><td>'+exp+'</td><td>'+myself.availableCron[i].name+' ('+myself.availableCron[i].job+')</td></tr>';
+		this.updateCrontab = function(reload) {
+			if (!reload) {
+				this.updateCrontabCallback(true,{cron:[]});
 			}
+			else {
+				$c.Kernel.newCall(myself.updateCrontabCallback,{
+					application: "cronmanager",
+					method: "get_cron_and_jobs"
+				});
+			}
+		};
 
-			html_table += '</tbody></table>';
+		this.updateCrontabCallback = function(success, result) {
+			if (success) {
 
-			myself.container.main.center.cron_management.cron_tab.set('content',html_table);
+				if (result.cron.length != 0) {
+					myself.availableCron = [];
+				}
+
+				var i=0;
+				for (i in result.cron) {
+					result.cron[i].leaf = true;
+					result.cron[i].type = 'cronrootnode';
+					myself.availableCron.push(result.cron[i]);
+				}
+
+				myself.container.main.center.cron_management.cron_tab.set('content','');
+
+				var html_table = '<table class="ym-table bordertable"><thead><tr><th>'+myself.getLocalizedMessage('0017')+'</th><th>'+myself.getLocalizedMessage('0016')+'</th></tr></thead><tbody>';
+				var exp;
+				for (i in myself.availableCron) {
+					if (myself.availableCron[i].enabled) {
+						exp = myself.availableCron[i].min+' '+myself.availableCron[i].hour+' '+myself.availableCron[i].day_of_month+' '+myself.availableCron[i].month+' '+myself.availableCron[i].day_of_week+' '+myself.availableCron[i].year;
+						html_table += '<tr><td>'+exp+'</td><td>'+myself.availableCron[i].name+' ('+myself.availableCron[i].job+')</td></tr>';
+					}
+				}
+
+				html_table += '</tbody></table>';
+
+				myself.container.main.center.cron_management.cron_tab.set('content',html_table);
+			}
+			else {
+				$c.Error.local(myself.container.main.center.cron_management.cron_tab.containerNode, result.code, result.name);
+			}
 		};
 
 		this.enableCron = function(cron) {
@@ -683,6 +799,7 @@ $c.App.load("cronmanager",
 				$d.removeClass(myself.container.main.center.cron_management.cron_tree.getNodesByItem(result.id+'')[0].iconNode,"cronmanager_cron_changing");
 				$d.addClass(myself.container.main.center.cron_management.cron_tree.getNodesByItem(result.id+'')[0].iconNode,"cronmanager_cron_enabled");
 				$d.addClass(myself.container.main.center.cron_management.cron_tree.getNodesByItem(result.id+'')[0].labelNode,"cronmanager_cron_enabled_label");
+				myself.updateCrontab(true);
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -704,6 +821,7 @@ $c.App.load("cronmanager",
 				$d.removeClass(myself.container.main.center.cron_management.cron_tree.getNodesByItem(result.id+'')[0].iconNode,"cronmanager_cron_changing");
 				$d.addClass(myself.container.main.center.cron_management.cron_tree.getNodesByItem(result.id+'')[0].iconNode,"cronmanager_cron_disabled");
 				$d.addClass(myself.container.main.center.cron_management.cron_tree.getNodesByItem(result.id+'')[0].labelNode,"cronmanager_cron_disabled_label");
+				myself.updateCrontab(true);
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -724,12 +842,14 @@ $c.App.load("cronmanager",
 			if (success) {
 				myself.cStoreObservable.remove(myself.selectedCronId);
 				myself.selectedCronId = false;
-				//if (myself.propertiesForm.get('value')['name'] == result) {
-				//	myself._resetForm();
-				//	myself._disableForm();
-				//	myself._resetEditor();
-				//	myself._disableEditor();
-				//}
+				myself.updateCrontab(true);
+				myself.cronForm.reset();
+				myself.cronForm.fields.name.set('readonly',false);
+				myself.updateSaveCronButton.set({
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0002'),
+					onClick: function() { myself.registerCron(); },
+					disabled: true
+				});
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -770,7 +890,68 @@ $c.App.load("cronmanager",
 		this.openCronCallback = function (success, result) {
 			if (success) {
 				myself.cronForm.set('value',result);
+				myself.cronForm.fields.name.set('readonly',false);
 				myself.validateCronExpression();
+				myself.updateSaveCronButton.set({
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0004'),
+					onClick: function() { myself.saveCron(); },
+					disabled: false
+				});
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.saveCron = function() {
+			if (!myself.cronForm.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				return;
+			}
+			var values = myself.cronForm.get('value');
+			$c.Kernel.newCall(myself.saveCronCallback,{
+				application: "cronmanager",
+				method: "save_cron",
+				content: values
+			});
+		};
+
+		this.saveCronCallback = function (success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0029'));
+				//myself.openCron(result.name);
+				myself.updateCrontab(true);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+
+		this.registerCron = function() {
+			if (!myself.cronForm.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				return;
+			}
+			var values = myself.cronForm.get('value');
+			$c.Kernel.newCall(myself.registerCronCallback,{
+				application: "cronmanager",
+				method: "new_cron",
+				content: values
+			});
+		};
+
+		this.registerCronCallback = function (success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0028'));
+				myself.cStoreObservable.put({
+					id: result.id,
+					name: result.name,
+					enabled: result.enabled,
+					type: 'cronrootnode',
+					leaf: true
+				});
+				myself.container.main.center.cron_management.cron_tree.set('paths', [ [ 'cronrootnode', result.id ] ] );
+				myself.openCron(result.name);
 			}
 			else {
 				$c.Error.modal(result.code, result.name);

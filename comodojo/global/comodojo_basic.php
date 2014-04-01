@@ -34,26 +34,32 @@ class comodojo_basic {
 	
 	/**
 	 * Use session transport or not
-	 * @var	string
+	 * @var	bool
 	 */
 	public $use_session_transport = false;
 	
 	/**
 	 * If true, c_basic will return error in case of invalid session
 	 * This is used also for kernel to understand session lost
-	 * @var	string
+	 * @var	bool
 	 */
 	public $require_valid_session = false;
 	
 	/**
 	 * If true, c_basic will do authentication on $attributes in order to login/logout user
-	 * @var	string
+	 * @var	bool
 	 */
 	public $do_authehtication = true;
+
+	/**
+	 * If auth is not enabled, this will set COMODOJO_* auth constant to NULL
+	 * @var	bool
+	 */
+	public $clean_auth_constants = true;
 	
 	/**
 	 * If true, c_basic will set header params automatically
-	 * @var	string
+	 * @var	bool
 	 */
 	public $auto_set_header = true;
 	
@@ -84,7 +90,7 @@ class comodojo_basic {
 	private $comodojo_basic_values = false;
 	private $comodojo_basic_values_from = false;
 	
-	public final function __construct() {
+	public function __construct() {
 		
 		if ($this->use_session_transport) { session_start(); }
 		
@@ -235,10 +241,17 @@ class comodojo_basic {
 		 * If no auth or pwd reset or sign up was requested, set unauthenticated session
 		 */
 		else {
-			comodojo_debug(' * No authentication found or requested: CLEANING AUTH PARAMETERS','INFO','comodojo_basic');
+
+			if ($this->clean_auth_constants) {
+				comodojo_debug(' * No authentication found or requested: CLEANING AUTH PARAMETERS','INFO','comodojo_basic');
+				$this->set_auth_session();
+			}
+			else {
+				comodojo_debug(' * No authentication found or requested: AUTH PARAMETERS WILL NOT BE CLEANED','INFO','comodojo_basic');
+			}
 			comodojo_debug('--------------------------------------------------------------------------','INFO','comodojo_basic');
 			comodojo_debug('--------------------------------------------------------------------------','INFO','comodojo_basic');
-			$this->set_auth_session();
+			
 		}
 
 		try {

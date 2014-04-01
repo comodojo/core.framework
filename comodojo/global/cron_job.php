@@ -82,7 +82,7 @@ class cron_job {
 	 * 
 	 * @return	$this 
 	 */
-	public final function __construct($params, $pid=null, $job_name=null, $timestamp=null) {
+	public final function __construct($params, $pid=null, $job_name=null, $timestamp=null, $multithread=false) {
 		
 		comodojo_load_resource('database');
 		
@@ -97,6 +97,18 @@ class cron_job {
 		else $this->start_timestamp = $timestamp;
 		
 		$this->job_class = get_class($this);
+
+		if ($multithread and function_exists("pcntl_signal")) {
+			declare(ticks = 1);
+			pcntl_signal(SIGTERM, function() {
+				$end = time();
+				comodojo_debug('Job '.$this->job_name.' ('.$this->job_class.') killed by parent at '.date('c',$end),'WARNING','cron');
+				if (!is_null($this->worklog_id)) {
+					$this->close_worklog($this->worklog_id, false, 'Job killed by parent', $end);
+				}
+				exit(1);
+			});
+		}
 
 		return $this;
 
@@ -128,6 +140,7 @@ class cron_job {
 
 		try{
 			$worklog_id = $this->create_worklog($pid, $job_name, $job_class, $start_timestamp);
+			$this->worklog_id = $worklog_id;
 			$job_result = $this->logic($params);
 			$end_timestamp = time();
 			$this->close_worklog($worklog_id, true, $job_result, $end_timestamp);

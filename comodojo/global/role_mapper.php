@@ -211,6 +211,11 @@ class role_mapper {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_role_mapper
+ */
 function loadHelper_role_mapper() { return false; }
 
 ?>

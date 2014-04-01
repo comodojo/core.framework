@@ -510,4 +510,11 @@ class xmlRpcEncoder {
 
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_xmlRpcEncoder
+ */
+function loadHelper_xmlRpcEncoder() { return false; }
+
 ?>

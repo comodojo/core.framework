@@ -30,4 +30,11 @@ class service {
 	
 }
 
+/**
+ * Sanity check for CoMoDojo loader
+ * 
+ * @define function loadHelper_rpc_client
+ */
+ function loadHelper_service() { return false; }
+
 ?>

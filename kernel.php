@@ -56,6 +56,7 @@ class kernel extends comodojo_basic {
 	public function logic($attributes) {
 		
 		comodojo_load_resource('cache');
+		comodojo_load_resource('application');
 		
 		if (!isset($attributes['application']) OR !isset($attributes['method'])) {
 			comodojo_debug('Inconsistent request: application or method not specified','ERROR','kernel');

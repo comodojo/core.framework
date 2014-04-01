@@ -10,23 +10,25 @@
  * @license		GPL Version 3
  */
 
-comodojo_load_resource('application');
 comodojo_load_resource('cron_jobs_management');
 
 class cronmanager extends application {
 	
 	public function init() {
 		$this->add_store_methods('cron_worklog',Array("GET","QUERY"));
-		$this->add_application_method('get_cron_and_jobs', 'getCronAndJobs', Array(), 'No description yes, sorry', false);
-		$this->add_application_method('open_job', 'openJob', Array("job_name"), 'No description yes, sorry', false);
-		$this->add_application_method('edit_job', 'editJob', Array("job_name","job_content"), 'No description yes, sorry', false);
-		$this->add_application_method('new_job', 'newJob', Array("job_name","job_content"), 'No description yes, sorry', false);
-		$this->add_application_method('delete_job', 'deleteJob', Array("job_name"), 'No description yes, sorry', false);
-		$this->add_application_method('open_cron', 'openCron', Array("name"), 'No description yes, sorry', false);
-		$this->add_application_method('enable_cron', 'enableCron', Array("name"), 'No description yes, sorry', false);
-		$this->add_application_method('disable_cron', 'disableCron', Array("name"), 'No description yes, sorry', false);
-		$this->add_application_method('delete_cron', 'deleteCron', Array("name"), 'No description yes, sorry', false);
-		$this->add_application_method('validate_cron', 'validateCron', Array("expression"), 'No description yes, sorry', false);
+		$this->add_application_method('get_cron_and_jobs', 'getCronAndJobs', Array(), 'No description yet, sorry', false);
+		$this->add_application_method('open_job', 'openJob', Array("job_name"), 'No description yet, sorry', false);
+		$this->add_application_method('edit_job', 'editJob', Array("job_name","job_content"), 'No description yet, sorry', false);
+		$this->add_application_method('new_job', 'newJob', Array("job_name","job_content"), 'No description yet, sorry', false);
+		$this->add_application_method('delete_job', 'deleteJob', Array("job_name"), 'No description yet, sorry', false);
+		$this->add_application_method('exec_job', 'execJob', Array("job_name","job_params"), 'No description yet, sorry', false);
+		$this->add_application_method('open_cron', 'openCron', Array("name"), 'No description yet, sorry', false);
+		$this->add_application_method('enable_cron', 'enableCron', Array("name"), 'No description yet, sorry', false);
+		$this->add_application_method('disable_cron', 'disableCron', Array("name"), 'No description yet, sorry', false);
+		$this->add_application_method('delete_cron', 'deleteCron', Array("name"), 'No description yet, sorry', false);
+		$this->add_application_method('validate_cron', 'validateCron', Array("expression"), 'No description yet, sorry', false);
+		$this->add_application_method('new_cron', 'newCron', Array('name', 'job', 'expression'), 'No description yet, sorry', false);
+		$this->add_application_method('save_cron', 'saveCron', Array('name', 'job', 'expression'), 'No description yet, sorry', false);
 	}
 
 	public function getCronAndJobs($params) {
@@ -82,6 +84,34 @@ class cronmanager extends application {
 			throw $e;
 		}
 		return $params['job_name'];
+	}
+
+	public function execJob($params) {
+
+		comodojo_load_resource('database');
+		comodojo_load_resource('cron_job');
+		require(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CRON_FOLDER.$params['job_name'].'.php');
+
+		$start_timestamp = time();
+		$job_name = $params['job_name'];
+		$job_params = empty($params["job_params"]) ? null : $params["job_params"];
+		$_job = new $job_name($job_params, null, 'SELF_RUN', $start_timestamp, false);
+		
+		try {
+
+			$job_result = $_job->start();
+		
+		}
+		catch (Exception $e) {
+		
+			return $e->getMessage();
+		
+		}
+
+		$job_result["start"] = $start_timestamp;
+
+		return $job_result;
+
 	}
 
 	public function openCron($params) {
@@ -143,6 +173,32 @@ class cronmanager extends application {
 		$cron = Cron\CronExpression::factory($params["expression"]);
 		try {
 			$s = $cron->getNextRunDate()->format('c');
+		}
+		catch (Exception $e) {
+			throw $e;
+		}
+		return $s;
+	}
+
+	public function newCron($params) {
+		$description = isset($params["description"]) ? $params["description"] : null;
+		$parameters = isset($params["params"]) ? trim($params["params"]) : null;
+		$c = new cron_jobs_management();
+		try {
+			$s = $c->new_cron($params["name"], $params["job"], $params["expression"], $description, $parameters);
+		}
+		catch (Exception $e) {
+			throw $e;
+		}
+		return $s;
+	}
+
+	public function saveCron($params) {
+		$description = isset($params["description"]) ? $params["description"] : null;
+		$parameters = isset($params["params"]) ? trim($params["params"]) : null;
+		$c = new cron_jobs_management();
+		try {
+			$s = $c->save_cron($params["name"], $params["job"], $params["expression"], $description, $parameters);
 		}
 		catch (Exception $e) {
 			throw $e;

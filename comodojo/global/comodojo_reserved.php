@@ -12,8 +12,6 @@
  * @license		GPL Version 3
  */
 
-comodojo_load_resource('application');
-
 class comodojo_reserved extends application {
 	
 	public function init() {

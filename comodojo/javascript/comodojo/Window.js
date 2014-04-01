@@ -132,11 +132,12 @@ Win.util = function(title, width, height, resizable, maxable) {
 
 };
 	
-Win.info = function(content,width,height) {
+Win.info = function(title,content,width,height) {
 	
 	return Win.placeOnAndResize(Win.newWindow({
 		id:comodojo.getPid(),
-		title:"!",
+		icon: comodojo.icons._iconsPath[16]+'info.png',
+		title: !title ? "info" : title,
 		resizable:false,
 		maxable:false,
 		content:content,

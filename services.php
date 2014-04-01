@@ -110,8 +110,10 @@ class services extends comodojo_basic {
 					comodojo_debug('Cannot read service file: '.$service_service_file,'ERROR','services');
 					throw new Exception('Internal Server Error', 500);
 				}
-				
+
+				comodojo_load_resource('service');
 				require $service_service_file;
+				
 				if (!class_exists($exec_name)) {
 					comodojo_debug('Wrong class implementation for service: '.$service_properties['name'],'ERROR','services');
 					throw new Exception('Internal Server Error', 500);

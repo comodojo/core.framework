@@ -382,13 +382,6 @@ $c.App.load("servicesmanager",
 					type: "TextBox",
 					label: myself.getLocalizedMessage('0011'),
 					required: false
-				},{
-					name: "action_button",
-					type: "Button",
-					label: $c.getLocalizedMessage('10021'),
-					onClick: function() {
-						myself.newService();
-					}
 				}],
 				attachNode: this.container.main.center.service_properties.containerNode
 			}).build();
@@ -432,6 +425,16 @@ $c.App.load("servicesmanager",
 					myself.startNew();
 				}
 			}).domNode);
+
+			this.updateSaveService = new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+$c.getLocalizedMessage('10021'),
+				//style: 'float: left;',
+				onClick: function() {
+					myself.newService();
+				},
+				disabled: true
+			});
+			this.container.main.bottom.containerNode.appendChild(this.updateSaveService.domNode);
 
 			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('close',16)+'" />&nbsp;'+$c.getLocalizedMessage('10011'),
@@ -489,8 +492,11 @@ $c.App.load("servicesmanager",
 			this.propertiesForm.fields.name.set('readonly',false);
 			this.container.main.center.service_properties.set('title',this.getLocalizedMutableMessage('0027',[this.getLocalizedMessage('0026')]));
 			this.container.main.center.service_code.set('title',this.getLocalizedMutableMessage('0028',[this.getLocalizedMessage('0026')]));
-			this.propertiesForm.fields.action_button.set('onClick',function() {
-				myself.newService();
+			this.updateSaveService.set({
+				onClick: function() {
+					myself.newService();
+				},
+				disabled: false
 			});
 		};
 
@@ -506,8 +512,11 @@ $c.App.load("servicesmanager",
 			this.container.main.center.service_properties.set('title',this.getLocalizedMutableMessage('0027',[properties.name]));
 			this.container.main.center.service_code.set('title',this.getLocalizedMutableMessage('0028',[properties.name]));
 			this._resetForm();
-			this.propertiesForm.fields.action_button.set('onClick',function() {
-				myself.editService();
+			this.updateSaveService.set({
+				onClick: function() {
+					myself.editService();
+				},
+				disabled: false
 			});
 			this.propertiesForm.set('value',properties);
 			this.propertiesForm.fields.name.set('readonly',true);
@@ -604,6 +613,7 @@ $c.App.load("servicesmanager",
 					myself._resetEditor();
 					myself._disableEditor();
 				}
+				myself.updateSaveService.set('disabled', true);
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -622,6 +632,7 @@ $c.App.load("servicesmanager",
 				return;
 			}
 			values.service_file = editor;
+			values.supported_http_methods = values.supported_http_methods.join(",");
 			$c.Kernel.newCall(myself.newServiceCallback,{
 				application: "servicesmanager",
 				method: "new_service",
@@ -659,6 +670,7 @@ $c.App.load("servicesmanager",
 				return;
 			}
 			values.service_file = editor;
+			values.supported_http_methods = values.supported_http_methods.join(",");
 			$c.Kernel.newCall(myself.editServiceCallback,{
 				application: "servicesmanager",
 				method: "edit_service",
@@ -668,7 +680,7 @@ $c.App.load("servicesmanager",
 
 		this.editServiceCallback = function(success, result) {
 			if (success) {
-				$c.Dialog.info(myself.getLocalizedMessage('0024'));
+				$c.Dialog.info(myself.getLocalizedMessage('0029'));
 				var old_tree_item = myself.container.main.left.getNodesByItem(result.name)[0].item;
 				if (old_tree_item.type != result.type) {
 					myself.sStoreObservable.remove(old_tree_item.id);

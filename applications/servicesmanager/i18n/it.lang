@@ -39,7 +39,8 @@ $lang = Array(
 	'0025'	=>	'E\' necessario definire la logica del servizio (codice)',
 	'0026'	=>	'Nuovo servizio',
 	'0027'	=>	'{0} - proprietà',
-	'0028'	=>	'{0} - codice'
+	'0028'	=>	'{0} - codice',
+	'0029'	=>	'Servizio aggiornato correttamente'
 );
 
 ?>

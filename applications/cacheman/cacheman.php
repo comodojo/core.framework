@@ -1,7 +1,7 @@
 <?php
 
 /**
- * [APP DESCRIPTION]
+ * Cacheman - get statistics about cache usage and clean cache
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -9,8 +9,6 @@
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
-
-comodojo_load_resource('application');
 
 class cacheman extends application {
 	

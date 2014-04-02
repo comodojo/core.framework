@@ -1,7 +1,7 @@
 define(["dojo/dom","dojo/_base/declare","dijit/form/Textarea","dojo/dom-construct","dojo/window",
 	"dojo/dom-geometry","dojo/on","dojo/keys","dojo/dom-style","dojo/request","dojo/_base/json",
-	"dojo/_base/lang","dijit/form/TextBox","dojo/_base/array"],
-function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,json,lang,TextBox,array){
+	"dojo/_base/lang","dijit/form/TextBox","dojo/_base/array","dojo/store/Memory"],
+function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,json,lang,TextBox,array,Memory){
 
 	// module:
 	// 	comodojo/Shell
@@ -112,10 +112,47 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 
 			}
 			
+			this.shell_commands_store_data = [{id: "applications", type: "native"},{id: "exit", type: "native"},{id: "help", type: "native"},{id: "login", type: "native"},{id: "logout", type: "native"},{id: "history", type: "native"},{id: "output", type: "native"},{id: "whoami", type: "native"}];
+
+			this.shell_commands_store = new Memory ({ data: this.shell_commands_store_data });
+
+			this.loadAutocomplete();
+
 			this.startShell();
-			
+
 		},
 		
+		loadAutocomplete: function() {
+
+			this.shell_commands_store.query({type:'application'}).forEach(function(value) { myself.shell_commands_store.remove(value.id); });
+
+			request.post("kernel.php",{
+				data: {
+					application: 'comodojo',
+					method: 'applications'
+				},
+				handleAs: 'json'
+			}).then(function(data) {
+				if (data.success) {
+					for (var i in data.result) {
+						//myself.shell_commands_store_data.push({
+						//	id: data.result[i],
+						//	type: "application"
+						//});
+						myself.shell_commands_store.put({
+							id: data.result[i],
+							type: "application"
+						});
+					}
+				}
+				else {
+					alert("It was impossible to load applications, autocomplete will not work");
+				}
+			},function(data) {
+				alert("It was impossible to load applications, autocomplete will not work");
+			});
+		},
+
 		getSystemMessage: function() {
 			var _siteName = !this.siteName ? 'comodojo' : this.siteName;
 			var _userName = this.userRole == 1 ? ('<span style="color: red;">'+this.userName+'</span>') : this.userName;
@@ -192,7 +229,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		},
 		
 		startShell: function() {
-			
+
 			this.currentArea = this.newArea();
 			
 			on(window,"resize",this.resizeViewport);
@@ -210,7 +247,6 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			var separator = domConstruct.create("div",{style: {
 				width: "100%",
 				border: "0px solid white",
-				//borderBottom: "1px solid green",
 				clear: "both"
 			}});
 			this.shellNode.appendChild(separator);
@@ -260,6 +296,10 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				else if (evt.keyCode == keys.DOWN_ARROW) {
 					evt.preventDefault();
 					myself.commandHistoryForward();
+				}
+				else if (evt.keyCode == keys.TAB) {
+					evt.preventDefault();
+					myself.autocomplete();
 				}
 				else if (evt.keyCode == 67 && evt.ctrlKey == true) {
 					evt.preventDefault();
@@ -373,7 +413,6 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.shellNode.appendChild(domConstruct.create("div",{style: {
 				width: "100%",
 				border: "0px solid white",
-				//borderBottom: "1px solid green",
 				clear: "both"
 			}}));
 			
@@ -536,6 +575,26 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			});
 			
 		},
+
+		autocomplete: function() {
+
+			var command = lang.trim(this.currentArea.get('value'));
+			var possible = [];
+			this.shell_commands_store.query({id: new RegExp('^'+command, "i")}).forEach(function(value) {
+				possible.push(value.id);
+			});
+			if (possible.length == 1) {
+				this.currentArea.set('value',possible[0]);
+			}
+			else if (possible.length > 1) {
+				this.parseResults({success: true, result: possible});
+				this.currentArea.set('value',command);
+			}
+			else {
+				//do nothing...
+			}
+
+		},
 		
 		reserved_commands: {
 			comodojo_login: function() {
@@ -600,6 +659,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						myself.userName = '';
 						myself.userRole = 0;
 						myself.resultOnScreen(myself.visualization._string.success('Successfully logged out'));
+						myself.loadAutocomplete();
 					}
 					else {
 						myself.resultOnScreen(myself.visualization._string.failure('Error logging out: '+data.result.name));
@@ -668,6 +728,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						myself.userName = data.result.userName;
 						myself.userRole = data.result.userRole;
 						myself.resultOnScreen(myself.visualization._string.success('Welcome '+data.result.completeName));
+						myself.loadAutocomplete();
 					}
 					else {
 						myself.userName = '';
@@ -854,10 +915,120 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			}
 			
 		}
-		
-		
-		
-		
+
+		// shell_commands_store: new Memory ({
+		// 	data: [{
+		// 		id: 'applications',
+		// 		action: function() {
+		// 			var oo = myself.output_object;
+		// 			myself.output_object = 'mlist';
+		// 			myself.kernelRequest({
+		// 				application: 'comodojo',
+		// 				method: 'applications'
+		// 			}, function(data) {
+		// 				data.result = {
+		// 					//'Available shell commands': Object.keys(myself.shell_commands),
+		// 					'Available applications': data.result
+		// 				};
+		// 				myself.parseResults(data);
+		// 			}, function(data) {
+		// 				myself.parseError(data);
+		// 			}).then(function(){myself.output_object = oo;});
+		// 		}
+		// 	},{
+		// 		id: "exit",
+		// 		action: function() {
+		// 			return myself.shell_commands.logout();
+		// 		}
+		// 	},{
+		// 		id: "help",
+		// 		action: function() {
+		// 			var shell_help = "<p> + Comodojo shell, framwork version {1} (build {2}).<br/>Product name: {0}.</p>";
+		// 			var shell_usage = "<p> + Shell hints:<ul><li>Write an application to get list of methods</li><li>Ctrl+c to abort command</li><li>Up/Down arrows to navigate command history</li><li>Use brackets to write commands on multiple lines</li></ul></p>";
+		// 			var shell_commands = "<p> + Available shell commands:<ul>{0}</ul></p>";
+		// 			var shell_commands_array = Object.keys(myself.shell_commands);
+		// 			myself.kernelRequest({
+		// 				application: 'comodojo',
+		// 				method: 'version',
+		// 				v: 'ARRAY'
+		// 			}, function(data) {
+		// 				var i, o='';
+		// 				for (i in shell_commands_array) { o += '<li>'+shell_commands_array[i]+'</li>'; }
+		// 				myself.resultOnScreen(lang.replace(shell_help,data.result)+shell_usage+lang.replace(shell_commands,[o]));
+		// 			}, function(data) {
+		// 				myself.parseError(data);
+		// 			});
+		// 		}
+		// 	},{
+		// 		id: "login",
+		// 		action: function() {
+		// 			myself.newInput('User Name (Ctrl-C to abort):',myself.shell_commands_callbacks.login_userName);
+		// 		}
+		// 	},{
+		// 		id: "logout",
+		// 		action: function() {
+		// 			myself.kernelRequest({
+		// 				application: 'comodojo',
+		// 				method: 'logout'
+		// 			}, function(data) {
+		// 				if (data.success) {
+		// 					myself.userName = '';
+		// 					myself.userRole = 0;
+		// 					myself.resultOnScreen(myself.visualization._string.success('Successfully logged out'));
+		// 				}
+		// 				else {
+		// 					myself.resultOnScreen(myself.visualization._string.failure('Error logging out: '+data.result.name));
+		// 				}
+		// 			}, function(data) {
+		// 				myself.parseError(data);
+		// 			});
+		// 		}
+		// 	},{
+		// 		id: "history",
+		// 		action: function() {
+		// 			var i,o = '';
+		// 			for (i=0;i<myself.commandHistory.length-1;i++) { o += '<li>'+myself.commandHistory[i]+'</li>'; }
+		// 				myself.resultOnScreen(lang.replace('<p> + Commands history:<ol>{0}</ol></p>',[o]));
+		// 			}
+		// 	},{
+		// 		id: "output",
+		// 		action: function() {
+		// 			var i, obj_out = [], str_out = [], oobj = Object.keys(myself.visualization._object), ostr = Object.keys(myself.visualization._string);
+		// 			for (i in oobj) {
+		// 				if (oobj[i].charAt(0) == '_') {
+		// 					continue;
+		// 				}
+		// 				obj_out.push(oobj[i]+(oobj[i] == myself.output_object ? '<span style="color:red;">*</span>' : ''));
+		// 			}
+		// 			for (i in ostr) {
+		// 				if (ostr[i].charAt(0) == '_') {
+		// 					continue;
+		// 				}
+		// 				str_out.push(ostr[i]+(ostr[i] == myself.output_string ? '<span style="color:red;">*</span>' : ''));
+		// 			}
+		// 			if (params == null) {
+		// 				myself.resultOnScreen(myself.visualization._string.info('Select output modifier:'+myself.visualization._object.mlist({object:obj_out,string:str_out})));
+		// 			}
+		// 			else if (params[0] == 'object' && array.indexOf(obj_out, params[1]) >= 0) {
+		// 				myself.output_object = params[1];
+		// 				myself.resultOnScreen(myself.visualization._string.success('Selected object modifier: '+params[1]));
+		// 			}
+		// 			else if (params[0] == 'string' && array.indexOf(str_out, params[1]) >= 0) {
+		// 				myself.output_string = params[1];
+		// 				myself.resultOnScreen(myself.visualization._string.success('Selected string modifier: '+params[1]));
+		// 			}
+		// 			else {
+		// 				myself.resultOnScreen(myself.visualization._string.failure('Invalid output modifier'));
+		// 			}
+		// 		}
+		// 	},{
+		// 		id: "whoami",
+		// 		action: function() {
+		// 			myself.resultOnScreen(myself.visualization._string.info((myself.userName == '' ? 'guest' : myself.userName) + ' @ ' + myself.siteName + ' as [' + myself.userRole + '] from ' + myself.clientIP));
+		// 		}
+		// 	}]
+		// })
+			
 	});
 	
 	return shell;

@@ -12,14 +12,12 @@ $c.App.load("about",
 
 	function(pid, applicationSpace, status){
 	
-		//dojo.mixin(this, status);
-	
 		var myself = this;
 		
 		this.init = function(){
 			$c.Kernel.newCall(myself.initCallback,{
 				application: "about",
-				method: "get_info",
+				method: "getinfo",
 				preventCache: false,
 				content: {}
 			});

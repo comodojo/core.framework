@@ -20,7 +20,7 @@ $c.App.load("info",
 		
 		this.init = function(){
 			
-			datastore = $c.Kernel.newDatastore('info', 'get_info', { isWriteStore : true, label : 'id', identifier: 'id' });
+			datastore = $c.Kernel.newDatastore('info', 'getInfo', { isWriteStore : true, label : 'id', identifier: 'id' });
 
     		store = new dojo.store.DataStore({store: datastore, idProperty: 'id'});
 

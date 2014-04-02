@@ -13,10 +13,10 @@
 class info extends application {
 	
 	public function init() {
-		$this->add_application_method('get_info', 'getInfo', Array(), 'info.getInfo() - Return information about comodojo installation. No parameters required.',false);
+		$this->add_application_method('getInfo', 'get_info', Array(), 'info.getInfo() - Return information about comodojo installation. No parameters required.',false);
 	}
 	
-	public function getInfo() {
+	public function get_info() {
 		$this->success = true;
 		return Array(
 			Array('id'=>1,'info'=>'0001', 'value'=>isset($_SESSION[COMODOJO_PUBLIC_IDENTIFIER]['QUERIES']) ? $_SESSION[COMODOJO_PUBLIC_IDENTIFIER]['QUERIES'] : 0),

@@ -13,10 +13,10 @@
 class license extends application {
 	
 	public function init() {
-		$this->add_application_method('get_info', 'getInfo', Array(), 'Comodojo license',false);
+		$this->add_application_method('getInfo', 'get_info', Array(), 'Comodojo license',false);
 	}
 	
-	public function getInfo($params) {
+	public function get_info($params) {
 		$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/others/license.html");
 		return $index;
 	}

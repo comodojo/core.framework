@@ -13,10 +13,10 @@
 class qotd extends application {
 	
 	public function init() {
-		$this->add_application_method('get_message', 'getMessage', Array(), 'qotd.get_message() returns a randomic quote string; no extra parameter is necessary',false);
+		$this->add_application_method('getMessage', 'get_message', Array(), 'qotd.get_message() returns a randomic quote string; no extra parameter is necessary',false);
 	}
 	
-	public function getMessage() {
+	public function get_message() {
 		
 		comodojo_load_resource('qotd');
 		return get_quote();

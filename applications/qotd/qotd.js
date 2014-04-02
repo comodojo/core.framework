@@ -14,14 +14,12 @@ $c.App.load("qotd",
 
 	function(pid, applicationSpace, status){
 	
-		//dojo.mixin(this, status);
-	
 		var myself = this;
 		
 		this.init = function(){
 			$c.Kernel.newCall(myself.initCallback,{
 				application: "qotd",
-				method: "get_message",
+				method: "getMessage",
 				content: {}
 			});
 		};

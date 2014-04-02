@@ -13,10 +13,10 @@
 class about extends application {
 	
 	public function init() {
-		$this->add_application_method('get_info', 'getInfo', Array(), 'About comodojo',true);
+		$this->add_application_method('getinfo', 'get_info', Array(), 'About comodojo',true);
 	}
 	
-	public function getInfo($params) {
+	public function get_info($params) {
 		$info = explode("\n",comodojo_version());
 		$index = file_get_contents(COMODOJO_SITE_PATH . "comodojo/others/about.html");
 		$index = str_replace("*_ABOUT_PRODUCT_*",$info[0],$index);

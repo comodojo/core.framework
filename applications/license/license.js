@@ -19,7 +19,7 @@ $c.App.load("license",
 		this.init = function(){
 			$c.Kernel.newCall(myself.initCallback,{
 				application: "license",
-				method: "get_info"
+				method: "getInfo"
 			});
 		};
 		

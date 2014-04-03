@@ -196,7 +196,7 @@ function xml2array($dataString) {
  */
 function array2yaml($array) {
 	
-	comodojo_load_resource('spyc');
+	comodojo_load_resource('Spyc');
 	return Spyc::YAMLDump($array);
 	
 }
@@ -209,7 +209,7 @@ function array2yaml($array) {
  */
 function yaml2array($dataString) {
 	
-	comodojo_load_resource('spyc');
+	comodojo_load_resource('Spyc');
 	return Spyc::YAMLLoadString($dataString);
 	
 }

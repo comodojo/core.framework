@@ -32,7 +32,7 @@ $lang = Array(
 	'0018'	=>	'Stop following session',
 	'0019'	=>	'Consolidating events...',
 	'0020'	=>	'Successfully consolidated {0} events',
-	'0021'	=>	'There are no events to consolidate',,
+	'0021'	=>	'There are no events to consolidate',
 	'0022'	=>	'Consolidate events',
 	'0023'	=>	'Update events',
 	//events translation

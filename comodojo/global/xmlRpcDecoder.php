@@ -26,11 +26,11 @@ class xmlRpcDecoder  {
 					if(is_array($temp) and array_key_exists(0, $temp)){
 						$count = count($temp);
 						for($n=0;$n<$count;$n++){
-							$temp2[$n] = &$this->serialize(&$temp[$n]);
+							$temp2[$n] = &$this->serialize($temp[$n]);
 						}
 						$temp = &$temp2;
 					}else{
-						$temp2 = &$this->serialize(&$temp);
+						$temp2 = &$this->serialize($temp);
 						$temp = array(&$temp2);
 					}
 				}
@@ -43,15 +43,13 @@ class xmlRpcDecoder  {
 					if(is_array($temp) and array_key_exists(0, $temp)){
 						$count = count($temp);
 						for($n=0;$n<$count;$n++){
-							$temp2[$temp[$n]['name']] = &$this->serialize(&$temp[$n]['value']);
+							$temp2[$temp[$n]['name']] = &$this->serialize($temp[$n]['value']);
 						}
-					}else{
-						$temp2[$temp['name']] = &$this->serialize(&$temp['value']);
-				(is_array($current_node)){
-			if(isset($current_node['array'])){
-				if(!@is_array($current_node['array']['data'])){
-			}
-					$temp = &$temp2;
+					}
+					else{
+						$temp2[$temp['name']] = &$this->serialize($temp['value']);
+						$temp = &$temp2;
+					}
 				}
 			}
 			elseif (sizeof($current_node) != 0 ) {
@@ -116,7 +114,7 @@ class xmlRpcDecoder  {
 			if(is_array($temp) and array_key_exists(0, $temp)){
 				$count = count($temp);
 				for($n = 0; $n < $count; $n++){
-					$temp2[$n] = &$this->serialize(&$temp[$n]['value']);
+					$temp2[$n] = &$this->serialize($temp[$n]['value']);
 				}
 			}else{
 				$temp2[0] = &$this->serialize($temp['value']);
@@ -128,17 +126,18 @@ class xmlRpcDecoder  {
 	
 	public function decode_call($request){
 		$_request = xml2Array($request);
-		if (!isset($_request['methodCall']) OR !isset($request['methodCall']['methodName'])) {
+		
+		if (!isset($_request['methodCall']) OR !isset($_request['methodCall']['methodName'])) {
 			$this->fault = "Uncomprensible request";
 			return Array(null,"Uncomprensible request");
 		}
 		else{
-			$method_name = $request['methodCall']['methodName'];
+			$method_name = $_request['methodCall']['methodName'];
 			$temp = &$_request['methodCall']['params']['param'];
 			if(is_array($temp) and array_key_exists(0, $temp)){
 				$count = count($temp);
 				for($n = 0; $n < $count; $n++){
-					$temp2[$n] = &$this->serialize(&$temp[$n]['value']);
+					$temp2[$n] = &$this->serialize($temp[$n]['value']);
 				}
 			}else{
 				$temp2[0] = &$this->serialize($temp['value']);

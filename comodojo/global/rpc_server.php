@@ -223,6 +223,8 @@ class rpc_server extends comodojo_basic {
 	private $json_rpc_auth_runs_once = false;
 	
 	private $aes = null;
+
+	private $loaded_applications = Array();
 	
 	public function __construct($transport) {
 		$this->transport = strtoupper($transport);
@@ -431,9 +433,12 @@ class rpc_server extends comodojo_basic {
 			
 			$this->app_exec = COMODOJO_SITE_PATH.'comodojo/global/comodojo_reserved.php';
 			
-			try {
+			if (!in_array($this->app_exec, $this->loaded_applications)) {
 				require $this->app_exec;
-			
+				array_push($this->loaded_applications, $this->app_exec);
+			}
+
+			try {
 				$this->app_run = new comodojo_reserved();
 				
 				list($runnable, $attributes) = $this->eval_request_sustainability($_method, $params, $mapToAttributes);
@@ -449,9 +454,12 @@ class rpc_server extends comodojo_basic {
 			
 			$this->app_exec = COMODOJO_SITE_PATH.'comodojo/global/system_reserved.php';
 			
-			try {
+			if (!in_array($this->app_exec, $this->loaded_applications)) {
 				require $this->app_exec;
-			
+				array_push($this->loaded_applications, $this->app_exec);
+			}
+
+			try {
 				$this->app_run = new system_reserved();
 				
 				list($runnable, $attributes) = $this->eval_request_sustainability($_method, $params, $mapToAttributes);
@@ -465,19 +473,24 @@ class rpc_server extends comodojo_basic {
 		}
 		else {
 			
+			comodojo_load_resource('role_mapper');
+
 			$this->app_exec = COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER.$_application.'/'.$_application.'.php';
-			
+
 			try {
-				comodojo_load_resource('role_mapper');
+				
 				$mapper = new role_mapper();
 				
 				$this->eval_request_consistence($_application, $mapper->get_allowed_applications());
 				
-				require $this->app_exec;
-				
+				if (!in_array($this->app_exec, $this->loaded_applications)) {
+					require $this->app_exec;
+					array_push($this->loaded_applications, $this->app_exec);
+				}
+
 				$this->eval_application_consistence($_application);
 				
-				$this->app_run = new $this->application;
+				$this->app_run = new $_application;
 				
 				list($runnable, $attributes) = $this->eval_request_sustainability($_method, $params, $mapToAttributes);
 				
@@ -517,6 +530,8 @@ class rpc_server extends comodojo_basic {
 		}
 
 		comodojo_debug('Serving content for request to '.$_application.'->'.$_method,'INFO','rpc_server');
+
+		return $to_return;
 		
 	}
 	
@@ -557,7 +572,7 @@ class rpc_server extends comodojo_basic {
 			$attributes = $params;
 		}
 		
-		if (!attributes_to_parameters_match($attributes, $method[1])) {
+		if (!attributes_to_parameters_match($attributes, $method_definition[1])) {
 			comodojo_debug("Unsustainable request: parameters mismatch",'ERROR','rpc_server');
 			throw new Exception(0, -32602);
 		}

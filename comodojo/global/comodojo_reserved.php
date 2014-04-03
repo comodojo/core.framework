@@ -21,6 +21,7 @@ class comodojo_reserved extends application {
 		$this->add_application_method('passwordRecovery', 'password_recovery', Array('email','code'), '',false);
 		$this->add_application_method('applications', 'applications', Array(), '',false);
 		$this->add_application_method('version', 'version', Array(), '',false);
+		$this->add_application_method('rpcproxy', 'rpcProxy', Array("server","method"), '',false);
 	}
 	
 	public function login($params) {
@@ -74,6 +75,26 @@ class comodojo_reserved extends application {
 		return comodojo_version(isset($params['v']) ? $params['v'] : 'ALL');
 	}
 
+	public function rpcProxy($params) {
+
+		comodojo_load_resource("rpc_client");
+
+		$transport	= isset($params["transport"])	? strtoupper($params["transport"]) : 'XML';
+		$key 		= isset($params["key"])			? $params["key"] : null;
+		$port		= isset($params["port"])		? filter_var($properties['port'], FILTER_VALIDATE_INT) : 80;
+		$http_method= isset($params["http_method"])	? strtoupper($params["http_method"]) : 'POST';
+		$id			= isset($params["id"])			? filter_var($properties['id'], FILTER_VALIDATE_BOOLEAN) : true;
+		$parameters	= isset($params["params"])		? $params["params"] : Array();
+
+		try {
+			$rpc = new rpc_client($params["server"], $transport, $key, $port, $http_method);
+			$result = $rpc->send($params["method"], $parameters, $id);
+		} catch (Exception $e) {
+			throw $e;
+		}
+		return $result;
+
+	}
 	
 }
 

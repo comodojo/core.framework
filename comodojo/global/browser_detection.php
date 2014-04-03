@@ -1320,8 +1320,6 @@ function script_time()
 	}
 }
 
-function loadHelper_browser_detection() { return false; }
-
 /*
 Here are some navigator.userAgent strings so you can see where the data comes from
 UserAgent Data:

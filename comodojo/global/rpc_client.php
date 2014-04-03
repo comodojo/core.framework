@@ -1,9 +1,9 @@
 <?php
 
 /** 
- * The RPC client. It's able to talk in XML, JSON and YAML.
+ * The RPC client. It's able to talk in XML, JSON.
  * 
- * Client can be forced to use special JSON-ENCRYPTED mode with other comodojo installations.
+ * Client can be forced to use special ENCRYPTED mode with other comodojo installations.
  * 
  * @package		Comodojo PHP Backend
  * @author		comodojo.org
@@ -30,7 +30,7 @@ class rpc_client {
 	
 	private $port = 80;
 	
-	private $mode = 0;
+	private $encrypt = false;
 	
 	private $key = false;
 	
@@ -42,7 +42,7 @@ class rpc_client {
 	
 	private $id = true;
 	
-	public function __construct($server=COMODOJO_EXTERNAL_RPC_SERVER, $port=COMODOJO_EXTERNAL_RPC_PORT, $http_method = 'POST', $mode=COMODOJO_EXTERNAL_RPC_MODE, $transport=COMODOJO_EXTERNAL_RPC_TRANSPORT, $key=COMODOJO_EXTERNAL_RPC_KEY) {
+	public function __construct($server, $transport='XML', $key=null, $port=80, $http_method = 'POST') {
 		
 		switch (strtoupper($transport)) {
 			case 'XML':
@@ -59,10 +59,6 @@ class rpc_client {
 				$this->transport = 'JSON';
 			break;
 			
-			case 'YAML':
-				$this->transport = 'YAML';
-			break;
-			
 			default:
 				throw new Exception("Unknown transport", 1);
 			break;
@@ -72,28 +68,12 @@ class rpc_client {
 		$this->port = $port;
 		$this->http_method = $http_method;
 		
-		if ($mode === 'shared') {
+		if (!empty($key)) {
 			comodojo_load_resource('Crypt/AES.php');
-			$this->mode = $mode;
+			$this->encrypt = true;
 			$this->key = $key;
 		}
 			
-/*
-			 include('Crypt/AES.php');
- *
- *    $aes = new Crypt_AES();
- *
- *    $aes->setKey('abcdefghijklmnop');
- *
- *    $size = 10 * 1024;
- *    $plaintext = '';
- *    for ($i = 0; $i < $size; $i++) {
- *        $plaintext.= 'a';
- *    }
- *
- *    echo $aes->decrypt($aes->encrypt($plaintext));
- */
-		
 	}
 	
 	public function send($method, $parameters, $id=true) {
@@ -116,10 +96,6 @@ class rpc_client {
 					
 				case 'JSON':
 					$response = $this->send_json($method,$parameters,$id);
-				break;
-				
-				case 'YAML':
-					$response = $this->send_yaml($method,$parameters,$id);
 				break;
 				
 				default:
@@ -209,13 +185,9 @@ class rpc_client {
 		
 	}
 	
-	private function send_yaml($method, $parameters, $id) {
-		
-	}
-
 	private function send_data($data, $contentType) {
 		
-		if ($this->mode === 'shared') {
+		if ($this->encrypt) {
 			$aes = new Crypt_AES();
 			$aes->setKey($this->key);
 			//$data = Array('comodojo.encrypted'=>true,'transport'=>$this->transport, 'payload'=>$aes->encrypt($data));
@@ -235,7 +207,7 @@ class rpc_client {
 			comodojo_debug("Cannot init sender: ".$e->getMessage(),"ERROR","rpc_client");
 			throw new Exception("Cannot init sender: ".$e->getMessage(), 2002);
 		}
-		if ($this->mode === 'shared') {
+		if ($this->encrypt) {
 			return $aes->decrypt($received);
 		}
 		else return $received;

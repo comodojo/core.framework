@@ -21,7 +21,9 @@ class comodojo_reserved extends application {
 		$this->add_application_method('passwordRecovery', 'password_recovery', Array('email','code'), '',false);
 		$this->add_application_method('applications', 'applications', Array(), '',false);
 		$this->add_application_method('version', 'version', Array(), '',false);
-		$this->add_application_method('rpcproxy', 'rpcProxy', Array("server","method"), '',false);
+		if (COMODOJO_RPC_PROXY_ENABLED) {
+			$this->add_application_method('rpcproxy', 'rpcProxy', Array("server","method"), '',false);
+		}
 	}
 	
 	public function login($params) {

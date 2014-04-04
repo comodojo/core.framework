@@ -206,6 +206,7 @@ foreach($_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values'] as $key=>$value) {
 		$key == 'DB_PASSWORD' OR
 		$key == 'DB_PREFIX' OR
 		$key == 'DB_DATA_MODEL' OR
+		$key == 'RPC_PROXY_ENABLED' OR
 		$key == 'STARTUP_CACHE_ENABLED' OR
 		$key == 'GLOBAL_DEBUG_ENABLED' OR
 		$key == 'GLOBAL_DEBUG_LEVEL' OR

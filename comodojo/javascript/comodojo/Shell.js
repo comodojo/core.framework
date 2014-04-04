@@ -33,9 +33,11 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		siteName: false,
 
 		clientIP: false,
+
+		rpcProxy: false,
 		
 		systemMessage: "{0}:{1}$>",
-		
+
 		currentArea: false,
 		
 		pastAreas: [],
@@ -56,6 +58,10 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		output_string: 'standard',
 
 		_autocomplete: true,
+
+		systemConnectedMessage: "{0}:{1}:(<span style='color:blue;'>rpcmode</span>)$>",
+		_inConnection: false,
+		_connections: {},
 
 		constructor: function(args) {
 			
@@ -797,6 +803,15 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			
 			whoami: function() {
 				myself.resultOnScreen(myself.visualization._string.info((myself.userName == '' ? 'guest' : myself.userName) + ' @ ' + myself.siteName + ' as [' + myself.userRole + '] from ' + myself.clientIP));
+			},
+
+			connect: function() {
+				if (myself.rpcProxy) {
+					myself.newInput('Host (Ctrl-C to abort):',myself.shell_commands_callbacks.connect_stage2);
+				}
+				else {
+					myself.resultOnScreen(myself.visualization._string.warning("RPC Proxy mode disabled"));
+				}
 			}
 			
 		},

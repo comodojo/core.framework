@@ -76,7 +76,8 @@ class shell extends comodojo_basic {
 							userName: '".COMODOJO_USER_NAME."',
 							userRole: '".COMODOJO_USER_ROLE."',
 							siteName: '".strtolower(str_replace (" ", "", COMODOJO_SITE_TITLE))."',
-							clientIP: '".$_SERVER["REMOTE_ADDR"]."'
+							clientIP: '".$_SERVER["REMOTE_ADDR"]."',
+							rpcProxy: ".COMODOJO_RPC_PROXY_ENABLED."
 						});
 					});
 				});

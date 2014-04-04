@@ -82,6 +82,8 @@ $comodojoCustomization = array(
 		"DB_DATA_MODEL"					=>	'MYSQLI',
 		
 		"STARTUP_CACHE_ENABLED"			=>	1,
+
+		"RPC_PROXY_ENABLED"				=>	0,
 		
 		"GLOBAL_DEBUG_ENABLED"			=>	0,
 		"GLOBAL_DEBUG_LEVEL"			=>	'INFO',

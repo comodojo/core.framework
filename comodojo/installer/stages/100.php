@@ -190,6 +190,11 @@ define('COMODOJO_SUPPORTED_LOCALES','".$_locale."');
 define('COMODOJO_STARTUP_CACHE_ENABLED',".$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['STARTUP_CACHE_ENABLED'].");
 
 /**
+ * Enable/disable RPC proxy func (use with care)
+ */
+define('COMODOJO_RPC_PROXY_ENABLED',".$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['RPC_PROXY_ENABLED'].");
+
+/**
  * Enable global debug
  * True will produce large amount of data in error_log! 
  */	

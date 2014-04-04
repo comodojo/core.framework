@@ -1,5 +1,5 @@
 /**
- * [APP DESCRIPTION]
+ * Change User's personal informations
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -46,7 +46,7 @@ $c.App.load("userprofile",
 
 			$c.Kernel.newCall(myself.initCallback,{
 				application: "userprofile",
-				method: "get_user_info"
+				method: "getUserInfo"
 			});
 			
 		};
@@ -156,7 +156,7 @@ $c.App.load("userprofile",
 			else {
 				$c.Kernel.newCall(myself.editProfileCallback,{
 					application: "userprofile",
-					method: "set_user_info",
+					method: "setUserInfo",
 					content: values
 				});
 			}
@@ -175,7 +175,7 @@ $c.App.load("userprofile",
 			$d.style(myself.userImageContainer, "backgroundImage", "url('comodojo/images/medium_loader.gif')");
 			$c.Kernel.newCall(myself.updateUserImageCallback,{
 				application: "userprofile",
-				method: "set_user_image",
+				method: "setUserImage",
 				content: {
 					image: image
 				}

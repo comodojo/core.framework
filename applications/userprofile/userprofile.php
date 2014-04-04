@@ -1,7 +1,7 @@
 <?php
 
 /**
- * [APP DESCRIPTION]
+ * Change User's personal informations
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -13,12 +13,12 @@
 class userprofile extends application {
 	
 	public function init() {
-		$this->add_application_method('get_user_info', 'getUserInfo', Array(), 'No description yet, sorry.',false);
-		$this->add_application_method('set_user_info', 'setUserInfo', Array("email"), 'No description yet, sorry.',false);
-		$this->add_application_method('set_user_image', 'setUserImage', Array("image"), 'No description yet, sorry.',false);
+		$this->add_application_method('getUserInfo', 'get_user_info', Array(), 'Display information about logged-in user; no extra parameter required.',false);
+		$this->add_application_method('setUserInfo', 'set_user_info', Array("email"), 'Save information about logged-id user. Require at least {email}',false);
+		$this->add_application_method('setUserImage', 'set_user_image', Array("image"), 'Set user image. Required parameter {image} should represent a valid image file (w relative path)',false);
 	}
 
-	public function getUserInfo($params) {
+	public function get_user_info($params) {
 		comodojo_load_resource("users_management");
 
 		try {
@@ -32,7 +32,7 @@ class userprofile extends application {
 
 	}
 
-	public function setUserInfo($params) {
+	public function set_user_info($params) {
 		comodojo_load_resource("users_management");
 
 		try {
@@ -46,7 +46,7 @@ class userprofile extends application {
 
 	}
 
-	public function setUserImage($params) {
+	public function set_user_image($params) {
 		comodojo_load_resource("users_management");
 
 		try {

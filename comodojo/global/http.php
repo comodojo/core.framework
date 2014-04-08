@@ -17,21 +17,21 @@
  
 class http {
 
-/*********************** PUBLIC VARS *********************/
+/********************** PRIVATE VARS *********************/
 	/**
 	 * Remote host address (complete url)
 	 */
-	public $address = false;
+	private $address = null;
 	
 	/**
 	 * Remote host port
 	 */
-	public $port = 80;
+	private $port = 80;
 	
 	/**
 	 * Conversation method (GET or POST)
 	 */
-	public $method = 'GET';
+	private $method = 'GET';
 	
 	/**
 	 * Data to send to host, in unidimensional array form or simple string
@@ -46,7 +46,7 @@ class http {
 	 * 
 	 * @param	ARRAY
 	 */
-	private $data = false;
+	//private $data = false;
 	
 	/**
 	 * Timeout for request, in seconds.
@@ -54,7 +54,7 @@ class http {
 	 * @param	INT	seconds
 	 * @default	30
 	 */
-	public $timeout = 30;
+	private $timeout = 20;
 	
 	/**
 	 * HTTP Version (1.0/1.1)
@@ -62,35 +62,30 @@ class http {
 	 * @param	STRING	
 	 * @default	false	auto
 	 */
-	public $httpVersion = false;
-	
-	/**
-	 * Does host require a basic auth?
-	 */
-	public $isAuthenticated = false;
+	private $httpVersion = "1.0";
 	
 	/**
 	 * Auth method to use. It currently support only:
 	 * - BASIC
 	 * - NTLM (only if CURL is available)
 	 */
-	public $authenticationMethod = 'BASIC';
+	private $authenticationMethod = "NONE";
 	
 	/**
 	 * Remote host auth username
 	 */
-	public $userName;
+	private $userName = null;
 	
 	/**
 	 * Remote host auth password
 	 */
-	public $userPass;
+	private $userPass = null;
 
 	/**
 	 * Encoding of request
 	 * PLEASE NOTE: this should be the same used in xmlRpcEncoder!
 	 */
-	public $encoding = COMODOJO_DEFAULT_ENCODING;
+	//private $encoding = COMODOJO_DEFAULT_ENCODING;
 	
 	/**
 	 * Request user agent
@@ -98,7 +93,7 @@ class http {
 	 * @param	STRING
 	 * @default	Comodojo-core_1.0-beta
 	 */
-	public $userAgent = 'Comodojo-core___CURRENT_VERSION__';
+	private $userAgent = 'comodojo-core___CURRENT_VERSION__';
 	
 	/**
 	 * Content type
@@ -106,151 +101,360 @@ class http {
 	 * @param	STRING
 	 * @default	text/xml
 	 */
-	public $contentType = 'application/x-www-form-urlencoded';
-/*********************** PUBLIC VARS *********************/
+	private $contentType = 'application/x-www-form-urlencoded';
 
-/********************** PRIVATE VARS *********************/
+	/**
+	 * Allowed HTTP methods?
+	 */
+	private $allowed_http_methods = Array("GET","POST","PUT","DELETE");
+
+	private $header = Array(
+		'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+		'Accept-Language: en-us,en;q=0.5',
+		'Accept-Encoding: gzip, deflate',
+		'Accept-Charset: UTF-8;q=0.7,*;q=0.7'
+	);
+
 	/**
 	 * Are we using curl?
 	 */
-	private $_usingCurl = true;
-	
-	/**
-	 * Data-to-send holder.
-	 * @var string
-	 */
-	private $sent = false;
-
-	/**
-	 * Received data holder.
-	 * @var string
-	 */
-	private $received = '';
+	private $curl = true;
 	
 	/**
 	 * Remote host 
 	 * @var string
 	 */
-	private $remoteHost = false;
+	private $remoteHost = null;
 
 	/**
 	 * Remote host path
 	 * @var string
 	 */
-	private $remotePath = false;
+	private $remotePath = null;
 	
+	/**
+	 * Remote query string
+	 * @var string
+	 */
+	private $remoteQuery = null;
+
 	/**
 	 * Transfer channel
 	 * @var resource
 	 */
 	private $ch = false;
 /********************** PRIVATE VARS *********************/
+	
+/********************* PUBLIC METHODS ********************/
+	
+	public final function __construct($address, $curl=true) {
+
+		if (!$address) throw new Exception("Invalid remote host address", 1502);
+		
+		$curl = filter_var($curl, FILTER_VALIDATE_BOOLEAN);
+
+		if (!function_exists("curl_init") OR !$curl) {
+			$this->curl = false;
+			$url = parse_url($address);
+			$this->remoteHost = isset($url['host']) ? $url['host'] : '';
+			$this->remotePath = isset($url['path']) ? $url['path'] : '';
+			$this->remoteQuery = isset($url['query']) ? $url['query'] : '';
+			comodojo_debug("http will use fsock (compatibility mode)","DEBUG","http");
+		}
+		else {
+			$this->curl = true;
+			comodojo_debug("http will use curl","DEBUG","http");
+		}
+
+	}
+
+	public final function authentication($method, $user, $pass) {
+		$method = strtoupper($method);
+		//if (!in_array($method, Array("BASIC","NTLM")) OR empty($user) OR empty($pass)) {
+		//	comodojo_debug("Unsupported authentication mode: ".$method,"ERROR","http");
+		//	throw new Exception("Unsupported authentication mode", 1506);
+		//}
+		//if (!$this->curl AND $method=="NTLM") {
+		//	comodojo_debug("NTLM auth with FSOCKS not supported","ERROR","http");
+		//	throw new Exception("NTLM auth with FSOCKS not supported", 1505);
+		//}
+		$this->authenticationMethod = $method;
+		$this->userName = $user;
+		$this->userPass = $pass;
+		comodojo_debug("Using auth method: ".$method,"DEBUG","http");
+		return $this;
+	}
+
+	//public final function encoding($enc) {
+	//	$this->encoding = $enc;
+	//	comodojo_debug("Using encoding: ".$enc,"DEBUG","http");
+	//	return $this;
+	//}
+
+	public final function userAgent($ua) {
+		$this->userAgent = $ua;
+		comodojo_debug("Using user agent: ".$ua,"DEBUG","http");
+		return $this;	
+	}
+
+	public final function timeout($sec) {
+		$time = filter_var($sec, FILTER_VALIDATE_INT);
+		$this->timeout = $time;
+		comodojo_debug("Timeout: ".$time,"DEBUG","http");
+		return $this;
+	}
+
+	public final function httpVersion($ver) {
+		if (!in_array($ver, Array("1.0","1.1"))) {
+			$version = "NONE";
+		}
+		else {
+			$version = $ver;
+		}
+		$this->httpVersion = $version;
+		comodojo_debug("Using http version: ".$version,"DEBUG","http");
+		return $this;
+	}
+
+	public final function contentType($type) {
+		$this->contentType = $type;
+		comodojo_debug("Using content type: ".$type,"DEBUG","http");
+		return $this;
+	}
+
+	public final function port($port) {
+		$port = filter_var($port, FILTER_VALIDATE_INT, array("options" => array("min_range" => 1, "max_range" => 65535, "default" => 80 )));
+		comodojo_debug("Using port: ".$port,"DEBUG","http");
+		return $this;
+	}
+
+	public final function httpMethod($method) {
+		$method = strtoupper($method);
+		//if (!in_array($method, $this->allowed_http_methods)) {
+		//	throw new Exception("Unsupported HTTP method", 1507);
+		//}
+		$this->method = $method;
+		comodojo_debug("Using method: ".$method,"DEBUG","http");
+		return $this;
+	}
+
+	public final function header($head) {
+		$this->header = !is_array($head) ? Array($head) : $head;
+		comodojo_debug("Using header: ".$head,"DEBUG","http");
+		return $this;
+	}
+
+	/**
+	 * Init transport and send data to the remote host.
+	 * 
+	 * @return	string	Received Data
+	 */
+	public function send($data = null) {
+			
+		try {
+			$tosend = $this->init_transport($data);
+		}
+		catch (Exception $e) {
+			throw $e;
+		}
+
+		comodojo_debug("Sending data to ".$this->address,"DEBUG","http");
+		
+		if ($this->curl) {
+			$received = curl_exec($this->ch);
+			if ($received === false) {
+				comodojo_debug("Cannot exec http request, curl error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","http");
+				throw new Exception("Cannot exec http request", 1504);
+			}
+		}
+		else {
+			$received = '';
+			$receiver = fwrite($this->ch, $tosend, strlen($tosend));
+			if ($receiver === false) {
+				comodojo_debug("Cannot exec http request, fwrite error.","ERROR","http");
+				throw new Exception("Cannot exec http request", 1504);
+			}
+			while(!feof($this->ch)) $received .= fgets($this->ch,4096); 
+			//while ($line = fgets($this->ch)) $received .= $line;
+			//$received = substr($received, strpos($received, "\r\n\r\n") + 4);
+		}
+		
+		$this->close_transport();
+		
+		comodojo_debug("Data received: ".$received,"DEBUG","http");
+		
+		return $received;
+	}
+	
+	/**
+	 * Reset the data channel for new request
+	 * 
+	 */
+	public function reset() {
+		$this->address = null;
+		$this->port = 80;
+		$this->method = 'GET';
+		$this->data = false;
+		$this->timeout = 20;
+		$this->httpVersion = "1.0";
+		$this->authenticationMethod = null;
+		$this->userName = null;
+		$this->userPass = null;
+		$this->userAgent = 'comodojo-core___CURRENT_VERSION__';
+		$this->contentType = 'application/x-www-form-urlencoded';
+		$this->allowed_http_methods = Array("GET","POST","PUT","DELETE");
+		$this->header = Array(
+			'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+			'Accept-Language: en-us,en;q=0.5',
+			'Accept-Encoding: gzip, deflate',
+			'Accept-Charset: UTF-8;q=0.7,*;q=0.7'
+		);
+		$this->curl = true;
+		$this->remoteHost = null;
+		$this->remotePath = null;
+		$this->remoteQuery = null;
+		$this->ch = false;
+	}
+/********************* PUBLIC METHODS ********************/
 
 /********************* PRIVATE METHODS *******************/
+	
 	/**
 	 * Initialize transport layer
 	 */
-	private function _initTransport() {
+	private function init_transport($data) {
 		
-		if ($this->_usingCurl) {
-		
+		if (!in_array($this->authenticationMethod, Array("BASIC","NTLM","NONE"))) {
+			comodojo_debug("Unsupported authentication mode: ".$this->authenticationMethod,"ERROR","http");
+			throw new Exception("Unsupported authentication mode", 1506);
+		}
+
+		if (!in_array($this->method, $this->allowed_http_methods)) {
+			comodojo_debug("Unsupported HTTP method: ".$this->method,"ERROR","http");
+			throw new Exception("Unsupported HTTP method", 1507);
+		}
+
+		if ($this->curl) {
+
 			$this->ch = curl_init();
 			
 			if (!$this->ch) {
-				comodojo_debug("Cannot init data channel","ERROR","httpTalk");
+				comodojo_debug("Cannot init data channel","ERROR","http");
 				throw new Exception("Cannot init data channel", 1501);
 			}
-			
-			if (strtoupper($this->method) == 'POST') {
-				curl_setopt($this->ch, CURLOPT_POST, true);
-				if ($this->data !== false) curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->data);
-				curl_setopt($this->ch, CURLOPT_URL, $this->address);
+
+			switch ($this->httpVersion) {
+				case '1.0':
+					curl_setopt($this->ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_0);
+					break;
+				case '1.1':
+					curl_setopt($this->ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_1);
+					break;
+				default:
+					curl_setopt($this->ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_NONE);
+					break;
 			}
-			elseif (strtoupper($this->method) == 'GET' AND is_array($this->data)) {
-				curl_setopt($this->ch, CURLOPT_URL, $this->address.'?'.http_build_query($this->data));
+
+			switch ($this->authenticationMethod) {
+				case 'BASIC':
+					curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+					curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+					break;
+				case 'NTLM':
+					curl_setopt($this->ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
+					curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
+					break;
 			}
-			else {
-				curl_setopt($this->ch, CURLOPT_URL, $this->address . (is_string($this->data) ? '?'.urlencode($this->data) : ''));
+
+			switch ($this->method) {
+				case 'GET':
+					curl_setopt($this->ch, CURLOPT_URL, $this->address.'?'.http_build_query($data));
+					break;
+				case 'PUT':
+					curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "PUT"); 
+					if (!empty($data)) {
+						curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query($data));
+						array_push($this->header, "Content-Type: ".$this->contentType);
+					}
+					curl_setopt($this->ch, CURLOPT_URL, $this->address);
+					break;
+				case 'POST':
+					curl_setopt($this->ch, CURLOPT_POST, true);
+					if (!empty($data)) {
+						curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
+						array_push($this->header, "Content-Type: ".$this->contentType);
+					}
+					curl_setopt($this->ch, CURLOPT_URL, $this->address);
+					break;
+				case 'DELETE':
+					curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+					curl_setopt($this->ch, CURLOPT_URL, $this->address);
+					break;
 			}
-			
-			
-			if ($this->httpVersion == '1.0') curl_setopt($ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_0);
-			elseif ($this->httpVersion == '1.1') curl_setopt($ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_1);
-			else curl_setopt($ch,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_NONE);
-		    
-		    curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
-		    curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
+
+			curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
 			curl_setopt($this->ch, CURLOPT_PORT, $this->port);
-			
-			if ($this->isAuthenticated) {
-				curl_setopt($this->ch, CURLOPT_HTTPAUTH, strtoupper($this->authenticationMethod == 'NTLM') ? CURLAUTH_NTLM : CURLAUTH_BASIC);
-				curl_setopt($this->ch, CURLOPT_USERPWD, $this->userName.":".$this->userPass); 
-			}
-			
 			curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
-			
+			curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->header);
+
+			$to_return = null;
+
 		}
 		else {
-				
-			if ($this->isAuthenticated AND $this->authenticationMethod == 'NTLM') {
-				comodojo_debug("NTLM auth with FSOCKS not supported","ERROR","httpTalk");
+
+			if ($this->authenticationMethod == 'NTLM') {
+				comodojo_debug("NTLM auth with FSOCKS not supported","ERROR","http");
 				throw new Exception("NTLM auth with FSOCKS not supported", 1505);
 			}
+
+			comodojo_debug("Using http requests in compatible mode. Some features will not be available","WARNING","http");
+
 			$crlf = "\r\n";
-			
-			$_data = null;
-			switch(true) {
-				case is_array($this->data):
-					$_data = http_build_query($this->data);
-				break;
-				case is_string($this->data) :
-					$_data = urlencode($this->data);
-				break;
-				default:
-					$_data = '';
-				break;
-			}
-			
-			if (strtoupper($this->method) == 'GET') $_data = '?'.$_data;
-			
-			$header  = strtoupper($this->method).' '.$this->remotePath.$_data.' HTTP/'.$this->httpVersion.$crlf;
+
+			$header  = $this->method.' '.$this->remotePath.$this->remoteQuery.' HTTP/'.$this->httpVersion.$crlf;
 			$header .= "User-Agent: ".$this->userAgent.$crlf;
 			$header .= "Host: ".$this->remoteHost.$crlf;
+
+			if ($this->authenticationMethod == "BASIC") $header .= "Authorization: Basic ".base64_encode($this->userName.":".$this->userPass).$crlf;
 			
-			if ($this->isAuthenticated) $header .= "Authorization: Basic ".base64_encode($this->userName.":".$this->userPass).$crlf;
-			
-			$header .= 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'.$crlf;
-            $header .= 'Accept-Language: en-us,en;q=0.5'.$crlf;
-            $header .= 'Accept-Encoding: deflate'.$crlf;
-            $header .= 'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7'.$crlf.$crlf;
-            
-            if (strtoupper($this->method) == 'POST') {
-            	$header .= "Content-Type: ".$this->contentType.$crlf;
-				$header .= "Content-Length: ".strlen($_data).$crlf.$crlf;
-				$this->sent = $header.$_data;
-            }
-			else {
-				$this->sent = $header;
+			foreach ($this->header as $head) {
+				$header .= $head.$crlf;
 			}
-            
+
+			if (!empty($data)) {
+				//$data = urlencode($data);
+				$header .= "Content-Type: ".$this->contentType.$crlf;
+				$header .= "Content-Length: ".strlen($data).$crlf.$crlf;
+				$to_return = $header.$data;
+			}
+			else {
+				$to_return = $header.$crlf;
+			}
+
 			$this->ch = fsockopen($this->remoteHost, $this->port, $errno, $errstr, $this->timeout);
+
+			stream_set_timeout($this->ch, $this->timeout); 
 			
 			if (!$this->ch) {
-				comodojo_debug("Cannot init data channel, fsock error: ".$errno." - ".$errstr,"ERROR","httpTalk");
+				comodojo_debug("Cannot init data channel, fsock error: ".$errno." - ".$errstr,"ERROR","http");
 				throw new Exception("Cannot init data channel", 1501);
 			}
-			
+
 		}
 
-		comodojo_debug("Ready to send data: ".$this->data,"DEBUG","httpTalk");
-		
+		comodojo_debug("Ready to send data: ".$data,"DEBUG","http");
+
+		return $to_return;
+
 	}
+
 
 	/**
 	 * Close transport layer
 	 */
-	private function _closeTransport() {
-		if ($this->_usingCurl) {
+	private function close_transport() {
+		if ($this->curl) {
 			curl_close($this->ch);
 		}
 		else {
@@ -258,94 +462,6 @@ class http {
 		}
 	}
 /********************* PRIVATE METHODS *******************/
-	
-/********************* PUBLIC METHODS ********************/
-	/**
-	 * Init transport and send data to the remote host.
-	 * 
-	 * @return	string	Received Data
-	 */
-	public function send($data = false) {
-			
-		if (!$this->address) throw new Exception("Invalid remote host address", 1502);
-		
-		//if ($data) throw new Exception("Invalid data", 1503);
-		
-		if ($data !== false) $this->data = $data;
-		
-		if (function_exists("curl_init")) {
-			$this->_usingCurl = true;
-			comodojo_debug("Using curl for transaction","DEBUG","httpTalk");
-		}
-		else {
-			$this->_usingCurl = false;
-			$_url = parse_url($address);
-			$this->remoteHost = $_url['host'];
-			$this->remotePath = $_url['path'];
-			comodojo_debug("Using fsock for transaction","DEBUG","httpTalk");
-		}
-		
-		try {
-			$this->_initTransport();
-		}
-		catch (Exception $e) {
-			throw $e;
-		}
-		
-		if ($this->_usingCurl) {
-			$this->received = curl_exec($this->ch);
-			if ($this->received === false) {
-				comodojo_debug("Cannot exec http request, curl error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","httpTalk");
-				throw new Exception("Cannot exec http request", 1504);
-			}
-		}
-		else {
-			//if (strtoupper($this->method) == 'POST') {
-			//	fputs($this->ch, $this->sent, strlen($this->sent));
-			//		while (!feof($this->ch)) {
-			//		$this->received .= fgets($this->ch, 4096);
-			//	}
-			//}
-			$received = fwrite($this->ch, $this->sent, strlen($this->sent));
-			if ($received === false) {
-				comodojo_debug("Cannot exec http request, fwrite error.","ERROR","httpTalk");
-				throw new Exception("Cannot exec http request", 1504);
-			}
-			$this->received = '';
-			while ($line = fgets($this->ch)) $this->received .= $line;
-			$this->received = substr($this->received, strpos($this->received, "\r\n\r\n") + 4);
-		}
-		
-		$this->_closeTransport();
-		
-		comodojo_debug("Data received: ".$this->received,"DEBUG","httpTalk");
-		
-		return $this->received;
-	}
-	
-	/**
-	 * Reset the data channel for new request
-	 * 
-	 */
-	public function resetChannel() {
-		$this->address = false;
-		$this->port = 80;
-		$this->method = 'GET';
-		$this->data = false;
-		$this->timeout = 30;
-		$this->httpVersion = false;
-		$this->isAuthenticated = false;
-		$this->authenticationMethod = 'BASIC';
-		$this->userName;
-		$this->userPass;
-		$this->encoding = COMODOJO_DEFAULT_ENCODING;
-		$this->userAgent = 'Comodojo-core___CURRENT_VERSION__';
-		$this->contentType = 'application/x-www-form-urlencoded';
-		$this->sent = false;
-		$this->received = '';
-		$this->ch = false;
-	}
-/********************* PUBLIC METHODS ********************/
 
 }
 

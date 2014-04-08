@@ -173,7 +173,6 @@ class XML {
 	private function _sanitizeKeys($input, $key) {
 		$kVal = explode("_",$this->_struct[$key]["tag"]);
 		if ($kVal[0] == "KEY") {
-			//error_log('Key '.$key.' seems masquerated ('.$this->_struct[$key]["tag"].'); will become: '.$kVal[1]);
 			$this->_struct[$key]["tag"] = intval($kVal[1]);
 		}
 	}
@@ -188,6 +187,7 @@ class XML {
 	private function _getTree() {
 		$i = 0;
 		$tree = array();
+		//comodojo_debug($this->_struct);
 		$_key = $this->_struct[$i]["tag"];
 		$_attributes = isset($this->_struct[$i]["attributes"]) ? $this->_struct[$i]["attributes"] : "";
 		$_value = isset($this->_struct[$i]["value"]) ? $this->_struct[$i]["value"] : "";

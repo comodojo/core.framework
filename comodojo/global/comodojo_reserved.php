@@ -22,7 +22,7 @@ class comodojo_reserved extends application {
 		$this->add_application_method('applications', 'applications', Array(), '',false);
 		$this->add_application_method('version', 'version', Array(), '',false);
 		if (COMODOJO_RPC_PROXY_ENABLED) {
-			$this->add_application_method('rpcproxy', 'rpcProxy', Array("server","method"), '',false);
+			$this->add_application_method('rpcproxy', 'rpcProxy', Array("server","rpc_method"), '',false);
 		}
 	}
 	
@@ -81,16 +81,16 @@ class comodojo_reserved extends application {
 
 		comodojo_load_resource("rpc_client");
 
-		$transport	= isset($params["transport"])	? strtoupper($params["transport"]) : 'XML';
-		$key 		= isset($params["key"])			? $params["key"] : null;
-		$port		= isset($params["port"])		? filter_var($properties['port'], FILTER_VALIDATE_INT) : 80;
-		$http_method= isset($params["http_method"])	? strtoupper($params["http_method"]) : 'POST';
-		$id			= isset($params["id"])			? filter_var($properties['id'], FILTER_VALIDATE_BOOLEAN) : true;
-		$parameters	= isset($params["params"])		? $params["params"] : Array();
+		$rpc_transport	= isset($params["rpc_transport"])	? strtoupper($params["rpc_transport"]) : 'XML';
+		$key 			= isset($params["key"])				? $params["key"] : null;
+		$port			= isset($params["port"])			? filter_var($params['port'], FILTER_VALIDATE_INT) : 80;
+		$http_method	= isset($params["http_method"])		? strtoupper($params["http_method"]) : 'POST';
+		$id				= isset($params["id"])				? filter_var($params['id'], FILTER_VALIDATE_BOOLEAN) : true;
+		$parameters		= isset($params["params"])			? $params["params"] : Array();
 
 		try {
-			$rpc = new rpc_client($params["server"], $transport, $key, $port, $http_method);
-			$result = $rpc->send($params["method"], $parameters, $id);
+			$rpc = new rpc_client($params["server"], $rpc_transport, $key, $port, $http_method);
+			$result = $rpc->send($params["rpc_method"], $parameters, $id);
 		} catch (Exception $e) {
 			throw $e;
 		}

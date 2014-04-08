@@ -805,12 +805,41 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				myself.resultOnScreen(myself.visualization._string.info((myself.userName == '' ? 'guest' : myself.userName) + ' @ ' + myself.siteName + ' as [' + myself.userRole + '] from ' + myself.clientIP));
 			},
 
-			connect: function() {
-				if (myself.rpcProxy) {
-					myself.newInput('Host (Ctrl-C to abort):',myself.shell_commands_callbacks.connect_stage2);
+			connect: function(host, user, pass, transport, port, key) {
+				if (!host) {
+					myself.resultOnScreen(myself.visualization._string.warning("Invalid host name"));
+				}
+				else if (!myself.rpcProxy) {
+					myself.resultOnScreen(myself.visualization._string.warning("RPC Proxy mode disabled"));
 				}
 				else {
-					myself.resultOnScreen(myself.visualization._string.warning("RPC Proxy mode disabled"));
+					var t = transport == 'JSON' ? 'JSON' : 'XML';
+					//var t = 'JSON';
+					var k = !key ? null : key;
+					var u = !user ? null : user;
+					var p = !pass ? null : pass;
+					var o = !port ? 80 : port;
+					var i = t == 'JSON' ? true : false;
+					myself.kernelRequest({
+						application: 'comodojo',
+						method: 'rpcproxy',
+						server: host,
+						rpc_transport: t,
+						key: k,
+						port: p,
+						id: i,
+						rpc_method: 'system.getCapabilities'
+					}, function(data) {
+						if (data.success) {
+							myself.resultOnScreen(myself.visualization._string.success('Connected'));
+						}
+						else {
+							myself.resultOnScreen(myself.visualization._string.failure('Error'));
+						}
+					}, function(data) {
+						myself.parseError(data);
+					});
+					
 				}
 			}
 			

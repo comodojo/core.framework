@@ -58,6 +58,8 @@
 	"1503":"Invalid data",
 	"1504":"Cannot exec http request",
 	"1505":"NTLM auth with FSOCKS not supported",
+	"1506":"Unsupported authentication mode",
+	"1507":"Unsupported HTTP method",
 	"1601":"Invalid address, user or password",
 	"1602":"Failed authentication or network unavailable",
 	"1603":"Invalid command",

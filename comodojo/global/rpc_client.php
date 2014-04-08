@@ -89,7 +89,7 @@ class rpc_client {
 		}
 		
 		try {
-			switch (strtoupper($transport)) {
+			switch (strtoupper($this->transport)) {
 				case 'XML':
 					$response = $this->send_xml($method,$parameters);
 				break;
@@ -113,7 +113,7 @@ class rpc_client {
 	}
 	
 	private function send_xml($method, $parameters) {
-		if ($this->_nativeRPC) {
+		if ($this->is_native_rpc) {
 			$request = xmlrpc_encode_request($method,$params,array('encoding',COMODOJO_DEFAULT_ENCODING));
 		}
 		else {
@@ -132,7 +132,7 @@ class rpc_client {
 		$result = explode("<methodResponse>", $received);
 		$result = "<methodResponse>".$result[1];
 		
-		if ($this->_nativeRPC) {
+		if ($this->is_native_rpc) {
 			$decoded = xmlrpc_decode($result);
 		    if (is_array($decoded) && xmlrpc_is_fault($decoded)) throw new Exception('RPC Conversation error: ('.$response['faultCode'].') '.$response['faultString'], 2003);
 		}
@@ -190,22 +190,18 @@ class rpc_client {
 		if ($this->encrypt) {
 			$aes = new Crypt_AES();
 			$aes->setKey($this->key);
-			//$data = Array('comodojo.encrypted'=>true,'transport'=>$this->transport, 'payload'=>$aes->encrypt($data));
 			$data = 'comodojo_encrypted_envelope-'.$aes->encrypt($data);
 		}
 		
 		try {
-			$sender = new http();
-			$sender->address = $this->server;
-			$sender->port = $this->port;
-			$sender->method = strtoupper($this->http_method);
-			$sender->encoding = COMODOJO_DEFAULT_ENCODING;
-			if (strtoupper($this->http_method) == 'GET') $sender->contentType = $contentType;
+			$sender = new http($this->server);
+			$sender->port($this->port)->httpMethod($this->http_method)->contentType($contentType);
 			$received = $sender->send($data);
 		}
 		catch (Exception $e) {
 			comodojo_debug("Cannot init sender: ".$e->getMessage(),"ERROR","rpc_client");
-			throw new Exception("Cannot init sender: ".$e->getMessage(), 2002);
+			//throw new Exception("Cannot init sender: ".$e->getMessage(), 2002);
+			throw $e;
 		}
 		if ($this->encrypt) {
 			return $aes->decrypt($received);

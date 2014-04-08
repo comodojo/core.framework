@@ -194,6 +194,8 @@ require 'comodojo_basic.php';
 
 class rpc_server extends comodojo_basic {
 	
+	public $script_name = 'rpc_server.php';
+
 	public $use_session_transport = false; //rpc cannot use session
 	
 	public $require_valid_session = false; //rpc cannot use session

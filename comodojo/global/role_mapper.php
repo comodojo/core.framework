@@ -154,8 +154,8 @@ class role_mapper {
 		
 		$userRole = is_null(COMODOJO_USER_ROLE) ? 0 : COMODOJO_USER_ROLE;
 		
-		$userLevel = $from[$userRole];
-		$persistent = $from['persistent'];
+		$userLevel = isset($from[$userRole]) ? $from[$userRole] : Array();
+		$persistent = isset($from['persistent']) ? $from['persistent'] : Array();
 		
 		$applications = Array();
 		

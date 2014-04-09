@@ -59,7 +59,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 
 		_autocomplete: true,
 
-		systemConnectedMessage: "{0}:{1}:(<span style='color:blue;'>rpcmode</span>)$>",
+		systemConnectedMessage: "{0}:{1}:(<span style='color:blue;'>rpcmode({2})</span>)$>",
 		_inConnection: false,
 		_connections: {},
 
@@ -807,14 +807,14 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 
 			connect: function(params) {
 				if (!params) {
-					myself.resultOnScreen(myself.visualization._string.warning("Invalid connect parameters"));
+					myself.resultOnScreen(myself.visualization._string.failure("Invalid connect parameters"));
 				}
 				else if (!myself.rpcProxy) {
-					myself.resultOnScreen(myself.visualization._string.warning("RPC Proxy mode disabled"));
+					myself.resultOnScreen(myself.visualization._string.failure("RPC Proxy mode disabled"));
 				}
 				else {
 					var par = {
-						server: '',
+						server: false,
 						transport: 'XML',
 						key: null,
 						port: 80,
@@ -822,17 +822,23 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						pass: false
 					};
 					par = lang.mixin(par,params);
-					var i = t == 'JSON' ? true : false;
+					
+					if (!par.server || par.server == '') {
+						myself.resultOnScreen(myself.visualization._string.failure("Invalid host"));
+						return;
+					}
+
+					var i = par.transport == 'JSON' ? true : false;
 					myself.kernelRequest({
 						application: 'comodojo',
 						method: 'rpcproxy',
-						server: host,
-						rpc_transport: t,
-						key: k,
-						port: p,
+						server: par.server,
+						rpc_transport: par.transport,
+						key: par.key,
+						port: par.port,
 						id: i,
 						rpc_method: 'system.getCapabilities',
-						params: (!user || !pass) ? '{}' : json.toJson([user,pass])
+						params: (!par.user || !par.pass) ? '{}' : json.toJson([par.user,par.pass])
 					}, function(data) {
 						if (data.success) {
 							myself.resultOnScreen(myself.visualization._string.success('Connected'));

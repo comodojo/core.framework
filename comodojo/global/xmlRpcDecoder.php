@@ -99,7 +99,9 @@ class xmlRpcDecoder  {
 	}
 
 	public function decode($request){
+		
 		$_request = xml2Array($request);
+
 		if (!isset($_request['methodResponse'])) {
 			$this->fault = "Uncomprensible response";
 			return -1;
@@ -121,10 +123,14 @@ class xmlRpcDecoder  {
 			}
 			$temp = &$temp2;
 			return $temp[0];
+			//foreach ($_request['methodResponse']['params'] as $key => $value) {
+				
+			//}
 		}
 	}
 	
 	public function decode_call($request){
+
 		$_request = xml2Array($request);
 		
 		if (!isset($_request['methodCall']) OR !isset($_request['methodCall']['methodName'])) {

@@ -323,16 +323,22 @@ class rpc_server extends comodojo_basic {
 		elseif ($this->transport == 'XML'){
 			
 			if (!function_exists('xmlrpc_encode_request')) {
+
+				comodojo_debug("Using xmlRpcEncoder","DEBUG","rpc_server");
 				comodojo_load_resource('xmlRpcEncoder');
 				comodojo_load_resource('xmlRpcDecoder');
 				$this->is_native_rpc = false;
 				$decoder = new xmlRpcDecoder();
 				list($method, $data) = $decoder->decode_call($attributes);
+
 			}
 			else {
+
+				comodojo_debug("Using xmlrpc_encode_request","DEBUG","rpc_client");
 				$this->is_native_rpc = true;
 				$method = null;
-				$data = xmlrpc_decode_request($attributes,$method);
+				$data = xmlrpc_decode_request($attributes, $method);
+
 			}
 			
 			if (is_null($method)) throw new Exception("Invalid Request", -32600);
@@ -589,12 +595,17 @@ class rpc_server extends comodojo_basic {
 		}
 		else {
 			if ($this->is_native_rpc) {
-				$error = xmlrpc_encode_request(NULL,$data);
+
+				$return_data = xmlrpc_encode_request(NULL, $data, array('encoding' => COMODOJO_DEFAULT_ENCODING));
+
 			}
 			else {
+
 				$encoder = new xmlRpcEncoder();
-				$encoder->auto_add_values(Array($data));
+				//$encoder->auto_add_values(Array($data));
+				$encoder->auto_add_values($data);
 				$return_data = $encoder->getData();
+
 			}
 			$contentType = 'application/xml';
 		}
@@ -702,7 +713,7 @@ class rpc_server extends comodojo_basic {
 		
 		//if (COMODOJO_RPC_MODE != 1) throw new Exception('Encrypted transport not available', -32300);
 		
-		comodojo_load_resource('Crypt/AES.php');
+		comodojo_load_resource('Crypt/AES');
 		
 		$this->aes = new Crypt_AES();
 		$this->aes->setKey(COMODOJO_RPC_KEY);

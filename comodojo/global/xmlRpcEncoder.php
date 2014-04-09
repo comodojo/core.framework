@@ -287,60 +287,100 @@ class xmlRpcEncoder {
 	 *
 	 * @param	array	$values		Values to be parsed and added
 	 */
-	public function auto_add_values($values) {
+	public function auto_add_values($values, $first_array=true) {
 		
-		foreach ($values as $key => $value) {
+		if (is_array($values) AND $first_array) {
+
+			$this->add_array($values);
+
+		}
+		else if (is_array($values)) {
+
+			foreach ($values as $key => $value) {
 			
-			$this->start_param();
-			
-			switch(TRUE) {
-					
-					case is_int($value) :
+				if (is_scalar($value)) {
+					if ( is_int($value) ) {
 						$this->type = 'int';
-					break;
-		
-					case is_bool($value) :
+					}
+					elseif ( is_bool($value) ) {
 						$this->type = 'boolean';
-					break;
-		
-					case is_float($value) :
+					}
+					elseif ( is_float($value) ) {
 						$this->type = 'double';
-					break;
-					
-					case (base64_decode($value, true) ? false : true):
-					//case (!preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $data)):
+					}
+					//elseif ( base64_decode($value, true) != false ) {
+					//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
+					elseif ( base64_encode(base64_decode($value, true)) === $value ) {
 						$this->type = 'base64';
-					break;
-					
-					case (!strtotime($value) ? false : true):
+					}
+					elseif ( strtotime($value) != false ) {
 						$value = timestamp2iso8601time(strtotime($value));
 						$this->type = 'dateTime.iso8601';
-					break;
-					
-					case is_array($value) :
-					case is_object($value) :
-						if (!array_keys($value) !== range(0, count($value) - 1)) $this->add_array($value, is_string($key) ? $key : false); 
-						else $this->add_struct($value, is_string($key) ? $key : false);
-						$this->type = 'none';
-					break;
-		
-					default :
+					}
+					else {
 						$this->type = 'string';
 						$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-					break;
+					}
 				}
-			
-			if ($this->type != 'none') {
-				if (is_string($key)) $this -> start_member($key);
-				$this->start_value($this->type, $value);
-				$this->end_value();
-				if (is_string($key)) $this -> end_member();
-			}
-			
-			$this->end_param();
-			
-		}
+				elseif ( is_array($value) OR is_object($value) ) {
+					if (array_keys($value) == range(0, count($value) - 1)) $this->add_array($value); 
+					else $this->add_struct($value, $key);
+					$this->type = 'none';
+				}
+				//elseif is_object($value) {
+				//
+				//}
+				else {
+					$this->type = 'string';
+					$value = '';
+				}
 
+				if ($this->type != 'none') {
+					$this->start_param();
+					if (is_string($key)) $this -> start_member($key);
+					$this->start_value($this->type, $value);
+					$this->end_value();
+					if (is_string($key)) $this -> end_member();
+					$this->end_param();
+				}
+				
+			}
+
+		}
+		else {
+
+			if ( is_int($values) ) {
+				$this->type = 'int';
+			}
+			elseif ( is_bool($values) ) {
+				$this->type = 'boolean';
+			}
+			elseif ( is_float($values) ) {
+				$this->type = 'double';
+			}
+			//elseif ( base64_decode($value, true) != false ) {
+			//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
+			elseif ( base64_encode(base64_decode($values, true)) === $values ) {
+				$this->type = 'base64';
+			}
+			elseif ( strtotime($value) != false ) {
+				$values = timestamp2iso8601time(strtotime($values));
+				$this->type = 'dateTime.iso8601';
+			}
+			else {
+				$this->type = 'string';
+				$values = trim(htmlentities($values,ENT_NOQUOTES,$this->encoding));
+			}
+
+			$this->start_param();
+			if (is_string($key)) $this -> start_member($key);
+			$this->start_value($this->type, $value);
+			$this->end_value();
+			if (is_string($key)) $this -> end_member();
+			$this->end_param();
+
+		}
+		
 	}
 
 	/**
@@ -349,54 +389,61 @@ class xmlRpcEncoder {
 	 * @param	array	$array	The name of the array
 	 * @param	string	$name	Optional member name: results in a member/name pair
 	 */
-	private function add_array($array, $name = false) {
-		if (!is_array($array)) return;
-		if ($name != false) { $this -> start_member($name);}
+	private function add_array($array) {
+		
 		$this -> start_array();
+		
 		foreach ($array as $key => $value) {
-			switch(TRUE) {
-				case is_int($value) :
+
+			if (is_scalar($value)) {
+				if ( is_int($value) ) {
 					$this->type = 'int';
-				break;
-	
-				case is_bool($value) :
+				}
+				elseif ( is_bool($value) ) {
 					$this->type = 'boolean';
-				break;
-	
-				case is_float($value) :
+				}
+				elseif ( is_float($value) ) {
 					$this->type = 'double';
-				break;
-				
-				case (!base64_decode($value, true) ? false : true):
-						$this->type = 'base64';
-				break;
-				
-				case (!strtotime($value) ? false : true):
+				}
+				//elseif ( base64_decode($value, true) != false ) {
+				//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
+				elseif ( base64_encode(base64_decode($value, true)) === $value ) {
+					$this->type = 'base64';
+				}
+				elseif ( strtotime($value) != false ) {
 					$value = timestamp2iso8601time(strtotime($value));
 					$this->type = 'dateTime.iso8601';
-				break;
-				
-				case is_array($value) :
-				case is_object($value) :
-					if (!array_keys($value) !== range(0, count($value) - 1)) $this->add_array($value, is_string($key) ? $key : false); 
-					else $this->add_struct($value, is_string($key) ? $key : false);
-					$this->type = 'none';
-				break;
-	
-				default :
+				}
+				else {
 					$this->type = 'string';
 					$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-				break;
+				}
 			}
+			elseif ( is_array($value) OR is_object($value) ) {
+				if (array_keys($value) == range(0, count($value) - 1)) $this->add_array($value); 
+				else $this->add_struct($value, $key);
+				$this->type = 'none';
+			}
+			//elseif is_object($value) {
+			//
+			//}
+			else {
+				$this->type = 'string';
+				$value = '';
+			}
+
 			if ($this->type != 'none') {
-				if (is_string($key)) $this -> start_member($key);
+				//if (is_string($key)) $this -> start_member($key);
 				$this->start_value($this->type, $value);
 				$this->end_value();
-				if (is_string($key)) $this -> end_member();
+				//if (is_string($key)) $this -> end_member();
 			}
+
 		}
-		$this -> end_array();
-		if ($name != false) $this -> end_member();
+
+		$this->end_array();
+		//if ($name != false) $this -> end_member();
+
 	}
 	
 	/**
@@ -405,54 +452,68 @@ class xmlRpcEncoder {
 	 * @param	struct	$struct	The name of the struct
 	 * @param	string	$name	Optional member name: results in a member/name pair
 	 */
-	private function add_struct($array, $name = false) {
-		if (!is_array($array)) return;
-		if ($name != false) { $this -> start_member($name);}
+	private function add_struct($array, $name) {
+
 		$this -> start_struct();
+
+		$this -> start_member($name);
+
+		$this -> start_struct();
+		
 		foreach ($array as $key => $value) {
-			switch(TRUE) {
-				case is_int($value) :
+		
+			if (is_scalar($value)) {
+				if ( is_int($value) ) {
 					$this->type = 'int';
-				break;
-	
-				case is_bool($value) :
+				}
+				elseif ( is_bool($value) ) {
 					$this->type = 'boolean';
-				break;
-	
-				case is_float($value) :
+				}
+				elseif ( is_float($value) ) {
 					$this->type = 'double';
-				break;
-				
-				case (!base64_decode($value, true) ? false : true):
-						$this->type = 'base64';
-				break;
-				
-				case (!strtotime($value) ? false : true):
+				}
+				//elseif ( base64_decode($value, true) != false ) {
+				//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
+				elseif ( base64_encode(base64_decode($value, true)) === $value ) {
+					$this->type = 'base64';
+				}
+				elseif ( strtotime($value) != false ) {
 					$value = timestamp2iso8601time(strtotime($value));
 					$this->type = 'dateTime.iso8601';
-				break;
-				
-				case is_array($value) :
-				case is_object($value) :
-					if (!array_keys($value) !== range(0, count($value) - 1)) $this->add_array($value, is_string($key) ? $key : false); 
-					else $this->add_struct($value, is_string($key) ? $key : false);
-					$this->type = 'none';
-				break;
-	
-				default :
+				}
+				else {
 					$this->type = 'string';
 					$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-				break;
+				}
 			}
+			elseif ( is_array($value) OR is_object($value) ) {
+				if (!array_keys($value) !== range(0, count($value) - 1)) $this->add_array($value, is_string($key) ? $key : false); 
+				else $this->add_struct($value, is_string($key) ? $key : false);
+				$this->type = 'none';
+			}
+			//elseif is_object($value) {
+			//
+			//}
+			else {
+				$this->type = 'string';
+				$value = '';
+			}
+
 			if ($this->type != 'none') {
 				if (is_string($key)) $this -> start_member($key);
 				$this->start_value($this->type, $value);
 				$this->end_value();
 				if (is_string($key)) $this -> end_member();
 			}
+
 		}
+
 		$this -> end_struct();
-		if ($name != false) $this -> end_member();
+
+		$this -> end_member();
+
+		$this -> end_struct();
+
 	}
 
 	/** target="_blank"

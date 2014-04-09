@@ -47,7 +47,7 @@ class rpc_client {
 		switch (strtoupper($transport)) {
 			case 'XML':
 				$this->transport = 'XML';
-				if (!function_exists('xmlrpc_encode_request')) {
+				if (function_exists('xmlrpc_encode_request')) {
 					comodojo_debug("Using xmlRpcEncoder","DEBUG","rpc_client");
 					comodojo_load_resource('xmlRpcEncoder');
 					comodojo_load_resource('xmlRpcDecoder');
@@ -73,7 +73,7 @@ class rpc_client {
 		$this->http_method = $http_method;
 		
 		if (!empty($key)) {
-			comodojo_load_resource('Crypt/AES.php');
+			comodojo_load_resource('Crypt/AES');
 			$this->encrypt = true;
 			$this->key = $key;
 		}
@@ -118,7 +118,7 @@ class rpc_client {
 	
 	private function send_xml($method, $parameters) {
 		if ($this->is_native_rpc) {
-			$request = xmlrpc_encode_request($method,$params,array('encoding',COMODOJO_DEFAULT_ENCODING));
+			$request = xmlrpc_encode_request($method,$parameters,array('encoding' => COMODOJO_DEFAULT_ENCODING));
 		}
 		else {
 			$encoder = new xmlRpcEncoder($method);
@@ -127,12 +127,12 @@ class rpc_client {
 		}
 		
 		try {
-			$received = $this->send_data($request, 'text/xml');
+			$received = $this->send_data($request, 'application/xml');
 		}
 		catch (Exceptionx $e) {
 			throw $e;
 		}
-		
+
 		$result = explode("<methodResponse>", $received);
 		$result = "<methodResponse>".$result[1];
 		

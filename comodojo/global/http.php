@@ -138,6 +138,8 @@ class http {
 	 */
 	private $remoteQuery = null;
 
+	private $receivedHeader = null;
+
 	/**
 	 * Transfer channel
 	 * @var resource
@@ -155,6 +157,7 @@ class http {
 
 		if (!function_exists("curl_init") OR !$curl) {
 			$this->curl = false;
+			$this->address = $address;
 			$url = parse_url($address);
 			$this->remoteHost = isset($url['host']) ? $url['host'] : '';
 			$this->remotePath = isset($url['path']) ? $url['path'] : '';
@@ -163,6 +166,7 @@ class http {
 		}
 		else {
 			$this->curl = true;
+			$this->address = $address;
 			comodojo_debug("http will use curl","DEBUG","http");
 		}
 
@@ -244,6 +248,10 @@ class http {
 		return $this;
 	}
 
+	public final function get_header() {
+		return $this->receivedHeader;
+	}
+
 	/**
 	 * Init transport and send data to the remote host.
 	 * 
@@ -261,27 +269,33 @@ class http {
 		comodojo_debug("Sending data to ".$this->address,"DEBUG","http");
 		
 		if ($this->curl) {
-			$received = curl_exec($this->ch);
-			if ($received === false) {
+			$body = curl_exec($this->ch);
+			if ($body === false) {
 				comodojo_debug("Cannot exec http request, curl error: ".curl_errno($this->ch)." - ".curl_error($this->ch),"ERROR","http");
 				throw new Exception("Cannot exec http request", 1504);
 			}
+			$header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
+			$this->receivedHeader = substr($body, 0, $header_size);
+			$received = substr($body, $header_size);
 		}
 		else {
-			$received = '';
+			$body = '';
 			$receiver = fwrite($this->ch, $tosend, strlen($tosend));
 			if ($receiver === false) {
 				comodojo_debug("Cannot exec http request, fwrite error.","ERROR","http");
 				throw new Exception("Cannot exec http request", 1504);
 			}
-			while(!feof($this->ch)) $received .= fgets($this->ch,4096); 
+			while(!feof($this->ch)) $body .= fgets($this->ch,4096); 
 			//while ($line = fgets($this->ch)) $received .= $line;
 			//$received = substr($received, strpos($received, "\r\n\r\n") + 4);
+			list($this->receivedHeader, $received) = preg_split("/\R\R/", $body, 2);
 		}
 		
 		$this->close_transport();
 		
-		comodojo_debug("Data received: ".$received,"DEBUG","http");
+		comodojo_debug("-------- Received data --------- ","DEBUG","http");
+		comodojo_debug($received,"DEBUG","http");
+		comodojo_debug("---------- End of data --------- ","DEBUG","http");
 		
 		return $received;
 	}
@@ -397,6 +411,7 @@ class http {
 			curl_setopt($this->ch, CURLOPT_PORT, $this->port);
 			curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
 			curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->header);
+			curl_setopt($this->ch, CURLOPT_HEADER, 1);
 
 			$to_return = null;
 
@@ -443,7 +458,9 @@ class http {
 
 		}
 
-		comodojo_debug("Ready to send data: ".$data,"DEBUG","http");
+		comodojo_debug("------ Ready to send data ------ ","DEBUG","http");
+		comodojo_debug($data,"DEBUG","http");
+		comodojo_debug("---------- End of data --------- ","DEBUG","http");
 
 		return $to_return;
 

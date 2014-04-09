@@ -676,6 +676,7 @@ class rpc_server extends comodojo_basic {
 				$error = xmlrpc_encode($message);
 			}
 			else {
+				comodojo_load_resource('xmlRpcEncoder');
 				$encoder = new xmlRpcEncoder();
 				$error = $encoder->getError($message["faultCode"], $message["faultString"]);
 			}

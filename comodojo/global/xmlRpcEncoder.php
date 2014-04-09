@@ -307,7 +307,8 @@ class xmlRpcEncoder {
 						$this->type = 'double';
 					break;
 					
-					case (!base64_decode($value, true) ? false : true):
+					case (base64_decode($value, true) ? false : true):
+					//case (!preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $data)):
 						$this->type = 'base64';
 					break;
 					

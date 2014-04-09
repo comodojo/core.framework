@@ -805,20 +805,23 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				myself.resultOnScreen(myself.visualization._string.info((myself.userName == '' ? 'guest' : myself.userName) + ' @ ' + myself.siteName + ' as [' + myself.userRole + '] from ' + myself.clientIP));
 			},
 
-			connect: function(host, user, pass, transport, port, key) {
-				if (!host) {
-					myself.resultOnScreen(myself.visualization._string.warning("Invalid host name"));
+			connect: function(params) {
+				if (!params) {
+					myself.resultOnScreen(myself.visualization._string.warning("Invalid connect parameters"));
 				}
 				else if (!myself.rpcProxy) {
 					myself.resultOnScreen(myself.visualization._string.warning("RPC Proxy mode disabled"));
 				}
 				else {
-					var t = transport == 'JSON' ? 'JSON' : 'XML';
-					//var t = 'JSON';
-					var k = !key ? null : key;
-					var u = !user ? null : user;
-					var p = !pass ? null : pass;
-					var o = !port ? 80 : port;
+					var par = {
+						server: '',
+						transport: 'XML',
+						key: null,
+						port: 80,
+						user: false,
+						pass: false
+					};
+					par = lang.mixin(par,params);
 					var i = t == 'JSON' ? true : false;
 					myself.kernelRequest({
 						application: 'comodojo',
@@ -828,7 +831,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						key: k,
 						port: p,
 						id: i,
-						rpc_method: 'system.getCapabilities'
+						rpc_method: 'system.getCapabilities',
+						params: (!user || !pass) ? '{}' : json.toJson([user,pass])
 					}, function(data) {
 						if (data.success) {
 							myself.resultOnScreen(myself.visualization._string.success('Connected'));

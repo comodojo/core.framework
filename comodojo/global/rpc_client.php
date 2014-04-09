@@ -48,11 +48,15 @@ class rpc_client {
 			case 'XML':
 				$this->transport = 'XML';
 				if (!function_exists('xmlrpc_encode_request')) {
+					comodojo_debug("Using xmlRpcEncoder","DEBUG","rpc_client");
 					comodojo_load_resource('xmlRpcEncoder');
 					comodojo_load_resource('xmlRpcDecoder');
 					$this->is_native_rpc = false;
 				}
-				else $this->is_native_rpc = true;
+				else {
+					$this->is_native_rpc = true;
+					comodojo_debug("Using xmlrpc_encode_request","DEBUG","rpc_client");
+				}
 			break;
 				
 			case 'JSON':

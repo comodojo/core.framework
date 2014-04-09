@@ -6,7 +6,7 @@ $create = Array(
 	'roles'	=>	Array(
 		'columns'	=>	Array(
 			Array('id','INTEGER',Array('unsigned'=>true,'null'=>false,'autoincrement'=>true,'primary'=>true)),
-			Array('reference','INTEGER',Array('unsigned'=>true,'null'=>false,'primary'=>true)),
+			Array('reference','INTEGER',Array('unsigned'=>true,'null'=>false,'unique'=>true)),
 			Array('description','TEXT',Array('null'=>false))
 			)
 		),
@@ -76,7 +76,7 @@ $create = Array(
 	'cron'	=>	Array(
 		'columns'	=>	Array(
 			Array('id','INTEGER',Array('unsigned'=>true,'null'=>false,'autoincrement'=>true,'primary'=>true)),
-			Array('name','STRING',Array('length'=>64,'null'=>false),'primary'=>true),
+			Array('name','STRING',Array('length'=>64,'null'=>false),'unique'=>true),
 			Array('job','STRING',Array('length'=>64,'null'=>false)),
 			Array('description','TEXT',Array('default'=>null)),
 			Array('enabled','BOOL',Array('default'=>0)),

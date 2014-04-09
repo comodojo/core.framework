@@ -86,7 +86,7 @@ class comodojo_reserved extends application {
 		$port			= isset($params["port"])			? filter_var($params['port'], FILTER_VALIDATE_INT) : 80;
 		$http_method	= isset($params["http_method"])		? strtoupper($params["http_method"]) : 'POST';
 		$id				= isset($params["id"])				? filter_var($params['id'], FILTER_VALIDATE_BOOLEAN) : true;
-		$parameters		= isset($params["params"])			? $params["params"] : Array();
+		$parameters		= isset($params["params"])			? json2array($params["params"]) : Array();
 
 		try {
 			$rpc = new rpc_client($params["server"], $rpc_transport, $key, $port, $http_method);

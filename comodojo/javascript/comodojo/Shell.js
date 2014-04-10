@@ -814,6 +814,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				}
 				else {
 					var par = {
+						name: (Math.random() + 1).toString(36).substring(7),
 						server: false,
 						transport: 'XML',
 						key: null,
@@ -829,11 +830,23 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					}
 
 					var i = par.transport == 'JSON' ? true : false;
+
+					myself._connections[par.name] = {
+						server: par.server,
+						port: par.port,
+						status: 'down',
+						transport: par.transport.toUpperCase(),
+						key: par.key,
+						id: i,
+						user: par.user,
+						pass: par.pass
+					};
+
 					myself.kernelRequest({
 						application: 'comodojo',
 						method: 'rpcproxy',
 						server: par.server,
-						rpc_transport: par.transport,
+						rpc_transport: par.transport.toUpperCase(),
 						key: par.key,
 						port: par.port,
 						id: i,
@@ -841,16 +854,32 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						params: (!par.user || !par.pass) ? '{}' : json.toJson([par.user,par.pass])
 					}, function(data) {
 						if (data.success) {
-							myself.resultOnScreen(myself.visualization._string.success('Connected'));
+							if(data.result.faults_interop) {
+								myself.resultOnScreen(myself.visualization._string.success('Connected and linked!'));
+								myself._connections[par.name].status = "up";
+							}
+							else {
+								myself.resultOnScreen(myself.visualization._string.warning('Host up but wrong response'));
+							}
 						}
 						else {
-							myself.resultOnScreen(myself.visualization._string.failure('Error'));
+							myself.resultOnScreen(myself.visualization._string.failure('Error: '+result));
+							delete myself._connections[par.name];
 						}
 					}, function(data) {
+						delete myself._connections[par.name];
 						myself.parseError(data);
 					});
 					
 				}
+			},
+
+			connections: function() {
+
+			},
+
+			disconnect: function(name) {
+				
 			}
 			
 		},

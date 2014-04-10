@@ -14,6 +14,7 @@ class system_reserved extends application {
 	
 	public function init() {
 		$this->add_application_method('getCapabilities', 'getCapabilities', Array(), 'No description available, sorry.',false);
+		$this->add_application_method('listMethods', 'listMethods', Array(), 'No description available, sorry.',false);
 	}
 	
 	public function getCapabilities($params) {
@@ -23,6 +24,21 @@ class system_reserved extends application {
 				'specVersion' => 20010516
 			)
 		);
+	}
+
+	public function listMethods($params) {
+		$methods_array = Array(
+			"system.getCapabilities",
+			"system.listMethods",
+			"comodojo.login",
+			"comodojo.logout",
+			"comodojo.confirmRegistration",
+			"comodojo.passwordRecovery",
+			"comodojo.applications",
+			"comodojo.version"
+		);
+		if (COMODOJO_RPC_PROXY_ENABLED) array_push($methods_array, "comodojo.rpcproxy");
+		return $methods_array;
 	}
 	
 }

@@ -47,7 +47,7 @@ class rpc_client {
 		switch (strtoupper($transport)) {
 			case 'XML':
 				$this->transport = 'XML';
-				if (function_exists('xmlrpc_encode_request')) {
+				if (!function_exists('xmlrpc_encode_request')) {
 					comodojo_debug("Using xmlRpcEncoder","DEBUG","rpc_client");
 					comodojo_load_resource('xmlRpcEncoder');
 					comodojo_load_resource('xmlRpcDecoder');
@@ -121,9 +121,8 @@ class rpc_client {
 			$request = xmlrpc_encode_request($method,$parameters,array('encoding' => COMODOJO_DEFAULT_ENCODING));
 		}
 		else {
-			$encoder = new xmlRpcEncoder($method);
-			$encoder->auto_add_values($parameters);
-			$request = $encoder->getData();
+			$encoder = new xmlRpcEncoder();
+			$request = $encoder->encode_call($method, $parameters);
 		}
 		
 		try {
@@ -133,19 +132,23 @@ class rpc_client {
 			throw $e;
 		}
 
-		$result = explode("<methodResponse>", $received);
-		$result = "<methodResponse>".$result[1];
+		//$result = explode("<methodResponse>", $received);
+		//$result = "<methodResponse>".$result[1];
 		
+		$result = $received;
+
 		if ($this->is_native_rpc) {
 			$decoded = xmlrpc_decode($result);
 		    if (is_array($decoded) && xmlrpc_is_fault($decoded)) throw new Exception('RPC Conversation error: ('.$response['faultCode'].') '.$response['faultString'], 2003);
+		    return $decoded;
 		}
 		else {
 			$decoder = new xmlRpcDecoder();
-			$decoded = $decoder->decode($result);
-			if (is_numeric($decoded) AND @intval($decoded) == -1) throw new Exception('RPC Conversation error: (-) '.$decoder->getFault(), 2003);
+			$decoded = $decoder->decode_response($result);
+			//if (is_numeric($decoded) AND @intval($decoded) == -1) throw new Exception('RPC Conversation error: (-) '.$decoder->getFault(), 2003);
+			if (!$decoded) throw new Exception('RPC Conversation error: (-) '.$decoder->getFault(), 2003);
+			return $decoded[0];
 		}
-		return $decoded;
 		
 	}
 	

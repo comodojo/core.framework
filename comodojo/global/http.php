@@ -115,6 +115,10 @@ class http {
 		'Accept-Charset: UTF-8;q=0.7,*;q=0.7'
 	);
 
+	private $proxy = null;
+
+	private $proxy_auth = null;
+
 	/**
 	 * Are we using curl?
 	 */
@@ -245,6 +249,16 @@ class http {
 	public final function header($head) {
 		$this->header = !is_array($head) ? Array($head) : $head;
 		comodojo_debug("Using header: ".$head,"DEBUG","http");
+		return $this;
+	}
+
+	public final function proxy($address, $user=null, $pass=null) {
+		$this->proxy = filter_var($address, FILTER_VALIDATE_URL);
+		if ($user !== null AND $pass !== null) {
+			$this->proxy_auth = $user.':'.$pass;
+			comodojo_debug("Using proxy: ".$user."@".$address,"DEBUG","http");
+		}
+		else comodojo_debug("Using proxy: ".$address,"DEBUG","http");
 		return $this;
 	}
 
@@ -380,6 +394,11 @@ class http {
 					break;
 			}
 
+			if (!is_null($this->proxy)) {
+				curl_setopt($this->ch, CURLOPT_PROXY, $this->proxy);
+				if (!is_null($this->proxy_auth)) curl_setopt($this->ch, CURLOPT_PROXYUSERPWD, $this->proxy_auth);
+			}
+
 			switch ($this->method) {
 				case 'GET':
 					curl_setopt($this->ch, CURLOPT_URL, $this->address.'?'.http_build_query($data));
@@ -407,6 +426,7 @@ class http {
 			}
 
 			curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
 			curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
 			curl_setopt($this->ch, CURLOPT_PORT, $this->port);
 			curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
@@ -433,6 +453,8 @@ class http {
 
 			if ($this->authenticationMethod == "BASIC") $header .= "Authorization: Basic ".base64_encode($this->userName.":".$this->userPass).$crlf;
 			
+			if ($this->proxy_auth !== null) $header .= "Proxy-Authorization: Basic ".base64_encode($this->proxy_auth).$crlf;
+
 			foreach ($this->header as $head) {
 				$header .= $head.$crlf;
 			}
@@ -447,7 +469,15 @@ class http {
 				$to_return = $header.$crlf;
 			}
 
-			$this->ch = fsockopen($this->remoteHost, $this->port, $errno, $errstr, $this->timeout);
+			if (is_null($this->proxy)) {
+				$this->ch = fsockopen($this->remoteHost, $this->port, $errno, $errstr, $this->timeout);
+			}
+			else {
+				$proxy = parse_url($this->proxy);
+				$proxy_host = $url['host'];
+				$proxy_port = isset($url['port']) ? $url['port'] : '80';
+				$this->ch = fsockopen($proxy_host, $proxy_port, $errno, $errstr, $this->timeout);	
+			}
 
 			stream_set_timeout($this->ch, $this->timeout); 
 			

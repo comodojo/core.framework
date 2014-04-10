@@ -20,533 +20,121 @@ class xmlRpcEncoder {
 	 */
 	public $encoding = COMODOJO_DEFAULT_ENCODING;
 
-	/**
-	 * Array of parameters
-	 * @var	array
-	 */
-	private $params;
-	
-	/**
-	 * Pointer to the current data type
-	 * @var string
-	 */
-	private $type;
+	public function encode_response($data) {
 
-	/**
-	 * <methodName>, if any
-	 */
-	private $methodName = 'null';
-	
-	/**
-	 * <methodName>, if any
-	 */
-	private $currentIndent = '    ';
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="'.$this->encoding.'"?><methodResponse />');
 
-	/**
-	 * Adds a <params> tags
-	 */
-	private function start_params() {
-		$this->params[] = $this->currentIndent."<params>\n";
-		$this->currentIndent .= '  ';
+		$params = $xml->addChild("params");
+		$param = $params->addChild("param");
+		$value = $param->addChild("value");
+
+		$this->encode_value($value, $data);
+
+		return $xml->asXML();
+
 	}
 
-	/**
-	 * Adds a </params> tags
-	 */
-	private function end_params() {
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</params>\n";
-	}
+	public function encode_call($method, $data) {
 
-	/**
-	 * Adds a <param> tag
-	 */
-	private function start_param() {
-		$this->params[] = $this->currentIndent."<param>\n";
-		$this->currentIndent .= '  ';
-	}
+		$xml = new SimpleXMLElement('<?xml version="1.0" encoding="'.$this->encoding.'"?><methodCall />');
 
-	/**
-	 * Adds a </param> tag
-	 */
-	private function end_param() {
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</param>\n";
-	}
+		$xml->addChild("methodName",trim($method));
 
-	/**
-	 * Adds a <struct> tag
-	 */
-	private function start_struct() {
-		$this->params[] = $this->currentIndent."<value>\n";
-		$this->currentIndent .= '  ';
-		$this->params[] = $this->currentIndent."<struct>\n";
-		$this->currentIndent .= '  ';
-	}
-
-	/**
-	 * Adds a </struct> tag
-	 */
-	private function end_struct() {
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</struct>\n";
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</value>\n";
-	}
-
-	/**
-	 * Adds a <array> tag
-	 */
-	private function start_array() {
-		$this->params[] = $this->currentIndent."<value>\n";
-		$this->currentIndent .= '  ';
-		$this->params[] = $this->currentIndent."<array>\n";
-		$this->currentIndent .= '  ';
-		$this->params[] = $this->currentIndent."<data>\n";
-		$this->currentIndent .= '  ';
-	}
-
-	/**
-	 * Adds a </array> tag
-	 */
-	private function end_array() {
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</data>\n";
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</array>\n";
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</value>\n";
-	}
-
-	/**
-	 * Adds a <member><name> tag
-	 * @param string $name Name of the member object
-	 */
-	private function start_member($name) {
-		$this->params[] = $this->currentIndent."<member>\n";
-		$this->currentIndent .= '  ';
-		$this->params[] = $this->currentIndent."<name>" . trim($name) . "</name>\n";
-	}
-
-	/**
-	 * Adds a </member> tag
-	 */
-	private function end_member() {
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</member>\n";
-	}
-	
-	/**
-	 * Adds a <value><[type]> tag
-	 * @param	string	$type	Type of the value to add
-	 * @param	string	$value	Value to add
-	 */
-	private function start_value($type, $value) {
-		$this->params[] = $this->currentIndent."<value>\n";
-		$this->currentIndent .= '  ';
-		$this->params[] = $this->currentIndent."<".$type.">".trim($value)."</".$type.">\n";
-	}
-
-	/**
-	 * Adds a <\value> tag
-	 */
-	private function end_value() {
-		$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-		$this->params[] = $this->currentIndent."</value>\n";
-	}
-
-	/**
-	 * Initializes the encoder.
-	 * @usage:	$encoder = new xmlRpcEncoder([methodName]);
-	 * @param	string	$methodName	The <methodName> of the outgoing call.
-	 */
-	public function xmlRpcEncoder($methodName = 'null') {
-		$this->type   = 'none';
-		$this->methodName = $methodName;
-	}
-
-	/**
-	 * Add param to struct.
-	 * @usage:	$encoder->add_param($type, $value, $name);
-	 * @param	string	$type		Type of value to add
-	 * @param	mixed	$value		The data to add
-	 * @param	string	$name		Optional struct member name: results in a member/name pair
-	 */
-	public function add_param($type, $value='', $name='') {
-		$this->start_param();
-		$this->add_value($type, $value, $name);
-		$this->end_param();
-	}
-
-	/**
-	 * Add value to struct
-	 *
-	 * @usage:	$encoder->add_value($type, $value, $name);
-	 *
-	 * $type can of any of the following:
-	 * i4, int, long, integer
-	 * real, float, double
-	 * bool, boolean
-	 * b64, base64
-	 * time, date, datetime, dateTime.iso8601 ($value is unix timestamp)
-	 * file ($value is path to a file to include)
-	 * array, struct, object
-	 * string
-	 *
-	 * The above non standard types are for convienince,
-	 * and are automaticly mapped to their xmlrpc standard counterparts.
-	 *
-	 * $type can also be non standard and used for custom needs.
-	 *
-	 * @param	string	$type		Type of value to add
-	 * @param	mixed	$value		The data to add
-	 * @param	string	$name	Optional struct member name: results in a member/name pair
-	 * @see add_param()
-	*/
-	private function add_value($type, $value = false, $name = '') {
-		$type = strtolower($type);
-		switch($type) {
-			case "i4" :
-			case "int" :
-			case "long" :
-			case "integer" :
-				$this->type = 'int';
-			break;
-	
-			case "real" :
-			case "float" :
-			case "double" :
-				$this->type = 'double';
-				break;
-	
-			case "bool" :
-			case "boolean" :
-				($value == "1" || $value == "true") ? $value = 1 : $value = 0;
-				$this -> type = 'boolean';
-			break;
-	
-			case "b64" :
-			case "base64" :
-				$value = base64_encode($value);
-				$this->type = 'base64';
-			break;
-	
-			case "time" :
-			case "date" :
-			case "datetime" :
-			case "dateTime.iso8601" :
-				$value = timestamp2iso8601time(strtotime($value));
-				$this->type = 'dateTime.iso8601';
-			break;
-	
-			case "file" :
-				$fp = fopen($value, "rb");
-				$ffile = fread($fp, filesize($value));
-				fclose($fp);
-				$value = base64_encode($ffile);
-				$this->type = 'base64';
-			break;
-	
-			case "array" :
-			case "object" :
-				$this->add_array($value, $name);
-				$this->type = 'none';
-			break;
-	
-			case "struct" :
-				$this->add_struct($value, $name);
-				$this->type = 'none';
-			break;
-	
-			case "string" :
-				$this->type = 'string';
-				$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-			break;
-	
-			default :
-				$this->type = preg_replace("/[^a-z0-9]/i", "", $type);
-				$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-			break;
-		}
-	
-		if ($this->type != 'none') {
-			if ($name) $this->start_member($name);
-			//$this->type = strtolower($this->type);
-			$this->start_value($this->type, $value);
-			$this->end_value();
-			if ($name) $this->end_member();
-		}
-	}
-
-	/**
-	 * Auto add array of values to request
-	 *
-	 * @usage:	$encoder->auto_add_values($values);
-	 *
-	 * It will automatically match the datatype and (hopefully) map it to xmlrpc standard counterpart.
-	 *
-	 * @param	array	$values		Values to be parsed and added
-	 */
-	public function auto_add_values($values, $first_array=true) {
+		$params = $xml->addChild("params");
 		
-		if (is_array($values) AND $first_array) {
-
-			$this->add_array($values);
-
+		foreach ($data as $d) {
+			$param = $params->addChild("param");
+			$value = $param->addChild("value");
+			$this->encode_value($value, $d);
 		}
-		else if (is_array($values)) {
 
-			foreach ($values as $key => $value) {
-			
-				if (is_scalar($value)) {
-					if ( is_int($value) ) {
-						$this->type = 'int';
-					}
-					elseif ( is_bool($value) ) {
-						$this->type = 'boolean';
-					}
-					elseif ( is_float($value) ) {
-						$this->type = 'double';
-					}
-					//elseif ( base64_decode($value, true) != false ) {
-					//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
-					elseif ( base64_encode(base64_decode($value, true)) === $value ) {
-						$this->type = 'base64';
-					}
-					elseif ( strtotime($value) != false ) {
-						$value = timestamp2iso8601time(strtotime($value));
-						$this->type = 'dateTime.iso8601';
-					}
-					else {
-						$this->type = 'string';
-						$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-					}
-				}
-				elseif ( is_array($value) OR is_object($value) ) {
-					if (array_keys($value) == range(0, count($value) - 1)) $this->add_array($value); 
-					else $this->add_struct($value, $key);
-					$this->type = 'none';
-				}
-				//elseif is_object($value) {
-				//
-				//}
-				else {
-					$this->type = 'string';
-					$value = '';
-				}
+		return $xml->asXML();
 
-				if ($this->type != 'none') {
-					$this->start_param();
-					if (is_string($key)) $this -> start_member($key);
-					$this->start_value($this->type, $value);
-					$this->end_value();
-					if (is_string($key)) $this -> end_member();
-					$this->end_param();
-				}
-				
-			}
+	}
 
+	private function encode_value($xml, $value) {
+
+		if ($value === NULL) {
+			$xml->addChild("nil");
+		}
+		else if (is_array($value)) {
+			if ( array_keys($value) == range(0, count($value) - 1) ) $this->encode_array($xml, $value);
+			else $this->encode_struct($xml, $value);
+		}
+		else if (is_bool($value)) {
+			$xml->addChild("boolean", $value ? 1 : 0);
+		}
+		else if (is_double($value)) {
+			$xml->addChild("double", $value);
+		}
+		else if (is_integer($value)) {
+			$xml->addChild("int", $value);
+		}
+		else if (is_object($value)) {
+			$this->encode_object($xml, $value);
+		}
+		else if (is_string($value)) {
+			$xml->addChild("string", htmlspecialchars($value, ENT_XML1, $this->encoding));
 		}
 		else {
-
-			if ( is_int($values) ) {
-				$this->type = 'int';
-			}
-			elseif ( is_bool($values) ) {
-				$this->type = 'boolean';
-			}
-			elseif ( is_float($values) ) {
-				$this->type = 'double';
-			}
-			//elseif ( base64_decode($value, true) != false ) {
-			//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
-			elseif ( base64_encode(base64_decode($values, true)) === $values ) {
-				$this->type = 'base64';
-			}
-			elseif ( strtotime($value) != false ) {
-				$values = timestamp2iso8601time(strtotime($values));
-				$this->type = 'dateTime.iso8601';
-			}
-			else {
-				$this->type = 'string';
-				$values = trim(htmlentities($values,ENT_NOQUOTES,$this->encoding));
-			}
-
-			$this->start_param();
-			if (is_string($key)) $this -> start_member($key);
-			$this->start_value($this->type, $value);
-			$this->end_value();
-			if (is_string($key)) $this -> end_member();
-			$this->end_param();
-
+			comodojo_debug("Unknown type for encoding: " . gettype($value),"ERROR","xmlRpcEncoder");
+			//should I throw an exception here?
 		}
-		
 	}
 
-	/**
-	 * Add array to struct
-	 * Values' type are autodetected
-	 * @param	array	$array	The name of the array
-	 * @param	string	$name	Optional member name: results in a member/name pair
-	 */
-	private function add_array($array) {
+	private function encode_array($xml, $value) {
 		
-		$this -> start_array();
+		$array = $xml->addChild("array");
 		
-		foreach ($array as $key => $value) {
+		$data = $array->addChild("data");
+		
+		foreach ($value as $entry) {
+		
+			$val = $data->addChild("value");
 
-			if (is_scalar($value)) {
-				if ( is_int($value) ) {
-					$this->type = 'int';
-				}
-				elseif ( is_bool($value) ) {
-					$this->type = 'boolean';
-				}
-				elseif ( is_float($value) ) {
-					$this->type = 'double';
-				}
-				//elseif ( base64_decode($value, true) != false ) {
-				//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
-				elseif ( base64_encode(base64_decode($value, true)) === $value ) {
-					$this->type = 'base64';
-				}
-				elseif ( strtotime($value) != false ) {
-					$value = timestamp2iso8601time(strtotime($value));
-					$this->type = 'dateTime.iso8601';
-				}
-				else {
-					$this->type = 'string';
-					$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-				}
-			}
-			elseif ( is_array($value) OR is_object($value) ) {
-				if (array_keys($value) == range(0, count($value) - 1)) $this->add_array($value); 
-				else $this->add_struct($value, $key);
-				$this->type = 'none';
-			}
-			//elseif is_object($value) {
-			//
-			//}
-			else {
-				$this->type = 'string';
-				$value = '';
-			}
-
-			if ($this->type != 'none') {
-				//if (is_string($key)) $this -> start_member($key);
-				$this->start_value($this->type, $value);
-				$this->end_value();
-				//if (is_string($key)) $this -> end_member();
-			}
+			$this->encode_value($val, $entry);
 
 		}
 
-		$this->end_array();
-		//if ($name != false) $this -> end_member();
-
 	}
-	
-	/**
-	 * Add struct to struct :)
-	 * Values' type are autodetected
-	 * @param	struct	$struct	The name of the struct
-	 * @param	string	$name	Optional member name: results in a member/name pair
-	 */
-	private function add_struct($array, $name) {
 
-		$this -> start_struct();
+	private function encode_object($xml, $value) {
 
-		$this -> start_member($name);
+		if ($value instanceof DataObject) {
 
-		$this -> start_struct();
-		
-		foreach ($array as $key => $value) {
-		
-			if (is_scalar($value)) {
-				if ( is_int($value) ) {
-					$this->type = 'int';
-				}
-				elseif ( is_bool($value) ) {
-					$this->type = 'boolean';
-				}
-				elseif ( is_float($value) ) {
-					$this->type = 'double';
-				}
-				//elseif ( base64_decode($value, true) != false ) {
-				//elseif ( preg_match('%^[a-zA-Z0-9/+]*={0,2}$%', $value) ) {
-				elseif ( base64_encode(base64_decode($value, true)) === $value ) {
-					$this->type = 'base64';
-				}
-				elseif ( strtotime($value) != false ) {
-					$value = timestamp2iso8601time(strtotime($value));
-					$this->type = 'dateTime.iso8601';
-				}
-				else {
-					$this->type = 'string';
-					$value = trim(htmlentities($value,ENT_NOQUOTES,$this->encoding));
-				}
-			}
-			elseif ( is_array($value) OR is_object($value) ) {
-				if (!array_keys($value) !== range(0, count($value) - 1)) $this->add_array($value, is_string($key) ? $key : false); 
-				else $this->add_struct($value, is_string($key) ? $key : false);
-				$this->type = 'none';
-			}
-			//elseif is_object($value) {
-			//
-			//}
-			else {
-				$this->type = 'string';
-				$value = '';
-			}
-
-			if ($this->type != 'none') {
-				if (is_string($key)) $this -> start_member($key);
-				$this->start_value($this->type, $value);
-				$this->end_value();
-				if (is_string($key)) $this -> end_member();
-			}
+			$this->encode_value($xml, $value->export());
 
 		}
+		else if ($value instanceof DateTime) {
 
-		$this -> end_struct();
+			//$xml->addChild("dateTime.iso8601", gmstrftime("%Y%m%dT%T", $value->format('U')));
+			$xml->addChild("dateTime.iso8601", timestamp2iso8601time($value->format('U')));
 
-		$this -> end_member();
-
-		$this -> end_struct();
-
-	}
-
-	/** target="_blank"
-	 * Get xml-encoded data.
-	 * @usage:	$message = $encoder->getData();
-	 * @return	string	Returns encoded values
-	 */
-	public function getData() {
-		$this->currentIndent = '';
-		if ($this->methodName == 'null') {
-			$payload  = '<?xml version="1.0" encoding="'.$this->encoding.'"?>' . "\n";
-			$payload .= "<methodResponse>\n";
-			$payload .= "  <params>\n";
-			if ($this->params != '') {
-				$payload .= $this->currentIndent."<param>\n";
-					$this->currentIndent .= '  ';
-				$payload .=	implode('', $this->params);
-					$this->currentIndent = substr($this->currentIndent,0,strlen($this->currentIndent)-2);
-				$payload .= $this->currentIndent."</param>\n";
-			}
-			$payload .= $this->currentIndent."  </params>\n";
-			$payload .= $this->currentIndent."</methodResponse>";
 		} else {
-			$payload  = '<?xml version="1.0" encoding="'.$this->encoding.'"?>' . "\n";
-			$payload .= "<methodCall>\n";
-			$payload .= "  <methodName>".trim($this->methodName)."</methodName>\n";
-			$payload .= "  <params>\n";
-			if ($this->params != '') $payload .= implode('', $this->params);
-			$payload .= "  </params>\n";
-			$payload .= "</methodCall>";
+
+			comodojo_debug("Cannot encode object of type: " . get_class($value),"ERROR","xmlRpcEncoder");
+			//should I throw an exception here?
+
 		}
-		//if (GLOBAL_DEBUG_ENABLED) error_log("(DEBUG) - Request payload: ".$payload);
-		return $payload;
+		
+	}
+
+	private function encode_struct($xml, $value) {
+
+		$struct = $xml->addChild("struct");
+
+		foreach ($value as $k => $v) {
+
+			$member = $struct->addChild("member");
+
+			$member->addChild("name", $k);
+
+			$val = $member->addChild("value");
+
+			$this->encode_value($val, $v);
+
+		}
+
 	}
 
 	public function getError($error_code, $error_name) {

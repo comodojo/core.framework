@@ -13,150 +13,237 @@
  */
 class xmlRpcDecoder  {
 
-	private $fault = false;
-	
-	private function & serialize(&$current_node){
-		if(is_array($current_node)){
-			if(isset($current_node['array'])){
-				if(!@is_array($current_node['array']['data'])){
-					$tr = array();
-					$temp = &$tr;
-				}else{
-					$temp = &$current_node['array']['data']['value'];
-					if(is_array($temp) and array_key_exists(0, $temp)){
-						$count = count($temp);
-						for($n=0;$n<$count;$n++){
-							$temp2[$n] = &$this->serialize($temp[$n]);
-						}
-						$temp = &$temp2;
-					}else{
-						$temp2 = &$this->serialize($temp);
-						$temp = array(&$temp2);
-					}
-				}
-			}elseif(isset($current_node['struct'])){
-				if(!is_array($current_node['struct'])){
-					$tr = array();
-					$temp = &$tr;
-				}else{
-					$temp = &$current_node['struct']['member'];
-					if(is_array($temp) and array_key_exists(0, $temp)){
-						$count = count($temp);
-						for($n=0;$n<$count;$n++){
-							$temp2[$temp[$n]['name']] = &$this->serialize($temp[$n]['value']);
-						}
-					}
-					else{
-						$temp2[$temp['name']] = &$this->serialize($temp['value']);
-						$temp = &$temp2;
-					}
-				}
-			}
-			elseif (sizeof($current_node) != 0 ) {
-				$types = array('string', 'int', 'i4', 'double', 'dateTime.iso8601', 'base64', 'boolean');
-				foreach($types as $type){
-					if(array_key_exists($type, $current_node)){
-						$temp = &$current_node[$type];
-						break;
-					}
-				}
-				switch ($type){
-					case 'int':
-					case 'i4':
-						$temp = (int)$temp;
-					break;
-					case 'string':
-						$temp = (string)$temp;
-					break;
-					case 'double':
-						$temp = (double)$temp;
-					break;
-					case 'boolean':
-						$temp = (bool)$temp;
-					break;
-					case 'dateTime.iso8601':
-						$temp = (object) Array(
-							"scalar"		=>	$temp,
-                    		"xmlrpc_type" 	=>	"datetime",
-                    		"timestamp"		=>	iso8601time2timestamp($temp)
-						);
-					break;
-					case 'base64':
-						$temp = base64_decode($temp);
-					break;
-					default:
-						$temp = (string)$temp;
-					break;
-				}
-			}
-			else {
-				
-			}
-		}else{
-			$temp = (string)$current_node;
+	private $last_fault = null;
+
+	public function decode_response($response) {
+
+		$xml_data = simplexml_load_string($response);
+
+		if ( !isset($xml_data->params) ) {
+			$this->last_fault = "Uncomprensible response";
+			return false;
 		}
-		return $temp;
+
+		$data = array();
+		try {
+			foreach ($xml_data->params->param as $param) {
+				//$data[] = $this->decode_value($param->value);
+				array_push($data,$this->decode_value($param->value));
+			}
+		} catch (Exception $e) {
+			$this->last_fault = $e->getMessage();
+			return false;
+		}
+
+		return $data;
+
 	}
 
-	public function decode($request){
-		
-		$_request = xml2Array($request);
+	public function decode_call($request) {
 
-		if (!isset($_request['methodResponse'])) {
-			$this->fault = "Uncomprensible response";
-			return -1;
-		}
-		elseif (isset($_request['methodResponse']['fault'])) {
-			$this->fault = $_request['methodResponse']['fault']['value']['struct']['member'][1]['value']['string'];
-			return -1;
-		}
-		else if(!is_array($_request['methodResponse']['params'])) return array();
-		else{
-			$temp = &$_request['methodResponse']['params']['param'];
-			if(is_array($temp) and array_key_exists(0, $temp)){
-				$count = count($temp);
-				for($n = 0; $n < $count; $n++){
-					$temp2[$n] = &$this->serialize($temp[$n]['value']);
-				}
-			}else{
-				$temp2[0] = &$this->serialize($temp['value']);
-			}
-			$temp = &$temp2;
-			return $temp[0];
-			//foreach ($_request['methodResponse']['params'] as $key => $value) {
-				
-			//}
-		}
-	}
-	
-	public function decode_call($request){
+		$xml_data = simplexml_load_string($request);
 
-		$_request = xml2Array($request);
-		
-		if (!isset($_request['methodCall']) OR !isset($_request['methodCall']['methodName'])) {
-			$this->fault = "Uncomprensible request";
-			return Array(null,"Uncomprensible request");
+		if ( !isset($xml_data->methodName) ) {
+			$this->last_fault = "Uncomprensible request";
+			return array(null,$this->last_fault);
 		}
-		else{
-			$method_name = $_request['methodCall']['methodName'];
-			$temp = &$_request['methodCall']['params']['param'];
-			if(is_array($temp) and array_key_exists(0, $temp)){
-				$count = count($temp);
-				for($n = 0; $n < $count; $n++){
-					$temp2[$n] = &$this->serialize($temp[$n]['value']);
-				}
-			}else{
-				$temp2[0] = &$this->serialize($temp['value']);
+
+		$method_name = $this->decode_string($xml_data->methodName[0]);
+
+		$data = array();
+		try {
+			foreach ($xml_data->params->param as $param) {
+				$data[] = $this->decode_value($param->value);
 			}
-			$temp = &$temp2;
-			return Array($method_name, $temp[0]);
+		} catch (Exception $e) {
+			$this->last_fault = $e->getMessage();
+			return array(null,$this->last_fault);
 		}
+
+		return array($method_name, $data);
+
 	}
-	
+
+	public function decode_multicall($request) {
+
+		$xml_data = simplexml_load_string($request);
+
+		if ( !isset($xml_data->methodName) ) {
+			$this->last_fault = "Uncomprensible multicall request";
+			return false;
+		}
+
+		if ( $this->decode_string($xml_data->methodName[0]) != "system.multicall" ) {
+			$this->last_fault = "Invalid multicall request";
+			return false;
+		}
+
+		$data = array();
+		try {
+			foreach ($xml_data->params->param as $param) {
+				$children = $param->value->children();
+				$child = $children[0];
+				$call = $this->decode_array($child);
+				$data[] = array($call['methodName'], $call['params']);
+			}
+		} catch (Exception $e) {
+			$this->last_fault = $e->getMessage();
+			$data[] = array(null, $this->last_fault);
+		}
+		/*
+		$found = preg_match_all('#<'.$element_name.'(?:\s+[^>]+)?>(.*?)</'.$element_name.'>#s', $xml, $matches, PREG_PATTERN_ORDER);
+		if ($found != false) {
+			if ($content_only) {
+				return $matches[1];  //ignore the enlosing tags
+			} else {
+			return $matches[0];  //return the full pattern match
+		}
+		*/
+
+		return $data;
+
+	}
+
 	public function getFault() {
-		return $this->fault;
+
+		return $this->last_fault;
+
 	}
- 
+
+	private function decode_value($value) {
+
+		$children = $value->children();
+
+		if (count($children) != 1) {
+			throw new Exception("Invalid value element");
+		}
+
+		$child = $children[0];
+
+		$child_type = $child->getName();
+
+		switch ($child_type) {
+
+			case "i4":
+			case "int":
+				$return_value = $this->decode_int($child);
+			break;
+
+			case "double":
+				$return_value = $this->decode_double($child);
+			break;
+
+			case "boolean":
+				$return_value = $this->decode_bool($child);
+			break;
+
+			case "base64":
+				$return_value = $this->decode_base($child);
+			break;
+			
+			case "dateTime.iso8601":
+				$return_value = $this->decode_iso_8601_datetime($child);
+			break;
+
+			case "string":
+				$return_value = $this->decode_string($child);
+			break;
+
+			case "array":
+				$return_value = $this->decode_array($child);
+			break;
+			
+			case "struct":
+				$return_value = $this->decode_struct($child);
+			break;
+			
+			case "nil":
+			case "ex:nil":
+				$return_value = $this->decode_nil();
+			break;
+			
+			default:
+				throw new Exception("Invalid value type");
+			break;
+
+		}
+
+		return $return_value;
+
+	}
+
+	/**
+	 * Decode an XML-RPC <base64> element
+	 */
+	private function decode_base($base64) {
+		return base64_decode($this->decode_string($base64));
+	}
+
+	/**
+	 * Decode an XML-RPC <boolean> element
+	 */
+	private function decode_bool($boolean) {
+		return filter_var($boolean, FILTER_VALIDATE_BOOLEAN);
+	}
+
+	/**
+	 * Decode an XML-RPC <dateTime.iso8601> element
+	 */
+	private function decode_iso_8601_datetime($date_time) {
+		return iso8601time2timestamp($date_time);
+	}
+
+	/**
+	 * Decode an XML-RPC <double> element
+	 */
+	private function decode_double($double) {
+		return (double)($this->decode_string($double));
+	}
+
+	/**
+	 * Decode an XML-RPC <int> or <i4> element
+	 */
+	private function decode_int($int) {
+		return filter_var($int, FILTER_VALIDATE_INT);
+	}
+
+	/**
+	 * Decode an XML-RPC <string>
+	 */
+	private function decode_string($string) {
+		return (string)$string;
+	}
+
+	/**
+	 * Decode an XML-RPC <nil/>
+	 */
+	private function decode_nil() {
+		return null;
+	}
+
+	/**
+	 * Decode an XML-RPC <struct>
+	 */
+	private function decode_struct($struct) {
+		$return_value = array();
+		foreach ($struct->member as $member) {
+			$name = $member->name . "";
+			$value = $this->decode_value($member->value);
+			$return_value[$name] = $value;
+		}
+		return $return_value;
+	}
+
+	/** 
+	 * Decode an XML-RPC <array> element
+	 */
+	private function decode_array($array) {
+		$return_value = array();
+		foreach ($array->data->value as $value) {
+			$return_value[] = $this->decode_value($value);
+		}
+		return $return_value;
+	}
 
 }
 

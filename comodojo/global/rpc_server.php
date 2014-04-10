@@ -602,9 +602,8 @@ class rpc_server extends comodojo_basic {
 			else {
 
 				$encoder = new xmlRpcEncoder();
-				//$encoder->auto_add_values(Array($data));
-				$encoder->auto_add_values($data);
-				$return_data = $encoder->getData();
+
+				$return_data = $encoder->encode_response($data);
 
 			}
 			$contentType = 'application/xml';

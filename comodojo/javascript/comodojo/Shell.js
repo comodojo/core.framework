@@ -37,6 +37,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		rpcProxy: false,
 		
 		systemMessage: "{0}:{1}$>",
+		systemConnectedMessage: "{0}:{1}(<span style='color:blue;'>rpcmode[{2}]</span>)$>",
 
 		currentArea: false,
 		
@@ -59,9 +60,13 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 
 		_autocomplete: true,
 
-		systemConnectedMessage: "{0}:{1}:(<span style='color:blue;'>rpcmode({2})</span>)$>",
+		
 		_inConnection: false,
 		_connections: {},
+		_pendingRequests: 0,
+		_pendingResults: '',
+
+		connections_template: '<div><span style="color:{0};">({1}) {2}</span> - ({3}) - {4}{5}</div>',
 
 		constructor: function(args) {
 			
@@ -70,13 +75,6 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.shellNode = dom.byId(this.shellNode);
 			this.shellLoader = dom.byId(this.shellLoader);
 
-			/*
-			if(typeof String.prototype.trim !== 'function') {
-				String.prototype.trim = function() {
-					return this.replace(/^\s+|\s+$/g, ''); 
-				};
-			}
-			*/
 			if (!Object.keys) {
 				// http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
 				var hasDontEnumBug = true, dontEnums = [
@@ -118,8 +116,20 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				};
 
 			}
-			
-			this.shell_commands_store_data = [{id: "applications", type: "native"},{id: "exit", type: "native"},{id: "help", type: "native"},{id: "login", type: "native"},{id: "logout", type: "native"},{id: "history", type: "native"},{id: "output", type: "native"},{id: "whoami", type: "native"}];
+
+			this.shell_commands_store_data = [
+				{id: "applications", type: "native", description:"Display available applications"},
+				{id: "exit", type: "native", description:"Exit from session or disconnect (if in rpcmode)"},
+				{id: "help", type: "native", description:"Display shell help"},
+				{id: "login", type: "native", description:"Login user"},
+				{id: "logout", type: "native", description:"Logout user"},
+				{id: "history", type: "native", description:"Show commands history"},
+				{id: "output", type: "native", description:"Select desired visualization output"},
+				{id: "whoami", type: "native", description:"Display informations about current user"},
+				{id: "connect", type: "native", description:"Connect to external rpc or enter connection mode (if no parameters)"},
+				{id: "connections", type: "native", description:"Display available connections"},
+				{id: "disconnect", type: "native", description:"Unlink connection or disconnect from rpcmode (if no parameters)"}
+			];
 
 			this.shell_commands_store = new Memory ({ data: this.shell_commands_store_data });
 
@@ -128,7 +138,40 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.startShell();
 
 		},
+
+		is_array: function(obj) {
+
+			if( Object.prototype.toString.call( obj ) === '[object Array]' ) {
+			    return true;
+			}
+			return false;
+
+		},
 		
+		in_array: function(what, wherein) {
+			// summary:
+			//		Check if a key is defined in array
+			// what:
+			//		The key to search
+			// wherein:
+			//		The array
+			var key;
+			for (key in wherein) {
+				if (wherein[key] == what) {
+					return true;
+				}
+			}
+			return false;
+		},
+
+		size: function(obj) {
+			var size = 0, key;
+			for (key in obj) {
+				if (obj.hasOwnProperty(key)) size++;
+			}
+			return size;
+		},
+
 		loadAutocomplete: function() {
 
 			this.shell_commands_store.query({type:'application'}).forEach(function(value) { myself.shell_commands_store.remove(value.id); });
@@ -145,6 +188,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						myself.shell_commands_store.put({
 							id: data.result[i],
 							type: "application",
+							description: false,
 							loaded: false
 						});
 					}
@@ -157,52 +201,119 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				myself._autocomplete = false;
 				alert("It was impossible to load applications, autocomplete will not work");
 			});
+
 		},
 
 		getSystemMessage: function() {
+
 			var _siteName = !this.siteName ? 'comodojo' : this.siteName;
 			var _userName = this.userRole == 1 ? ('<span style="color: red;">'+this.userName+'</span>') : this.userName;
-			return lang.replace(this.systemMessage,[_siteName,_userName]);
+			return myself._inConnection ? lang.replace(this.systemConnectedMessage,[_siteName,_userName,this.connection_get_active_links()]) : lang.replace(this.systemMessage,[_siteName,_userName]);
+
 		},
 		
 		setLoadingState: function() {
+
 			this.shellLoader.innerHTML = '<img src="comodojo/images/shell_loader.gif" />';
+
 		},
 		
 		setReadyState: function() {
+
 			this.shellLoader.innerHTML = '<img src="comodojo/images/shell_logo.png" />';
+
 		},
 		
 		resizeViewport: function() {
+
 			domStyle.set(myself.currentArea.domNode,'width',(win.getBox().w - myself.currentArea.get('preMargin'))+'px');
 			var i = 0;
 			for (i in myself.pastAreas) {
 				domStyle.set(myself.pastAreas[i].domNode,'width',(win.getBox().w - myself.pastAreas[i].get('preMargin'))+'px');
 			}
+
 		},
-		
-		commandHistoryBack: function() {
-			if (this.commandHistoryPointer == 0) {
-				return;
-			}
-			var pointer = this.commandHistoryPointer-1;
-			this.currentArea.set('value',this.commandHistory[pointer]);
-			this.commandHistoryPointer = pointer;
-		},
-		
-		commandHistoryForward: function() {
-			if (this.commandHistoryPointer >= this.commandHistory.length-1) {
-				this.commandHistoryPointer = this.commandHistory.length;
-				this.currentArea.set('value','');
-			}
-			else {
-				var pointer = this.commandHistoryPointer+1;
-				this.currentArea.set('value',this.commandHistory[pointer]);
-				this.commandHistoryPointer = pointer;
+
+		signals: {
+			inactive_area: function(evt) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				myself.currentArea.focus();
+				myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
+			},
+			ctrl_c: function(evt) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				myself.currentArea.set('readonly',true);
+				myself.currentSignal.remove();
+				myself.resultOnScreen('');
+			},
+			history_back: function(evt) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				if (myself.commandHistoryPointer == 0) {
+					return;
+				}
+				var pointer = myself.commandHistoryPointer-1;
+				myself.currentArea.set('value',myself.commandHistory[pointer]);
+				myself.commandHistoryPointer = pointer;
+			},
+			history_forward: function(evt) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				if (myself.commandHistoryPointer >= myself.commandHistory.length-1) {
+					myself.commandHistoryPointer = myself.commandHistory.length;
+					myself.currentArea.set('value','');
+				}
+				var pointer = myself.commandHistoryPointer+1;
+				myself.currentArea.set('value',myself.commandHistory[pointer]);
+				myself.commandHistoryPointer = pointer;
+			},
+			complete_command: function(evt) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				myself.autocomplete();
+			},
+			enter_push: function(evt) {
+				if (myself.areBracketsBalanced()) {
+					if (evt !== false) {
+						evt.preventDefault();
+					}
+					myself.processCommand();
+				}
+				else {
+					myself.currentArea.set('extended',true);
+				}
+			},
+			input_enter_push : function(evt, callback) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				myself.currentArea.set('readonly',true);
+				myself.currentSignal.remove();
+				callback(myself.currentArea.get('value'));
+			},
+			session_lost: function(evt) {
+				if (evt !== false) {
+					evt.preventDefault();
+				}
+				myself.currentArea.set('readonly',true);
+				myself.currentSignal.remove();
+				myself.resultOnScreen(myself.visualization._string.failure('Session was lost, please <a href="javascript:history.go(0);">reload shell</a>'));
+				myself.currentArea.set('readonly',true);
+				myself.currentSignal.remove();
+				myself.currentArea.set('value','shell locked, session lost');
+				myself.currentArea.set('style','color:red;font-style:italic;');
 			}
 		},
 		
 		areBracketsBalanced: function() {
+
 			var pc=0, sc=0, cc=0;
 			var string = this.currentArea.get('value');
 			for(var i=0; i < string.length; i++) {
@@ -216,13 +327,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				}
 			}
 			return (pc == 0 && sc == 0 && cc == 0) ? true : false;
-		},
-		
-		is_array: function(obj) {
-			if( Object.prototype.toString.call( obj ) === '[object Array]' ) {
-			    return true;
-			}
-			return false;
+
 		},
 		
 		kernelRequest: function(data, load, error) {
@@ -230,7 +335,27 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			return request.post("kernel.php",{
 				data: data,
 				handleAs: 'json'
-			}).then(load,error);
+			//}).then(load,error);
+			}).then(function(data) {
+				if (!data.success) {
+					if (data.result.code == 2107) {
+						myself.signals.session_lost(false);
+					}
+					else {
+						load(data);
+					}
+				}
+				else {
+					load(data);
+				}
+			},function(e) {
+				if (e.code == 2107) {
+					myself.signals.session_lost(false);
+				}
+				else {
+					error(e);
+				}
+			});
 			
 		},
 		
@@ -245,13 +370,9 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			myself = this;
 
 			on(document.body ,"keypress",function(evt) {
-				if (!(evt.ctrlKey || evt.metaKey || myself.currentArea._focused)) {
-					evt.preventDefault();
-					myself.currentArea.focus();
-					myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
-				}
+				if (!(evt.ctrlKey || evt.metaKey || myself.currentArea._focused)) { myself.signals.inactive_area(evt); }
 			});
-			
+
 		},
 		
 		newArea: function() {
@@ -289,7 +410,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					float: "right",
 					border: "0px solid white"
 				},
-				type: 'password'
+				type: 'password',
+				extended: false
 			});
 			
 			currentArea.set('preMargin',smp.w);
@@ -297,30 +419,11 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.shellNode.appendChild(currentArea.domNode);
 			
 			this.currentSignal = currentArea.on("keydown", function(evt) {
-				if (evt.keyCode == keys.ENTER){
-					if (myself.areBracketsBalanced()) {
-						evt.preventDefault();
-						myself.processCommand();
-					}
-				}
-				else if (evt.keyCode == keys.UP_ARROW) {
-					evt.preventDefault();
-					myself.commandHistoryBack();
-				}
-				else if (evt.keyCode == keys.DOWN_ARROW) {
-					evt.preventDefault();
-					myself.commandHistoryForward();
-				}
-				else if (evt.keyCode == keys.TAB) {
-					evt.preventDefault();
-					myself.autocomplete();
-				}
-				else if (evt.keyCode == 67 && evt.ctrlKey == true) {
-					evt.preventDefault();
-					myself.currentArea.set('readonly',true);
-					myself.currentSignal.remove();
-					myself.resultOnScreen('');
-				}
+				if (evt.keyCode == keys.ENTER) { myself.signals.enter_push(evt); }
+				else if (evt.keyCode == keys.UP_ARROW && !myself.currentArea.get('extended')) { myself.signals.history_back(evt); }
+				else if (evt.keyCode == keys.DOWN_ARROW && !myself.currentArea.get('extended'))	{ myself.signals.history_forward(evt); }
+				else if (evt.keyCode == keys.TAB) { myself.signals.complete_command(evt); }
+				else if (evt.keyCode == 67 && evt.ctrlKey == true) { myself.signals.ctrl_c(evt); }
 				else {
 					//console.log(evt);
 				}
@@ -333,11 +436,15 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		},
 
 		newInput: function(message,callback) {
+
 			return this._newInput(message, callback, 'text');
+
 		},
 		
 		newPassword: function(message,callback) {
+
 			return this._newInput(message, callback, 'password');
+
 		},
 		
 		_newInput: function(message,callback,type) {
@@ -377,7 +484,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					float: "right",
 					border: "0px solid white"
 				},
-				type: type
+				type: type,
+				extended: false
 			});
 			
 			this.currentArea.set('preMargin',smp.w);
@@ -385,18 +493,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.shellNode.appendChild(this.currentArea.domNode);
 			
 			this.currentSignal = this.currentArea.on("keydown", function(evt) {
-				if (evt.keyCode == keys.ENTER){
-					evt.preventDefault();
-					myself.currentArea.set('readonly',true);
-					myself.currentSignal.remove();
-					callback(myself.currentArea.get('value'));
-				}
-				else if (evt.keyCode == 67 && evt.ctrlKey == true) {
-					evt.preventDefault();
-					myself.currentArea.set('readonly',true);
-					myself.currentSignal.remove();
-					myself.resultOnScreen('');
-				}
+				if (evt.keyCode == keys.ENTER){ myself.signals.input_enter_push(evt, callback); }
+				else if (evt.keyCode == 67 && evt.ctrlKey == true) { myself.signals.ctrl_c(evt); }
 				else {
 					//console.log(evt);
 				}
@@ -417,11 +515,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.currentSignal.remove();
 
 			this.currentArea.on("keypress", function(evt) {
-				if (!(evt.ctrlKey || evt.metaKey)) {
-					evt.preventDefault();
-					myself.currentArea.focus();
-					myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
-				}
+				if (!(evt.ctrlKey || evt.metaKey)) { myself.signals.inactive_area(evt); }
 			});
 
 			this.shellNode.appendChild(domConstruct.create("div",{style: {
@@ -453,13 +547,19 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			var params = command.match(/\(([^\)]*)\)/);
 			
 			if (real_command.length < 2) {
-				if (typeof this.shell_commands[real_command] == 'function') {
-						try {
-							this.shell_commands[real_command](params == null ? null : json.fromJson(params[0]));
-						}
-						catch(e) {
-							this.parseError(e);
-						}
+
+				real_command[0] = real_command[0].replace(/\W+/g,'');
+
+				if (myself._inConnection && !myself.in_array(real_command,['exit','connect','disconnect','connections','output','whoami'])) {
+					this.parseError('Invalid command in rpcmode');
+				}
+				else if (typeof this.shell_commands[real_command] == 'function') {
+					try {
+						this.shell_commands[real_command](params == null ? null : json.fromJson(params[0]));
+					}
+					catch(e) {
+						this.parseError(e);
+					}
 				}
 				else {
 					this.kernelRequest({
@@ -470,10 +570,16 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					}, function(data) {
 						myself.parseError(data);
 					});
-					//this.parseError('Undefined shell command');
 				}
+
 			}
-			else if (real_command.length == 2) {
+			else if (real_command.length == 2 && myself._inConnection) {
+
+				this.connection_exex_command(real_command[0]+'.'+real_command[1],params);
+
+			}
+			else if (real_command.length == 2 && !myself._inConnection) {
+
 				if (typeof this.reserved_commands[real_command.join('_')] == 'function') {
 					this.reserved_commands[real_command.join('_')]();
 					return;
@@ -505,13 +611,135 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				}, function(data) {
 					myself.parseError(data);
 				});
+
 			} 
 			else {
 				this.parseError('Ambiguous command');
 			}
 			
 		},
-		
+
+		connection_exex_command: function(command, params) {
+			
+			for (var i in myself._connections) {
+
+				if (myself._connections[i].status == 'up') {
+
+					var par;
+
+					myself._pendingRequests++;
+
+					if (!myself._connections[i].user || !myself._connections[i].pass) {
+						par = [null, null, params == null ? {} : json.fromJson(params[0])];
+					}
+					else {
+						par = [myself._connections[i].user, myself._connections[i].pass, params == null ? {} : json.fromJson(params[0])];
+					}
+
+					myself.connection_exec_command_run({
+						application: 'comodojo',
+						method: 'rpcproxy',
+						server: myself._connections[i].server,
+						rpc_transport: myself._connections[i].transport.toUpperCase(),
+						key: myself._connections[i].key,
+						port: myself._connections[i].port,
+						id: myself._connections[i].id,
+						rpc_method: command,
+						params: json.toJson(par)
+					},i);
+
+				}
+				else {
+					continue;
+				}
+			}
+
+		},
+
+		connection_exec_command_run: function(params, name) {
+			myself.kernelRequest(params, function(data) {
+				myself.connection_exex_command_callback(name,data);
+			}, function(error) {
+				myself.connection_exex_command_error(name,error);
+			});
+		},
+
+		connection_exex_command_callback: function(source, data) {
+
+			myself._pendingRequests--;
+
+			if (data.success) {
+
+				var result_content = '';
+
+				try {
+					switch(typeof data.result) {
+						case 'object':
+							result_content = myself.visualization._object[myself.output_object](data.result);
+						break;
+						case 'string':
+							result_content = myself.visualization._string[myself.output_string](data.result);
+						break;
+						case 'number':
+							result_content = myself.visualization._string.bold('Command output [numeric]: '+data.result);
+						break;
+						case 'boolean':
+							if (data.result == true) {
+								result_content = myself.visualization._string.success('Command returned success state');
+							}
+							else {
+								result_content = myself.visualization._string.failure('Command returned failure state');
+							}
+						break;
+						case 'function':
+							result_content = myself.visualization._string.warning('{function}');
+						break;
+						default:
+							result_content = myself.visualization._string.warning('{undefined}');
+						break;
+					}
+					myself._pendingResults += ('<div><h3>Response from <span style="color:blue;">'+source+'</span></h3>'+result_content+"</div>");
+				}
+				catch (e) {
+					myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box error">'+e+'</p></div>');
+				}
+
+			}
+			else {
+				myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box error">('+data.result.code+') '+data.result.name+'</p></div>');
+			}
+			
+			if (myself._pendingRequests == 0) {
+				myself.resultOnScreen(myself._pendingResults);
+				myself._pendingResults = '';
+			}
+
+		},
+
+		connection_exex_command_error: function(source, data) {
+
+			myself._pendingRequests--;
+			myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box error">'+data+'</p></div>');
+
+			if (myself._pendingRequests == 0) {
+				myself.resultOnScreen(myself._pendingResults);
+				myself._pendingResults = '';
+			}
+
+		},
+
+		connection_get_active_links: function() {
+
+			var conn = 0;
+			for (var i in this._connections) {
+				if (this._connections[i].status == 'up') {
+					conn++;
+				}
+			}
+			return conn;
+
+		},
+
 		parseResults: function(data) {
 			
 			var result_content = '';
@@ -556,7 +784,9 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		},
 		
 		parseError: function(code) {
-			this.resultOnScreen('<p class="box error">'+code+'</p>');			
+
+			this.resultOnScreen('<p class="box error">'+code+'</p>');
+
 		},
 		
 		resultOnScreen: function(result_content) {
@@ -564,6 +794,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.currentResult = domConstruct.create("div", {
 				innerHTML: result_content,
 				style: {
+					width: "100%",
 					position: "relative",
 					top: "0px",
 					padding: "0",
@@ -581,18 +812,14 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			this.setReadyState();
 
 			on(this.currentResult,"keypress",function(evt) {
-				if (!(evt.ctrlKey || evt.metaKey)) {
-					evt.preventDefault();
-					myself.currentArea.focus();
-					myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
-				}
+				if (!(evt.ctrlKey || evt.metaKey)) { myself.signals.inactive_area(evt); }
 			});
 			
 		},
 
 		autocomplete: function() {
 
-			if (!this._autocomplete) {
+			if (!this._autocomplete || this._inConnection) {
 				return;
 			}
 
@@ -624,32 +851,45 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 									myself.shell_commands_store.put({
 										id: exploded_command[0]+'.'+i,
 										type: "method",
+										description: data.result[i].description,
 										loaded: false
 									});
 								}
 								myself.shell_commands_store.put({
 									id: exploded_command[0],
 									type: "application",
+									description: false,
 									loaded: true
 								},{overwrite:true});
+								exploded_command[0] = exploded_command[0].replace(/\W+/g,'');
+								exploded_command[1] = exploded_command[1].replace(/\W+/g,'');
 								myself.shell_commands_store.query({id: new RegExp('^'+exploded_command[0]+'.'+exploded_command[1], "i"), type: 'method'}).forEach(function(value) {
-									possible.push(value.id);
+									possible.push([value.id,'<span style="color:blue;">'+value.id+'</span> - '+value.description]);
 								});
 								myself.autocomplete_onScreen(possible,exploded_command[0],exploded_command[1]);
 							}
 						});
 					}
 					else {
+						exploded_command[0] = exploded_command[0].replace(/\W+/g,'');
+						exploded_command[1] = exploded_command[1].replace(/\W+/g,'');
 						this.shell_commands_store.query({id: new RegExp('^'+exploded_command[0]+'.'+exploded_command[1], "i"), type: 'method'}).forEach(function(value) {
-							possible.push(value.id);
+							possible.push([value.id,'<span style="color:blue;">'+value.id+'</span> - '+value.description]);
 						});
 						this.autocomplete_onScreen(possible,exploded_command[0],exploded_command[1]);
 					}
 				}
 			}
 			else {
+				command = command.replace(/\W+/g,'');
 				this.shell_commands_store.query({id: new RegExp('^'+command, "i"), type: new RegExp('application|native', "i")}).forEach(function(value) {
-					possible.push(value.id);
+					if (!value.description) {
+						possible.push([value.id,'<span style="color:blue;">'+value.id+'</span>']);
+					}
+					else {
+						possible.push([value.id,'<span style="color:blue;">'+value.id+'</span> - '+value.description]);
+					}
+					
 				});
 				this.autocomplete_onScreen(possible,command,false);
 			}
@@ -659,36 +899,53 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		autocomplete_onScreen: function(pos, app, met) {
 
 			if (pos.length == 1) {
-					this.currentArea.set('value',pos[0]);
-				}
-				else if (pos.length > 1) {
+				this.currentArea.set('value',pos[0][0]);
+			}
+			else if (pos.length > 1) {
 
-					this.setLoadingState();
+				this.setLoadingState();
+			
+				this.currentArea.set('readonly',true);
 				
-					this.currentArea.set('readonly',true);
-					
-					this.currentSignal.remove();
+				this.currentSignal.remove();
 
-					this.currentArea.on("keypress", function(evt) {
-						if (!(evt.ctrlKey || evt.metaKey)) {
-							evt.preventDefault();
-							myself.currentArea.focus();
-							myself.currentArea.set('value',myself.currentArea.get('value')+String.fromCharCode(evt.charCode));
-						}
-					});
+				this.currentArea.on("keypress", function(evt) {
+					if (!(evt.ctrlKey || evt.metaKey)) { myself.signals.inactive_area(evt); }
+				});
 
-					this.parseResults({success: true, result: pos});
-					if (met === false) {
-						this.currentArea.set('value',app);
-					}
-					else {
-						this.currentArea.set('value',app+'.'+met);
-					}
+				var p = [], c = [];
 
+				for (var i in pos) {
+					c.push(pos[i][0]);
+					p.push(pos[i][1]);
 				}
-				else {
-					//do nothing...
-				}
+
+				this.parseResults({success: true, result: p});
+
+				var a = c.slice(0).sort();
+				var w1 = a[0];
+				var w2 = a[a.length-1];
+				var i = 0;
+				while(w1.charAt(i) == w2.charAt(i)) ++i;
+				this.currentArea.set('value',w1.substring(0, i));
+
+				//if (met === false) {
+				//	this.currentArea.set('value',app);
+				//}
+				//else {
+				//	var a = p.slice(0).sort();
+				//	var w1 = a[0];
+				//	var w2 = a[a.length-1];
+				//	var i = 0;
+				//	while(w1.charAt(i) == w2.charAt(i)) ++i;
+				//	this.currentArea.set('value',w1.substring(0, i));
+				//	//this.currentArea.set('value',app+'.'+met);
+				//}
+
+			}
+			else {
+				//do nothing...
+			}
 
 		},
 
@@ -711,7 +968,6 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					method: 'applications'
 				}, function(data) {
 					data.result = {
-						//'Available shell commands': Object.keys(myself.shell_commands),
 						'Available applications': data.result
 					};
 					myself.parseResults(data);
@@ -721,21 +977,31 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			},
 			
 			exit: function() {
-				return myself.shell_commands.logout();
+				if (myself._inConnection) {
+					return myself.shell_commands.disconnect(false);
+				}
+				else if (myself.userRole == 0) {
+					myself.resultOnScreen(myself.visualization._string.warning("No session to exit from"));
+				}
+				else {
+					return myself.shell_commands.logout();
+				}
 			},
 			
 			help: function() {
 				var shell_help = "<p> + Comodojo shell, framwork version {1} (build {2}).<br/>Product name: {0}.</p>";
 				var shell_usage = "<p> + Shell hints:<ul><li>Write an application to get list of methods</li><li>Ctrl+c to abort command</li><li>Up/Down arrows to navigate command history</li><li>Use brackets to write commands on multiple lines</li><li>Use tab to autocomplete commands</li></ul></p>";
 				var shell_commands = "<p> + Available shell commands:<ul>{0}</ul></p>";
-				var shell_commands_array = Object.keys(myself.shell_commands);
+				//var shell_commands_array = Object.keys(myself.shell_commands);
 				myself.kernelRequest({
 					application: 'comodojo',
 					method: 'version',
 					v: 'ARRAY'
 				}, function(data) {
-					var i, o='';
-					for (i in shell_commands_array) { o += '<li>'+shell_commands_array[i]+'</li>'; }
+					var o = '';
+					myself.shell_commands_store.query({type: 'native'}).forEach(function(value) {
+						o += '<li>'+'<span style="color:blue;">'+value.id+'</span> - '+value.description+'</li>';
+					});
 					myself.resultOnScreen(lang.replace(shell_help,data.result)+shell_usage+lang.replace(shell_commands,[o]));
 				}, function(data) {
 					myself.parseError(data);
@@ -806,16 +1072,24 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			},
 
 			connect: function(params) {
-				if (!params) {
-					myself.resultOnScreen(myself.visualization._string.failure("Invalid connect parameters"));
-				}
-				else if (!myself.rpcProxy) {
+
+				if (!myself.rpcProxy) {
 					myself.resultOnScreen(myself.visualization._string.failure("RPC Proxy mode disabled"));
+				}
+				else if (!params && !myself._inConnection) {
+					myself._inConnection = true;
+					myself.commandHistoryPointer = myself.commandHistory.push('connect');
+					myself.signals.ctrl_c(false);
+				}
+				else if (!params && myself._inConnection) {
+					myself.resultOnScreen(myself.visualization._string.failure("Invalid connect parameters"));
 				}
 				else {
 					var par = {
-						name: (Math.random() + 1).toString(36).substring(7),
+						name: (Math.random() + 1).toString(36).substring(5),
 						server: false,
+						method: 'system.getCapabilities',
+						lookFor: 'faults_interop',
 						transport: 'XML',
 						key: null,
 						port: 80,
@@ -829,9 +1103,10 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						return;
 					}
 
-					var i = par.transport == 'JSON' ? true : false;
+					var i = par.transport.toUpperCase() == 'JSON' ? true : false;
 
 					myself._connections[par.name] = {
+						name: par.name,
 						server: par.server,
 						port: par.port,
 						status: 'down',
@@ -850,22 +1125,29 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						key: par.key,
 						port: par.port,
 						id: i,
-						rpc_method: 'system.getCapabilities',
+						rpc_method: par.method,
 						params: (!par.user || !par.pass) ? '{}' : json.toJson([par.user,par.pass])
 					}, function(data) {
-						if (data.success) {
-							if(data.result.faults_interop) {
-								myself.resultOnScreen(myself.visualization._string.success('Connected and linked!'));
+						
+						if (data.success && !data.result) {
+							myself.resultOnScreen(myself.visualization._string.warning('Host up but null response'));
+						}
+						else if (data.success) {
+							//if(data.result.faults_interop) {
+							if (typeof(data.result[par.lookFor])!=="undefined") {
 								myself._connections[par.name].status = "up";
+								myself._inConnection = true;
+								myself.resultOnScreen(myself.visualization._string.success('Connected and linked!'));
 							}
 							else {
 								myself.resultOnScreen(myself.visualization._string.warning('Host up but wrong response'));
 							}
 						}
 						else {
-							myself.resultOnScreen(myself.visualization._string.failure('Error: '+result));
+							myself.resultOnScreen(myself.visualization._string.failure('Error: ('+data.result.code+') '+data.result.name));
 							delete myself._connections[par.name];
 						}
+
 					}, function(data) {
 						delete myself._connections[par.name];
 						myself.parseError(data);
@@ -875,11 +1157,47 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			},
 
 			connections: function() {
-
+				var c = [];
+				if (myself.size(myself._connections) == 0) {
+					myself.resultOnScreen(myself.visualization._string.warning('No rpc connection here'));
+				}
+				else {
+					var color;
+					var user;
+					for (var i in myself._connections) {
+						color = myself._connections[i].status == 'up' ? 'green' : 'red';
+						user = myself._connections[i].user == null ? '' : myself._connections[i].user+'@';
+						c.push(lang.replace(myself.connections_template,[
+							color,
+							myself._connections[i].status,
+							myself._connections[i].name,
+							myself._connections[i].transport,
+							user,
+							myself._connections[i].server
+						]));
+					}
+					myself.resultOnScreen(c);
+				}
 			},
 
 			disconnect: function(name) {
-				
+				if (name != false) {
+					myself.commandHistoryPointer = myself.commandHistory.push("disconnect('"+name+"')");
+					if ( delete myself._connections[name] ) {
+						myself.resultOnScreen(myself.visualization._string.success('Connection '+name+' unlinked'));
+					}
+					else {
+						myself.resultOnScreen(myself.visualization._string.failure('Unable to find connection: '+name));
+					}
+				}
+				else if (myself._inConnection) {
+					myself.commandHistoryPointer = myself.commandHistory.push('disconnect');
+					myself._inConnection = false;
+					myself.signals.ctrl_c(false);
+				}
+				else {
+					myself.resultOnScreen(myself.visualization._string.warning("Already disconnected"));
+				}
 			}
 			
 		},

@@ -302,6 +302,10 @@ class comodojo_basic {
 		}
 		$this->set_auth_session();
 	}
+
+	public final function auth_clear() {
+		$this->set_auth_session();
+	}
 	
 	private final function set_auth_session($userName=false, $userPass=false, $userInfo=false) {
 		if (!$userName OR !$userPass OR !$userInfo) {

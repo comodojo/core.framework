@@ -343,11 +343,23 @@ class rpc_server extends comodojo_basic {
 			
 			if (is_null($method)) throw new Exception("Invalid Request", -32600);
 			
-			$userName = isset($data[0]) ? $data[0] : NULL;
-			$userPass = isset($data[1]) ? $data[1] : NULL;
-			$parameters = isset($data[2]) ? $data[2] : NULL;
+			if ( isset($data[0]) AND isset($data[1]) ) {
+				$userName = empty($data[0]) ? NULL : $data[0];
+				$userPass = empty($data[1]) ? NULL : $data[1];
+			}
+			else {
+				$userName = NULL;
+				$userPass = NULL;
+			}
+
+			$parameters = ( isset($data[2]) AND @is_array($data[2]) ) ? $data[2] : Array();
 			
-			$this->auth_login($userName, $userPass, false);
+			if (!is_null($userName) AND !is_null($userPass)) {
+				$this->auth_login($userName, $userPass, false);
+			}
+			else {
+				$this->auth_clear();
+			}
 			
 			try {
 				$to_return = $this->process_request($method, $parameters);
@@ -422,7 +434,12 @@ class rpc_server extends comodojo_basic {
 		else throw new Exception("Not structured param", -32600);
 		
 		if (!$this->json_rpc_auth_runs_once) {
-			$this->auth_login($userName, $userPass, false);
+			if (!is_null($userName) AND !is_null($userPass)) {
+				$this->auth_login($userName, $userPass, false);
+			}
+			else {
+				$this->auth_clear();
+			}
 			$this->json_rpc_auth_runs_once = true;
 		}
 		
@@ -560,8 +577,10 @@ class rpc_server extends comodojo_basic {
 	}
 	
 	private function eval_request_sustainability($method, $params, $mapToAttributes) {
+
 		$method_definition = $this->app_run->get_registered_method($method);
-		if (!$method) {
+
+		if (!$method_definition) {
 			comodojo_debug("Unsustainable request: method ".$this->method." not registered correctly",'ERROR','rpc_server');
 			throw new Exception(0, -32601);
 		}

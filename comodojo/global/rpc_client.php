@@ -117,8 +117,13 @@ class rpc_client {
 	}
 	
 	private function send_xml($method, $parameters) {
+
 		if ($this->is_native_rpc) {
-			$request = xmlrpc_encode_request($method,$parameters,array('encoding' => COMODOJO_DEFAULT_ENCODING));
+			$request = xmlrpc_encode_request($method,$parameters,array(
+				'encoding' => COMODOJO_DEFAULT_ENCODING,
+				'verbosity'=> 'no_white_space',
+				'version'  => 'xmlrpc'
+			));
 		}
 		else {
 			$encoder = new xmlRpcEncoder();
@@ -139,7 +144,7 @@ class rpc_client {
 
 		if ($this->is_native_rpc) {
 			$decoded = xmlrpc_decode($result);
-		    if (is_array($decoded) && xmlrpc_is_fault($decoded)) throw new Exception('RPC Conversation error: ('.$response['faultCode'].') '.$response['faultString'], 2003);
+		    if (is_array($decoded) && xmlrpc_is_fault($decoded)) throw new Exception('RPC Conversation error: ('.$decoded['faultCode'].') '.$decoded['faultString'], 2003);
 		    return $decoded;
 		}
 		else {

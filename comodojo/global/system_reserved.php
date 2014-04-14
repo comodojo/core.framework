@@ -19,7 +19,7 @@ class system_reserved extends application {
 	
 	public function getCapabilities($params) {
 		return array(
-			'faults_interop' => array (
+			"faults_interop" => array (
 				'specUrl' => "http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php",
 				'specVersion' => 20010516
 			)

@@ -1088,8 +1088,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					var par = {
 						name: (Math.random() + 1).toString(36).substring(5),
 						server: false,
-						method: 'system.getCapabilities',
-						lookFor: 'faults_interop',
+						//method: 'system.getCapabilities',
+						//lookFor: 'faults_interop',
 						transport: 'XML',
 						key: null,
 						port: 80,
@@ -1125,16 +1125,17 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						key: par.key,
 						port: par.port,
 						id: i,
-						rpc_method: par.method,
-						params: (!par.user || !par.pass) ? '{}' : json.toJson([par.user,par.pass])
+						//rpc_method: par.method,
+						rpc_method: 'system.getCapabilities',
+						params: (!par.user || !par.pass) ? '[null, null]' : json.toJson([par.user,par.pass])
 					}, function(data) {
 						
 						if (data.success && !data.result) {
 							myself.resultOnScreen(myself.visualization._string.warning('Host up but null response'));
 						}
 						else if (data.success) {
-							//if(data.result.faults_interop) {
-							if (typeof(data.result[par.lookFor])!=="undefined") {
+							if(data.result.faults_interop) {
+							//if (typeof(data.result[par.lookFor])!=="undefined") {
 								myself._connections[par.name].status = "up";
 								myself._inConnection = true;
 								myself.resultOnScreen(myself.visualization._string.success('Connected and linked!'));
@@ -1166,7 +1167,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					var user;
 					for (var i in myself._connections) {
 						color = myself._connections[i].status == 'up' ? 'green' : 'red';
-						user = myself._connections[i].user == null ? '' : myself._connections[i].user+'@';
+						user = !myself._connections[i].user ? '' : myself._connections[i].user+'@';
 						c.push(lang.replace(myself.connections_template,[
 							color,
 							myself._connections[i].status,
@@ -1181,7 +1182,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 			},
 
 			disconnect: function(name) {
-				if (name != false) {
+				if (name != false && name != '' && name != null) {
 					myself.commandHistoryPointer = myself.commandHistory.push("disconnect('"+name+"')");
 					if ( delete myself._connections[name] ) {
 						myself.resultOnScreen(myself.visualization._string.success('Connection '+name+' unlinked'));

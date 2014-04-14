@@ -52,13 +52,35 @@ class xmlRpcEncoder {
 
 	}
 
+	public function getError($error_code, $error_name) {
+		$payload  = '<?xml version="1.0" encoding="'.$this->encoding.'"?>' . "\n";
+		$payload .= "<methodResponse>\n";
+		$payload .= "  <fault>\n";
+		$payload .= "    <value>\n";
+		$payload .= "      <struct>\n";
+		$payload .= "        <member>\n";
+		$payload .= "          <name>faultCode</name>\n";
+		$payload .= "          <value><int>".$error_code."</int></value>\n";
+		$payload .= "        </member>\n";
+		$payload .= "        <member>\n";
+		$payload .= "          <name>faultString</name>\n";
+		$payload .= "          <value><string>".$error_name."</string></value>\n";
+		$payload .= "        </member>\n";
+		$payload .= "      </struct>\n";
+		$payload .= "    </value>\n";
+		$payload .= "  </fault>\n";
+		$payload .= "</methodResponse>";
+		return $payload;
+	}
+
 	private function encode_value($xml, $value) {
 
 		if ($value === NULL) {
 			$xml->addChild("nil");
 		}
 		else if (is_array($value)) {
-			if ( array_keys($value) == range(0, count($value) - 1) ) $this->encode_array($xml, $value);
+			//if ( array_keys($value) == range(0, count($value) - 1) ) $this->encode_array($xml, $value);
+			if ( !$this->catch_struct($value) ) $this->encode_array($xml, $value);
 			else $this->encode_struct($xml, $value);
 		}
 		else if (is_bool($value)) {
@@ -137,26 +159,16 @@ class xmlRpcEncoder {
 
 	}
 
-	public function getError($error_code, $error_name) {
-		$payload  = '<?xml version="1.0" encoding="'.$this->encoding.'"?>' . "\n";
-		$payload .= "<methodResponse>\n";
-		$payload .= "  <fault>\n";
-		$payload .= "    <value>\n";
-		$payload .= "      <struct>\n";
-		$payload .= "        <member>\n";
-		$payload .= "          <name>faultCode</name>\n";
-		$payload .= "          <value><int>".$error_code."</int></value>\n";
-		$payload .= "        </member>\n";
-		$payload .= "        <member>\n";
-		$payload .= "          <name>faultString</name>\n";
-		$payload .= "          <value><string>".$error_name."</string></value>\n";
-		$payload .= "        </member>\n";
-		$payload .= "      </struct>\n";
-		$payload .= "    </value>\n";
-		$payload .= "  </fault>\n";
-		$payload .= "</methodResponse>";
-		return $payload;
-	}
+	private function catch_struct($value) {
+
+		for ($i = 0; $i < count($value); $i++) {
+			if (!array_key_exists($i, $value)) {
+				return true;
+			}
+		}
+		return false;
+
+	} 
 
 }
 

@@ -27,17 +27,14 @@ class authentication {
 	 * Login a user
 	 * 
 	 * It's the standard interface to login user in comodojo.
-	 * According to COMODOJO_AUTHENTICATION_MODE, user will be authenticated via:
+	 * According to personal profile, user will be authenticated via:
 	 * - local database
-	 * - ldap (filtered)
-	 * - ldap (unfiltered)
+	 * - ldap
 	 * - external authenticator via RPC interface
 	 * 
-	 * PLEASE NOTE: authentication via ldap unfiltered will also create user profile
+	 * PLEASE NOTE: authentication via external server, if autoadd=true option will also create user profile
 	 *  if a valid ldap correspondece is found.
 	 * 
-	 * PLEASE NOTE: external user's cache will work ONLY when authenticating via RPC authenticator
-	 *
 	 * @param	string	$userName	The name of the user to login
 	 * @param	string	$userPass	The password for the user to login
 	 * 
@@ -113,6 +110,80 @@ class authentication {
 
 /********************* PRIVATE METHODS *******************/
 	/**
+	 * Get user definition
+	 */
+	private final function get_user_local_definition($user) {
+
+		comodojo_load_resource('database');
+		
+		try {
+
+			$db = new database();
+			$result = $db->table('users')
+				->keys(Array("userRole","enabled","authentication","completeName","gravatar","email","birthday","gender","url"))
+				->where("userName","=",$userName)
+				->get();
+
+			if ($result['resultLength'] == 1) {
+				$to_return = $result['result'][0];
+			} 
+			else {
+				//comodojo_debug('Unknown user','ERROR','authentication');
+				//throw new Exception("Invalid username", 1903);
+				$to_return = false;
+			}
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		
+		return $to_return;
+
+	}
+
+	/**
+	 * Parse authentication servers
+	 */
+	private final function get_auth_servers($autoAddfilter=false) {
+
+		$rpcs = json2array(COMODOJO_AUTHENTICATION_RPCS);
+
+		$ldaps = json2array(COMODOJO_AUTHENTICATION_LDAPS);
+
+		$servers = Array();
+
+		foreach ($rpcs as $rpc) {
+			if ($autoAddfilter AND $rpc["autoadd"] == false) continue;
+			$servers[$rpc["name"]] = Array(
+				"server"	=> $rpc["server"],
+				"port"		=> $rpc["port"],
+				"mode"		=> $rpc["mode"],
+				"transport"	=> $rpc["transport"],
+				"sharedkey"	=> $rpc["sharedkey"],
+				"autoadd"	=> $rpc["autoadd"]
+			);
+		}
+
+		foreach ($ldaps as $ldap) {
+			if ($autoAddfilter AND $ldap["autoadd"] == false) continue;
+			$servers[$ldap["name"]] = Array(
+				"server"	=> $ldap["server"],
+				"port"		=> $ldap["port"],
+				"dcs"		=> $ldap["dcs"],
+				"dns"		=> $ldap["dns"],
+				"filter"	=> $ldap["filter"],
+				"listuser"	=> $ldap["listuser"],
+				"listpass"	=> $ldap["listpass"],
+				"cmode"		=> $ldap["cmode"],
+				"autoadd"	=> $ldap["autoadd"]
+			);
+		}
+
+		return $servers;
+
+	}
+
+	/**
 	 * Validate user via local database
 	 */
 	private	function validate_user_local() {
@@ -122,12 +193,11 @@ class authentication {
 		try {
 			$db = new database();
 			$result = $db->table('users')
-			->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url"))
+			->keys("userId")
 			->where("userName","=",$this->userName)
 			->and_where("userPass","=",!$this->loginFromSession ? md5($this->userPass) : $this->userPass)
 			->and_where("enabled","=",1)
-			->and_where("ldap","=",0)
-			->and_where("rpc","=",0)
+			->and_where("authentication","=",'local')
 			->get();
 		}
 		catch (Exception $e){
@@ -146,76 +216,29 @@ class authentication {
 	}
 	
 	/**
-	 * Validate user via external LDAP server IF AND ONLY IF user is also defined in local database 
+	 * Validate user via external LDAP server
 	 */
-	private	function validate_user_ldap_filtered() {
+	private	function validate_user_ldap($server, $port, $dcs, $dns, $filter, $listuser, $listpass, $cmode, $user, $pass) {
 		
-		comodojo_load_resource('database');
 		comodojo_load_resource('ldap');
 		
 		try {
-			$db = new database();
-			$result = $db->table('users')
-			->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url","ldap"))
-			->where("userName","=",$this->userName)
-			->and_where("enabled","=",1)
-			->and_where("rpc","=",0)
-			->get();
+			$ldap = new ldap($server, $port, $dcs, $dns, $filter, $listuser, $listpass, $cmode);
+			$lauth = $ldap->ldapAuth($user, $pass);
 		}
 		catch (Exception $e){
-			throw $e;
+			//IF LDAP is unavailable check local cache (no error throw)
+			comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');
+			return $this->user_from_cache($this->userName, $this->userPass) ? $result["result"][0] : false;
+			//throw $e;
 		}
-		
-		if ($result["resultLength"] == 1 AND @$result["result"][0]['ldap'] == 0) {
-			comodojo_debug('User '.$this->userName.' found in local database and defined local, now checking password locally','INFO','authentication');
-			try {
-				$db->clean();
-				$result = $db->table('users')
-				->keys(Array("userId","userRole","completeName","gravatar","email","birthday","gender","url"))
-				->where("userName","=",$this->userName)
-				->and_where("userPass","=",!$this->loginFromSession ? md5($this->userPass) : $this->userPass)
-				->and_where("enabled","=",1)
-				->and_where("ldap","=",0)
-				->and_where("rpc","=",0)
-				->get();
-			}
-			catch (Exception $e){
-				throw $e;
-			}
-			
-			if ($result["resultLength"] == 1) {
-				comodojo_debug('User '.$this->userName.' authenticated via local database','INFO','authentication');
-				return $result["result"][0];
-			}
-			else {
-				comodojo_debug('Cannot authenticate user '.$this->userName.' via local database','WARNING','authentication');
-				return false;
-			}
-		}
-		else if ($result["resultLength"] == 1 AND @$result["result"][0]['ldap'] == 1) {
-			comodojo_debug('User '.$this->userName.' found in local database, now checking password on ldap','INFO','authentication');
-			try {
-				$ldap = new ldap();
-				$lauth = $ldap->ldapAuth($this->userName, $this->userPass);
-			}
-			catch (Exception $e){
-				//IF LDAP is unavailable check local cache (no error throw)
-				comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');
-				return $this->user_from_cache($this->userName, $this->userPass) ? $result["result"][0] : false;
-				//throw $e;
-			}
-			if ($lauth) {
-				comodojo_debug('User '.$this->userName.' authenticated via ldap filtered','INFO','authentication');
-				$this->user_to_cache($this->userName, $this->userPass);
-				return $result["result"][0];
-			}
-			else {
-				comodojo_debug('Cannot authenticate user '.$this->userName.' via ldap filtered, no match in ldap','WARNING','authentication');
-				return false;
-			}
+		if ($lauth) {
+			comodojo_debug('User '.$this->userName.' authenticated via ldap filtered','INFO','authentication');
+			$this->user_to_cache($this->userName, $this->userPass);
+			return $result["result"][0];
 		}
 		else {
-			comodojo_debug('Cannot authenticate user '.$this->userName.' via ldap filtered, no match in local database','WARNING','authentication');
+			comodojo_debug('Cannot authenticate user '.$this->userName.' via ldap filtered, no match in ldap','WARNING','authentication');
 			return false;
 		}
 
@@ -224,6 +247,8 @@ class authentication {
 	/**
 	 * Validate user via external LDAP server and create user profile (if not yet defined locally)
 	 */
+	
+	/*
 	private	function validate_user_ldap_unfiltered() {
 		
 		comodojo_load_resource('database');
@@ -338,6 +363,7 @@ class authentication {
 		}
 		
 	}
+	*/
 
 	/**
 	 * Validate user using external RPC authenticator

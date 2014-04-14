@@ -88,6 +88,7 @@
 	"1809":"Invalid output format",
 	"1901":"Invalid username or password provided",
 	"1902":"Unsupported authentication model",
+	"1903":"Invalid username",
 	"2001":"Unknown transport",
 	"2002":"Cannot init sender:",
 	"2003":"RPC Conversation error:",

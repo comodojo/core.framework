@@ -149,6 +149,8 @@ $comodojoCustomization = array(
 		"AUTHENTICATION_MODE"			=>	'local',
 		"AUTHENTICATION_CACHE_ENABLED"	=>	0,
 		"AUTHENTICATION_CACHE_TTL"		=>	259200,
+		"AUTHENTICATION_RPCS"			=>	Array(),
+		"AUTHENTICATION_LDAPS"			=>	Array(),
 		"REGISTRATION_MODE"				=>	0,
 		"REGISTRATION_AUTHORIZATION"	=>	0,
 		"REGISTRATION_DEFAULT_ROLE"		=>	1000,
@@ -156,14 +158,14 @@ $comodojoCustomization = array(
 		/**
 		 * LDAP
 		 */
-		"LDAP_SERVER"			=>	'',
-		"LDAP_PORT"				=>	636,
-		"LDAP_DC"				=>	'',
-		"LDAP_OTHER_DN"			=>	'',
-		"LDAP_DEFAULT_FILTER"	=>	'samaccountname=',
-		"LDAP_LISTER_USERNAME"	=>	'',
-		"LDAP_LISTER_PASSWORD"	=>	'',
-		"LDAP_COMPATIBILE_MODE"	=>	1,
+		//"LDAP_SERVER"			=>	'',
+		//"LDAP_PORT"				=>	636,
+		//"LDAP_DC"				=>	'',
+		//"LDAP_OTHER_DN"			=>	'',
+		//"LDAP_DEFAULT_FILTER"	=>	'samaccountname=',
+		//"LDAP_LISTER_USERNAME"	=>	'',
+		//"LDAP_LISTER_PASSWORD"	=>	'',
+		//"LDAP_COMPATIBILE_MODE"	=>	1,
 		/**
 		 * Mail
 		 */
@@ -178,11 +180,11 @@ $comodojoCustomization = array(
 		/**
 		 * External RPC
 		 */
-		"EXTERNAL_RPC_SERVER"		=>	'',
-		"EXTERNAL_RPC_PORT"			=>	80,
-		"EXTERNAL_RPC_MODE"			=>	'plain',
-		"EXTERNAL_RPC_TRANSPORT"	=>	'XML',
-		"EXTERNAL_RPC_KEY"			=>	'',
+		//"EXTERNAL_RPC_SERVER"		=>	'',
+		//"EXTERNAL_RPC_PORT"			=>	80,
+		//"EXTERNAL_RPC_MODE"			=>	'plain',
+		//"EXTERNAL_RPC_TRANSPORT"	=>	'XML',
+		//"EXTERNAL_RPC_KEY"			=>	'',
 		/**
 		 * Local RPC
 		 */

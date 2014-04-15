@@ -1,7 +1,7 @@
 <?php
 
 /**
- * [APP DESCRIPTION]
+ * An app to permit distracted users to recover their password
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -13,10 +13,10 @@
 class pwdrecover extends application {
 	
 	public function init() {
-		$this->add_application_method('recover_by_email', 'recoverByEmail', Array('email'), 'Send a mail to address specified containing how to recover your password.',false);
+		$this->add_application_method('sendEmail', 'recover_by_email', Array('email'), 'Send a mail to address specified containing how to recover your password.',false);
 	}
 
-	public function recoverByEmail($attributes) {
+	public function recover_by_email($attributes) {
 		comodojo_load_resource('users_management');
 		try{
 			$um = new users_management();

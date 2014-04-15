@@ -1,5 +1,5 @@
 /**
- * [APP DESCRIPTION]
+ * An app to permit distracted users to recover registration's email
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -53,7 +53,7 @@ $c.App.load("regrecover",
 			else {
 				$c.Kernel.newCall(myself.recoverCallback,{
 					application: "regrecover",
-					method: "send_new_email",
+					method: "sendNewEmail",
 					preventCache: true,
 					content: myself.recoverform.get('value')
 				});

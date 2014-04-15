@@ -13,13 +13,13 @@
 class controlpanel extends application {
 
 	public function init() {
-		$this->add_application_method('get_main_view', 'getMainView', Array(), 'No description available, sorry',false);
-		$this->add_application_method('get_state', 'getState', Array("group"), 'No description available, sorry',false);
-		$this->add_application_method('set_state', 'setState', Array("group"), 'No description available, sorry',false);
-		$this->add_application_method('set_value', 'setValue', Array("option","value"), 'No description available, sorry',false);
+		$this->add_application_method('getMainView', 'get_main_view', Array(), 'Provide settings gouping for the control panel',false);
+		$this->add_application_method('getState', 'get_state', Array("group"), 'Get state (group) values',false);
+		$this->add_application_method('setState', 'set_state', Array("group"), 'Set state (group) values',false);
+		$this->add_application_method('setValue', 'set_value', Array("option","value"), 'Set single option value',false);
 	}
 
-	public function getMainView($attributes) {
+	public function get_main_view($attributes) {
 
 		try{
 			list($panels, $options) = $this->get_states();
@@ -43,7 +43,7 @@ class controlpanel extends application {
 
 	}
 
-	public function getState($attributes) {
+	public function get_state($attributes) {
 
 		comodojo_load_resource('database');
 
@@ -85,7 +85,7 @@ class controlpanel extends application {
 		return ($toReturn);
 	}
 
-	public function setState($attributes) {
+	public function set_state($attributes) {
 		comodojo_load_resource('database');
 		comodojo_load_resource('cache');
 		$this->cache = new cache();
@@ -109,7 +109,7 @@ class controlpanel extends application {
 					//escape for the bootstrap field
 					if ($include == "BOOTSTRAP") $attributes[$include] = stripslashes($attributes[$include]);
 		      	    //register value
-					$this->setValue(Array("option"=>$include, "value"=>$attributes[$include]));
+					$this->set_value(Array("option"=>$include, "value"=>$attributes[$include]));
 				}
 			}
 
@@ -120,7 +120,7 @@ class controlpanel extends application {
 		return true;
 	}
 
-	public function setValue($attributes) {
+	public function set_value($attributes) {
 		comodojo_load_resource('database');
 		comodojo_load_resource('events');
 		$ev = new events();

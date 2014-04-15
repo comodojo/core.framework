@@ -16,6 +16,7 @@ $d.require("dojo.store.Memory");
 $d.require("dojo.parser");
 $d.require("dijit.form.TextBox");
 $d.require("dijit.form.NumberTextBox");
+$d.require("dijit.form.Select");
 $d.require("comodojo.Form");
 $d.require("comodojo.Layout");
 $d.require("gridx.Grid");
@@ -167,10 +168,10 @@ $c.App.load("controlpanel",
 			
 			switch(this.state) {
 				case false:
-					callOptions = {application: "controlpanel", method:"get_main_view", content: {}};
+					callOptions = {application: "controlpanel", method:"getMainView", content: {}};
 				break;
 				default:
-					callOptions = {application: "controlpanel", method:"get_state", content: {group:this.state}};
+					callOptions = {application: "controlpanel", method:"getState", content: {group:this.state}};
 				break;
 			}
 			
@@ -204,6 +205,10 @@ $c.App.load("controlpanel",
 					break;
 					case 'ldap':
 						myself._buildLdap(result.includes);
+						myself._buttonsGoesToSave();
+					break;
+					case 'rpc':
+						myself._buildRpc(result.includes);
 						myself._buttonsGoesToSave();
 					break;
 					default:
@@ -296,11 +301,11 @@ $c.App.load("controlpanel",
 					
 					components[i].onChange = function() {
 						myself._themeImage.style.backgroundImage = "url('comodojo/themes/" + myself.temp[this.value].label + "/theme.jpg')";
-						myself._themeName.innerHTML = "<strong>"+myself.getLocalizedMessage('0153')+":</strong> "+ myself.temp[this.value].label;
-						myself._themeCreatedBy.innerHTML = "<strong>"+myself.getLocalizedMessage('0154')+":</strong> "+ myself.temp[this.value].createdBy;
-						myself._themeVersion.innerHTML = "<strong>"+myself.getLocalizedMessage('0155')+":</strong> "+ myself.temp[this.value].version;
-						myself._themeFramework.innerHTML = "<strong>"+myself.getLocalizedMessage('0156')+":</strong> "+ myself.temp[this.value].framework;
-						myself._themeComment.innerHTML = "<strong>"+myself.getLocalizedMessage('0157')+":</strong> "+ myself.temp[this.value].comment;
+						myself._themeName.innerHTML = "<strong>"+myself.getLocalizedMessage('the_3')+":</strong> "+ myself.temp[this.value].label;
+						myself._themeCreatedBy.innerHTML = "<strong>"+myself.getLocalizedMessage('the_4')+":</strong> "+ myself.temp[this.value].createdBy;
+						myself._themeVersion.innerHTML = "<strong>"+myself.getLocalizedMessage('the_5')+":</strong> "+ myself.temp[this.value].version;
+						myself._themeFramework.innerHTML = "<strong>"+myself.getLocalizedMessage('the_6')+":</strong> "+ myself.temp[this.value].framework;
+						myself._themeComment.innerHTML = "<strong>"+myself.getLocalizedMessage('the_7')+":</strong> "+ myself.temp[this.value].comment;
 					};
 					
 				}
@@ -309,11 +314,11 @@ $c.App.load("controlpanel",
 				}
 			}
 			this._themeImage.style.backgroundImage = "url('comodojo/themes/" + this.temp[currentTheme].label + "/theme.jpg')";
-			this._themeName.innerHTML = "<strong>"+this.getLocalizedMessage('0153')+":</strong> "+ this.temp[currentTheme].label;
-			this._themeCreatedBy.innerHTML = "<strong>"+this.getLocalizedMessage('0154')+":</strong> "+ this.temp[currentTheme].createdBy;
-			this._themeVersion.innerHTML = "<strong>"+this.getLocalizedMessage('0155')+":</strong> "+ this.temp[currentTheme].version;
-			this._themeFramework.innerHTML = "<strong>"+this.getLocalizedMessage('0156')+":</strong> "+ this.temp[currentTheme].framework;
-			this._themeComment.innerHTML = "<strong>"+this.getLocalizedMessage('0157')+":</strong> "+ this.temp[currentTheme].comment;
+			this._themeName.innerHTML = "<strong>"+this.getLocalizedMessage('the_3')+":</strong> "+ this.temp[currentTheme].label;
+			this._themeCreatedBy.innerHTML = "<strong>"+this.getLocalizedMessage('the_4')+":</strong> "+ this.temp[currentTheme].createdBy;
+			this._themeVersion.innerHTML = "<strong>"+this.getLocalizedMessage('the_5')+":</strong> "+ this.temp[currentTheme].version;
+			this._themeFramework.innerHTML = "<strong>"+this.getLocalizedMessage('the_6')+":</strong> "+ this.temp[currentTheme].framework;
+			this._themeComment.innerHTML = "<strong>"+this.getLocalizedMessage('the_7')+":</strong> "+ this.temp[currentTheme].comment;
 			
 			this.form = new $c.Form({
 				modules: ['Select'],
@@ -437,52 +442,66 @@ $c.App.load("controlpanel",
 
 		this._buildLdap = function(components) {
 
+			try {
+				components[0].value = $d.fromJson(components[0].value);
+			}
+			catch(e) {
+				components[0].value = {};
+			}
+
 			dojo.declare('gridx.controlpanel.CustomEditorLdap', [dijit._Widget, dijit._TemplatedMixin, dijit._WidgetsInTemplateMixin], {
 				templateString: [
-					'<table><tr><td style="width: 100px;">',
-						'<label>ID:</label>',
+					'<table><tr><td style="width: 50%;">',
+						//'<label>ID:</label>',
 					'</td><td>',
-						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="id"></div>',
-					'</td></tr><tr><td style="width: 100px;">',	
-						'<label>Name:</label>',
+						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="id" style="display:none;"></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',	
+						'<label>'+this.getLocalizedMessage("lda_9")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="name"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>Server:</label>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_1")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="server"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>Port:</label>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_2")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="port"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>dcs:</label>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_3")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="dcs"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>dns:</label>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_4")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="dns"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>filter:</label>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_5")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="filter"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>listuser:</label>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_6")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listuser"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>listpass:</label>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_7")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listpass"></div>',
-					'</td></tr><tr><td style="width: 100px;">',
-						'<label>cmode:</label>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_8")+'</label>',
 					'</td><td>',
-						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="cmode"></div>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="cmode"><option value="1">ON</option><option value="0">Off</option></div>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_11")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="autoadd"><option value="0">OFF</option><option value="1">On</option></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_10")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="enabled"><option value="0">OFF</option><option value="1">On</option></div>',
 					'</td></tr></table>'
 				].join(''),
 				_setValueAttr: function(value){
-					console.log(value);
 					this.id.set('value', value[0]);
 					this.name.set('value', value[1]);
 					this.server.set('value', value[2]);
@@ -492,7 +511,9 @@ $c.App.load("controlpanel",
 					this.filter.set('value', value[6]);
 					this.listuser.set('value', value[7]);
 					this.listpass.set('value', value[8]);
-					this.cmode.set('value', value[9]);
+					this.cmode.set('value', parseInt(value[9], 10));
+					this.autoadd.set('value', parseInt(value[10], 10));
+					this.enabled.set('value', parseInt(value[11], 10));
 				},
 				_getValueAttr: function(value){
 					return [
@@ -505,7 +526,9 @@ $c.App.load("controlpanel",
 						this.filter.get('value'),
 						this.listuser.get('value'),
 						this.listpass.get('value'),
-						this.cmode.get('value')
+						parseInt(this.cmode.get('value')),
+						parseInt(this.autoadd.get('value')),
+						parseInt(this.enabled.get('value'))
 					];
 				},
 				focus: function(){
@@ -513,45 +536,35 @@ $c.App.load("controlpanel",
 				}
 			});
 
-
 			this.ldapStore = new dojo.store.Memory({
 				idProperty:'id',
-				data: components[0].options
+				data: []
 			});
 
-			//var ldapLayout = [
-			//	{ id: "id", name: "id", field: "id", width: "2%" },
-			//	{ id: "name", name: "name", field: "description", width: "11%" },
-			//	{ id: "server", name: "server", field: "server", width: "25%" },
-			//	{ id: "port", name: "port", field: "port", width: "5%" },
-			//	{ id: "dcs", name: "dcs", field: "dcs", width: "15%" },
-			//	{ id: "dns", name: "dns", field: "dns", width: "10%" },
-			//	{ id: "filter", name: "filter", field: "filter", width: "10%" },
-			//	{ id: "listuser", name: "listuser", field: "listuser", width: "10%" },
-			//	{ id: "listpass", name: "listpass", field: "listpass", width: "10%" },
-			//	{ id: "cmode", name: "cmode", field: "cmode", width: "2%" }
-			//];
-			
+			for (var i = 1; i < 10; i++) {
+				this.ldapStore.put({id: i,name: '',server: '',port: 636,dcs: '',dns: '',filter: '',listuser: '',listpass: '',cmode: "1", autoadd: "0", enabled: "0"});
+			};
+
+			for (var o in components[0].value) {
+				this.ldapStore.put(components[0].value[o]);
+			}
+
 			var ldapLayout = [
 				{ field: "id", name:"ID", width: '20px'},
 				{ field: "id", name: "Ldap Servers", editable: true,
-					//Construct our own cell data using multiple fields
 					formatter: function(rawData){
-						if (!rawData.name || !rawData.server) {
-							return '<span style="color: gray">(Empty)</span>';
+						if (!rawData.name || !rawData.server || !rawData.port) {
+							return '<span style="color: gray">('+myself.getLocalizedMessage('lda_12')+')</span>';
 						}
 						else {
 							return '<span style="color: '+(rawData.enabled ? 'green' : 'red')+'">'+rawData.name+' ('+ rawData.server+':'+rawData.port + ')</span>';
 						}
 					},
-					//Use our own editor
 					editor: 'gridx.controlpanel.CustomEditorLdap',
 					editorArgs: {
 						useGridData: false,
-						//Feed our editor with proper values
 						toEditor: function(storeData, gridData){
 							var values = myself.ldapGrid.model.store.data[storeData-1];
-							console.log(values);
 							return [
 								values.id,
 								values.name,
@@ -563,6 +576,7 @@ $c.App.load("controlpanel",
 								values.listuser,
 								values.listpass,
 								values.cmode,
+								values.autoadd,
 								values.enabled
 							];
 						},
@@ -578,12 +592,12 @@ $c.App.load("controlpanel",
 								listuser: values[7],
 								listpass: values[8],
 								cmode: values[9],
-								enabled: values[10]
+								autoadd: values[10],
+								enabled: values[11]
 							});
 							return values;
 						}
 					},
-					//Define our own "applyEdit" process
 					customApplyEdit: function(cell, value){
 						return cell.row.setRawData({
 							id: value[0],
@@ -596,7 +610,8 @@ $c.App.load("controlpanel",
 							listuser: value[7],
 							listpass: value[8],
 							cmode: value[9],
-							enabled: value[10]
+							autoadd: value[10],
+							enabled: value[11]
 						});
 					}
 				}
@@ -618,6 +633,165 @@ $c.App.load("controlpanel",
 
 			this.container.main.center._layoutChildren();
 			this.ldapGrid.resize();
+		};
+
+		this._buildRpc = function(components) {
+
+			try {
+				components[0].value = $d.fromJson(components[0].value);
+			}
+			catch(e) {
+				components[0].value = {};
+			}
+
+			dojo.declare('gridx.controlpanel.CustomEditorRpc', [dijit._Widget, dijit._TemplatedMixin, dijit._WidgetsInTemplateMixin], {
+				templateString: [
+					'<table><tr><td style="width: 50%;">',
+						//'<label>ID:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="id" style="display:none;"></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',	
+						'<label>'+this.getLocalizedMessage("ext_3")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="name"></div>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_1")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="server"></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_2")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="port"></div>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_4")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="transport"><option value="JSON">json</option><option value="XML">xml</option></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_5")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="sharedKey"></div>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_7")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="autoadd"><option value="0">OFF</option><option value="1">ON</option></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_6")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="enabled"><option value="0">OFF</option><option value="1">ON</option></div>',
+					'</td></tr></table>'
+				].join(''),
+				_setValueAttr: function(value){
+					this.id.set('value', value[0]);
+					this.name.set('value', value[1]);
+					this.server.set('value', value[2]);
+					this.port.set('value', parseInt(value[3], 10));
+					this.transport.set('value', value[4]);
+					this.sharedKey.set('value', value[5]);
+					this.autoadd.set('value', parseInt(value[6], 10));
+					this.enabled.set('value', parseInt(value[7], 10));
+				},
+				_getValueAttr: function(value){
+					return [
+						this.id.get('value'),
+						this.name.get('value'),
+						this.server.get('value'),
+						this.port.get('value'),
+						this.transport.get('value'),
+						this.sharedKey.get('value'),
+						parseInt(this.autoadd.get('value')),
+						parseInt(this.enabled.get('value'))
+					];
+				},
+				focus: function(){
+					this.name.focus();
+				}
+			});
+
+			this.rpcStore = new dojo.store.Memory({
+				idProperty:'id',
+				data: []
+			});
+
+			for (var i = 1; i < 10; i++) {
+				this.rpcStore.put({id: i,name: '',server: '',port: 80,transport: 'JSON',sharedKey: '',autoadd: "0", enabled: "0"});
+			};
+
+			for (var o in components[0].value) {
+				this.rpcStore.put(components[0].value[o]);
+			}
+
+			var rpcLayout = [
+				{ field: "id", name:"ID", width: '20px'},
+				{ field: "id", name: "RPC Servers", editable: true,
+					formatter: function(rawData){
+						if (!rawData.name || !rawData.server || !rawData.port) {
+							return '<span style="color: gray">('+myself.getLocalizedMessage('ext_8')+')</span>';
+						}
+						else {
+							return '<span style="color: '+(rawData.enabled ? 'green' : 'red')+'">'+rawData.name+' ('+ rawData.server+':'+rawData.port + ')</span>';
+						}
+					},
+					editor: 'gridx.controlpanel.CustomEditorRpc',
+					editorArgs: {
+						useGridData: false,
+						toEditor: function(storeData, gridData){
+							var values = myself.rpcGrid.model.store.data[storeData-1];
+							return [
+								values.id,
+								values.name,
+								values.server,
+								parseInt(values.port, 10),
+								values.transport,
+								values.sharedKey,
+								values.autoadd,
+								values.enabled
+							];
+						},
+						fromEditor: function(values){
+							myself.ldapGrid.model.store.put({
+								id: values[0],
+								name: values[1],
+								server: values[2],
+								port: parseInt(values[3], 10),
+								transport: values[4],
+								sharedKey: values[5],
+								autoadd: values[6],
+								enabled: values[7]
+							});
+							return values;
+						}
+					},
+					customApplyEdit: function(cell, value){
+						return cell.row.setRawData({
+							id: value[0],
+							name: value[1],
+							server: value[2],
+							port: parseInt(value[3], 10),
+							transport: value[4],
+							sharedKey: value[5],
+							autoadd: value[6],
+							enabled: value[7]
+						});
+					}
+				}
+			];
+
+			this.rpcGrid = new gridx.Grid({
+				store: this.rpcStore,
+				cacheClass: 'gridx/core/model/cache/Sync',
+				structure: rpcLayout,
+				modules: [
+					"gridx/modules/CellWidget",
+					"gridx/modules/Edit"
+				]
+			});
+
+			myself._loadingStateRelease();
+			this.container.main.center.addChild(this.rpcGrid);
+			this.rpcGrid.startup();
+
+			this.container.main.center._layoutChildren();
+			this.rpcGrid.resize();
 		};
 		
 		this.save = function() {
@@ -659,6 +833,33 @@ $c.App.load("controlpanel",
 					}
 					values = {BOOTSTRAP: $d.toJson(jValues)};
 				break;
+
+				case 'ldap':
+					validData = true;
+					var data = this.ldapGrid.model.store.data;
+					var jValues = [];
+					var i = 0;
+					for (i in data) {
+						if (data[i].name != '' && data[i].server != '' && data[i].port != '') {
+							jValues.push(data[i]);
+						}
+					}
+					var values = {AUTHENTICATION_LDAPS: $d.toJson(jValues)};
+				break;
+
+				case 'rpc':
+					validData = true;
+					var data = this.rpcGrid.model.store.data;
+					var jValues = [];
+					var i = 0;
+					for (i in data) {
+						if (data[i].name != '' && data[i].server != '' && data[i].port != '') {
+							jValues.push(data[i]);
+						}
+					}
+					var values = {AUTHENTICATION_RPCS: $d.toJson(jValues)};
+				break;
+
 				/*
 				case 'require':
 					validData = true;
@@ -677,7 +878,7 @@ $c.App.load("controlpanel",
 				values.group = this.state;
 				$c.Kernel.newCall(myself.saveCallback, {
 					application: "controlpanel",
-					method:"set_state", 
+					method:"setState", 
 					content: values
 				});
 			}

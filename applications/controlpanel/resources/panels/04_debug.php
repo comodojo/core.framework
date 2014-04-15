@@ -18,7 +18,7 @@ $panels = Array(
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("JS_DEBUG","JS_DEBUG_POPUP","JS_DEBUG_DEEP"),
-		"note"		=>	Array("name"=>"debug_note","type"=>"info","content"=>"0134")
+		"note"		=>	Array("name"=>"debug_note","type"=>"info","content"=>"deb_4")
 	)
 );
 

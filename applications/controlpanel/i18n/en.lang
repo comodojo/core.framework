@@ -97,6 +97,10 @@ $lang = Array(
 	'lda_6'	=>	'Username that can list ldap tree (leave blank if every user can do that)',
 	'lda_7'	=>	'Password for user that can list tree',
 	'lda_8'	=>	'Use compatible mode (check this if you experienced problems, i.e. in Active Directory domain)',
+	'lda_9'	=>	'Name',
+	'lda_10'=>	'Enabled',
+	'lda_11'=>	'Create new users on login',
+	'lda_12'=>	'empty',
 	//LOCAL_RPC.PHP
 	'loc_0'	=>	'Local RPC',
 	'loc_1'	=>	'Enable local RPC server',
@@ -116,11 +120,14 @@ $lang = Array(
 	'reg_4'	=>	'Registration requests time to live',
 	//EXTERNAL_RPC.PHP
 	'ext_0'	=>	'External RPC',
-	'ext_1'	=>	'RPC server address',
-	'ext_2'	=>	'RPC server port',
-	'ext_3'	=>	'Server working mode',
+	'ext_1'	=>	'Server',
+	'ext_2'	=>	'Port',
+	'ext_3'	=>	'Name',
 	'ext_4'	=>	'Transport',
-	'ext_5'	=>	'SharedKey',
+	'ext_5'	=>	'SharedKey',,
+	'ext_6'=>	'Enabled',
+	'ext_7'=>	'Create new users on login',
+	'ext_8'=>	'empty',
 	//METTA.PHP
 	'met_0'	=>	'Meta tags',
 	//BOOOTSTRAP.PHP

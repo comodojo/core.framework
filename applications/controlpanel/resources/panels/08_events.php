@@ -18,7 +18,7 @@ $panels = Array(
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
 		"include"	=>	Array("EVENTS_ENABLED"),
-		"note"		=>	Array("name"=>"debug_note","type"=>"info","content"=>"0172")
+		"note"		=>	Array("name"=>"debug_note","type"=>"info","content"=>"eve_2")
 	)
 );
 

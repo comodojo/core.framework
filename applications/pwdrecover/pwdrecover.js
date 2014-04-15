@@ -1,5 +1,5 @@
 /**
- * [APP DESCRIPTION]
+ * An app to permit distracted users to recover their password
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -58,7 +58,7 @@ $c.App.load("pwdrecover",
 				myself.form.fields.go.set('disabled',true);
 				$c.Kernel.newCall(myself.recoverCallback,{
 					application: "pwdrecover",
-					method: "recover_by_email",
+					method: "sendEmail",
 					preventCache: true,
 					content: {
 						email: values.email

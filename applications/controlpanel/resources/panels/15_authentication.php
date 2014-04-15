@@ -10,15 +10,6 @@
  * @license		GPL Version 3
  */
 
-function get_authentication_mode() {
-	return Array(
-		Array("label"=>"Local", "id"=>'local'),
-		Array("label"=>"LDAP filtered", "id"=>'ldapfiltered'),
-		Array("label"=>"LDAP unfiltered + SharedKey", "id"=>'ldapunfiltered'),
-		Array("label"=>"External RPC", "id"=>'rpc')
-	);
-}
-
 $panels = Array(
 	"authentication" => Array(
 		"builder"	=>	"form",
@@ -26,18 +17,11 @@ $panels = Array(
 		"label"		=>	"aut_0",
 		"table"		=>	"options",
 		"where"		=>	Array("siteId","=",COMODOJO_UNIQUE_IDENTIFIER),
-		"include"	=>	Array("AUTHENTICATION_MODE","AUTHENTICATION_CACHE_ENABLED","AUTHENTICATION_CACHE_TTL")
+		"include"	=>	Array("AUTHENTICATION_CACHE_ENABLED","AUTHENTICATION_CACHE_TTL")
 	)
 );
 
 $options = Array(
-	"AUTHENTICATION_MODE"			=>	Array(
-		"type"		=>	"Select",
-		"label"		=>	"aut_1",
-		"required"	=>	true,
-		"onclick"	=>	false,
-		"options"	=>	get_authentication_mode()
-	),
 	"AUTHENTICATION_CACHE_ENABLED"	=>	Array(
 		"type"		=>	"OnOffSelect",
 		"label"		=>	"aut_2",

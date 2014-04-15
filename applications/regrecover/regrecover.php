@@ -1,7 +1,7 @@
 <?php
 
 /**
- * [APP DESCRIPTION]
+ * An app to permit distracted users to recover registration's email
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -13,10 +13,10 @@
 class regrecover extends application {
 	
 	public function init() {
-		$this->add_application_method('send_new_email', 'sendNewEmail', Array('email'), 'No description available, sorry.',false);
+		$this->add_application_method('sendNewEmail', 'send_new_email', Array('email'), 'No description available, sorry.',false);
 	}
 	
-	public function sendNewEmail($attributes) {
+	public function send_new_email($attributes) {
 
 		comodojo_load_resource('registration');
 

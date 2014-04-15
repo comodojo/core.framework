@@ -19,7 +19,7 @@ $c.App.load("cacheman",
 		this.init = function(){
 			$c.Kernel.newCall(myself.initCallback,{
 				application: "cacheman",
-				method: "get_stats"
+				method: "getStats"
 			});
 		};
 		
@@ -69,7 +69,7 @@ $c.App.load("cacheman",
 			$c.Loader.start();
 			$c.Kernel.newCall(myself.purgeCallback,{
 				application: "cacheman",
-				method: "purge_cache"
+				method: "purgeCache"
 			});
 		};
 		

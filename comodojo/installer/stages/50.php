@@ -18,7 +18,7 @@ class stage extends stage_base {
 			),
 			array(
 				"type"			=>	"ValidationTextBox",
-				"label"			=>	$this->i18n["0083"],
+				"label"			=>	$this->i18n["0081"],
 				"name"			=>	"SITE_URL",
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SITE_URL'],
 				"required"		=>	true

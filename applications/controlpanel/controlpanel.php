@@ -212,6 +212,7 @@ class controlpanel extends application {
 					unset($options);
 				}
 				else {
+					comodojo_debug('Unable to open panel '.$item,'ERROR','filesystem');
 					continue;
 				}
 

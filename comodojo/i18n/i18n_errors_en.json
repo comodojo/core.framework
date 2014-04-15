@@ -89,6 +89,8 @@
 	"1901":"Invalid username or password provided",
 	"1902":"Unsupported authentication model",
 	"1903":"Invalid username",
+	"1904":"External auth not supported when authenticating from session",
+	"1905":"Invalid external authentication server",
 	"2001":"Unknown transport",
 	"2002":"Cannot init sender:",
 	"2003":"RPC Conversation error:",

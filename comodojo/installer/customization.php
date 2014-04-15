@@ -52,7 +52,7 @@ $comodojoCustomization = array(
 	
 	"minPPHRequired"	=>	"5.3.3",
 
-	"stages"			=>	Array(0,1,10,20,30,40,50,60,70,80,85,90,100),
+	"stages"			=>	Array(0,1,10,20,30,40,50,60,80,85,90,100),
 
 	"defaultBaseValues"	=>	Array(
 		
@@ -146,7 +146,7 @@ $comodojoCustomization = array(
 		/**
 		 * Authentication & registration
 		 */
-		"AUTHENTICATION_MODE"			=>	'local',
+		//"AUTHENTICATION_MODE"			=>	'local',
 		"AUTHENTICATION_CACHE_ENABLED"	=>	0,
 		"AUTHENTICATION_CACHE_TTL"		=>	259200,
 		"AUTHENTICATION_RPCS"			=>	Array(),

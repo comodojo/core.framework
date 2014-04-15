@@ -17,7 +17,7 @@ $create = Array(
 			Array('userPass','STRING',Array('length'=>32,'null'=>false)),
 			Array('userRole','INTEGER',Array('unsigned'=>true,'null'=>false)),
 			Array('enabled','BOOL',Array('default'=>0)),
-			Array('authentication','STRING',Array('default'=>null)),
+			Array('authentication','STRING',Array('length'=>32,'null'=>false)),
 			Array('completeName','STRING',Array('length'=>32,'default'=>null)),
 			Array('gravatar','BOOL',Array('default'=>0)),
 			Array('email','STRING',Array('length'=>64,'null'=>false)),
@@ -172,7 +172,7 @@ $fill = Array(
 	Array('roles',Array(0, 100, "PowerUser")),
 	Array('roles',Array(0, 1000, "User")),
 	Array('users',Array(0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_USER'], MD5($_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_PASSWORD']),
-		1, 1, 0, 0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_USER'], 0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_MAIL'],
+		1, 1, 'local', $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_USER'], 0, $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['ADMIN_MAIL'],
 		$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SITE_DATE'], "M", $_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['SITE_URL'],
 		random(),random())),
 	

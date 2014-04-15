@@ -12,6 +12,10 @@ $c.App.loadCss('controlpanel');
 
 $d.require("dojo.on");
 $d.require("dojo.mouse");
+$d.require("dojo.store.Memory");
+$d.require("dojo.parser");
+$d.require("dijit.form.TextBox");
+$d.require("dijit.form.NumberTextBox");
 $d.require("comodojo.Form");
 $d.require("comodojo.Layout");
 $d.require("gridx.Grid");
@@ -20,6 +24,8 @@ $d.require("gridx.modules.RowHeader");
 $d.require("gridx.modules.Tree");
 $d.require("gridx.modules.select.Row");
 $d.require("gridx.modules.IndirectSelect");
+$d.require("gridx.modules.CellWidget");
+$d.require("gridx.modules.Edit");
 
 $c.App.load("controlpanel",
 
@@ -194,6 +200,10 @@ $c.App.load("controlpanel",
 					break;
 					case 'bootstrap':
 						myself._buildBootstrap(result.includes);
+						myself._buttonsGoesToSave();
+					break;
+					case 'ldap':
+						myself._buildLdap(result.includes);
 						myself._buttonsGoesToSave();
 					break;
 					default:
@@ -423,6 +433,191 @@ $c.App.load("controlpanel",
 
 			this.container.main.center._layoutChildren();
 			this.bootstrapGrid.resize();
+		};
+
+		this._buildLdap = function(components) {
+
+			dojo.declare('gridx.controlpanel.CustomEditorLdap', [dijit._Widget, dijit._TemplatedMixin, dijit._WidgetsInTemplateMixin], {
+				templateString: [
+					'<table><tr><td style="width: 100px;">',
+						'<label>ID:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="id"></div>',
+					'</td></tr><tr><td style="width: 100px;">',	
+						'<label>Name:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="name"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>Server:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="server"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>Port:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.NumberTextBox" data-dojo-attach-point="port"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>dcs:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="dcs"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>dns:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="dns"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>filter:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="filter"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>listuser:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listuser"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>listpass:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listpass"></div>',
+					'</td></tr><tr><td style="width: 100px;">',
+						'<label>cmode:</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="cmode"></div>',
+					'</td></tr></table>'
+				].join(''),
+				_setValueAttr: function(value){
+					console.log(value);
+					this.id.set('value', value[0]);
+					this.name.set('value', value[1]);
+					this.server.set('value', value[2]);
+					this.port.set('value', parseInt(value[3], 10));
+					this.dcs.set('value', value[4]);
+					this.dns.set('value', value[5]);
+					this.filter.set('value', value[6]);
+					this.listuser.set('value', value[7]);
+					this.listpass.set('value', value[8]);
+					this.cmode.set('value', value[9]);
+				},
+				_getValueAttr: function(value){
+					return [
+						this.id.get('value'),
+						this.name.get('value'),
+						this.server.get('value'),
+						this.port.get('value'),
+						this.dcs.get('value'),
+						this.dns.get('value'),
+						this.filter.get('value'),
+						this.listuser.get('value'),
+						this.listpass.get('value'),
+						this.cmode.get('value')
+					];
+				},
+				focus: function(){
+					this.name.focus();
+				}
+			});
+
+
+			this.ldapStore = new dojo.store.Memory({
+				idProperty:'id',
+				data: components[0].options
+			});
+
+			//var ldapLayout = [
+			//	{ id: "id", name: "id", field: "id", width: "2%" },
+			//	{ id: "name", name: "name", field: "description", width: "11%" },
+			//	{ id: "server", name: "server", field: "server", width: "25%" },
+			//	{ id: "port", name: "port", field: "port", width: "5%" },
+			//	{ id: "dcs", name: "dcs", field: "dcs", width: "15%" },
+			//	{ id: "dns", name: "dns", field: "dns", width: "10%" },
+			//	{ id: "filter", name: "filter", field: "filter", width: "10%" },
+			//	{ id: "listuser", name: "listuser", field: "listuser", width: "10%" },
+			//	{ id: "listpass", name: "listpass", field: "listpass", width: "10%" },
+			//	{ id: "cmode", name: "cmode", field: "cmode", width: "2%" }
+			//];
+			
+			var ldapLayout = [
+				{ field: "id", name:"ID", width: '20px'},
+				{ field: "id", name: "Ldap Servers", editable: true,
+					//Construct our own cell data using multiple fields
+					formatter: function(rawData){
+						if (!rawData.name || !rawData.server) {
+							return '<span style="color: gray">(Empty)</span>';
+						}
+						else {
+							return '<span style="color: '+(rawData.enabled ? 'green' : 'red')+'">'+rawData.name+' ('+ rawData.server+':'+rawData.port + ')</span>';
+						}
+					},
+					//Use our own editor
+					editor: 'gridx.controlpanel.CustomEditorLdap',
+					editorArgs: {
+						useGridData: false,
+						//Feed our editor with proper values
+						toEditor: function(storeData, gridData){
+							var values = myself.ldapGrid.model.store.data[storeData-1];
+							console.log(values);
+							return [
+								values.id,
+								values.name,
+								values.server,
+								parseInt(values.port, 10),
+								values.dcs,
+								values.dns,
+								values.filter,
+								values.listuser,
+								values.listpass,
+								values.cmode,
+								values.enabled
+							];
+						},
+						fromEditor: function(values){
+							myself.ldapGrid.model.store.put({
+								id: values[0],
+								name: values[1],
+								server: values[2],
+								port: parseInt(values[3], 10),
+								dcs: values[4],
+								dns: values[5],
+								filter: values[6],
+								listuser: values[7],
+								listpass: values[8],
+								cmode: values[9],
+								enabled: values[10]
+							});
+							return values;
+						}
+					},
+					//Define our own "applyEdit" process
+					customApplyEdit: function(cell, value){
+						return cell.row.setRawData({
+							id: value[0],
+							name: value[1],
+							server: value[2],
+							port: parseInt(value[3], 10),
+							dcs: value[4],
+							dns: value[5],
+							filter: value[6],
+							listuser: value[7],
+							listpass: value[8],
+							cmode: value[9],
+							enabled: value[10]
+						});
+					}
+				}
+			];
+
+			this.ldapGrid = new gridx.Grid({
+				store: this.ldapStore,
+				cacheClass: 'gridx/core/model/cache/Sync',
+				structure: ldapLayout,
+				modules: [
+					"gridx/modules/CellWidget",
+					"gridx/modules/Edit"
+				]
+			});
+
+			myself._loadingStateRelease();
+			this.container.main.center.addChild(this.ldapGrid);
+			this.ldapGrid.startup();
+
+			this.container.main.center._layoutChildren();
+			this.ldapGrid.resize();
 		};
 		
 		this.save = function() {

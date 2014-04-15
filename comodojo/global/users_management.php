@@ -46,14 +46,21 @@ class users_management {
 	 *
 	 * @default false;
 	 */
-	 public $do_not_encrypt_userPass = false;
+	//public $do_not_encrypt_userPass = false;
 
-	 /**
-	 * If true, user will added skipping promised username control.
-	 *
-	 * @default false;
-	 */
-	 public $add_user_from_registration = false;
+	/**
+	* If true, user will be added skipping promised username control.
+	*
+	* @default false;
+	*/
+	public $add_user_from_registration = false;
+
+	/**
+	* If true, user will be added skipping admin check.
+	*
+	* @default false;
+	*/
+	public $add_user_from_external = false;
 /********************** PUBLIC VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -88,20 +95,20 @@ class users_management {
 		
 		try{
 			$presence = $this->findRegisteredUser($userName, false, false);
-			if ($presence == 'LOCAL') {
+			if ($presence == 'local') {
 				comodojo_debug('Changing local password from user: '.$userName,'INFO','users_management');
 				$success = $this->change_user_password_local($userName, $oldPassword, $newPassword);
 			}
-			else if ($presence == 'RPC') {
-				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
-				$success = $this->change_user_password_external_rpc($userName, $oldPassword, $newPassword);
-			}
-			else if ($presence == 'LDAP') {
-				comodojo_debug('Unsupported action','ERROR','users_management');
-				throw new Exception("Unsupported action", 2614);
-			}
+			//else if ($presence == 'RPC') {
+			//	comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
+			//	$success = $this->change_user_password_external_rpc($userName, $oldPassword, $newPassword);
+			//}
+			//else if ($presence == 'LDAP') {
+			//	comodojo_debug('Unsupported action','ERROR','users_management');
+			//	throw new Exception("Unsupported action", 2614);
+			//}
 			else {
-				comodojo_debug('Unknown user','ERROR','users_management');
+				comodojo_debug('Unsupported action','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -145,20 +152,20 @@ class users_management {
 		
 		try{
 			$presence = $this->findRegisteredUser($userName, false, false);
-			if ($presence == 'LOCAL') {
+			if ($presence == 'local') {
 				comodojo_debug('Changing local password from user: '.$userName,'INFO','users_management');
 				$success = $this->reset_user_password_local($userName);
 			}
-			else if ($presence == 'RPC') {
-				comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
-				$success = $this->reset_user_password_external_rpc($userName);
-			}
-			else if ($presence == 'LDAP') {
-				comodojo_debug('Unsupported action','ERROR','users_management');
-				throw new Exception("Unsupported action", 2614);
-			}
+			//else if ($presence == 'RPC') {
+			//	comodojo_debug('Changing remote (RPC) password from user: '.$userName,'INFO','users_management');
+			//	$success = $this->reset_user_password_external_rpc($userName);
+			//}
+			//else if ($presence == 'LDAP') {
+			//	comodojo_debug('Unsupported action','ERROR','users_management');
+			//	throw new Exception("Unsupported action", 2614);
+			//}
 			else {
-				comodojo_debug('Unknown user','ERROR','users_management');
+				comodojo_debug('Unsupported action','ERROR','users_management');
 				throw new Exception("Unknown user", 2603);
 			}
 		}
@@ -303,7 +310,7 @@ class users_management {
 		try {
 			$db = new database();
 			$result = $db->table('users')
-			->keys(Array("userRole","enabled","ldap","rpc","completeName","gravatar","email","birthday","gender","url"))
+			->keys(Array("userRole","enabled","authentication","completeName","gravatar","email","birthday","gender","url"))
 			->where("userName","=",$userName)
 			->get();
 
@@ -313,8 +320,7 @@ class users_management {
 					"completeName"=>$result['result'][0]['completeName'],
 					"userRole"	=>	$result['result'][0]['userRole'],
 					"enabled"	=>	$result['result'][0]['enabled'],
-					"ldap"		=>	$result['result'][0]['ldap'],
-					"rpc"		=>	$result['result'][0]['rpc'],
+					"authentication"		=>	$result['result'][0]['authentication'],
 					"gravatar"	=>	$result['result'][0]['gravatar'],
 					"email"		=>	$result['result'][0]['email'],
 					"birthday"	=>	$result['result'][0]['birthday'],
@@ -342,7 +348,7 @@ class users_management {
 			throw new Exception("Invalid user parameters", 2612);
 		}
 
-		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1 AND $this->add_user_from_external == false) {
 			comodojo_debug('Only administrators can manage users','ERROR','users_management');
 			throw new Exception("Only administrators can manage users", 2605);
 		}
@@ -362,12 +368,12 @@ class users_management {
 
 		$_params = Array(
 			'userName'	=>	$userName,
-			'userPass'	=>	!$this->do_not_encrypt_userPass ? md5($userPass) : $userPass,
+			//'userPass'	=>	!$this->do_not_encrypt_userPass ? md5($userPass) : $userPass,
+			'userPass'	=>	md5($userPass),
 			'email'		=>	$email,
 			'userRole'	=>	!isset($params['userRole']) ? COMODOJO_REGISTRATION_DEFAULT_ROLE : (is_numeric($params['userRole']) ? $params['userRole'] : COMODOJO_REGISTRATION_DEFAULT_ROLE),
 			'enabled'	=>	!isset($params['enabled']) ? false : (!$params['enabled'] ? false : true),
-			'ldap'		=>	!isset($params['ldap']) ? false : (!$params['ldap'] ? false : true),
-			'rpc'		=>	!isset($params['rpc']) ? false : (!$params['rpc'] ? false : true),
+			'authentication'=>	!isset($params['authentication']) ? 'local' : strtolower($params['authentication']),
 			'completeName'	=> !isset($params['completeName']) ? null : (is_scalar($params['completeName']) ? $params['completeName'] : null),
 			'gravatar'	=>	!isset($params['gravatar']) ? false : (!$params['gravatar'] ? false : true),
 			'birthday'	=>	!isset($params['birthday']) ? null : (is_scalar($params['birthday']) ? $params['birthday'] : null),
@@ -381,7 +387,7 @@ class users_management {
 			$db = new database();
 			$result = $db->return_id()
 			->table('users')
-			->keys(Array("userName","userPass","email","userRole","enabled","ldap","rpc","completeName","gravatar","birthday","gender","url","private_identifier","public_identifier"))
+			->keys(Array("userName","userPass","email","userRole","enabled","authentication","completeName","gravatar","birthday","gender","url","private_identifier","public_identifier"))
 			->values($_params)
 			->store();
 			$fs = new filesystem();
@@ -409,7 +415,7 @@ class users_management {
 
 		comodojo_load_resource('database');
 
-		if (!$this->findRegisteredUser($userName, true, false)) {
+		if (is_null($this->findRegisteredUser($userName, true, false))) {
 			comodojo_debug('Unknown user','ERROR','users_management');
 			throw new Exception("Unknown user", 2603);
 		}
@@ -417,7 +423,7 @@ class users_management {
 		$_keys = Array();
 		$_values = Array();
 
-		$_keys_pool = Array("email","userRole","enabled","ldap","rpc","completeName","gravatar","birthday","gender","url");
+		$_keys_pool = Array("email","userRole","enabled","authentication","completeName","gravatar","birthday","gender","url");
 
 		foreach ($params as $key => $value) {
 			if (in_array($key, $_keys_pool)) {
@@ -493,7 +499,8 @@ class users_management {
 		try {
 			$presence = $this->findRegisteredUser($userName, true, false);
 
-			if ($presence != false) {
+			//if ($presence != false) {
+			if (!is_null($presence)) {
 				comodojo_debug('Deleting user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->delete_user_local($userName, true);
 			}
@@ -530,7 +537,8 @@ class users_management {
 		
 		try {
 			$presence = $this->findRegisteredUser($userName, true, false);
-			if ($presence != false) {
+			//if ($presence != false) {
+			if (!is_null($presence)) {
 				comodojo_debug('Enabling  user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->enable_user_local($userName, true);
 			}
@@ -567,7 +575,8 @@ class users_management {
 		
 		try {
 			$presence = $this->findRegisteredUser($userName, true, false);
-			if ($presence != false) {
+			//if ($presence != false) {
+			if (!is_null($presence)) {
 				comodojo_debug('Disabling user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->enable_user_local($userName, false);
 			}
@@ -816,14 +825,14 @@ class users_management {
 		try {
 			$db = new database();
 			
-			$result = $db->table('users')->keys(Array("ldap","rpc"))->where("userName","=",$userName);
+			$result = $db->table('users')->keys("authentication")->where("userName","=",$userName);
 			if (!$includeDisabled) {
 				$result = $result->and_where("enabled","=",1);
 			}
 			$result = $result->get();
 
 			if ($result['resultLength'] == 1) {
-				$found = $result['result'][0]['ldap'] ? 'LDAP' : ($result['result'][0]['rpc'] ? 'RPC' : 'LOCAL');
+				$found = $result['result'][0]['authentication'];
 			}
 
 			if ($includePromised AND is_null($found)) {
@@ -835,7 +844,7 @@ class users_management {
 				->and_where("expired","!=",1)
 				->get();
 
-				if ($result['resultLength'] == 1) $found = 'LOCAL';
+				if ($result['resultLength'] == 1) $found = 'local';
 
 			} 
 		}
@@ -890,11 +899,7 @@ class users_management {
 		
 		return true;
 	}
-	
-	private function change_user_password_external_rpc() {
 		
-	}
-	
 	private function reset_user_password_local($userName) {
 		
 		comodojo_load_resource('database');
@@ -923,10 +928,6 @@ class users_management {
 		}
 		
 		return $new_password;
-	}
-	
-	private function reset_user_password_external_rpc() {
-		
 	}
 	
 	private function enable_user_local($userName,$enable) {

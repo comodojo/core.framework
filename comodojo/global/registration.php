@@ -32,7 +32,7 @@ class registration {
 	 * @default false;
 	 * @var bool
 	 */
-	 private $restrict_management_to_administrators = false;
+	 private $restrict_management_to_administrators = COMODOJO_RESTRICT_MANAGEMENT;
 
 	 /**
 	  * If true, localized email template will be used.

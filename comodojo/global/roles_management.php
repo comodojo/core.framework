@@ -14,13 +14,13 @@ class roles_management {
 
 /********************** PRIVATE VARS *********************/
 	/**
-	 * Restrict roles management to administrator.
+	 * Restrict roles management to administrator, default associated with COMODOJO_RESTRICT_MANAGEMENT
 	 * 
 	 * If disabled, it will not check user role (=1).
-	 * 
+	 *
 	 * @default true;
 	 */
-	private $restrict_management_to_administrators = true;
+	private $restrict_management_to_administrators = COMODOJO_RESTRICT_MANAGEMENT;
 	
 	/**
 	 * Protected roles; ids in this array will not be editable

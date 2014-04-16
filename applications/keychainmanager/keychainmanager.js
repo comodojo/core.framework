@@ -47,6 +47,9 @@ $c.App.load("keychainmanager",
 			},{
 				label: "OpenWRT device",
 				id: "OPENWRT"
+			},{
+				label: "MetaWeblog",
+				id: "METAWEBLOG"
 			}
 		];
 

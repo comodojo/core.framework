@@ -20,7 +20,7 @@ class services_management {
 	 * 
 	 * @default true;
 	 */
-	private $restrict_management_to_administrators = true;
+	private $restrict_management_to_administrators = COMODOJO_RESTRICT_MANAGEMENT;
 
 	/**
 	 * Reserved service names
@@ -147,6 +147,11 @@ class services_management {
 
 		if (empty($service)) throw new Exception("Cannot find service properties file", 2902);
 
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+			comodojo_debug('Only administrators may manage services','ERROR','services_management');
+			throw new Exception("Only administrators may manage services", 2908);
+		}
+
 		if (is_readable(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties') ) {
 			
 			$properties_file_name = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties';
@@ -190,6 +195,11 @@ class services_management {
 		
 		if (empty($service)) throw new Exception("Cannot find service properties file", 2902);
 
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+			comodojo_debug('Only administrators may manage services','ERROR','services_management');
+			throw new Exception("Only administrators may manage services", 2908);
+		}
+
 		if (is_readable(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties') ) {
 			
 			$properties_file_name = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties';
@@ -229,6 +239,11 @@ class services_management {
 	public function new_service($properties) {
 		
 		if (empty($properties)) throw new Exception("Cannot find service properties file", 2902);
+
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+			comodojo_debug('Only administrators may manage services','ERROR','services_management');
+			throw new Exception("Only administrators may manage services", 2908);
+		}
 
 		if (!isset($properties['name']) OR !isset($properties['type']) OR !isset($properties['supported_http_methods'])) throw new Exception("Invalid properties for a service", 2904);
 
@@ -339,6 +354,11 @@ class services_management {
 
 		if (empty($properties)) throw new Exception("Cannot find service properties file", 2902);
 
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+			comodojo_debug('Only administrators may manage services','ERROR','services_management');
+			throw new Exception("Only administrators may manage services", 2908);
+		}
+
 		if (!isset($properties['name'])) throw new Exception("Invalid properties for a service", 2904);
 
 		try { $current = $this->get_service($properties['name']); } catch (Exception $e) { throw $e; }
@@ -405,6 +425,13 @@ class services_management {
 	 */
 	public function delete_service($service) {
 		
+		if (empty($service)) throw new Exception("Cannot find service properties file", 2902);
+		
+		if ($this->restrict_management_to_administrators AND COMODOJO_USER_ROLE != 1) {
+			comodojo_debug('Only administrators may manage services','ERROR','services_management');
+			throw new Exception("Only administrators may manage services", 2908);
+		}
+
 		if (is_readable(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties')) {
 			
 			$result = @unlink(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_SERVICE_FOLDER.$service.'.properties');

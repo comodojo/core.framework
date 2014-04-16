@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * it.lang
+ * application i18n - 'it' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2010 comodojo.org (info@comodojo.org)
+ */
+
+$lang = Array(
+	'0000'	=>	'Impossibile lanciare l\'applicazione, non sono stati definiti i parametri del servizio di posta.',
+	'0001'	=>	'Da',
+	'0002'	=>	'A',
+	'0003'	=>	'CC',
+	'0004'	=>	'CCN',
+	'0005'	=>	'Priorità',
+	'0006'	=>	'Invia Mail',
+	'0007'	=>	'Bassa',
+	'0008'	=>	'Normale',
+	'0009'	=>	'Alta',
+	'0010'	=>	'Oggetto',
+	'0011'	=>	'Messaggio',
+	'0012'	=>	'La mail dovrebbe essere partita...',
+	'0013'	=>	'Manda la mail in formato',
+	'0014'	=>	'HTML',
+	'0015'	=>	'Testo semplice'
+);
+
+?>

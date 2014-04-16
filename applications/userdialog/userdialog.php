@@ -1,7 +1,7 @@
 <?php
 
 /**
- * [APP DESCRIPTION]
+ * Simple and configurable user selector (and password validation)
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -13,10 +13,10 @@
 class userdialog extends application {
 	
 	public function init() {
-		$this->add_application_method('get_users', 'getUsers', Array(), 'No description yet',false);
+		$this->add_application_method('getUsers', 'get_users', Array(), 'No description yet',false);
 	}
 	
-	public function getUsers($params) {
+	public function get_users($params) {
 		comodojo_load_resource('users_management');
 		$um = new users_management();
 		return $um->get_users(16);

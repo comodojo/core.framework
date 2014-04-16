@@ -1,5 +1,5 @@
 /**
- * [APP DESCRIPTION]
+ * Simple and configurable user selector (and password validation)
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
@@ -65,7 +65,7 @@ $c.App.load("userdialog",
 			if (this.showUserName && this.userNameList) {
 				$c.Kernel.newCall(myself.userListCallback,{
 					application: "userdialog",
-					method: "get_users",
+					method: "getUsers",
 					content: {},
 					preventCache: true
 				});

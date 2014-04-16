@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * en.lang
+ * application i18n - 'en' locale
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2010 comodojo.org (info@comodojo.org)
+ */
+ 
+$lang = Array(
+	'0000'	=>	'Could not launch test application: invalid mail server parameters or server not defined.',
+	'0001'	=>	'From',
+	'0002'	=>	'To',
+	'0003'	=>	'CC',
+	'0004'	=>	'BCC',
+	'0005'	=>	'Priority',
+	'0006'	=>	'Send Mail',
+	'0007'	=>	'Low',
+	'0008'	=>	'Normal',
+	'0009'	=>	'Hight',
+	'0010'	=>	'Subject',
+	'0011'	=>	'Message',
+	'0012'	=>	'Mail should be on the way...',
+	'0013'	=>	'Mail format',
+	'0014'	=>	'HTML',
+	'0015'	=>	'Simple text'
+);
+
+?>

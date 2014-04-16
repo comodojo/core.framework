@@ -195,6 +195,11 @@ define('COMODOJO_STARTUP_CACHE_ENABLED',".$_SESSION[SITE_UNIQUE_IDENTIFIER]['ins
 define('COMODOJO_RPC_PROXY_ENABLED',".$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['RPC_PROXY_ENABLED'].");
 
 /**
+ * Restrict (to administrator only) management of users, roles, options, ... 
+ */
+define('COMODOJO_RESTRICT_MANAGEMENT',".$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['RESTRICT_MANAGEMENT'].");
+
+/**
  * Enable global debug
  * True will produce large amount of data in error_log! 
  */	

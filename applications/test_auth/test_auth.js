@@ -1,114 +1,121 @@
 /**
- * testMailSend.js
+ * Test user authentication on multiple realms
  *
- * Comodojo test environment
- *
- * @package		Comodojo Applications
+ * @package		Comodojo ServerSide Core Packages
  * @author		comodojo.org
- * @copyright	2010 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
  */
 
-$c.loadComponent('form',['ValidationTextBox','Button','Select']);
-$c.loadComponent('layout');
-$d.require("dijit.layout.ContentPane");
+$d.require('comodojo.Form');
+$d.require('comodojo.Layout');
 
-$c.app.load("testAuthentication",
+$c.App.load("test_auth",
 
 	function(pid, applicationSpace, status){
-	
-		//dojo.mixin(this, status);
-	
+
 		var myself = this;
 		
+		this.auth_template = '<h3>Comodojo authentication via realm {0}</h3><table class="ym-table bordertable"><thead><tr><th>'+'Param'+'</th><th>'+'Value'+'</th></tr></thead><tbody>{1}</tbody></table>';
+
 		this.init = function(){
-		
-			this.container = new $c.layout({
-				attachNode: applicationSpace.containerNode,
-				template: "top,center",
-				_pid: pid,
-				topStyle: "height: 150px; background-color: #F0F0F0",
-				centerStyle: ""
-			});
-			
-			this.container.show();
-			
-			this.container.center.preventCache = true;
-			
-			this.buildForm();
-		};
-		
-		this.buildForm = function() {
-            
-            var formHi = [{
-                "name": "userName",
-                "value": "",
-                "type": "ValidationTextBox",
-                "label": "userName",
-                "required": true,
-                "onClick": false
-            }, {
-                "name": "userPass",
-                "value": "",
-                "type": "ValidationTextBox",
-                "label": "userPass",
-                "required": true,
-                "onClick": false
-            }, {
-                "name": "go",
-                "type": "Button",
-                "label": 'go',
-                "onClick": function() {
-					myself.authenticate();
-				}
-            }];
-			
-			this._form = new $c.form({
-				hierarchy: formHi,
-				attachNode: this.container.top.containerNode
-			});
-			
-			this._form.build();
-		
-		};
-		
-		this.authenticate = function() {
-			if (!this._form._form.validate()) {
-				$c.dialog.info('please fill all fields first...');
-			}
-			else {
-				var val = this._form._form.attr('value');
-				this.container.center.attr('href','comodojo/applications/testAuthentication/testAuthentication.php?userName='+val.userName+'&userPass='+val.userPass);
-			}
-			/*
-			if (!this._form._form.validate()) {
-				$c.dialog.info('please fill all fields first...');
-			}
-			else {
-				$c.kernel.newCall(myself.authenticateCallback, {
-					server: "testAuthentication",
-					selector: "send_pkt",
-					content: this._form._form.attr('value')
-				});
-			}
-			*/
-		};
-		/*
-		this.authenticateCallback = function(success, result) {
-			myself.container.center.containerNode.innerHTML = "";
-			myself.container.center.containerNode.appendChild($d.create('div',{innerHTML: success ? "Success!" : "Failure!",style: "border: 1px solid red;"}));
-			//myself.container.center.containerNode.appendChild($d.create('div',{innerHTML: result}));
-			for (var o in result) {
-				if (o == "debug") {
-					for (var i in result[o]) {
-						myself.container.center.containerNode.appendChild($d.create('div',{innerHTML: result[o][i]}));
+
+			this.container = new $c.Layout({
+		 		attachNode: applicationSpace,
+		 		splitter: false,
+		 		id: pid,
+		 		hierarchy: [{
+		 			type: 'Content',
+		 			name: 'top',
+		 			region: 'top',
+		 			params: {
+		 				style: "height: 200px;"
+		 			}
+		 		},
+		 		{
+		 			type: 'Content',
+		 			name: 'center',
+		 			region: 'center',
+		 			params: {
+		 				style:"overflow: auto;"
+		 			}
+		 		}]
+			}).build();
+
+			this.form = new $c.Form({
+				modules: ['Button','ValidationTextBox','PasswordTextBox'],
+				autoFocus: true,
+				hierarchy: [{
+					name: "userName",
+					value: "",
+					type: "ValidationTextBox",
+					label: "User Name",
+					required: true
+				},{
+					name: "userPass",
+					value: "",
+					type: "PasswordTextBox",
+					label: "User password",
+					required: true
+				},{
+					name: "realm",
+					value: "local",
+					type: "ValidationTextBox",
+					label: "Auth realm",
+					required: false
+				},{
+					name: "go",
+					type: "Button",
+					label: "Test auth",
+					onClick: function() {
+						myself.auth();
 					}
+				}],
+				attachNode: this.container.main.top.containerNode
+			}).build();
+
+		};
+
+		this.auth = function() {
+			if (!myself.form.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				return;
+			}
+			var values = myself.form.get('value');
+			$c.Kernel.newCall(myself.authCallback,{
+				application: "test_auth",
+				method: "login",
+				preventCache: true,
+				content: values
+			});
+		};
+
+		this.authCallback = function (success, result) {
+
+			if (success) {
+
+				var d = '';
+
+				if (!result.data) {
+					d = '<tr><td colspan=2 style="color:red;">Invalid credentials</td></tr>';
 				}
 				else {
-					myself.container.center.containerNode.appendChild($d.create('div',{innerHTML: o + ":" + result[o]}));
+					for (var i in result.data) {
+						d += "<tr><td>"+i+"</td><td>"+result.data[i]+"</td></tr>";
+					}
 				}
+				
+				myself.container.main.center.set('content',$d.replace(myself.auth_template,[result.via,d]));
+
+			}
+			else {
+
+				$c.Error.local(myself.container.main.center.containerNode, result.code, result.name);
+
 			}
 		};
-		*/
+
 	}
-	
+
 );

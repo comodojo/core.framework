@@ -36,56 +36,56 @@ $c.App.load("helloworld",
 		/**
 		 * myself is used to come back in app scope from async calls (like kernel call)
 		 */
-		var myself = this;
-		
+		 var myself = this;
+		 
 		/**
 		 * init is the method thad $c.app will invoke as first (consider it like a constructor)
 		 */
-		this.init = function(){
-			
-			this.container = new $c.Layout({
-				attachNode: applicationSpace,
-				splitter: false,
-				id: pid,
-				hierarchy: [{
-					type: 'Content',
-					name: 'top',
-					region: 'top',
-					params: {
-						style: "height: 100px;"
-					}
-				},
-				{
-					type: 'Content',
-					name: 'center',
-					region: 'center',
-					params: {
-						style:"overflow: auto;"
-					}
-				}]
-			}).build();
-			
-			this.form = new $c.Form({
-				modules: ['Button','TextBox'],
-				autoFocus: true,
-				hierarchy: [{
-	                name: "to",
-	                value: "",
-	                type: "TextBox",
-	                label: "Say hello to:"
-	            },{
-	                name: "go",
-	                type: "Button",
-	                label: "Say",
-	                onClick: function() {
-	                	var val = myself.form.get('value').to
-	                	myself.say(val.length == 0 ? false : val);
-	                }
-	            }],
-				attachNode: this.container.main.top.containerNode
-			}).build();
-			
-		};
+		 this.init = function(){
+		 	
+		 	this.container = new $c.Layout({
+		 		attachNode: applicationSpace,
+		 		splitter: false,
+		 		id: pid,
+		 		hierarchy: [{
+		 			type: 'Content',
+		 			name: 'top',
+		 			region: 'top',
+		 			params: {
+		 				style: "height: 100px;"
+		 			}
+		 		},
+		 		{
+		 			type: 'Content',
+		 			name: 'center',
+		 			region: 'center',
+		 			params: {
+		 				style:"overflow: auto;"
+		 			}
+		 		}]
+		 	}).build();
+		 	
+		 	this.form = new $c.Form({
+		 		modules: ['Button','TextBox'],
+		 		autoFocus: true,
+		 		hierarchy: [{
+		 			name: "to",
+		 			value: "",
+		 			type: "TextBox",
+		 			label: "Say hello to:"
+		 		},{
+		 			name: "go",
+		 			type: "Button",
+		 			label: "Say",
+		 			onClick: function() {
+		 				var val = myself.form.get('value').to
+		 				myself.say(val.length == 0 ? false : val);
+		 			}
+		 		}],
+		 		attachNode: this.container.main.top.containerNode
+		 	}).build();
+		 	
+		 };
 		
 		this.say = function(to) {
 			content = !to ? {} : {to: to};

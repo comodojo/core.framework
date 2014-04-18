@@ -1,45 +1,37 @@
 <?php
 
 /**
- * chpasswd.js
+ * Test user authentication on multiple realms
  *
- * Update or reset passwords in Comodojo mode
- *
- * @package		Comodojo Applications
+ * @package		Comodojo ServerSide Core Packages
  * @author		comodojo.org
- * @copyright	2010 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
  */
 
-@session_start();
-
-include "../../configuration/siteIdentifier.php";
-require("../../configuration/staticConfiguration.php");
-require("../../global/commonFunctions.php");
-
-
-if (!isset($_SESSION[SITE_UNIQUE_IDENTIFIER])) {
-	die("fatal error");
-}
-
-if (!isset($_GET['userName']) OR !isset($_GET['userPass'])) {
-	die('<p style="color:red;">No username/password defined...</p>');
-}
-
-require($_SESSION[SITE_UNIQUE_IDENTIFIER]["sitePath"] . "/comodojo/global/authentication.php");
+class test_auth extends application {
 	
-$au = new authentication();
+	public function init() {
+		$this->add_application_method('login', 'Login', Array('userName','userPass'), 'Test user credentials on multiple realm',false);
+	}
+	
+	public function Login($params) {
 
-$au->userName = $_GET['userName'];
-$au->userPass = $_GET['userPass'];
-$au->isDebug = true;
+		comodojo_load_resource('authentication');
 
-$re = $au->testLogin();
+		try{
+			$a = new authentication();
+			$to_return = $a->testlogin($params['userName'], $params['userPass'], isset($params['realm']) ? $params['realm'] : null);
+		}
+		catch (Exception $e){
+			throw $e;
+		}
 
-if ($re['success']) {
-	echo "<p>returned user data:</p>";
-	print_r($re['result']);
+		return $to_return;
+
+	}
+	
 }
-
-die();
 
 ?>

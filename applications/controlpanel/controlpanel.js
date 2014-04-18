@@ -542,7 +542,7 @@ $c.App.load("controlpanel",
 			});
 
 			for (var i = 1; i < 10; i++) {
-				this.ldapStore.put({id: i,name: '',server: '',port: 636,dcs: '',dns: '',filter: '',listuser: '',listpass: '',cmode: "1", autoadd: "0", enabled: "0"});
+				this.ldapStore.put({id: i,name: '',server: '',port: 389,dcs: '',dns: '',filter: '',listuser: '',listpass: '',cmode: "1", autoadd: "0", enabled: "0"});
 			};
 
 			for (var o in components[0].value) {

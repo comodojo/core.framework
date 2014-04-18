@@ -22,6 +22,7 @@ class authentication {
 	private $userPass = false;
 	private $userData = false;
 	private $userData_remote = false;
+	private $authVia = false;
 /********************** PRIVATE VARS *********************/
 
 /********************* PUBLIC METHODS ********************/
@@ -89,6 +90,56 @@ class authentication {
 
 	}
 
+	public function testlogin($userName, $userPass, $realm = null) {
+
+		comodojo_load_resource('database');
+
+		if (!$userName OR !$userPass) {
+			comodojo_debug('Invalid username or password provided','ERROR','authentication');
+			throw new Exception("Invalid username or password provided", 1901);
+		}
+		
+		$this->userName = $userName;
+		$this->userPass = $userPass;
+
+		try {
+
+			$this->userData = $this->get_user_local_definition($userName);
+			
+			$re = empty($realm) ? null : $realm;
+
+			if (!$this->userData) {
+
+				$isValid = $this->login_undefined($re, true);
+
+			}
+			else if (!$this->userData["enabled"]) {
+
+				throw new Exception("User administratively disabled", 1906);
+
+			}
+			else {
+				
+				$isValid = $this->login_defined($re, true);
+
+			}
+
+		} catch (Exception $e) {
+			throw $e;
+		}
+
+		if ($isValid) {
+			unset($this->userData["enabled"]);
+			unset($this->userData["authentication"]);
+		}
+
+		return Array(
+			"via" => $this->authVia,
+			"data"=> $isValid == true ? $this->userData : false
+		);
+
+	}
+
 	/**
 	 * Logout an user
 	 * 
@@ -111,108 +162,290 @@ class authentication {
 
 /********************* PRIVATE METHODS *******************/
 	
-	private final function login_defined() {
+	private final function login_defined($realm=null, $test=false) {
 
 		$servers = $this->get_auth_servers();
 
-		try {
+		// automatically select realm
+		if (is_null($realm)) {
+
 			if (strtolower($this->userData["authentication"]) == 'local') {
+
 				comodojo_debug('Starting local authentication for user '.$this->userName,'INFO','authentication');
-				$login = $this->validate_user_local();
-			}
-			elseif (isset($servers[$this->userData["authentication"]])) {
-				$se = $servers[$this->userData["authentication"]];
-				switch(strtolower($se["type"])) {
-					case 'ldap':
-						comodojo_debug('Starting ldap authentication for user '.$this->userName.' via '.$this->userData["authentication"],'INFO','authentication');
-						$login = $this->validate_user_ldap(
-							$se["server"],
-							$se["port"],
-							$se["dcs"],
-							$se["dns"],
-							$se["filter"],
-							$se["listuser"],
-							$se["listpass"],
-							$se["cmode"]
-						);
-					break;
-					case 'rpc':
-						comodojo_debug('Starting rpc authentication for user '.$this->userName.' via '.$this->userData["authentication"],'INFO','authentication');
-						$login = $this->validate_user_external_rpc(
-							$se["server"],
-							$se["port"],
-							$se["transport"],
-							$se["sharedkey"]
-						);
-					break;
-					default:
-						throw new Exception("Invalid external authentication server", 1905);
-					break;
+				
+				$this->authVia = 'local';
+
+				try {
+
+					$login = $this->validate_user_local();
+
+				} catch (Exception $e) {
+
+					throw $e;
+					
 				}
-				$this->user_to_cache($this->userName, $this->userPass);
-				$this->update_user();
+
+				return $login;
+				
+			}
+			elseif(isset($servers[$this->userData["authentication"]])) {
+
+				try {
+
+					$this->authVia = $this->userData["authentication"];
+					$se = $servers[$this->userData["authentication"]];
+					switch(strtolower($se["type"])) {
+						case 'ldap':
+							comodojo_debug('Starting ldap authentication for user '.$this->userName.' via '.$this->userData["authentication"],'INFO','authentication');
+							$login = $this->validate_user_ldap(
+								$se["server"],
+								$se["port"],
+								$se["dcs"],
+								$se["dns"],
+								$se["filter"],
+								$se["listuser"],
+								$se["listpass"],
+								$se["cmode"]
+							);
+						break;
+						case 'rpc':
+							comodojo_debug('Starting rpc authentication for user '.$this->userName.' via '.$this->userData["authentication"],'INFO','authentication');
+							$login = $this->validate_user_external_rpc(
+								$se["server"],
+								$se["port"],
+								$se["transport"],
+								$se["sharedkey"]
+							);
+						break;
+						default:
+							throw new Exception("Invalid external authentication server", 1905);
+						break;
+					}
+					if ($login AND $test !== false) {
+						$this->user_to_cache($this->userName, $this->userPass);
+						$this->update_user();
+					}
+
+				} catch (Exception $e) {
+
+					comodojo_debug('External auth error: '.$e->getCode().' - '.$e->getMessage(),'ERROR','authentication');
+					if ( in_array($e->getCode(), Array(1403,1501,1504)) AND $test !== false AND !$cache_runs) {
+						$login = $this->validate_user_cache();
+					}
+					else throw $e;
+					
+				}
+
+				return $login;
+
 			}
 			else {
-				throw new Exception("Invalid external authentication server", 1905);
-			}
-		} catch (Exception $e) {
-			//check if communication ends with transport error; if true, try to auth user from cache
-			if ( in_array($e->getCode(), Array(1403,1501,1504)) ) $login = $this->validate_user_cache();
-			else throw $e;
-		}
 
-		return $login;
+				throw new Exception("Invalid external authentication server", 1905);
+
+			}
+
+		}
+		// try to authenticate user via realm override
+		else {
+
+			$this->authVia = trim($realm);
+
+			if (strtolower(trim($realm)) == 'local') {
+
+				comodojo_debug('Starting local authentication for user '.$this->userName,'INFO','authentication');
+
+				try {
+				
+					$login = $this->validate_user_local();
+
+				} catch (Exception $e) {
+					
+					throw $e;
+					
+				}
+
+				return $login;
+
+			}
+			elseif(isset($servers[trim($realm)])) {
+
+				try {
+
+					$se = $servers[trim($realm)];
+					switch(strtolower($se["type"])) {
+						case 'ldap':
+							comodojo_debug('Starting ldap authentication for user '.$this->userName.' via '.$realm,'INFO','authentication');
+							$login = $this->validate_user_ldap(
+								$se["server"],
+								$se["port"],
+								$se["dcs"],
+								$se["dns"],
+								$se["filter"],
+								$se["listuser"],
+								$se["listpass"],
+								$se["cmode"]
+							);
+						break;
+						case 'rpc':
+							comodojo_debug('Starting rpc authentication for user '.$this->userName.' via '.$realm,'INFO','authentication');
+							$login = $this->validate_user_external_rpc(
+								$se["server"],
+								$se["port"],
+								$se["transport"],
+								$se["sharedkey"]
+							);
+						break;
+						default:
+							throw new Exception("Invalid external authentication server", 1905);
+						break;
+					}
+					if ($login AND $test !== false) {
+						$this->user_to_cache($this->userName, $this->userPass);
+						$this->update_user();
+					}
+
+				} catch (Exception $e) {
+					
+					if ( in_array($e->getCode(), Array(1403,1501,1504)) AND $test !== false) $login = $this->validate_user_cache();
+					else throw $e;
+
+				}
+
+				return $login;
+
+			}
+			else {
+
+				throw new Exception("Invalid external authentication server", 1905);
+
+			}
+
+
+		}
 
 	}
 
-	private final function login_undefined() {
+	private final function login_undefined($realm=null, $test=false) {
 
-		$servers = $this->get_auth_servers(true);
+		$servers = $this->get_auth_servers($test ? false : true);
 
-		foreach ($servers as $s => $se) {
+		if (is_null($realm)) {
 
-			try {
+			$cache_runs = false;
 
-				switch(strtolower($se["type"])) {
-					case 'ldap':
-						comodojo_debug('Starting AUTO ldap authentication for user '.$this->userName.' via '.$this->userData["authentication"],'INFO','authentication');
-						$login = $this->validate_user_ldap(
-							$se["server"],
-							$se["port"],
-							$se["dcs"],
-							$se["dns"],
-							$se["filter"],
-							$se["listuser"],
-							$se["listpass"],
-							$se["cmode"]
-						);
-					break;
-					case 'rpc':
-						comodojo_debug('Starting AUTO rpc authentication for user '.$this->userName.' via '.$this->userData["authentication"],'INFO','authentication');
-						$login = $this->validate_user_external_rpc(
-							$se["server"],
-							$se["port"],
-							$se["transport"],
-							$se["sharedkey"]
-						);
-					break;
-					default:
-						throw new Exception("Invalid external authentication server", 1905);
-					break;
+			foreach ($servers as $s => $se) {
+
+				try {
+
+					switch(strtolower($se["type"])) {
+						case 'ldap':
+							comodojo_debug('Starting AUTO ldap authentication for user '.$this->userName.' via '.$s,'INFO','authentication');
+							$login = $this->validate_user_ldap(
+								$se["server"],
+								$se["port"],
+								$se["dcs"],
+								$se["dns"],
+								$se["filter"],
+								$se["listuser"],
+								$se["listpass"],
+								$se["cmode"]
+							);
+						break;
+						case 'rpc':
+							comodojo_debug('Starting AUTO rpc authentication for user '.$this->userName.' via '.$s,'INFO','authentication');
+							$login = $this->validate_user_external_rpc(
+								$se["server"],
+								$se["port"],
+								$se["transport"],
+								$se["sharedkey"]
+							);
+						break;
+						default:
+							throw new Exception("Invalid external authentication server", 1905);
+						break;
+
+					}
+
+					if ($login AND $test !== false) {
+						$this->add_user($s);
+					}
+
+					if ($login) {
+						$this->authVia = $s;
+						return true;
+					}
+
+				} catch (Exception $e) {
+
+					// no excemption here, only log (just in case)
+					//throw $e;
+					comodojo_debug('External auth error: '.$e->getCode().' - '.$e->getMessage(),'ERROR','authentication');
+					if ( in_array($e->getCode(), Array(1403,1501,1504)) AND $test !== false AND !$cache_runs) {
+						$login = $this->validate_user_cache();
+						$cache_runs = true;
+					}
+
 				}
-
-				if ($login) {
-					$this->add_user($s);
-					return true;
-				}
-
-			} catch (Exception $e) {
-
-				throw $e;
 
 			}
 
 			return false;
+
+		}
+		else {
+
+			if (isset($servers[trim($realm)])) {
+
+				$this->authVia = trim($realm);
+
+				try {
+					
+					$se = $servers[trim($realm)];
+					switch(strtolower($se["type"])) {
+						case 'ldap':
+							comodojo_debug('Starting ldap authentication for user '.$this->userName.' via '.$realm,'INFO','authentication');
+							$login = $this->validate_user_ldap(
+								$se["server"],
+								$se["port"],
+								$se["dcs"],
+								$se["dns"],
+								$se["filter"],
+								$se["listuser"],
+								$se["listpass"],
+								$se["cmode"]
+							);
+						break;
+						case 'rpc':
+							comodojo_debug('Starting rpc authentication for user '.$this->userName.' via '.$realm,'INFO','authentication');
+							$login = $this->validate_user_external_rpc(
+								$se["server"],
+								$se["port"],
+								$se["transport"],
+								$se["sharedkey"]
+							);
+						break;
+						default:
+							throw new Exception("Invalid external authentication server", 1905);
+						break;
+					}
+					if ($login AND $test !== false) {
+						$this->add_user($s);
+					}
+
+				} catch (Exception $e) {
+
+					comodojo_debug('External auth error: '.$e->getCode().' - '.$e->getMessage(),'ERROR','authentication');
+					throw $e;
+					
+				}
+				
+			}
+			else {
+				throw new Exception("Invalid external authentication server", 1905);
+			}
+
+			return $login;
 
 		}
 
@@ -244,6 +477,7 @@ class authentication {
 			throw $e;
 		}
 		
+		comodojo_debug('User '.$this->userName.($to_return ? ' ' : ' NOT').' found in local database','INFO','authentication');
 		return $to_return;
 
 	}
@@ -341,11 +575,11 @@ class authentication {
 			throw $e;
 		}
 		if ($lauth) {
-			comodojo_debug('User '.$this->userName.' authenticated via ldap filtered','INFO','authentication');
+			comodojo_debug('User '.$this->userName.' authenticated via ldap','INFO','authentication');
 			return true;
 		}
 		else {
-			comodojo_debug('Cannot authenticate user '.$this->userName.' via ldap filtered, no match in ldap','WARNING','authentication');
+			comodojo_debug('Cannot authenticate user '.$this->userName.' via ldap','WARNING','authentication');
 			return false;
 		}
 
@@ -426,6 +660,8 @@ class authentication {
 				
 		if (!COMODOJO_AUTHENTICATION_CACHE_ENABLED) return;
 		
+		comodojo_debug('Caching user '.$userName,'INFO','authentication');
+
 		comodojo_load_resource('database');
 		
 		try {
@@ -445,6 +681,8 @@ class authentication {
 	}
 
 	private final function add_user($source) {
+
+		comodojo_debug('Adding user '.$this->userName.' found in '.$source,'INFO','authentication');
 
 		comodojo_load_resource('users_management');
 
@@ -515,7 +753,11 @@ class authentication {
 			$this->userData_remote["gender"] != $this->userData["gender"] OR
 			$this->userData_remote["url"] != $this->userData["url"]
 		) {
+
+			comodojo_debug('Updating user '.$this->userName,'INFO','authentication');
+
 			comodojo_load_resource('users_management');
+
 			$params = Array(
 				"completeName"	=> $this->userData_remote["completeName"],
 				"gravatar"		=> $this->userData_remote["gravatar"],
@@ -532,12 +774,12 @@ class authentication {
 				throw $e;
 			}
 
-			$this->userData["completeName"] != $this->userData_remote["completeName"];
-			$this->userData["gravatar"] != $this->userData_remote["gravatar"];
-			$this->userData["email"] != $this->userData_remote["email"];
-			$this->userData["birthday"] != $this->userData_remote["birthday"];
-			$this->userData["gender"] != $this->userData_remote["gender"];
-			$this->userData["url"] != $this->userData_remote["url"];
+			$this->userData["completeName"] = $this->userData_remote["completeName"];
+			$this->userData["gravatar"] = $this->userData_remote["gravatar"];
+			$this->userData["email"] = $this->userData_remote["email"];
+			$this->userData["birthday"] = $this->userData_remote["birthday"];
+			$this->userData["gender"] = $this->userData_remote["gender"];
+			$this->userData["url"] = $this->userData_remote["url"];
 
 		}
 

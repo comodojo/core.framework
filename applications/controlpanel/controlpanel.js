@@ -478,7 +478,7 @@ $c.App.load("controlpanel",
 					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("lda_5")+'</label>',
 					'</td><td>',
-						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="filter"></div>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="suffix"></div>',
 					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("lda_6")+'</label>',
 					'</td><td>',
@@ -490,15 +490,23 @@ $c.App.load("controlpanel",
 					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("lda_8")+'</label>',
 					'</td><td>',
-						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="cmode"><option value="1">ON</option><option value="0">Off</option></div>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="admode"><option value="1">ON</option><option value="0">OFF</option></div>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_13")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="ssl"><option value="0">OFF</option><option value="1">ON</option></div>',
+					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_14")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="tls"><option value="0">OFF</option><option value="1">ON</option></div>',
 					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("lda_11")+'</label>',
 					'</td><td>',
-						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="autoadd"><option value="0">OFF</option><option value="1">On</option></div>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="autoadd"><option value="0">OFF</option><option value="1">ON</option></div>',
 					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("lda_10")+'</label>',
 					'</td><td>',
-						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="enabled"><option value="0">OFF</option><option value="1">On</option></div>',
+						'<div data-dojo-type="dijit.form.Select" data-dojo-attach-point="enabled"><option value="0">OFF</option><option value="1">ON</option></div>',
 					'</td></tr></table>'
 				].join(''),
 				_setValueAttr: function(value){
@@ -508,12 +516,14 @@ $c.App.load("controlpanel",
 					this.port.set('value', parseInt(value[3], 10));
 					this.dcs.set('value', value[4]);
 					this.dns.set('value', value[5]);
-					this.filter.set('value', value[6]);
+					this.suffix.set('value', value[6]);
 					this.listuser.set('value', value[7]);
 					this.listpass.set('value', value[8]);
-					this.cmode.set('value', parseInt(value[9], 10));
-					this.autoadd.set('value', parseInt(value[10], 10));
-					this.enabled.set('value', parseInt(value[11], 10));
+					this.admode.set('value', parseInt(value[9], 10));
+					this.ssl.set('value', parseInt(value[10], 10));
+					this.tls.set('value', parseInt(value[11], 10));
+					this.autoadd.set('value', parseInt(value[12], 10));
+					this.enabled.set('value', parseInt(value[13], 10));
 				},
 				_getValueAttr: function(value){
 					return [
@@ -523,10 +533,12 @@ $c.App.load("controlpanel",
 						this.port.get('value'),
 						this.dcs.get('value'),
 						this.dns.get('value'),
-						this.filter.get('value'),
+						this.suffix.get('value'),
 						this.listuser.get('value'),
 						this.listpass.get('value'),
-						parseInt(this.cmode.get('value')),
+						parseInt(this.admode.get('value')),
+						parseInt(this.ssl.get('value')),
+						parseInt(this.tls.get('value')),
 						parseInt(this.autoadd.get('value')),
 						parseInt(this.enabled.get('value'))
 					];
@@ -572,10 +584,12 @@ $c.App.load("controlpanel",
 								parseInt(values.port, 10),
 								values.dcs,
 								values.dns,
-								values.filter,
+								values.suffix,
 								values.listuser,
 								values.listpass,
-								values.cmode,
+								values.admode,
+								values.ssl,
+								values.tls,
 								values.autoadd,
 								values.enabled
 							];
@@ -588,12 +602,14 @@ $c.App.load("controlpanel",
 								port: parseInt(values[3], 10),
 								dcs: values[4],
 								dns: values[5],
-								filter: values[6],
+								suffix: values[6],
 								listuser: values[7],
 								listpass: values[8],
-								cmode: values[9],
-								autoadd: values[10],
-								enabled: values[11]
+								admode: values[9],
+								ssl: values[10],
+								tls: values[11],
+								autoadd: values[12],
+								enabled: values[13]
 							});
 							return values;
 						}
@@ -606,12 +622,14 @@ $c.App.load("controlpanel",
 							port: parseInt(value[3], 10),
 							dcs: value[4],
 							dns: value[5],
-							filter: value[6],
+							suffix: value[6],
 							listuser: value[7],
 							listpass: value[8],
-							cmode: value[9],
-							autoadd: value[10],
-							enabled: value[11]
+							admode: value[9],
+							ssl: value[10],
+							tls: value[11],
+							autoadd: value[12],
+							enabled: value[13]
 						});
 					}
 				}

@@ -200,12 +200,10 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["dcs"],
-								$se["dns"],
-								$se["filter"],
-								$se["listuser"],
-								$se["listpass"],
-								$se["cmode"]
+								$se["suffix"],
+								$se["admode"],
+								$se["ssl"],
+								$se["tls"]
 							);
 						break;
 						case 'rpc':
@@ -279,12 +277,10 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["dcs"],
-								$se["dns"],
-								$se["filter"],
-								$se["listuser"],
-								$se["listpass"],
-								$se["cmode"]
+								$se["suffix"],
+								$se["admode"],
+								$se["ssl"],
+								$se["tls"]
 							);
 						break;
 						case 'rpc':
@@ -344,12 +340,10 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["dcs"],
-								$se["dns"],
-								$se["filter"],
-								$se["listuser"],
-								$se["listpass"],
-								$se["cmode"]
+								$se["suffix"],
+								$se["admode"],
+								$se["ssl"],
+								$se["tls"]
 							);
 						break;
 						case 'rpc':
@@ -408,12 +402,10 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["dcs"],
-								$se["dns"],
-								$se["filter"],
-								$se["listuser"],
-								$se["listpass"],
-								$se["cmode"]
+								$se["suffix"],
+								$se["admode"],
+								$se["ssl"],
+								$se["tls"]
 							);
 						break;
 						case 'rpc':
@@ -512,12 +504,10 @@ class authentication {
 			$servers[$ldap["name"]] = Array(
 				"server"	=> $ldap["server"],
 				"port"		=> $ldap["port"],
-				"dcs"		=> $ldap["dcs"],
-				"dns"		=> $ldap["dns"],
-				"filter"	=> $ldap["filter"],
-				"listuser"	=> $ldap["listuser"],
-				"listpass"	=> $ldap["listpass"],
-				"cmode"		=> $ldap["cmode"],
+				"suffix"	=> $ldap["suffix"],
+				"admode"	=> $ldap["admode"],
+				"ssl"		=> $ldap["ssl"],
+				"tls"		=> $ldap["tls"],
 				"autoadd"	=> $ldap["autoadd"],
 				"type"		=> "ldap"
 			);
@@ -560,15 +550,15 @@ class authentication {
 	/**
 	 * Validate user via external LDAP server
 	 */
-	private	final function validate_user_ldap($server, $port, $dcs, $dns, $filter, $listuser, $listpass, $cmode) {
+	private	final function validate_user_ldap($server, $port, $suffix, $admode, $ssl, $tls) {
 		
 		if ($this->loginFromSession) throw new Exception("External auth not supported when authenticating from session", 1904);
 
 		comodojo_load_resource('ldap');
 		
 		try {
-			$ldap = new ldap($server, $port, $dcs, $dns, $filter, $listuser, $listpass, $cmode);
-			$lauth = $ldap->ldapAuth($this->userName, $this->userPass);
+			$ldap = new ldap($server, $port);
+			$lauth = $ldap->suffix($suffix)->admode($admode)->ssl($ssl)->tls($tls)->auth($this->userName, $this->userPass);
 		}
 		catch (Exception $e){
 			comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');

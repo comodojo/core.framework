@@ -1,0 +1,11 @@
+<?php
+
+$theme = Array(
+	"name"		=>	"default",
+	"createdBy"	=>	"comodojo.org",
+	"version"	=>	"1.0",
+	"framework"	=>	"1",
+	"comment"	=>	"Default comodojo theme, built with bootstrap css"
+);
+
+?>

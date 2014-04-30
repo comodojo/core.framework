@@ -11,7 +11,7 @@
  */
 
 $panels = Array(
-	"registration" => Array(
+	"maps" => Array(
 		"builder"	=>	"form",
 		"icon"		=>	"maps.png",
 		"label"		=>	"map_0",

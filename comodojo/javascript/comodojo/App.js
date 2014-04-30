@@ -158,7 +158,7 @@ App.start = function(appExec, status, on_start, on_stop, force_properties) {
 		}
 		else {
 			comodojo.debug("Requested to start a running application tagged as unique, now focusing.");
-			App.byExec(appExec).focusOn();
+			App.byExec(appExec).focus();
 			return true;
 		}
 	}

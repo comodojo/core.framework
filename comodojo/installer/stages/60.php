@@ -9,30 +9,6 @@ class stage extends stage_base {
 				"type"			=>	"info",
 				"content"		=>	$this->i18n["0037"]
 			),
-			//array(
-			//	"type"			=>	"Select",
-			//	"label"			=>	$this->i18n["0038"],
-			//	"name"			=>	"AUTHENTICATION_MODE",
-			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['AUTHENTICATION_MODE'],
-			//	"options"		=>	array(
-			//							array(
-			//								"id"		=>	'local',
-			//								"label"		=>	$this->i18n["0092"]	
-			//							),
-			//							array(
-			//								"id"		=>	'ldapfiltered',
-			//								"label"		=>	$this->i18n["0093"]
-			//							),
-			//							array(
-			//								"id"		=>	'ldapunfiltered',
-			//								"label"		=>	$this->i18n["0094"]
-			//							),
-			//							array(
-			//								"id"		=>	'rpc',
-			//								"label"		=>	$this->i18n["0095"]
-			//							)
-			//						)
-			//),
 			array(
 				"type"			=>	"OnOffSelect",
 				"label"			=>	$this->i18n["0088"],
@@ -78,37 +54,6 @@ class stage extends stage_base {
 				"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['REGISTRATION_TTL'],
 				"required"		=>	true
 			),
-			//array(
-			//	"type"			=>	"TextBox",
-			//	"label"			=>	$this->i18n["0041"],
-			//	"name"			=>	"EXTERNAL_RPC_SERVER",
-			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['EXTERNAL_RPC_SERVER'],
-			//),
-			//array(
-			//	"type"			=>	"TextBox",
-			//	"label"			=>	$this->i18n["0136"],
-			//	"name"			=>	"EXTERNAL_RPC_PORT",
-			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['EXTERNAL_RPC_PORT'],
-			//),
-			//array(
-			//	"type"			=>	"ValidationTextBox",
-			//	"label"			=>	$this->i18n["0098"],
-			//	"name"			=>	"EXTERNAL_RPC_TRANSPORT",
-			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['EXTERNAL_RPC_TRANSPORT'],
-			//	"required"		=>	true
-			//),
-			//array(
-			//	"type"			=>	"OnOffSelect",
-			//	"label"			=>	$this->i18n["0042"],
-			//	"name"			=>	"EXTERNAL_RPC_MODE",
-			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['EXTERNAL_RPC_MODE']
-			//),
-			//array(
-			//	"type"			=>	"TextBox",
-			//	"label"			=>	$this->i18n["0043"],
-			//	"name"			=>	"EXTERNAL_RPC_KEY",
-			//	"value"			=>	$_SESSION[SITE_UNIQUE_IDENTIFIER]['installer_values']['EXTERNAL_RPC_KEY'],
-			//),
 			array(
 				"type"			=>	"Select",
 				"label"			=>	$this->i18n["0137"],

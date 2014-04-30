@@ -177,6 +177,7 @@ class comodojo_startup extends comodojo_basic {
 					locale: '" . $this->locale . "',
 					phpLocale: '" . $this->locale . "',
 					queryString: " . $queryString . ",
+					gmaps_enabled: " . (COMODOJO_GMAPS_PRELOAD ? "true" : "false") . ",
 					dojoTheme: '" . COMODOJO_SITE_THEME_DOJO . "',
 					defaultContainer: '" . COMODOJO_SITE_DEFAULT_CONTAINER . "',
 					serverTimezoneOffset: '" . getServerTimezoneOffset() . "',
@@ -189,6 +190,15 @@ class comodojo_startup extends comodojo_basic {
 				}
 			</script>
 		";
+
+		if (COMODOJO_GMAPS_PRELOAD) {
+			$sensor = COMODOJO_GMAPS_SENSOR ? "true" : "false";
+			$apikey = empty(COMODOJO_GMAPS_APIKEY) ? "" : "&key=".COMODOJO_GMAPS_APIKEY;
+			$myJsLoader .="
+			<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=".$sensor."&language=".$this->locale.$apikey."\" ></script>
+			";	
+		}
+
 		//if (COMODOJO_JS_XD_LOADING) {
 		//	$myJsLoader .="
 		//	<script type=\"text/javascript\" src=\"//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js.uncompressed.js\" ></script>

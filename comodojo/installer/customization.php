@@ -52,7 +52,7 @@ $comodojoCustomization = array(
 	
 	"minPPHRequired"	=>	"5.3.3",
 
-	"stages"			=>	Array(0,1,10,20,30,40,50,60,80,85,90,100),
+	"stages"			=>	Array(0,1,10,20,30,40,50,60,70,80,85,90,100),
 
 	"defaultBaseValues"	=>	Array(
 		
@@ -158,16 +158,11 @@ $comodojoCustomization = array(
 		"REGISTRATION_DEFAULT_ROLE"		=>	1000,
 		"REGISTRATION_TTL"				=>	604800,
 		/**
-		 * LDAP
+		 * GMAPS
 		 */
-		//"LDAP_SERVER"			=>	'',
-		//"LDAP_PORT"				=>	636,
-		//"LDAP_DC"				=>	'',
-		//"LDAP_OTHER_DN"			=>	'',
-		//"LDAP_DEFAULT_FILTER"	=>	'samaccountname=',
-		//"LDAP_LISTER_USERNAME"	=>	'',
-		//"LDAP_LISTER_PASSWORD"	=>	'',
-		//"LDAP_COMPATIBILE_MODE"	=>	1,
+		"GMAPS_PRELOAD"			=>	0,
+		"GMAPS_SENSOR"			=>	0,
+		"GMAPS_APIKEY"			=>	NULL,
 		/**
 		 * Mail
 		 */
@@ -179,14 +174,6 @@ $comodojoCustomization = array(
 		"SMTP_USER"				=>	'',
 		"SMTP_PASSWORD"			=>	'',
 		"SMTP_ADDRESS"			=>	'',
-		/**
-		 * External RPC
-		 */
-		//"EXTERNAL_RPC_SERVER"		=>	'',
-		//"EXTERNAL_RPC_PORT"			=>	80,
-		//"EXTERNAL_RPC_MODE"			=>	'plain',
-		//"EXTERNAL_RPC_TRANSPORT"	=>	'XML',
-		//"EXTERNAL_RPC_KEY"			=>	'',
 		/**
 		 * Local RPC
 		 */

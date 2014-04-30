@@ -133,7 +133,12 @@ $lang = Array(
 	//METTA.PHP
 	'met_0'	=>	'Meta tags',
 	//BOOOTSTRAP.PHP
-	'boo_0'	=>	'Ruoli e applicazioni'
+	'boo_0'	=>	'Ruoli e applicazioni',
+	//MAPS.PHP
+	'map_0'	=>	'Maps support (gmaps)',
+	'map_1'	=>	'Enable maps',
+	'map_2'	=>	'Enable sensor',
+	'map_3'	=>	'API key'
 );
 
 ?>

@@ -17,7 +17,7 @@ class ldap {
 /********************** PRIVATE VARS *********************/
 	private $ldaph = false;
 
-	private $admode = false;
+	private $version = 3;
 
 	private $ssl = false;
 
@@ -27,15 +27,15 @@ class ldap {
 
 	private $dc = '';
 
-	private $dn = '';
+	private $dn = 'USER_NAME';
 
-	private $suffix = '';
+	private $searchbase = false;
 
 	private $user = null;
 
 	private $pass = null;
 
-	private $fields = Array("displayName","givenName","mail","description");
+	private $fields = Array(); //Array("displayName","givenName","mail","description");
 
 /********************** PRIVATE VARS *********************/
 
@@ -63,7 +63,7 @@ class ldap {
 		
 	}
 
-	public final function dc($dcs) {
+	public final function base($dcs) {
 
 		if ( empty($dcs) ) {
 			comodojo_debug('Invalid dc','ERROR','ldap');
@@ -78,28 +78,28 @@ class ldap {
 
 	}
 
-	public final function dn($dns) {
+	public final function dn($dn) {
 
-		if ( empty($dns) ) {
+		if ( empty($dn) ) {
 			comodojo_debug('Invalid dn','ERROR','ldap');
 			throw new Exception($dns, 1411);
 		}
 
-		$pDn = str_replace(' ', '', $dns);
-
-		$this->dn = $pDn;
+		$this->dn = str_replace(' ', '', $dn);
 
 		return $this;
 
 	}
 
-	public final function admode($mode=true) {
+	public final function version($mode=3) {
 
-		if ($mode === true) {
-			$this->admode = true;
+		$mode = filter_var($mode, FILTER_VALIDATE_INT);
+
+		if ($mode === 2) {
+			$this->version = 2;
 		}
 		else {
-			$this->admode = false;
+			$this->version = 3;
 		}
 
 		return $this;
@@ -107,6 +107,8 @@ class ldap {
 	}
 
 	public final function ssl($mode=true) {
+
+		$mode = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
 
 		if ($mode === true) {
 			$this->ssl = true;
@@ -121,6 +123,8 @@ class ldap {
 
 	public final function tls($mode=true) {
 
+		$mode = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
+
 		if ($mode === true) {
 			$this->tls = true;
 		}
@@ -133,6 +137,8 @@ class ldap {
 	}
 
 	public final function sso($mode=true) {
+
+		$mode = filter_var($mode, FILTER_VALIDATE_BOOLEAN);
 
 		if ($mode === true) {
 			if ( !function_exists('ldap_sasl_bind') ) {
@@ -163,14 +169,14 @@ class ldap {
 
 	}
 	
-	public final function suffix($s) {
+	public final function searchbase($s) {
 		
 		if ( empty($s) ) {
-			comodojo_debug('Invalid suffix','ERROR','ldap');
-			throw new Exception("Invalid suffix", 1409);
+			$this->searchbase = false;
 		}
-
-		$this->suffix = '@'.$s;
+		else {
+			$this->searchbase = str_replace(' ', '', $s);
+		}
 
 		return $this;
 
@@ -219,39 +225,6 @@ class ldap {
 
 		return $auth;
 			
-	}
-	
-	/**
-	 * Check if user is in LDAP directory
-	 * 
-	 * @param	string	$user	The user to search for
-	 */
-	public function user_exists($user, $id=false) {
-		
-		if (empty($user)) { 
-			comodojo_debug('Invalid user to search for','ERROR','ldap');
-			throw new Exception("Invalid user to search for", 1405);
-		}
-	
-		comodojo_debug('Starting LDAP user presence check','INFO','ldap');
-		
-		if (!$id) {
-			$id = $this->admode ? "samaccountname" : "uid";
-		}
-
-		try {
-			$this->setupConnection($this->user, $this->pass);
-			$result = $this->search_helper($id.'='.$user.$this->suffix);
-		} catch (Exception $e) {
-			$this->unsetConnection();
-			throw $e;
-		}
-
-		$this->unsetConnection();
-
-		if ($result["count"] == 1) return true;
-		else return false;
-		
 	}
 	
 	/**
@@ -313,23 +286,37 @@ class ldap {
 			throw new Exception(ldap_error($this->ldaph), 1403);
 		}
 		
-		comodojo_debug('Connected to LDAP server '.$this->server,'INFO','ldap');
+		comodojo_debug('Connected to LDAP server '.$this->server.':'.$this->port.($this->ssl ? ' using SSL' : ''),'INFO','ldap');
 		
-		if ($this->admode) {
-			comodojo_debug('Using active directory mode for '.$this->server,'INFO','ldap');
-			ldap_set_option($this->ldaph, LDAP_OPT_PROTOCOL_VERSION, 3);
-			ldap_set_option($this->ldaph, LDAP_OPT_REFERRALS, 0);
+		ldap_set_option($this->ldaph, LDAP_OPT_PROTOCOL_VERSION, $this->version);
+		ldap_set_option($this->ldaph, LDAP_OPT_REFERRALS, 0);
+
+		if ($this->tls) {
+
+			$tls = @ldap_start_tls($this->ldaph);
+
+			if ($tls) {
+				comodojo_debug('Connection is using TLS','INFO','ldap');
+			}
+			else {
+				comodojo_debug('Ldap error, TLS does not start correctly: '.ldap_error($this->ldaph),'ERROR','ldap');
+				throw new Exception(ldap_error($this->ldaph), 1403);
+			}
+
 		}
 
-		if ($this->tls) ldap_start_tls($this->ldaph);
-		
 		if ($this->sso AND $this->admode AND $_SERVER['REMOTE_USER'] AND $_SERVER["REMOTE_USER"] == $user AND $_SERVER["KRB5CCNAME"]) {
 			putenv("KRB5CCNAME=".$_SERVER["KRB5CCNAME"]);
 			$bind = @ldap_sasl_bind($this->ldaph, NULL, NULL, "GSSAPI");
 		}
-		else {
-			$bind = @ldap_bind($this->ldaph, $user.$this->suffix, $pass);
+		elseif ( is_null($user) OR is_null($pass) ) {
+			$bind = @ldap_bind($this->ldaph);
 		}
+		else {
+			$user_dn = str_replace('USERNAME', $user, $this->dn);
+			$bind = @ldap_bind($this->ldaph, $user_dn, $pass);
+		}
+
 		if (!$bind) {
 			comodojo_debug('Ldap error, server refuse to bind: '.ldap_error($this->ldaph),'ERROR','ldap');
 			throw new Exception(ldap_error($this->ldaph), 1402);
@@ -351,7 +338,7 @@ class ldap {
 	 */
 	private function search_helper($what) {
 
-		$base = $this->dc . $this->dn;
+		$base = !$this->searchbase ? $this->dn : $this->searchbase;
 
 		if ( empty($this->fields) ) {
 			$result = ldap_search($this->ldaph, $base, $what);

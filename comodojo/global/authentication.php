@@ -106,9 +106,14 @@ class authentication {
 
 			$this->userData = $this->get_user_local_definition($userName);
 			
-			$re = empty($realm) ? null : $realm;
+			$re = empty($realm) ? null : trim($realm);
 
-			if (!$this->userData) {
+			if (!$this->userData AND $re == 'local') {
+				$this->authVia = 'local';
+				comodojo_debug('Cannot authenticate user '.$this->userName.' via local database','WARNING','authentication');
+				$isValid = false;
+			}
+			elseif (!$this->userData) {
 
 				$isValid = $this->login_undefined($re, true);
 
@@ -200,8 +205,8 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["suffix"],
-								$se["admode"],
+								$se["dn"],
+								$se["version"],
 								$se["ssl"],
 								$se["tls"]
 							);
@@ -219,7 +224,7 @@ class authentication {
 							throw new Exception("Invalid external authentication server", 1905);
 						break;
 					}
-					if ($login AND $test !== false) {
+					if ($login AND $test === false) {
 						$this->user_to_cache($this->userName, $this->userPass);
 						$this->update_user();
 					}
@@ -277,8 +282,8 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["suffix"],
-								$se["admode"],
+								$se["dn"],
+								$se["version"],
 								$se["ssl"],
 								$se["tls"]
 							);
@@ -296,7 +301,7 @@ class authentication {
 							throw new Exception("Invalid external authentication server", 1905);
 						break;
 					}
-					if ($login AND $test !== false) {
+					if ($login AND $test === false) {
 						$this->user_to_cache($this->userName, $this->userPass);
 						$this->update_user();
 					}
@@ -316,7 +321,6 @@ class authentication {
 				throw new Exception("Invalid external authentication server", 1905);
 
 			}
-
 
 		}
 
@@ -340,8 +344,8 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["suffix"],
-								$se["admode"],
+								$se["dn"],
+								$se["version"],
 								$se["ssl"],
 								$se["tls"]
 							);
@@ -361,11 +365,8 @@ class authentication {
 
 					}
 
-					if ($login AND $test !== false) {
-						$this->add_user($s);
-					}
-
 					if ($login) {
+						$this->add_user($s, $test);
 						$this->authVia = $s;
 						return true;
 					}
@@ -375,7 +376,7 @@ class authentication {
 					// no excemption here, only log (just in case)
 					//throw $e;
 					comodojo_debug('External auth error: '.$e->getCode().' - '.$e->getMessage(),'ERROR','authentication');
-					if ( in_array($e->getCode(), Array(1403,1501,1504)) AND $test !== false AND !$cache_runs) {
+					if ( in_array($e->getCode(), Array(1403,1501,1504)) AND $test === false AND !$cache_runs) {
 						$login = $this->validate_user_cache();
 						$cache_runs = true;
 					}
@@ -402,8 +403,8 @@ class authentication {
 							$login = $this->validate_user_ldap(
 								$se["server"],
 								$se["port"],
-								$se["suffix"],
-								$se["admode"],
+								$se["dn"],
+								$se["version"],
 								$se["ssl"],
 								$se["tls"]
 							);
@@ -421,9 +422,12 @@ class authentication {
 							throw new Exception("Invalid external authentication server", 1905);
 						break;
 					}
-					if ($login AND $test !== false) {
-						$this->add_user($s);
+
+					if ($login) {
+						$this->add_user(trim($realm), $test);
 					}
+
+					return $login;
 
 				} catch (Exception $e) {
 
@@ -436,8 +440,6 @@ class authentication {
 			else {
 				throw new Exception("Invalid external authentication server", 1905);
 			}
-
-			return $login;
 
 		}
 
@@ -504,8 +506,8 @@ class authentication {
 			$servers[$ldap["name"]] = Array(
 				"server"	=> $ldap["server"],
 				"port"		=> $ldap["port"],
-				"suffix"	=> $ldap["suffix"],
-				"admode"	=> $ldap["admode"],
+				"dn"		=> $ldap["dn"],
+				"version"	=> $ldap["version"],
 				"ssl"		=> $ldap["ssl"],
 				"tls"		=> $ldap["tls"],
 				"autoadd"	=> $ldap["autoadd"],
@@ -550,7 +552,7 @@ class authentication {
 	/**
 	 * Validate user via external LDAP server
 	 */
-	private	final function validate_user_ldap($server, $port, $suffix, $admode, $ssl, $tls) {
+	private	final function validate_user_ldap($server, $port, $dn, $version, $ssl, $tls) {
 		
 		if ($this->loginFromSession) throw new Exception("External auth not supported when authenticating from session", 1904);
 
@@ -558,7 +560,7 @@ class authentication {
 		
 		try {
 			$ldap = new ldap($server, $port);
-			$lauth = $ldap->suffix($suffix)->admode($admode)->ssl($ssl)->tls($tls)->auth($this->userName, $this->userPass);
+			$lauth = $ldap->dn($dn)->version($version)->ssl($ssl)->tls($tls)->auth($this->userName, $this->userPass);
 		}
 		catch (Exception $e){
 			comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');
@@ -670,11 +672,12 @@ class authentication {
 		
 	}
 
-	private final function add_user($source) {
+	private final function add_user($source, $test=false) {
 
-		comodojo_debug('Adding user '.$this->userName.' found in '.$source,'INFO','authentication');
-
-		comodojo_load_resource('users_management');
+		if ($test === false) {
+			comodojo_debug('Adding user '.$this->userName.' found in '.$source,'INFO','authentication');
+			comodojo_load_resource('users_management');
+		}
 
 		if (!$this->userData_remote) {
 			$email = $this->userName.'@localhost';
@@ -718,13 +721,18 @@ class authentication {
 			);
 		}
 
-		try {
-			$um = new users_management();
-			$um->add_user_from_external = true;
-			$result = $um->add_user($this->userName, random(32), $email, $params);
-			$data["userId"] = $result;
-		} catch (Exception $e) {
-			throw $e;
+		if ($test === false) {
+			try {
+				$um = new users_management();
+				$um->add_user_from_external = true;
+				$result = $um->add_user($this->userName, random(32), $email, $params);
+				$data["userId"] = $result;
+			} catch (Exception $e) {
+				throw $e;
+			}
+		}
+		else {
+			$data["userId"] = -1;
 		}
 
 		$this->userData = $data;

@@ -19,6 +19,13 @@ $c.App.load("test_auth",
 		
 		this.auth_template = '<h3>Comodojo authentication via realm {0}</h3><table class="ym-table bordertable"><thead><tr><th>'+'Param'+'</th><th>'+'Value'+'</th></tr></thead><tbody>{1}</tbody></table>';
 
+		this.availableRealms = [
+			{
+				label: 'auto',
+				id: ""
+			}
+		];
+
 		this.init = function(){
 
 			this.container = new $c.Layout({
@@ -43,8 +50,33 @@ $c.App.load("test_auth",
 		 		}]
 			}).build();
 
+			$c.Kernel.newCall(myself.initCallback,{
+				application: "test_auth",
+				method: "realms"
+			});
+
+		};
+
+		this.initCallback = function(success, result) {
+			if (success) {
+				for (var i in result) {
+					myself.availableRealms.push({
+						label: result[i],
+						id: result[i]
+					});
+				}
+				myself.buildForm();
+			}
+			else {
+				$c.Error.modal(result.code,result.name);
+				myself.stop();
+			}
+		};
+
+		this.buildForm = function() {
+
 			this.form = new $c.Form({
-				modules: ['Button','ValidationTextBox','PasswordTextBox'],
+				modules: ['Button','ValidationTextBox','PasswordTextBox','Select'],
 				autoFocus: true,
 				hierarchy: [{
 					name: "userName",
@@ -60,9 +92,10 @@ $c.App.load("test_auth",
 					required: true
 				},{
 					name: "realm",
-					value: "local",
-					type: "ValidationTextBox",
+					value: "",
+					type: "Select",
 					label: "Auth realm",
+					options: this.availableRealms,
 					required: false
 				},{
 					name: "go",

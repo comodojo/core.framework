@@ -49,7 +49,7 @@ $c.App.load("chmod",
 				data: [{id:1,role:'reader'},{id:2,role:'writer'},{id:3,role:'owner'}]
 			});
 
-			this._userStore = $c.Kernel.newDatastore('chmod','list_users',{identifier: 'userName', label: 'userName'});
+			this._userStore = $c.Kernel.newDatastore('chmod','listUsers',{identifier: 'userName', label: 'userName'});
 
 			this.container = new $c.Layout({
 				modules: ['Grid'],
@@ -167,7 +167,7 @@ $c.App.load("chmod",
 
 			$c.Kernel.newCall(myself.loadResourceAclCallback,{
 				application: "chmod",
-				method: "get_resource_acl",
+				method: "getResourceAcl",
 				content: {
 					filePath: myself.filePath,
 					fileName: myself.fileName
@@ -212,7 +212,7 @@ $c.App.load("chmod",
 			}
 			$c.Kernel.newCall(myself.setResourceAclCallback,{
 				application: "chmod",
-				method: "set_resource_acl",
+				method: "setResourceAcl",
 				content: {
 					filePath: myself.filePath,
 					fileName: myself.fileName,

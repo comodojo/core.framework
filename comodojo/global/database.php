@@ -116,9 +116,11 @@ class database {
 
 	/**
 	 * Enable date/time values serialization (values handled like string if disabled)
+	 * If enabled, database will try to serialize string that represent iso date/time values
+	 * Use with care.
 	 * @var bool
 	 */
-	private $date_time_serialization = true;
+	private $date_time_serialization = false;
 
 	/**
 	 * Queries' keys
@@ -1289,6 +1291,28 @@ class database {
 
 	}
 
+	public function serialize($value, $type) {
+
+		if (empty($value)) return NULL;
+
+		switch ( strtoupper($type) ) {
+			case 'DATE':
+				$return = $this->date_to_database($value);
+				break;
+				
+			case 'TIME':
+				$return = $this->time_to_database($value);
+				break;
+
+			default:
+				$return = NULL;
+				break;
+		}
+
+		return $return;
+
+	}
+
 	/*
 	public function alter_rename_table() {}
 
@@ -1314,9 +1338,9 @@ class database {
 	 * 	- db::$dbUserPass
 	 * 	- db::$dbName
 	 */
-    private function connect() {
-    		
-    	switch ($this->dbDataModel) {
+	private function connect() {
+			
+		switch ($this->dbDataModel) {
 				
 			case ("MYSQL"):
 				$this->dbHandler = @mysql_connect($this->dbHost.":".$this->dbPort, $this->dbUserName, $this->dbUserPass);

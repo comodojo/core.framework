@@ -13,12 +13,12 @@
 class chmod extends application {
 	
 	public function init() {
-		$this->add_application_method('list_users', 'listUsers', Array(), 'No description available, sorry.',false);
-		$this->add_application_method('get_resource_acl', 'getResourceAcl', Array('filePath','fileName'), 'No description available, sorry.',false);
-		$this->add_application_method('set_resource_acl', 'setResourceAcl', Array('filePath','fileName','owners','readers','writers'), 'No description available, sorry.',false);
+		$this->add_application_method('listUsers', 'list_users', Array(), 'List available users, wildcards included.',false);
+		$this->add_application_method('getResourceAcl', 'get_resource_acl', Array('filePath','fileName'), 'Get resource acl; filePath and fileName are required to identify resource.',false);
+		$this->add_application_method('setResourceAcl', 'set_resource_acl', Array('filePath','fileName','owners','readers','writers'), 'Set resource acl; filePath and fileName are required to identify resource, owners, readers and writers to define acl.',false);
 	}
 	
-	public function listUsers() {
+	public function list_users() {
 			
 		comodojo_load_resource('users_management');
 		$um = new users_management();
@@ -45,7 +45,7 @@ class chmod extends application {
 		
 	}
 	
-	public function getResourceAcl($params) {
+	public function get_resource_acl($params) {
 		
 		comodojo_load_resource('filesystem');
 		$fs = new filesystem();
@@ -68,7 +68,7 @@ class chmod extends application {
 		
 	}
 	
-	public function setResourceAcl($params) {
+	public function set_resource_acl($params) {
 		
 		comodojo_load_resource('filesystem');
 		$fs = new filesystem();

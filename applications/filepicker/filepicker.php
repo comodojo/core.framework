@@ -13,12 +13,12 @@
 class filepicker extends application {
 	
 	public function init() {
-		$this->add_application_method('list_reader', 'listReader', Array(), 'No description available, sorry',false);
-		$this->add_application_method('list_writer', 'listWriter', Array(), 'No description available, sorry',false);
-		$this->add_application_method('list_owner', 'listOwner', Array(), 'No description available, sorry',false);
+		$this->add_application_method('listReader', 'list_reader', Array(), 'No description available, sorry',false);
+		$this->add_application_method('listWriter', 'list_writer', Array(), 'No description available, sorry',false);
+		$this->add_application_method('listOwner', 'list_owner', Array(), 'No description available, sorry',false);
 	}
 
-	public function listReader() {
+	public function list_reader() {
 		try {
 			$result = $this->listDirectory('reader');
 		}
@@ -28,7 +28,7 @@ class filepicker extends application {
 		return $result;
 	}
 
-	public function listWriter() {
+	public function list_writer() {
 		try {
 			$result = $this->listDirectory('writer');
 		}
@@ -38,7 +38,7 @@ class filepicker extends application {
 		return $result;
 	}
 
-	public function listOwner() {
+	public function list_owner() {
 		try {
 			$result = $this->listDirectory('owner');
 		}

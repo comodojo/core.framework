@@ -31,8 +31,23 @@ $c.App.load("filepicker",
 		var myself = this;
 		
 		this.init = function(){
+
+			var level = this.accessLevel.toLowerCase();
+			var method;
+			switch (level) {
+				case "writer":
+					method = "listWriter";
+					break;
+				case "owner":
+					method = "listOwner";
+					break;
+				//case "reader":
+				default:
+					method = "listReader";
+					break;
+			}
 			
-			this.treeStore = $c.Kernel.newDatastore('filepicker', 'list_'+this.accessLevel, {
+			this.treeStore = $c.Kernel.newDatastore('filepicker', method, {
 				label: 'file_name',
 				identifier: 'relative_resource'
 			});

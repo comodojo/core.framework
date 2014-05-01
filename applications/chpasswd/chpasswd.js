@@ -1,9 +1,9 @@
 /**
- * Change your comodojo password
+ * Change password
  *
  * @package		Comodojo Core Applications
  * @author		comodojo.org
- * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
@@ -79,7 +79,7 @@ $c.App.load("chpasswd",
 				myself.chpasswdForm.fields.go.set('disabled',true);
 				$c.Kernel.newCall(myself.tryChpasswdCallback,{
 					application: "chpasswd",
-					method: "change_password",
+					method: "changePassword",
 					preventCache: true,
 					content: {
 						userPass: values.oldUserPass,

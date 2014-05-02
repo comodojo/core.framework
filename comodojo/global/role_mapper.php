@@ -19,7 +19,7 @@
  * @version		__CURRENT_VERSION__
  * @license		GPL Version 3
  */
- 
+
 class role_mapper {
 	
 	/**
@@ -53,6 +53,10 @@ class role_mapper {
 	 * @param	bool	$registerApplication	[optional] If true, role_mapper will register application allowed widely
 	 */
 	public final function __construct($registerApplications=true) {
+
+		if (COMODOJO_STARTUP_CACHE_ENABLED) { 
+			comodojo_load_resource('cache');
+		}
 		
 		if ($this->bootstrap_from_override_file() !== false) {
 			comodojo_debug('Starting comodojo role mapping (bootstrap) from override file','INFO','role_mapper');
@@ -83,7 +87,7 @@ class role_mapper {
 		return $this->applicationsProperties;
 	}
 	
-	private function get_properties($application) {
+	private function get_properties($application, $custom_properties) {
 		
 		$propertiesFile = COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER . $application . "/" . $application . ".properties";
 		$resourcesPath = COMODOJO_SITE_PATH.COMODOJO_APPLICATION_FOLDER . $application . "/resources/";
@@ -95,20 +99,25 @@ class role_mapper {
 			$this->currentApplicationSupportsLocalization = $properties["localizationSupport"];
 			$this->currentApplicationSupportedLocales = $properties["supportedLocales"];
 			$this->currentApplicationDefaultLocale = $properties["defaultLocale"];
-			$this->currentApplicationShouldStartOnBoot = $properties["autoStart"];
-			
 			//set some values from locale
 			$properties["title"] = $properties["title"][(in_array(COMODOJO_CURRENT_LOCALE,$this->currentApplicationSupportedLocales) ? COMODOJO_CURRENT_LOCALE : $this->currentApplicationDefaultLocale)];
 			$properties["description"] = $properties["description"][(in_array(COMODOJO_CURRENT_LOCALE,$this->currentApplicationSupportedLocales) ? COMODOJO_CURRENT_LOCALE : $this->currentApplicationDefaultLocale)];
+
+			if (is_null($custom_properties)) {
+				$this->currentApplicationShouldStartOnBoot = $properties["autoStart"];
+			}
+			else {
+				$this->currentApplicationShouldStartOnBoot = isset($custom_properties['autoStart']) ? filter_var($custom_properties['autoStart'], FILTER_VALIDATE_BOOLEAN) : $properties["autoStart"];
+				$properties["type"] = isset($custom_properties['type']) ? $custom_properties['type'] : $properties["type"];
+				$properties["attachNode"] = isset($custom_properties['attachNode']) ? $custom_properties['attachNode'] : $properties["attachNode"];
+				$properties["requestSpecialNode"] = isset($custom_properties['requestSpecialNode']) ? $custom_properties['requestSpecialNode'] : $properties["requestSpecialNode"];
+				$properties["placeAt"] = isset($custom_properties['placeAt']) ? $custom_properties['placeAt'] : $properties["placeAt"];
+				$properties["width"] = isset($custom_properties['width']) ? $custom_properties['width'] : $properties["width"];
+				$properties["height"] = isset($custom_properties['height']) ? $custom_properties['height'] : $properties["height"];
+				$properties["resizable"] = isset($custom_properties['resizable']) ? filter_var($custom_properties['resizable'], FILTER_VALIDATE_BOOLEAN) : $properties["resizable"];
+				$properties["maxable"] = isset($custom_properties['maxable']) ? filter_var($custom_properties['maxable'], FILTER_VALIDATE_BOOLEAN) : $properties["maxable"];
+			}
 			
-			/*
-			if (!$properties["iconSrc"] AND 
-				is_readable($resourcesPath.'icon_64.png') AND
-				is_readable($resourcesPath.'icon_32.png') AND
-				is_readable($resourcesPath.'icon_16.png')
-			) $properties["iconSrc"] = 'SELF';
-			else ... 
-			*/
 			return $properties;
 			
 		}
@@ -159,53 +168,141 @@ class role_mapper {
 		
 		$applications = Array();
 		
+		if (COMODOJO_STARTUP_CACHE_ENABLED) { 
+		
+			$c = new cache();	
+			$request = md5(COMODOJO_UNIQUE_IDENTIFIER).'_BOOTSTRAP_ROLE_'.COMODOJO_USER_ROLE;
+			$cache = $c->get_cache($request, 'JSON', false);
+
+			if ($cache !== false) {
+				comodojo_debug('Comodojo role mapping (bootstrap) will use startup cache','INFO','role_mapper');
+				$this->autoStart = $cache[2]['auto_start'];
+				$this->applicationsAllowed = $cache[2]['applications_allowed'];
+				$this->applicationsProperties = $cache[2]['applications_properties'];
+				return;
+			}
+
+		}
+		
 		foreach($userLevel as $key => $val) {
 			
-			$p = $this->get_properties($val);
-			if ($p === false){
-				comodojo_debug('Error loading level '.$userRole.' application '.$val.'. Skipping.','ERROR','role_mapper');
-				continue;
+			if (is_array($val)) {
+
+				if ( !isset($val["name"]) OR !isset($val["properties"]) ) {
+					comodojo_debug('Error loading level '.$userRole.' application '.$val.'. Skipping.','ERROR','role_mapper');
+					continue;
+				}
+
+				$p = $this->get_properties($val["name"], $val["properties"]);
+				if ($p === false){
+					comodojo_debug('Error loading level '.$userRole.' application '.$val.'. Skipping.','ERROR','role_mapper');
+					continue;
+				}
+
+				$applications[$val["name"]]["properties"] = $p;
+			
+				if ($this->currentApplicationSupportsLocalization) {
+					$l = $this->get_localization($val["name"]);
+					$applications[$val["name"]]["i18n"] = $l;
+				}
+				
+				if ($this->currentApplicationShouldStartOnBoot) {
+					array_push($this->autoStart, $val["name"]);
+				}
+				
+				array_push($this->applicationsAllowed, $val["name"]);
+
 			}
-			
-			$applications[$val]["properties"] = $p;
-			
-			if ($this->currentApplicationSupportsLocalization) {
-				$l = $this->get_localization($val);
-				$applications[$val]["i18n"] = $l;
+			else {
+
+				$p = $this->get_properties($val, null);
+				if ($p === false){
+					comodojo_debug('Error loading level '.$userRole.' application '.$val.'. Skipping.','ERROR','role_mapper');
+					continue;
+				}
+				
+				$applications[$val]["properties"] = $p;
+				
+				if ($this->currentApplicationSupportsLocalization) {
+					$l = $this->get_localization($val);
+					$applications[$val]["i18n"] = $l;
+				}
+				
+				if ($this->currentApplicationShouldStartOnBoot) {
+					array_push($this->autoStart, $val);
+				}
+				
+				array_push($this->applicationsAllowed, $val);
+
 			}
-			
-			if ($this->currentApplicationShouldStartOnBoot) {
-				array_push($this->autoStart, $val);
-			}
-			
-			array_push($this->applicationsAllowed, $val);
 			
 		}
 		
 		foreach($persistent as $key => $val) {
 			
-			$p = $this->get_properties($val);
-			if ($p === false){
-				comodojo_debug('Error loading persistent application '.$val.'. Skipping.','ERROR','role_mapper');
-				continue;
+			if (is_array($val)) {
+
+				if ( !isset($val["name"]) OR !isset($val["properties"]) ) {
+					comodojo_debug('Error loading persistent application '.$val.'. Skipping.','ERROR','role_mapper');
+					continue;
+				}
+
+				$p = $this->get_properties($val["name"], $val["properties"]);
+				if ($p === false){
+					comodojo_debug('Error loading persistent application '.$val.'. Skipping.','ERROR','role_mapper');
+					continue;
+				}
+
+				$applications[$val["name"]]["properties"] = $p;
+			
+				if ($this->currentApplicationSupportsLocalization) {
+					$l = $this->get_localization($val["name"]);
+					$applications[$val["name"]]["i18n"] = $l;
+				}
+				
+				if ($this->currentApplicationShouldStartOnBoot) {
+					array_push($this->autoStart, $val["name"]);
+				}
+				
+				array_push($this->applicationsAllowed, $val["name"]);
+
 			}
-			
-			$applications[$val]["properties"] = $p;
-			
-			if ($this->currentApplicationSupportsLocalization) {
-				$l = $this->get_localization($val);
-				$applications[$val]["i18n"] = $l;
+			else {
+
+				$p = $this->get_properties($val, null);
+				if ($p === false){
+					comodojo_debug('Error loading persistent application '.$val.'. Skipping.','ERROR','role_mapper');
+					continue;
+				}
+				
+				$applications[$val]["properties"] = $p;
+				
+				if ($this->currentApplicationSupportsLocalization) {
+					$l = $this->get_localization($val);
+					$applications[$val]["i18n"] = $l;
+				}
+				
+				if ($this->currentApplicationShouldStartOnBoot) {
+					array_push($this->autoStart, $val);
+				}
+				
+				array_push($this->applicationsAllowed, $val);
+
 			}
-			
-			if ($this->currentApplicationShouldStartOnBoot) {
-				array_push($this->autoStart, $val);
-			}
-			
-			array_push($this->applicationsAllowed, $val);
 			
 		}
 		
 		$this->applicationsProperties = $applications;
+
+		if (COMODOJO_STARTUP_CACHE_ENABLED) {
+
+			$c->set_cache(Array(
+				'auto_start'			 =>$this->autoStart,
+				'applications_allowed'	 =>$this->applicationsAllowed,
+				'applications_properties'=>$this->applicationsProperties
+			), $request, 'JSON', false);
+
+		}
 		
 	}
 	

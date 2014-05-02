@@ -13,8 +13,10 @@ $c.App.loadCss('controlpanel');
 $d.require("dojo.on");
 $d.require("dojo.mouse");
 $d.require("dojo.store.Memory");
+$d.require("dojo.data.ObjectStore");
 $d.require("dojo.parser");
 $d.require("dijit.form.TextBox");
+$d.require("dijit.form.CheckBox");
 $d.require("dijit.form.NumberTextBox");
 $d.require("dijit.form.Select");
 $d.require("comodojo.Form");
@@ -41,6 +43,22 @@ $c.App.load("controlpanel",
 		var myself = this;
 
 		this._currentBuilder = false;
+
+		this.availableAppTypes = [
+			{
+				label: "Windowed",
+				id: "windowed"
+			},{
+				label: "Modal",
+				id: "modal"
+			},{
+				label: "Attached",
+				id: "attached"
+			},{
+				label: "",
+				id: ""
+			}
+		];
 
 		this.init = function(){
 		
@@ -368,43 +386,111 @@ $c.App.load("controlpanel",
 				label: 'description',
 				items: []
 			};
-			var i = 0, o = 0;
+			var i = 0, o = 0, n = 0, available_apps = components[0].options.applications;
+
 			for (i in components[0].options.roles) {
+				
+				var ins_apps = [];
+
+				var role = components[0].options.roles[i];
+
+				var role_apps = components[0].value[role.id]
+
 				var position = storeElements.items.push({
-					id: components[0].options.roles[i].id,
-					description: components[0].options.roles[i].description,
-					//status: -1,
+					id: role.id,
+					description: role.description,
 					aggregate: 'cnt',
 					childs: []
 				});
-				for (o in components[0].options.applications) {
-					/*storeElements.items[position-1].childs.push({_reference:components[0].options.applications[o]+components[0].options.roles[i].id});
-					storeElements.items.push({
-						id: components[0].options.applications[o]+components[0].options.roles[i].id,
-						description: components[0].options.applications[o],
-						status: !components[0].value[components[0].options.roles[i].id][components[0].options.applications[o]] ? false : true
-					});*/
-					storeElements.items[position-1].childs.push({
-						id: components[0].options.applications[o]+'_'+components[0].options.roles[i].id,
-						description: components[0].options.applications[o],
-						//status: !components[0].value[components[0].options.roles[i].id][components[0].options.applications[o]] ? false : true
-						status: $c.Utils.inArray(components[0].options.applications[o],components[0].value[components[0].options.roles[i].id]) ? true : false
-					});
-					if ($c.Utils.inArray(components[0].options.applications[o],components[0].value[components[0].options.roles[i].id])) {
-						initialSelection.push(components[0].options.applications[o]+'_'+components[0].options.roles[i].id);
-					}
-				}
-			}
 
-			//console.log(storeElements);
+				for (n in role_apps) {
+
+					var current_app;
+
+					if ($d.isObject(role_apps[n])) {
+
+						current_app = {
+							description: role_apps[n].name,
+							type: $c.Utils.defined(role_apps[n].properties.type) ? role_apps[n].properties.type : '',
+							attachNode: $c.Utils.defined(role_apps[n].properties.attachNode) ? role_apps[n].properties.attachNode : '',
+							placeAt: $c.Utils.defined(role_apps[n].properties.placeAt) ? role_apps[n].properties.placeAt : '',
+							requestSpecialNode: $c.Utils.defined(role_apps[n].properties.requestSpecialNode) ? role_apps[n].properties.requestSpecialNode : '',
+							width: $c.Utils.defined(role_apps[n].properties.width) ? role_apps[n].properties.width : '',
+							height: $c.Utils.defined(role_apps[n].properties.height) ? role_apps[n].properties.height : '',
+							autoStart: $c.Utils.defined(role_apps[n].properties.autoStart) ? role_apps[n].properties.autoStart : ''
+						}
+
+					}
+					else {
+
+						current_app = {
+							description: role_apps[n],
+							type: '',
+							attachNode: '',
+							placeAt: '',
+							requestSpecialNode: '',
+							width: '',
+							height: '',
+							autoStart: ''
+						}
+						
+					}
+
+					if ($c.Utils.inArray(current_app.description, available_apps)) {
+						initialSelection.push(role.id+'_'+current_app.description);
+						storeElements.items[position-1].childs.push({
+							id: role.id+'_'+current_app.description,
+							reference: false,
+							description: current_app.description,
+							type: current_app.type,
+							attachNode: current_app.attachNode,
+							placeAt: current_app.placeAt,
+							requestSpecialNode: current_app.requestSpecialNode,
+							width: current_app.width,
+							height: current_app.height,
+							autoStart: current_app.autoStart
+						});
+					}
+
+					ins_apps.push(current_app.description);
+
+				}
+
+				for (o in available_apps) {
+
+					if ($c.Utils.inArray(available_apps[o], ins_apps)) {
+						continue;
+					}
+
+					storeElements.items[position-1].childs.push({
+						id: role.id+'_'+available_apps[o],
+						reference: false,
+						description: available_apps[o],
+						type: '',
+						attachNode: '',
+						placeAt: '',
+						requestSpecialNode: '',
+						width: '',
+						height: '',
+						autoStart: ''
+					});
+
+				}
+
+			}
 
 			var bootstrapLayout = [
 				//{ name: "id", field: "id", width: "auto" },
-				{ id: "description", name: "description", field: "description", width: "90%" },
-				{ id: "status", name: "status", field: "status", width: "10%", formatter: function(value) {
-					return !$c.Utils.defined(value.status) ? '&nbsp;' : ('<img src="'+$c.icons.getIcon(value.status ? 'on' : 'off',16)+'" alt="'+(value.status ? 'on' : 'off')+'"/>');
-				}
-			}];
+				{ id: "description", name: "description", field: "description", width: "26%" },
+				{ id: "type", name: "type", field: "type", width: "15%", alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", },
+				{ id: "attachNode", name: "attachNode", field: "attachNode", width: "15%", alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", },
+				{ id: "placeAt", name: "placeAt", field: "placeAt", width: "10%",  alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", },
+				{ id: "requestSpecialNode", name: "requestSpecialNode", field: "requestSpecialNode", width: "10%",  alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", },
+				{ id: "width", name: "width", field: "width", width: "7%",  alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", },
+				{ id: "height", name: "height", field: "height", width: "7%",  alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", },
+				{ id: "autoStart", name: "autoStart", field: "autoStart", width: "10%",  alwaysEditing: true, canEdit: function(cell) { return $c.Utils.defined(cell.row.rawData().aggregate) ? false : true; }, editor: "dijit.form.TextBox", }
+				
+			];
 			this.bootstrapStore = new dojo.data.ItemFileWriteStore({ data: storeElements });
 
 			this.bootstrapStore.hasChildren = function(id, item){
@@ -423,9 +509,11 @@ $c.App.load("controlpanel",
 					'gridx/modules/Tree',
 					'gridx/modules/RowHeader',
 					'gridx/modules/select/Row',
-					'gridx/modules/IndirectSelect'
-				],
-				selectRowTriggerOnCell: true
+					'gridx/modules/IndirectSelect',
+					"gridx/modules/CellWidget",
+					"gridx/modules/Edit"
+				]//,
+				//selectRowTriggerOnCell: true
 			});
 
 			myself._loadingStateRelease();
@@ -839,15 +927,30 @@ $c.App.load("controlpanel",
 					validData = true;
 					var bValues = this.bootstrapGrid.select.row.getSelected();
 					var jValues = {persistent: []};
-					var jParent, jId;
+					var jParent, jData, jId, jProperties;
 
 					for (var value in bValues) {
+						jProperties = {};
 						jParent = this.bootstrapGrid.row(bValues[value]).parent().id;
-						jId = this.bootstrapGrid.row(bValues[value]).data().description;
+						jData = this.bootstrapGrid.row(bValues[value]).data();
+						jId = jData.description;
 						if (!$c.Utils.defined(jValues[jParent])) {
 							jValues[jParent] = [];
 						}
-						jValues[jParent].push(jId);
+						if (jData.type.trim() != '') { jProperties.type = jData.type.trim(); }
+						if (jData.attachNode.trim() != '') { jProperties.attachNode = jData.attachNode.trim(); }
+						if (jData.placeAt.trim() != '') { jProperties.placeAt = jData.placeAt.trim(); }
+						if (jData.requestSpecialNode.trim() != '') { jProperties.requestSpecialNode = jData.requestSpecialNode.trim(); }
+						if (jData.width.trim() != '') { jProperties.width = jData.width.trim() == 'auto' ? jData.width.trim() : parseInt(jData.width); }
+						if (jData.height.trim() != '') { jProperties.height = jData.height.trim() == 'auto' ? jData.height.trim() : parseInt(jData.height); }
+						if (jData.autoStart.trim() != '') { jProperties.autoStart = jData.autoStart == 'true' ? true : false; }
+
+						if (Object.keys(jProperties).length == 0) {
+							jValues[jParent].push(jId);
+						}
+						else {
+							jValues[jParent].push({name: jId, properties: jProperties});
+						}
 					}
 					values = {BOOTSTRAP: $d.toJson(jValues)};
 				break;

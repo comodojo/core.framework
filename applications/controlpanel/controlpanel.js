@@ -927,7 +927,7 @@ $c.App.load("controlpanel",
 					validData = true;
 					var bValues = this.bootstrapGrid.select.row.getSelected();
 					var jValues = {persistent: []};
-					var jParent, jData, jId, jProperties;
+					var jParent, jData, jId, jProperties, jTrim;
 
 					for (var value in bValues) {
 						jProperties = {};
@@ -941,9 +941,64 @@ $c.App.load("controlpanel",
 						if (jData.attachNode.trim() != '') { jProperties.attachNode = jData.attachNode.trim(); }
 						if (jData.placeAt.trim() != '') { jProperties.placeAt = jData.placeAt.trim(); }
 						if (jData.requestSpecialNode.trim() != '') { jProperties.requestSpecialNode = jData.requestSpecialNode.trim(); }
-						if (jData.width.trim() != '') { jProperties.width = jData.width.trim() == 'auto' ? jData.width.trim() : parseInt(jData.width); }
-						if (jData.height.trim() != '') { jProperties.height = jData.height.trim() == 'auto' ? jData.height.trim() : parseInt(jData.height); }
-						if (jData.autoStart.trim() != '') { jProperties.autoStart = jData.autoStart == 'true' ? true : false; }
+						if (jData.width != '') {
+							if (typeof jData.width == 'string') {
+								jTrim = jData.width.trim();
+								if (!isNaN(parseFloat(jTrim)) && isFinite(jTrim)) {
+									jProperties.width = parseInt(jTrim);
+								}
+								else if (jTrim == "true") {
+									jProperties.width = true;
+								}
+								else if (jTrim == "false") {
+									jProperties.width = false;
+								}
+								else {
+									jProperties.width = jTrim;
+								}
+							}
+							else if (typeof jData.width == 'number' || typeof jData.width == 'boolean') {
+								jProperties.width = jData.width;
+							}
+							else {
+								jProperties.width = parseInt(jData.width);
+							}
+						}
+						if (jData.height != '') {
+							if (typeof jData.height == 'string') {
+								jTrim = jData.height.trim();
+								if (!isNaN(parseFloat(jTrim)) && isFinite(jTrim)) {
+									jProperties.height = parseInt(jTrim);
+								}
+								else if (jTrim == "true") {
+									jProperties.height = true;
+								}
+								else if (jTrim == "false") {
+									jProperties.height = false;
+								}
+								else {
+									jProperties.height = jTrim;
+								}
+							}
+							else if (typeof jData.height == 'number' || typeof jData.height == 'boolean') {
+								jProperties.height = jData.height;
+							}
+							else {
+								jProperties.height = parseInt(jData.height);
+							}
+						}
+						if (jData.autoStart != '') {
+							if (typeof jData.autoStart == 'string') {
+								jTrim = jData.autoStart.trim();
+								jProperties.autoStart = jData.autoStart == 'true' ? true : false;
+							}
+							else if (typeof jData.autoStart == 'boolean') {
+								jProperties.autoStart = jData.autoStart;
+							}
+							else {
+								jProperties.autoStart = false;
+							}
+						}
 
 						if (Object.keys(jProperties).length == 0) {
 							jValues[jParent].push(jId);

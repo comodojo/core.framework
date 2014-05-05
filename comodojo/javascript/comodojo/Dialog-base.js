@@ -185,6 +185,10 @@ var dbase = declare(null, {
 			comodojo.debugDeep('Dialog with id: ' + this.id + ' will be destroyed in ' + this.timer + 'ms.');
 		}
 		
+		if (utils.defined(this.toAppend)) {
+			this._dialog.containerNode.appendChild(this.toAppend);
+		}
+		
 		if (this.secondaryCloseButton || this.actionOk !== null || this.actionCancel !== null) {
 			this.actionBar = domConstruct.create("div", {
 				"class": "dijitDialogPaneActionBar"
@@ -225,10 +229,6 @@ var dbase = declare(null, {
 			}).placeAt(this.actionBar);
 		}
 		
-		if (utils.defined(this.toAppend)) {
-			this._dialog.containerNode.appendChild(this.toAppend);
-		}
-
 		if (!this.hided) {
 			this._dialog.startup();
 			this._dialog.show();

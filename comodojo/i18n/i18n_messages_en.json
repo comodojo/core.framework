@@ -39,5 +39,7 @@
 	"10038":"Birthday",
 	"10039":"Gender",
 	"10040":"Change",
-	"10041":"One or more applications are still open, unsaved data will be lost"
+	"10041":"One or more applications are still open, unsaved data will be lost",
+	"10042":"Error determining user's location",
+	"10043":"Select an address"
 }

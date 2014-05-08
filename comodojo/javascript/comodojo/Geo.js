@@ -1,40 +1,14 @@
 define("comodojo/Geo", [
 	"dojo/_base/lang",
 	"dojo/_base/Deferred",
-	/*"dojo/has",*/
 	"dojo/_base/declare",
-	//"dojo/request",
-	"dojo/dom-construct",
-	//"dojo/dom-class",
-	//"dojo/dom-geometry",
-	//"dojo/dom-style",
-	//"dijit/layout/BorderContainer",
-	//"dijit/layout/ContentPane",
-	//"dijit/layout/TabContainer",
-	//"dijit/layout/AccordionContainer",
-	//"dojox/layout/ExpandoPane",
-	//"comodojo/Utils",
-	//"gridx/core/model/cache/Sync",
-	//"gridx/core/model/cache/Async"
+	"dojo/dom-construct"
 ], 
 function(
 	lang,
 	Deferred,
-	/*, has*/
 	declare,
-	//request,
 	domConstruct
-	//domClass,
-	//domGeom,
-	//domStyle,
-	//BorderContainer,
-	//ContentPane,
-	//TabContainer,
-	//AccordionContainer,
-	//ExpandoPane,
-	//Utils,
-	//SyncCache,
-	//AsyncCache
 ){
 
 	// module:
@@ -56,12 +30,15 @@ var Geo = declare(null,{
 
 	// Zoom level on the location
 	// Int
-	zoom: 15,
-	
+	mapzoom: 15,
 	
 	// Autozoom to the location/s marker/s
 	// Bool
 	autozoom: false,
+
+	// Try to get user location at startup
+	// Bool
+	locateuser: false,
 	
 	// Default markers animation (DROP or BOUNCE)
 	// String
@@ -74,27 +51,52 @@ var Geo = declare(null,{
 
 		declare.safeMixin(this,args);
 
+		this.active_markers = [];
+
+		this.geocode_multiple_results = [];
+
+		this.reverse_geocode_multiple_results = [];
+
 		node = $c.Utils.nodeOrId(this.attachNode);
 
 		this.map = new google.maps.Map(node,{
 			mapTypeId: google.maps.MapTypeId[this.mapType]
 		});
 
-		if (this.lat !== false && thig.lng !== false) {
-			this.point(new google.maps.LatLng(this.lat,thig.lng));
-		}
-		
-		this.markers = [];
-
 		that = this;
+
+		this.startup_location();
+
+	},
+
+	startup_location: function() {
+
+		if (this.lat !== false && this.lng !== false) {
+
+			this.point(new google.maps.LatLng(this.lat,this.lng));
+			this.zoom();
+
+		}
+		else if (this.locateuser) {
+			
+			this.locate().then(function(position) {
+				that.point(position.latlng);
+			},function(error) {
+				$c.Error.generic(false,$c.getLocalizedMessage('10042'),error);
+			});
+			this.zoom();
+
+		}
+		else {
+			this.point(new google.maps.LatLng(41.9100711,12.5359979));
+			this.zoom(5);
+		}
 
 	},
 
 	point: function(LatLng) {
 
-		//var ll = new google.maps.LatLng(latitude,longitude);
 		this.map.setCenter(LatLng);
-		//this.map.setZoom(!zoom ? this.zoom : zoom);
 
 	},
 
@@ -110,7 +112,8 @@ var Geo = declare(null,{
 	},
 
 	zoom: function(zoom) {
-		this.map.setZoom(!zoom ? this.zoom : zoom);
+		this.mapzoom = !zoom ? this.mapzoom : zoom;
+		this.map.setZoom(this.mapzoom);
 	},
 
 	latlng: function(lat, lng) {
@@ -140,29 +143,29 @@ var Geo = declare(null,{
 
 			if (results.length != 1) {
 				var content = [];
+				this.geocode_multiple_results = results;
 				for (var i in results) {
 					content.push({
-						id: results[i],
+						id: i,
 						label: results[i].formatted_address
 					});
 				}
-				$c.Dialog.select("Select an address",'',content,this.geocodeResolv);
+				$c.Dialog.select($c.getLocalizedMessage('10043'),'',content,this.geocodeResolve);
 			}
 			else {
-				this.geocode_deferred.resolve(results);
+				this.geocode_deferred.resolve(results[0]);
 			}
 
 		}
 		else {
-			//$c.Error.minimal('Error: '+status);
 			this.geocode_deferred.reject(status);
 		}
 
 	},
 
-	geocodeResolv: function(result) {
+	geocodeResolve: function(result) {
 
-		this.geocode_deferred.resolve(result);
+		that.geocode_deferred.resolve(that.geocode_multiple_results[result]);
 		
 	},
 
@@ -200,13 +203,14 @@ var Geo = declare(null,{
 
 			if (results.length != 1) {
 				var content = [];
+				this.reverse_geocode_multiple_results = results;
 				for (var i in results) {
 					content.push({
-						id: results[i],
+						id: i,
 						label: results[i]
 					});
 				}
-				$c.Dialog.select("Select an address",'',content,this.reverseGeocodeResolv);
+				$c.Dialog.select($c.getLocalizedMessage('10043'),'',content,this.reverseGeocodeResolv);
 			}
 			else {
 				this.reversegeocode_deferred.resolve(results);
@@ -214,7 +218,6 @@ var Geo = declare(null,{
 
 		}
 		else {
-			//$c.Error.minimal('Error: '+status);
 			this.reversegeocode_deferred.reject(status);
 		}
 
@@ -222,7 +225,7 @@ var Geo = declare(null,{
 
 	reverseGeocodeResolv: function(result) {
 
-		this.reversegeocode_deferred.resolve(result);
+		that.reversegeocode_deferred.resolve(that.reverse_geocode_multiple_results[result]);
 		
 	},
 	
@@ -232,7 +235,6 @@ var Geo = declare(null,{
 			this.reversegeocode_deferred.resolve(results);
 		}
 		else {
-			//$c.Error.minimal('Error: '+status);
 			this.reversegeocode_deferred.reject(status);
 		}
 
@@ -241,7 +243,7 @@ var Geo = declare(null,{
 	marker: function(LatLng, properties, name) {
 
 		var prop = {
-			title: false,
+			title: '',
 			icon: null,
 			draggable: false,
 			animated: false,
@@ -249,7 +251,7 @@ var Geo = declare(null,{
 			bubbleOpened: false
 		};
 
-		lang.safeMixin(prop,properties);
+		lang.mixin(prop,properties);
 
 		if (!name) {
 			name = (Math.random() + 1).toString(36).substring(5);
@@ -264,7 +266,7 @@ var Geo = declare(null,{
 			animation: prop.animated !== false ? google.maps.Animation[this.markersAnimation] : null
 		});
 
-		this.markers[name] = {
+		this.active_markers[name] = {
 			latlng: LatLng,
 			properties: prop,
 			marker: marker
@@ -285,10 +287,10 @@ var Geo = declare(null,{
 
 		}
 
-		if (this.markers.length != 1 && this.autozoom) {
+		if (this.active_markers.length != 1 && this.autozoom) {
 			var i=0, LatLngs=[];
-			for (i in this.markers) {
-				LatLngs.push(this.markers[i].latlng);
+			for (i in this.active_markers) {
+				LatLngs.push(this.active_markers[i].latlng);
 			}
 			this.multipoint(LatLngs);
 		}
@@ -304,7 +306,7 @@ var Geo = declare(null,{
 		var i=0, marks=[];
 
 		for (i in markers) {
-			marks.push(this.marker(markers[i].LatLng, markers[i].properties, markers[i].name));
+			marks.push(this.marker(markers[i][0], markers[i][1], markers[i][2]));
 		}
 
 		return marks;
@@ -313,17 +315,17 @@ var Geo = declare(null,{
 
 	removeMarker: function(name) {
 
-		if ($c.Utils.defined(this.markers[name])) {
-			this.markers[name].marker.setMap(null);
-			delete this.markers[name];
+		if ($c.Utils.defined(this.active_markers[name])) {
+			this.active_markers[name].marker.setMap(null);
+			delete this.active_markers[name];
 		}
 
 	},
 
 	getMarker: function(name) {
 
-		if ($c.Utils.defined(this.markers[name])) {
-			return this.markers[name];
+		if ($c.Utils.defined(this.active_markers[name])) {
+			return this.active_markers[name];
 		}
 		else {
 			return false;
@@ -333,20 +335,67 @@ var Geo = declare(null,{
 
 	getMarkers: function() {
 
-		return this.markers;
+		return this.active_markers;
 
 	},
 
-	reset: function() {
+	locate: function(params) {
+		
+		var options = {
+			enableHighAccuracy: true,
+			timeout: 5000,
+			maximumAge: 0
+		}
+
+		lang.mixin(options,params);
+
+		this.locate_deferred = new Deferred();
+		
+		if(navigator.geolocation) {
+			
+			navigator.geolocation.getCurrentPosition(lang.hitch(this,"locateResolve"),lang.hitch(this,"locateError"),options);
+
+		} else {
+
+			setTimeout(function() {
+				that.locateError(false);
+			},100);
+
+		}
+
+		return this.locate_deferred.promise;
+
+	},
+
+	locateResolve: function(position) {
+
+		var crd = position.coords;
+
+		this.locate_deferred.resolve({
+			latlng: this.latlng(crd.latitude,crd.longitude),
+			lat: crd.latitude,
+			lng: crd.longitude,
+			accuracy: crd.accuracy
+		});
+
+	},
+
+	locateError: function(err) {
+
+		this.locate_deferred.reject(!err ? "Browser does not support geolocation" : err.name);
+
+	},
+
+	reset: function(skiplocation) {
 
 		var i=0;
 
-		for (var i in this.markers) {
-			this.markers[i].marker.setMap(null);
+		for (var i in this.active_markers) {
+			this.active_markers[i].marker.setMap(null);
 		}
 
-		if (this.lat !== false && thig.lng !== false) {
-			this.point(new google.maps.LatLng(this.lat,thig.lng));
+		if (!skiplocation) {
+			this.startup_location();
 		}
 
 	}

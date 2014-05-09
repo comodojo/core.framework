@@ -41,5 +41,7 @@
 	"10040":"Modifica",
 	"10041":"Alcune applicazioni sono ancora aperte, i dati non salvati verranno persi",
 	"10042":"Cerca",
-	"10043":"Sto cercando..."
+	"10043":"Sto cercando...",
+	"10044":"Impossibile determinare la posizione dell'utente",
+	"10045":"Seleziona un indirizzo"
 }

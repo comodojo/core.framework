@@ -258,16 +258,6 @@ $c.App.load("usersmanager",
 			});
 			this.container.main.center.local.local_actions.containerNode.appendChild(this.updateSaveButton.domNode);
 
-			//{
-			//	name: "go_pwd",
-			//	type: "Button",
-			//	label: this.getLocalizedMessage('0006'),
-			//	disabled: !$c.App.isRegistered('rstpasswd'),
-			//	onClick: function() {
-			//		$c.App.start('rstpasswd');
-			//	}
-			//}
-
 		};
 
 		this.layout_realm = function(i, layout) {

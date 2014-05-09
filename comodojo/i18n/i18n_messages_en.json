@@ -41,5 +41,7 @@
 	"10040":"Change",
 	"10041":"One or more applications are still open, unsaved data will be lost",
 	"10042":"Search",
-	"10043":"Searching..."
+	"10043":"Searching...",
+	"10044":"Error determining user's location",
+	"10045":"Select an address"
 }

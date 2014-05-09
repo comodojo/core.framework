@@ -136,6 +136,7 @@ class filesystem {
 	 * Internal pointer to home path 
 	 */
 	private $_homePath = null;
+	private $default_mask = 0644;
 	
 	/**
 	 * Internal pointer to file path 
@@ -562,6 +563,8 @@ class filesystem {
 			$directory = substr($directory,0,-1);
 		}
 
+		$myNewGhost = $this->_homePath . ($this->filePath[strlen($this->filePath)-1] == "/" ? $this->filePath : $this->filePath . "/") . "._" . $this->fileName . ".acl";
+
 		$handle = opendir($directory);
 		while (false !== ($item = readdir($handle))) {
 			if($item != '.' && $item != '..') {
@@ -594,6 +597,8 @@ class filesystem {
 			return false;
 		}
 
+		if ($this->_checkRealFilePermissions($myNewGhost)) unlink($myNewGhost);		
+
 		comodojo_debug('Directory '.$directory.' successfully removed','INFO','filesystem');
 		return true;
 
@@ -613,7 +618,7 @@ class filesystem {
 				if (!$this->_removeDirectoryHelper($this->_file)) {
 					$toReturn = false;
 				}
-				elseif (!mkdir($this->_file, umask(), true)) {
+				elseif (!mkdir($this->_file, /*umask()*/$this->default_mask, true)) {
 					comodojo_debug('Directory '.$this->_file.' can\'t be created','ERROR','filesystem');
 					$toReturn = false;
 				}
@@ -642,7 +647,7 @@ class filesystem {
 			}
 			else {
 
-				if (!mkdir($this->_file, umask(), true)) {
+				if (!mkdir($this->_file, /*umask()*/$this->default_mask, true)) {
 					comodojo_debug('Directory '.$this->_file.' can\'t be created','ERROR','filesystem');
 					$toReturn = false;
 				}
@@ -1873,6 +1878,42 @@ class filesystem {
 			if (!$this->_createFile()) {
 				comodojo_debug('Error creating new directory '.$this->_file,'ERROR','filesystem');
 				throw new Exception("Error creating new directory ".$this->_file, 1108);
+			}
+			
+			return true;
+				
+		}
+
+	}
+
+	/**
+	 * Remove user's home directory 
+	 *
+	 * Use with care...
+	 *
+	 * @param	string	$user	Username to process
+	 * 
+	 * @return	bool			True in case of success, false in case of no privileges; exception in case of error
+	 */
+	public function removeHome($user) {
+		
+		if (!$user) {
+			comodojo_debug('Cannot remove user home without username','ERROR','filesystem');
+			throw new Exception("Directory cannot be removed", 1115);
+		}
+		
+		$this->filePath = "/";
+		$this->fileName = $user;
+		
+		if (!$this->_readUserPermissions()) {
+			comodojo_debug('No file founded or no acl for this directory','ERROR','filesystem');
+			throw new Exception("No file founded or no acl for this directory", 1102);
+		}
+		else {
+			
+			if (!$this->_removeFile()) {
+				comodojo_debug('Directory cannot be removed','ERROR','filesystem');
+				throw new Exception("Directory cannot be removed", 1115);
 			}
 			
 			return true;

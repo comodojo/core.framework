@@ -11,8 +11,8 @@
  */
 
 $lang = Array(
-	'0000'	=>	'Utilizza gravatar',
-	'0001'	=>	'URL personale',
+	'0000'	=>	'Use gravatar',
+	'0001'	=>	'Personal URL',
 	'0002'	=>	'Change password',
 	'0003'	=>	'Profile updated!',
 	'0004'	=>	'',

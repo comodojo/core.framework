@@ -23,7 +23,7 @@ class chmod extends application {
 		comodojo_load_resource('users_management');
 		$um = new users_management();
 		try {
-			$result = $um->get_users(16);
+			$result = $um->get_users(16, true, true);
 		}
 		catch (Exception $e){
 			throw $e;

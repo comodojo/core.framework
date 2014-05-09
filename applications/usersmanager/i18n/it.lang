@@ -11,16 +11,16 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Utenti locali',
+	'0001'	=>	'Abilita utente',
+	'0002'	=>	'Disabilita utente',
+	'0003'	=>	'Elimina utente',
+	'0004'	=>	'Nuovo utente',
+	'0005'	=>	'Aggiorna profilo',
+	'0006'	=>	'Reset password',
+	'0007'	=>	'Registra utente',
+	'0008'	=>	'Utilizza gravatar',
+	'0009'	=>	'URL personale'
 );
 
 ?>

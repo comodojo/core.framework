@@ -19,7 +19,7 @@ class userdialog extends application {
 	public function get_users($params) {
 		comodojo_load_resource('users_management');
 		$um = new users_management();
-		return $um->get_users(16);
+		return $um->get_users(16, true, true);
 	}
 	
 }

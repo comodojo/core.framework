@@ -109,7 +109,7 @@ class users_management {
 			//}
 			else {
 				comodojo_debug('Unsupported action','ERROR','users_management');
-				throw new Exception("Unknown user", 2603);
+				throw new Exception("Unsupported action", 2603);
 			}
 		}
 		catch (Exception $e){
@@ -189,7 +189,7 @@ class users_management {
 	 * 
 	 * @return	array
 	 */
-	public function get_users($userImageDimensions=64) {
+	public function get_users($userImageDimensions=64, $enabledOnly=false, $useCache=true) {
 		
 		comodojo_load_resource('database');
 		comodojo_load_resource('cache');
@@ -199,9 +199,14 @@ class users_management {
 		
 		try {
 
-			$c = new cache();
-			$cache = $c->get_cache($request, 'JSON', false);
-			
+			if ($useCache) {
+				$c = new cache();
+				$cache = $c->get_cache($request, 'JSON', false);
+			}
+			else {
+				$cache = false;
+			}
+
 			if ($cache !== false) {
 				$to_return = $cache[2]['cache_content'];
 			}
@@ -210,25 +215,34 @@ class users_management {
 				$to_return = array();
 				
 				$db = new database();
-				$results = $db->table('users')
-				->keys(Array("userName","completeName","email","gravatar"))
-				->where("enabled","=",1)
-				->get();
+				$results = $db->table('users')->keys(Array("userName","completeName","email","gravatar","userRole","enabled"));
 
-				if (!$userImageDimensions) {
-					foreach ($results['result'] as $result) {
-						array_push($to_return,Array("userName"=>$result['userName'],"completeName"=>$result['completeName']));
-					}
+				if ($enabledOnly) {
+					$results->where("enabled","=",1);
 				}
-				else {
-					foreach ($results['result'] as $result) {
-						array_push($to_return,Array("userName"=>$result['userName'],"completeName"=>$result['completeName'],"userImage"=>get_user_avatar($result['userName'],$result['email'],$result['gravatar'],$userImageDimensions)));
-					}
+				
+				$results = $results->get();
+
+				foreach ($results['result'] as $user) {
+					
+					$user_profile = Array(
+						"userName"		=> $user['userName'],
+						"completeName"	=> $user['completeName'],
+						"userRole"		=> $user['userRole']
+					);
+
+					if (is_int($userImageDimensions)) $user_profile["userImage"] = get_user_avatar($user['userName'],$user['email'],$user['gravatar'],$userImageDimensions);
+
+					if (!$enabledOnly) $user_profile["enabled"] = $user['enabled'];
+
+					array_push($to_return,$user_profile);
+
 				}
 
-				$c->set_cache(Array('cache_content'=>$to_return), $request, 'JSON', false);
+				if ($useCache) $c->set_cache(Array('cache_content'=>$to_return), $request, 'JSON', false);
 
 			}
+
 		}
 		catch (Exception $e){
 			throw $e;
@@ -493,8 +507,10 @@ class users_management {
 			throw new Exception("Only administrators can manage users", 2605);
 		}
 
+		comodojo_load_resource('filesystem');
 		comodojo_load_resource('events');
 		$events = new events();
+		$fs = new filesystem();
 		
 		try {
 			$presence = $this->findRegisteredUser($userName, true, false);
@@ -503,6 +519,7 @@ class users_management {
 			if (!is_null($presence)) {
 				comodojo_debug('Deleting user: '.$userName." defined as ".$presence,'INFO','users_management');
 				$success = $this->delete_user_local($userName, true);
+				$fs->removeHome($userName);
 			}
 			else {
 				comodojo_debug('Unknown user','ERROR','users_management');

@@ -11,16 +11,16 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'Local Users',
+	'0001'	=>	'Enable user',
+	'0002'	=>	'Disable user',
+	'0003'	=>	'Delete user',
+	'0004'	=>	'New User',
+	'0005'	=>	'Update user profile',
+	'0006'	=>	'Reset password',
+	'0007'	=>	'Save User',
+	'0008'	=>	'Use gravatar',
+	'0009'	=>	'Personal URL'
 );
 
 ?>

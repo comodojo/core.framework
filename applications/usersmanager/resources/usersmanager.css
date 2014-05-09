@@ -1,0 +1,25 @@
+.usersmanager_user_enabled_label {
+	font-weight: bold;
+}
+
+.usersmanager_user__disabled_label {
+	color: grey;
+}
+
+.usersmanager_user_enabled {
+	background-image: url('user_enabled.png'); 
+	width: 16px;
+	height: 16px;
+}
+
+.usersmanager_user_disabled {
+	background-image: url('user_disabled.png'); 
+	width: 16px;
+	height: 16px
+}
+
+.usersmanager_user_ {
+	background-image: url('../../../comodojo/images/small_loader.gif'); 
+	width: 16px;
+	height: 16px
+}

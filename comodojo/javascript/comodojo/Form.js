@@ -243,7 +243,7 @@ var form = declare(null,{
 		
 		for (i in this.hierarchy) {
 			
-			if (this.hierarchy[i].type == "info" || this.hierarchy[i].type == "success" || this.hierarchy[i].type == "warning" || this.hierarchy[i].type == "error") {
+			if (comodojo.Utils.inArray(this.hierarchy[i].type, ['info', 'success', 'warning', 'error'])) {
 				myField = this._makeHierarchyBoxHelper(this.hierarchy[i]);
 				if (this.hierarchy[i].name) {
 					this._form.fields[this.hierarchy[i].name] = myField;

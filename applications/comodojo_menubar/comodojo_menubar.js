@@ -155,7 +155,7 @@
 			container.on("open", function(){ myself.sessionLoginForm.fields.userName.focus(); });
 			
 			this.sessionLoginForm = new $c.Form({
-				modules: ['Button','PasswordTextBox','ValidationTextBox'],
+				modules: ['BusyButton','PasswordTextBox','ValidationTextBox'],
 				formWidth: 400,
 				hierarchy:[{
 					name: "session_login_form_info",
@@ -175,7 +175,7 @@
 					required: true
 				}, {
 					name: "login",
-					type: "Button",
+					type: "BusyButton",
 					label: this.getLocalizedMessage('0020'),
 					onClick: function() {
 						myself.tryLogin();
@@ -195,7 +195,7 @@
 			}).build();
 			
 			this.sessionLoginForm.fields.userName.on("keypress", function(key){ if (key.keyCode == '13') {myself.sessionLoginForm.fields.userPass.focus();} });
-			this.sessionLoginForm.fields.userPass.on("keypress", function(key){ if (key.keyCode == '13') {myself.sessionLoginForm.fields.login.onClick();} });
+			this.sessionLoginForm.fields.userPass.on("keypress", function(key){ if (key.keyCode == '13') {myself.sessionLoginForm.fields.login.makeBusy(); myself.sessionLoginForm.fields.login.onClick();} });
 			
 			return container;
 			
@@ -449,6 +449,7 @@
 			if (!myself.sessionLoginForm.validate()) {
 				myself.sessionLoginForm.fields.session_login_form_info.changeType('warning');
 				myself.sessionLoginForm.fields.session_login_form_info.changeContent(myself.getLocalizedMessage('0027'));
+				myself.sessionLoginForm.fields.login.cancel();
 			}
 			else {
 				myself.sessionLoginForm.fields.session_login_form_info.changeType('info');
@@ -462,10 +463,12 @@
 			if (success) {
 				myself.sessionLoginForm.fields.session_login_form_info.changeType('success');
 				myself.sessionLoginForm.fields.session_login_form_info.changeContent(myself.getLocalizedMessage('0029'));
+				myself.sessionLoginForm.fields.login.set('label',myself.getLocalizedMessage('0029'));
 			}
 			else {
 				myself.sessionLoginForm.fields.session_login_form_info.changeType('error');
 				myself.sessionLoginForm.fields.session_login_form_info.changeContent(myself.getLocalizedMessage('0030'));
+				myself.sessionLoginForm.fields.login.cancel();
 			}
 		};
 		

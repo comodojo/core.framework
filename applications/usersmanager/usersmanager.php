@@ -17,6 +17,9 @@ class usersmanager extends application {
 		$this->add_application_method('enableUser', 'enable_user', Array("userName"), 'DESCRIPTION',false);
 		$this->add_application_method('disableUser', 'disable_user', Array("userName"), 'DESCRIPTION',false);
 		$this->add_application_method('deleteUser', 'delete_user', Array("userName"), 'DESCRIPTION',false);
+		$this->add_application_method('getUser', 'get_user', Array("userName"), 'DESCRIPTION',false);
+		$this->add_application_method('updateUser', 'update_user', Array("userName"), 'DESCRIPTION',false);
+		$this->add_application_method('saveUser', 'save_user', Array("userName"), 'DESCRIPTION',false);
 	}
 
 	public function get_users_roles_realms($params) {
@@ -100,6 +103,31 @@ class usersmanager extends application {
 
 	}
 
+	public function get_user($params) {
+
+		comodojo_load_resource('users_management');
+		
+		try {
+
+			$users = new users_management();
+			$result = $users->get_user_extensive($params['userName'], false);
+
+		} catch (Exception $e) {
+			throw $e;
+		}
+
+		return $result;
+
+	}
+
+	public function update_user($params) {
+
+	}
+
+	public function save_user($params) {
+
+	}
+
 	private final function get_auth_servers() {
 
 		$rpcs = json2array(COMODOJO_AUTHENTICATION_RPCS);
@@ -107,6 +135,11 @@ class usersmanager extends application {
 		$ldaps = json2array(COMODOJO_AUTHENTICATION_LDAPS);
 
 		$servers = Array();
+
+		$servers["local"] = Array(
+			"server"	=>	"local",
+			"type"		=>	"local"
+		);
 
 		foreach ($rpcs as $rpc) {
 			$servers[$rpc["name"]] = Array(

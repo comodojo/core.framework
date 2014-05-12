@@ -43,5 +43,7 @@
 	"10042":"Search",
 	"10043":"Searching...",
 	"10044":"Error determining user's location",
-	"10045":"Select an address"
+	"10045":"Select an address",
+	"10046":"User's Role",
+	"10047":"Authentication"
 }

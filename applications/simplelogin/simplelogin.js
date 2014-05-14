@@ -8,7 +8,7 @@
  * @license		GPL Version 3
  */
 
- $c.App.loadCss('simplelogin');
+$c.App.loadCss('simplelogin');
 $d.require("comodojo.Form");
 
 $c.App.load("simplelogin",

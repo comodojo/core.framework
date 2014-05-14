@@ -1,76 +1,22 @@
 <?php
 
 /**
- * chpasswd.js
+ * Send mail
  *
- * Update or reset passwords in Comodojo mode
- *
- * @package		Comodojo Applications
+ * @package		Comodojo Core Applications
  * @author		comodojo.org
- * @copyright	2010 comodojo.org (info@comodojo.org)
+ * @copyright	__COPYRIGHT__ comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
  */
 
-@session_start();
+class sendmail extends application {
+	
+	public function init() {
+		$this->add_application_method('send', 'Send', Array(), 'Send mail',false);
+	}
 
-class testMailSend {
-	
-	protected $kernelRequiredParameters = Array(
-		"send_mail"	=>	Array("from","to","cc","bcc","subject","priority","message","isHtmlMail")
-	);
-	
-	protected function doCall($selector, $params) {
-		
-		switch ($selector) {
-			case "check_engine":
-				$toReturn = $this->checkEngine();
-			break;
-			
-			case "send_mail":
-				$toReturn = $this->sendMail($params);
-			break;
-			
-			default:
-				$this->success = false;
-				$toReturn = false;
-			break;
-		}
-		return $toReturn;
-		
-	}
-	
-	protected function doDatastoreCall($selector) {
-		$result = false;
-		return $result;
-	}
-	
-	public function checkEngine() {
-		
-		$this->success = true;
-		
-		return (!$_SESSION[SITE_UNIQUE_IDENTIFIER]["smtpServer"] OR $_SESSION[SITE_UNIQUE_IDENTIFIER]["smtpServer"] == "" OR !$_SESSION[SITE_UNIQUE_IDENTIFIER]["smtpAddress"] OR $_SESSION[SITE_UNIQUE_IDENTIFIER]["smtpAddress"] == "") ? false : true;
-		
-	}
-	
-	public function sendMail($params) {
-		
-		if (!function_exists("loadHelper_mail")) {
-			require($_SESSION[SITE_UNIQUE_IDENTIFIER]["sitePath"] . "comodojo/abstractionLayers/smtpTalk.php");
-		}
-		
-		$mail = new mail;
-		
-		$mail->to = $params['to'];
-		$mail->cc = $params['cc'];
-		$mail->bcc = $params['bcc'];
-		$mail->replyTo = $params['from'];
-		$mail->priority = $params['priority'];
-		$mail->subject = $params['subject'];
-		$mail->message = $params['message'];
-		
-		$result = $params['isHtmlMail'] ? $mail->sendHtmlMail() : $mail->sendMail();
-		
-		$this->success = $result['success'];
-		return $result['result'];
+	public function Send($params) {
 		
 	}
 	

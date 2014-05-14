@@ -504,7 +504,7 @@ $c.App.load("servicesmanager",
 			this._resetForm();
 			this._enableForm();
 			this._resetEditor();
-			this.mirror.setValue("<?php\n\ncomodojo_load_resource('service');\n\nclass [SERVICENAME] extends service {\n\n\tpublic function get($attributes) {\n\t\t\n\t}\n\t\n\tpublic function put($attributes) {\n\t\t\n\t}\n\n\tpublic function post($attributes) {\n\t\t\n\t}\n\n\tpublic function delete($attributes) {\n\t\t\n\t}\n\n}\n\n?>");
+			this.mirror.setValue("<?php\n\nclass [SERVICENAME] extends service {\n\n\tpublic function get($attributes) {\n\t\t\n\t}\n\t\n\tpublic function put($attributes) {\n\t\t\n\t}\n\n\tpublic function post($attributes) {\n\t\t\n\t}\n\n\tpublic function delete($attributes) {\n\t\t\n\t}\n\n}\n\n?>");
 			this._enableEditor();
 		};
 

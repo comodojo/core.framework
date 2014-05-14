@@ -125,6 +125,8 @@ class ssh {
 			if (!$this->_ssh->login($this->user, $this->password)) throw new Exception("failed authentication or network unavailable",1602);
 			comodojo_debug("Connected to ".$this->address." w phplibsec transport","INFO","ssh");
 		}
+
+		return $this;
 		
 	}
 	

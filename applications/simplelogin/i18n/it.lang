@@ -1,0 +1,34 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Inserisci le tue credenziali per accedere',
+	'0001'	=>	'Accesso in corso...',
+	'0002'	=>	'Accesso riuscito!',
+	'0003'	=>	'Impossibile accedere: username sconosciuto o password non valida',
+	'0004'	=>	'Nome utente',
+	'0005'	=>	'Password',
+	'0006'	=>	'Accedi',
+	'0007'	=>	'Non ricordi la password?',
+	'0008'	=>	'{0}Registrati al portale{1} o {2}invia una nuova email{3}',
+	'0009'	=>	'Registrati al portale',
+	'0010'	=>	'Si è verificato un errore nel caricamento delle informazioni utente',
+	'0011'	=>	'Modifica il tuo profilo',
+	'0012'	=>	'Modifica localizzazione',
+	'0013'	=>	'Cambia password',
+	'0014'	=>	'Modifica il tuo profilo',
+	'0015'	=>	'Modifica localizzazione',
+	'0016'	=>	'Cambia password',
+	'0017'	=>	'Logout',
+	'0018'	=>	'',
+	'0019'	=>	'',
+);

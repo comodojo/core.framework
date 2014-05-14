@@ -1,0 +1,33 @@
+.simplelogin_userInfo_container {
+	width: 400px;
+	height: 70px;
+}
+
+.simplelogin_userInfo_name {
+	text-align: center;
+	font-weight: bold;
+	font-size: 16px;
+	width: 230px;
+	float: right;
+	height: 69px;
+	padding-top: 28px;
+}
+
+.simplelogin_userInfo_avatar{
+	width: 66px;
+	height: 66px;
+	border: 1px solid #444444;
+	float: left;
+	/*margin: 2px;*/
+}
+
+.simplelogin_userAction_container {
+	width: 400px;
+	text-align: center;
+}
+
+.simplelogin_userAction_button {
+	width: 400px;
+	display: block;
+	margin-top: 10px;
+}

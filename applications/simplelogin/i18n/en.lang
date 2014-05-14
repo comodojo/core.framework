@@ -1,0 +1,36 @@
+<?php
+ 
+/**
+ * Comodojo application locale pack
+ *
+ * @package		Comodojo Core Applications
+ * @author		comodojo.org
+ * @copyright	2012 comodojo.org (info@comodojo.org)
+ * @version		__CURRENT_VERSION__
+ * @license		GPL Version 3
+ */
+
+$lang = Array(
+	'0000'	=>	'Please insert your credential',
+	'0001'	=>	'Logging in...',
+	'0002'	=>	'Login succeed!',
+	'0003'	=>	'Error logging in: unknown username or wrong password',
+	'0004'	=>	'Username',
+	'0005'	=>	'Password',
+	'0006'	=>	'Login',
+	'0007'	=>	'Password lost?',
+	'0008'	=>	'{0}Sign up{1} or {2}resend validation email{3}',
+	'0009'	=>	'Sign up',
+	'0010'	=>	'Error retrieving user informations',
+	'0011'	=>	'Edit your profile',
+	'0012'	=>	'Change localizzation',
+	'0013'	=>	'Change password',
+	'0014'	=>	'Edit your profile',
+	'0015'	=>	'Change localizzation',
+	'0016'	=>	'Change password',
+	'0017'	=>	'Logout',
+	'0018'	=>	'',
+	'0019'	=>	'',
+);
+
+?>

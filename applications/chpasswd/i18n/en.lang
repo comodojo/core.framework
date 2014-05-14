@@ -20,7 +20,7 @@ $lang = Array(
 	'0006'	=>	'Fill and check all fields first',
 	'0007'	=>	'Changing password...',
 	'0008'	=>	'Password changed correctly',
-	'0009'	=>	''
+	'0009'	=>	'New Password does not match, please retype'
 );
 
 ?>

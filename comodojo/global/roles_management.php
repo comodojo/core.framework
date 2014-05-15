@@ -28,6 +28,13 @@ class roles_management {
 	 * @default Array(1,2,3);
 	 */
 	private $protected_roles = Array(1,2,3);
+
+	/**
+	 * If true, system will not check for existing users while deleting role
+	 *
+	 * @default false;
+	 */
+	private $ignore_users_in_role = false;
 	
 /********************** PRIVATE VARS *********************/
 
@@ -63,6 +70,8 @@ class roles_management {
 	 */
 	public function get_role($id) {
 	 	
+		$id = filter_var($id, FILTER_VALIDATE_INT);
+	 	
 	 	if (!is_int($id)) {
 			comodojo_debug('Invalid role identifier','ERROR','roles_management');
 			throw new Exception("Invalid role identifier", 2702);
@@ -95,7 +104,9 @@ class roles_management {
 		
 		comodojo_load_resource('database');
 		
-		if (!is_int($reference) OR !is_scalar($description)) {
+		$reference = filter_var($reference, FILTER_VALIDATE_INT);
+
+		if (!is_int($reference) OR !is_string($description)) {
 			comodojo_debug('Invalid reference or description','ERROR','roles_management');
 			throw new Exception("Invalid reference or description", 2701);
 		}		
@@ -129,6 +140,9 @@ class roles_management {
 	public function edit_role($id, $reference, $description) {
 		
 		comodojo_load_resource('database');
+
+		$id = filter_var($id, FILTER_VALIDATE_INT);
+		$reference = filter_var($reference, FILTER_VALIDATE_INT);
 		
 		if (!is_int($id)) {
 			comodojo_debug('Invalid role identifier','ERROR','roles_management');
@@ -167,6 +181,8 @@ class roles_management {
 	public function delete_role($id) {
 		
 		comodojo_load_resource('database');
+
+		$id = filter_var($id, FILTER_VALIDATE_INT);
 		
 		if (!is_int($id)) {
 			comodojo_debug('Invalid role identifier','ERROR','roles_management');
@@ -184,7 +200,17 @@ class roles_management {
 		}
 		
 		try {
+
 			$db = new database();
+
+			if (!$this->ignore_users_in_role) {
+				$in_role = $db->table("users")->where("userRole","=",$id)->get();
+				if ($in_role['resultLength'] > 0) {
+					comodojo_debug('Cannot delete a role with active users','ERROR','roles_management');
+					throw new Exception("Cannot delete a role with active users", 2706);
+				}
+			}
+
 			$result = $db->table("roles")->where("id","=",$id)->delete();
 		}
 		catch (Exception $e){
@@ -203,6 +229,8 @@ class roles_management {
 	 * @return	int						Role id in in case of success, false otherwise, exception in case of error
 	 */
 	public function id_by_reference($reference) {
+
+		$reference = filter_var($reference, FILTER_VALIDATE_INT);
 
 		if (!is_int($reference)) {
 			comodojo_debug('Invalid role reference','ERROR','roles_management');

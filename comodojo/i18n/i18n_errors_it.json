@@ -154,6 +154,7 @@
 	"2703":"Cannot modify a protected role",
 	"2704":"Only administrators can manage roles",
 	"2705":"Invalid role reference",
+	"2706":"Cannot delete a role with active users",
 	"2801":"Registrations are closed",
 	"2802":"Cannot register: userName is in use",
 	"2803":"Cannot find request id",

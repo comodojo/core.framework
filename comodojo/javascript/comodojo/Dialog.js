@@ -102,17 +102,34 @@ Dialog.warning = function(Title, Content, ActionOk, ActionCancel) {
 
 Dialog.input = function(Title, Message, Callback) {
 
-	return new dialogBase({
+	var content=domConstruct.create('input',{
+		style: "padding: 4px; width: 300px; margin-top:10px; font-size:110%;"
+	});
+
+	var message=domConstruct.create('p',{
+		className: "box info",
+		style: "width: 280px;",
+		innerHTML: Message
+	});
+
+	var cbox = domConstruct.create('div',{
+		style: "text-align:center"
+	});
+
+	if (Message != false) { cbox.appendChild(message); }
+	cbox.appendChild(content);
+
+	var d = new dialogBase({
 		id: 'actionDialog',
 		title: Title,
-		content: '<p class="box info" style="width: 300px;">'+Message+'</p><p style="text-align:center;"><input style="padding: 4px; width: 300px;" id="actionDialog_input" /></p>',
+		content: cbox,
 		forced: true,
 		blocker: false,
 		hided: false,
 		draggable: false,
 		actionOk: function() {
 			if ($d.isFunction(Callback)) {
-				Callback($d.byId('actionDialog_input').value);
+				Callback(content.value);
 			}
 		},
 		closeOnOk: true,
@@ -121,9 +138,13 @@ Dialog.input = function(Title, Message, Callback) {
 		focusKilled: false
 	});
 
+	content.focus();
+
+	return d;
+	
 };
 
-Dialog.timed = function() {
+Dialog.timed = function(Title, Content, Time) {
 
 	return new dialogBase({
 		title: Title,
@@ -148,10 +169,23 @@ Dialog.select = function(Title, Message, Options, Callback) {
 		content.appendChild(option);
 	}
 
-	return new dialogBase({
+	var message=domConstruct.create('p',{
+		className: "box info",
+		style: "width: 280px;",
+		innerHTML: Message
+	});
+
+	var cbox = domConstruct.create('div',{
+		style: "text-align:center"
+	});
+
+	if (Message != false) { cbox.appendChild(message); }
+	cbox.appendChild(content);
+
+	var d = new dialogBase({
 		id: 'actionDialog',
 		title: Title,
-		content: content,
+		content: cbox,
 		forced: true,
 		blocker: false,
 		hided: false,
@@ -166,6 +200,55 @@ Dialog.select = function(Title, Message, Options, Callback) {
 		closeOnCancel: true,
 		focusKilled: false
 	});
+
+	content.focus();
+
+	return d;
+
+};
+
+Dialog.password = function(Title, Message, Callback) {
+
+	var content=domConstruct.create('input',{
+		type:'password',
+		style: "padding: 4px; width: 300px; margin-top:10px; font-size:110%;"
+	});
+
+	var message=domConstruct.create('p',{
+		className: "box info",
+		style: "width: 280px;",
+		innerHTML: Message
+	});
+
+	var cbox = domConstruct.create('div',{
+		style: "text-align:center"
+	});
+
+	if (Message != false) { cbox.appendChild(message); }
+	cbox.appendChild(content);
+
+	var d = new dialogBase({
+		id: 'actionDialog',
+		title: Title,
+		content: cbox,
+		forced: true,
+		blocker: false,
+		hided: false,
+		draggable: false,
+		actionOk: function() {
+			if ($d.isFunction(Callback)) {
+				Callback(content.value);
+			}
+		},
+		closeOnOk: true,
+		actionCancel: false,
+		closeOnCancel: true,
+		focusKilled: false
+	});
+
+	content.focus();
+
+	return d;
 
 };
 

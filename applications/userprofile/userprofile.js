@@ -8,6 +8,7 @@
  * @license		GPL Version 3
  */
 
+$d.require("dojo.date.locale");
 $d.require('comodojo.Layout');
 $d.require("comodojo.Form");
 
@@ -149,11 +150,14 @@ $c.App.load("userprofile",
 		};
 
 		this.editProfile = function() {
-			var values = this.profileForm.get('value');
 			if (!this.profileForm.validate()) {
 				$c.Error.minimal($c.getLocalizedMessage('10028'));
 			}
 			else {
+				var values = this.profileForm.get('value');
+				if (values.birthday) {
+					values.birthday = dojo.date.locale.format(values.birthday, {datePattern: "yyyy-MM-dd", selector: "date"});
+				}
 				$c.Kernel.newCall(myself.editProfileCallback,{
 					application: "userprofile",
 					method: "setUserInfo",

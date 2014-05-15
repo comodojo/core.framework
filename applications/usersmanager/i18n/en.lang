@@ -20,7 +20,17 @@ $lang = Array(
 	'0006'	=>	'Reset password',
 	'0007'	=>	'Save User',
 	'0008'	=>	'Use gravatar',
-	'0009'	=>	'Personal URL'
+	'0009'	=>	'Personal URL',
+	'0010'	=>	'Type a password for new user',
+	'0011'	=>	'User created',
+	'0012'	=>	'<p>You are about to delete user:</p><p style="font-weight:bold;"> {0} ({1})</p><p>Continue?</p>',
+	'0013'	=>	'User deleted',
+	'0014'	=>	'User updated',
+	'0015'	=>	'',
+	'0016'	=>	'',
+	'0017'	=>	'',
+	'0018'	=>	'',
+	'0019'	=>	''
 );
 
 ?>

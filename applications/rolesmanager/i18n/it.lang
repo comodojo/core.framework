@@ -11,16 +11,14 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'ID',
+	'0001'	=>	'Ref',
+	'0002'	=>	'Descrizione',
+	'0003'	=>	'Aggiungi ruolo',
+	'0004'	=>	'Riferimento',
+	'0005'	=>	'Descrizione',
+	'0006'	=>	'Conferma eliminazione ruolo',
+	'0007'	=>	'<p>Si sta per eliminare il ruolo utente:</p><p style="text-align: center">{0} ({1})</p><p>Procedere?</p>'
 );
 
 ?>

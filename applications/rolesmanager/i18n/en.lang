@@ -11,16 +11,14 @@
  */
 
 $lang = Array(
-	'0000'	=>	'',
-	'0001'	=>	'',
-	'0002'	=>	'',
-	'0003'	=>	'',
-	'0004'	=>	'',
-	'0005'	=>	'',
-	'0006'	=>	'',
-	'0007'	=>	'',
-	'0008'	=>	'',
-	'0009'	=>	''
+	'0000'	=>	'ID',
+	'0001'	=>	'Ref',
+	'0002'	=>	'Description',
+	'0003'	=>	'Add new role',
+	'0004'	=>	'Reference',
+	'0005'	=>	'Description',
+	'0006'	=>	'Confirm delete',
+	'0007'	=>	'<p>You are about to delete user role:</p><p style="text-align: center">{0} ({1})</p><p>Continue?</p>'
 );
 
 ?>

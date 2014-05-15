@@ -355,7 +355,7 @@ class users_management {
 		return $to_return;
 	}
 	
-	public function add_user($userName, $userPass, $email, $params=Array()) {
+	public function add_user($userName, $userPass, $email, $params=Array(), $welcomeEmail=false) {
 		
 		if (empty($userName) OR empty($userPass) OR empty($email) OR !is_array($params)) {
 			comodojo_debug('Invalid user parameters','ERROR','users_management');
@@ -381,24 +381,27 @@ class users_management {
 		}
 
 		$_params = Array(
-			'userName'	=>	$userName,
+			'userName'		=>	$userName,
 			//'userPass'	=>	!$this->do_not_encrypt_userPass ? md5($userPass) : $userPass,
-			'userPass'	=>	md5($userPass),
-			'email'		=>	$email,
-			'userRole'	=>	!isset($params['userRole']) ? COMODOJO_REGISTRATION_DEFAULT_ROLE : (is_numeric($params['userRole']) ? $params['userRole'] : COMODOJO_REGISTRATION_DEFAULT_ROLE),
-			'enabled'	=>	!isset($params['enabled']) ? false : (!$params['enabled'] ? false : true),
+			'userPass'		=>	md5($userPass),
+			'email'			=>	filter_var($email,FILTER_VALIDATE_EMAIL),
+
+			'userRole'		=>	!isset($params['userRole']) ? COMODOJO_REGISTRATION_DEFAULT_ROLE : filter_var($params['userRole'],FILTER_VALIDATE_INT),
+			'enabled'		=>	!isset($params['enabled']) ? false : filter_var($params['enabled'],FILTER_VALIDATE_BOOLEAN),
 			'authentication'=>	!isset($params['authentication']) ? 'local' : strtolower($params['authentication']),
-			'completeName'	=> !isset($params['completeName']) ? null : (is_scalar($params['completeName']) ? $params['completeName'] : null),
-			'gravatar'	=>	!isset($params['gravatar']) ? false : (!$params['gravatar'] ? false : true),
-			'birthday'	=>	!isset($params['birthday']) ? null : (is_scalar($params['birthday']) ? $params['birthday'] : null),
-			'gender'	=>	!isset($params['gender']) ? null : (is_scalar($params['gender']) ? $params['gender'] : null),
-			'url'		=>	!isset($params['url']) ? null : (filter_var($params['url'], FILTER_VALIDATE_URL) === FALSE ? null : $params['url']),
+			'completeName'	=>	!isset($params['completeName']) ? $userName : (is_string($params['completeName']) ? $params['completeName'] : $userName),
+			'gravatar'		=>	!isset($params['gravatar']) ? false : filter_var($params['gravatar'],FILTER_VALIDATE_BOOLEAN),
+			'birthday'		=>	!isset($params['birthday']) ? null : (is_string($params['birthday']) ? $params['birthday'] : null),
+			'gender'		=>	!isset($params['gender']) ? null : (is_string($params['gender']) ? $params['gender'] : null),
+			'url'			=>	!isset($params['url']) ? null : (filter_var($params['url'], FILTER_VALIDATE_URL) === FALSE ? null : $params['url']),
+
 			'private_identifier'	=>	random(),
 			'public_identifier'		=>	random()	
 		);
 
 		try {
 			$db = new database();
+			if (!is_null($_params["birthday"])) $_params["birthday"] = $db->serialize($_params["birthday"],'DATE');
 			$result = $db->return_id()
 			->table('users')
 			->keys(Array("userName","userPass","email","userRole","enabled","authentication","completeName","gravatar","birthday","gender","url","private_identifier","public_identifier"))
@@ -406,6 +409,9 @@ class users_management {
 			->store();
 			$fs = new filesystem();
 			$fs->createHome($userName);
+			if ($welcomeEmail == true) {
+				$this->send_welcome_email($_params['userName'],$_params['completeName'],$_params['email']);
+			}
 		}
 		catch (Exception $e){
 			throw $e;
@@ -437,28 +443,50 @@ class users_management {
 		$_keys = Array();
 		$_values = Array();
 
-		$_keys_pool = Array("email","userRole","enabled","authentication","completeName","gravatar","birthday","gender","url");
-
-		foreach ($params as $key => $value) {
-			if (in_array($key, $_keys_pool)) {
-				array_push($_keys, $key);
-				array_push($_values, $value);
-			}
-		}
-
-		if (empty($_keys)) {
-			comodojo_debug('Invalid user parameters','ERROR','users_management');
-			throw new Exception("Invalid user parameters", 2612);
-		}
-
 		try {
+
 			$db = new database();
+
+			foreach ($params as $key => $value) {
+				if (in_array($key, Array("email","userRole","enabled","authentication","completeName","gravatar","birthday","gender","url"))) {
+					array_push($_keys, $key);
+					switch ($key) {
+						case 'email':
+							$filtered_value = filter_var($value,FILTER_VALIDATE_EMAIL);
+							break;
+						case 'userRole':
+							$filtered_value = filter_var($value,FILTER_VALIDATE_INT);
+							break;
+						case 'enabled':
+						case 'gravatar':
+							$filtered_value = filter_var($value,FILTER_VALIDATE_BOOLEAN);
+							break;
+						case 'authentication':
+							$filtered_value = strtolower($value);
+							break;
+						case 'birthday':
+							$filtered_value = $db->serialize($value,'DATE');
+							break;
+						default:
+							$filtered_value = $value;
+							break;
+					}
+					array_push($_values, $filtered_value);
+				}
+			}
+
+			if (empty($_keys)) {
+				comodojo_debug('Invalid user parameters','ERROR','users_management');
+				throw new Exception("Invalid user parameters", 2612);
+			}
+
 			$result = $db->return_id()
 			->table('users')
 			->keys($_keys)
 			->values($_values)
 			->where("userName","=",$userName)
 			->update();
+			
 		}
 		catch (Exception $e){
 			throw $e;
@@ -820,6 +848,49 @@ class users_management {
 		}
 	}
 
+	public final function search($pattern, $realm) {
+
+		if (empty($pattern) OR empty($realm)) {
+
+		}
+
+		if ($realm == 'local') {
+
+			try {
+				$results = $this->search_local($pattern);
+			} catch (Exception $e) {
+				throw $e;
+			}
+
+			return $results;
+
+		}
+		else {
+
+			$server = $this->get_auth_server($realm);
+			if (!$server) {
+
+			}
+
+			try {
+				switch ($server["type"]) {
+					case 'ldap':
+						$results = $this->search_ldap($pattern, $server);
+						break;
+					
+					case 'rpc':
+						$results = $this->search_rpc($pattern, $server);
+						break;
+				}
+			} catch (Exception $e) {
+				throw $e;
+			}
+			
+			return $results;
+
+		}
+
+	}
 
 /********************* PUBLIC METHODS ********************/
 
@@ -1023,6 +1094,7 @@ class users_management {
 		catch (Exception $e) {
 			throw $e;			
 		}
+
 	}
 
 	private function send_reset_email($userName, $completeName, $email, $password) {
@@ -1045,7 +1117,7 @@ class users_management {
 				 ->subject("Password Reset Request")
 				 ->add_tag("*_COMPLETENAME_*",$completeName)
 				 ->add_tag("*_USERNAME_*",$userName)
-				 ->add_tag("*_EMAIL_*",$userName)
+				 ->add_tag("*_EMAIL_*",$email)
 				 ->add_tag("*_PASSWORD_*",$password)
 				 ->embed(COMODOJO_SITE_PATH."comodojo/images/logo.png","COMODOJO_LOGO","logo")
 				 ->send();
@@ -1053,7 +1125,113 @@ class users_management {
 		catch (Exception $e) {
 			throw $e;			
 		}
+
 	}
+
+	private function send_welcome_email($userName, $completeName, $email) {
+
+		comodojo_load_resource("mail");
+
+		$localized_email = "mail_users_management_welcome_".COMODOJO_CURRENT_LOCALE.".html";
+
+		if ($this->use_localized_email_templates and realFileExists(COMODOJO_SITE_PATH."comodojo/templates/".$localized_email)) {
+			$mail_template = $localized_email;
+		}
+		else {
+			$mail_template = "mail_users_management_welcome_en.html";
+		}
+		
+		try {
+			$mail = new mail();
+			$mail->template($mail_template)
+				 ->to($email)
+				 ->subject("Welcome to ".COMODOJO_SITE_TITLE)
+				 ->add_tag("*_COMPLETENAME_*",$completeName)
+				 ->add_tag("*_USERNAME_*",$userName)
+				 ->embed(COMODOJO_SITE_PATH."comodojo/images/logo.png","COMODOJO_LOGO","logo")
+				 ->send();
+		}
+		catch (Exception $e) {
+			throw $e;			
+		}
+
+	}
+
+	private function search_local($pattern) {
+
+	}
+
+	private function search_ldap($pattern, $server) {
+
+		comodojo_load_resource('ldap');
+		
+		try {
+			$ldap = new ldap($server["server"], $server["port"]);
+			$result = $ldap->base($server["base"])
+				->searchbase($server["searchbase"])
+				->dn($server["dn"])
+				->version($server["version"])
+				->ssl($server["ssl"])
+				->tls($server["tls"])
+				->account($server["listuser"], $server["listpass"])
+				->search($pattern);
+		}
+		catch (Exception $e){
+			comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');
+			throw $e;
+		}
+
+		return $result;
+
+	}
+
+	private function search_rpc($pattern, $server) {
+
+	}
+
+	/**
+	 * Parse authentication servers
+	 */
+	private final function get_auth_server($server) {
+
+		$rpcs = json2array(COMODOJO_AUTHENTICATION_RPCS);
+
+		$ldaps = json2array(COMODOJO_AUTHENTICATION_LDAPS);
+
+		foreach ($rpcs as $rpc) {
+			if ($rpc["name"] == $server) {
+				return Array(
+					"server"	=> $rpc["server"],
+					"port"		=> $rpc["port"],
+					"transport"	=> $rpc["transport"],
+					"sharedkey"	=> $rpc["sharedkey"],
+					"type"		=> "rpc"
+				);
+			}
+		}
+
+		foreach ($ldaps as $ldap) {
+			if ($ldap["name"] == $server) {
+				return Array(
+					"server"	=> $ldap["server"],
+					"port"		=> $ldap["port"],
+					"base"		=> $ldap["base"],
+					"dn"		=> $ldap["dn"],
+					"searchbase"=> $ldap["searchbase"],
+					"version"	=> $ldap["version"],
+					"ssl"		=> $ldap["ssl"],
+					"tls"		=> $ldap["tls"],
+					"listuser"	=> $ldap["listuser"],
+					"listpass"	=> $ldap["listpass"],
+					"type"		=> "ldap"
+				);
+			}
+		}
+
+		return false;
+
+	}
+
 //********************* PRIVATE METHODS *******************/
 
 }

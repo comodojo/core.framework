@@ -238,24 +238,6 @@ class ldap {
 			$this->setupConnection($this->user, $this->pass);
 			$result = $this->search_helper($what);
 		} catch (Exception $e) {
-			throw $e;
-		}
-
-		$this->unsetConnection();
-
-		return $result;
-	
-		if (empty($what)) { 
-			comodojo_debug('Invalid search filter','ERROR','ldap');
-			throw new Exception("Invalid search filter", 1406);
-		}
-	
-		comodojo_debug('Starting LDAP search','INFO','ldap');
-		
-		try {
-			$this->setupConnection($this->user, $this->pass);
-			$result = $this->search_helper($what);
-		} catch (Exception $e) {
 			$this->unsetConnection();
 			throw $e;
 		}
@@ -305,7 +287,7 @@ class ldap {
 
 		}
 
-		if ($this->sso AND $this->admode AND $_SERVER['REMOTE_USER'] AND $_SERVER["REMOTE_USER"] == $user AND $_SERVER["KRB5CCNAME"]) {
+		if ($this->sso AND $_SERVER['REMOTE_USER'] AND $_SERVER["REMOTE_USER"] == $user AND $_SERVER["KRB5CCNAME"]) {
 			putenv("KRB5CCNAME=".$_SERVER["KRB5CCNAME"]);
 			$bind = @ldap_sasl_bind($this->ldaph, NULL, NULL, "GSSAPI");
 		}
@@ -338,13 +320,16 @@ class ldap {
 	 */
 	private function search_helper($what) {
 
-		$base = !$this->searchbase ? $this->dn : $this->searchbase;
+		//$base = !$this->searchbase ? $this->dn : $this->searchbase;
+
+		$base = $this->dc;
+		$search = str_replace('PATTERN', $what, $this->searchbase);
 
 		if ( empty($this->fields) ) {
-			$result = ldap_search($this->ldaph, $base, $what);
+			$result = ldap_search($this->ldaph, $base, $search);
 		}
 		else {
-			$result = ldap_search($this->ldaph, $base, $what, $this->fields);
+			$result = ldap_search($this->ldaph, $base, $search, $this->fields);
 		}
 
 		if (!$result) {
@@ -354,7 +339,7 @@ class ldap {
 
 		$to_return = ldap_get_entries($this->ldaph, $result);
 
-		if (!$this->userList) {
+		if (!$to_return) {
 			comodojo_debug('Unable to get ldap entries','ERROR','ldap');
 			throw new Exception(ldap_error($this->ldaph), 1412);
 		}

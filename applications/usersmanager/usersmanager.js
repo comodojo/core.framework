@@ -12,6 +12,7 @@ $c.App.loadCss('usersmanager');
 
 $d.require("dojo.store.Memory");
 $d.require("dojo.store.Observable");
+$d.require("dojo.date.locale");
 $d.require("dijit.tree.ObjectStoreModel");
 $d.require("dijit.Menu");
 $d.require("dijit.MenuItem");
@@ -20,10 +21,8 @@ $d.require("dijit.form.Button");
 $d.require("comodojo.Layout");
 $d.require('comodojo.Form');
 $d.require("gridx.modules.SingleSort");
-//$d.require("gridx.modules.Pagination");
-//$d.require("gridx.modules.pagination.PaginationBar");
-//$d.require("gridx.modules.Filter");
-//$d.require("gridx.modules.filter.FilterBar");
+$d.require("gridx.modules.Pagination");
+$d.require("gridx.modules.pagination.PaginationBar");
 
 $c.App.load("usersmanager",
 
@@ -42,6 +41,8 @@ $c.App.load("usersmanager",
 		this.realmStores = {};
 
 		this.selectedUser = false;
+		this.selectedRole = false;
+		this.updatedRole = false;
 
 		this.localUserForm = false;
 
@@ -194,6 +195,8 @@ $c.App.load("usersmanager",
 
 			this.container.main.center.local.local_tree.on('click',function(item){
 				if (item.leaf) {
+					myself.selectedUser = item.userName;
+					myself.selectedRole = item.userRole;
 					myself.openUser(item.userName);
 				}
 			});
@@ -244,7 +247,7 @@ $c.App.load("usersmanager",
 				onClick: function() {
 					var targetNode = dijit.getEnclosingWidget(this.getParent().currentTarget);
 					myself.selectedUser = targetNode.item.userName;
-					myself.deleteUser(targetNode.item.userName);
+					myself.removeUser(targetNode.item.userName, targetNode.item.completeName);
 				}
 			});
 
@@ -255,12 +258,7 @@ $c.App.load("usersmanager",
 				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+this.getLocalizedMessage('0004'),
 				style: 'float: left;',
 				onClick: function() {
-					myself.local_user_form();
-					myself.updateSaveButton.set({
-						label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0007'),
-						onClick: function() { myself.saveUser(); },
-						disabled: false
-					});
+					myself.newUser();
 				}
 			});
 			this.container.main.center.local.local_actions.containerNode.appendChild(this.newUserButton.domNode);
@@ -318,11 +316,9 @@ $c.App.load("usersmanager",
 						style: 'padding: 0px; margin: 0px !important;',
 						store: this.realmStores[i],
 						modules: [
-							"gridx/modules/SingleSort"
-							//"gridx/modules/Pagination",
-							//"gridx/modules/pagination/PaginationBar",
-							//"gridx/modules/Filter",
-							//"gridx/modules/filter/FilterBar"
+							"gridx/modules/SingleSort",
+							"gridx/modules/Pagination",
+							"gridx/modules/pagination/PaginationBar"
 						]
 					}
 				},{
@@ -341,15 +337,16 @@ $c.App.load("usersmanager",
 				return;
 			}
 
-			this.container.main.center['realm_'+o]['realm_'+o+'_search'].containerNode.appendChild(new dijit.form.ValidationTextBox({
+			this.container.main.center['realm_'+o]['realm_'+o+'_search'].searchbox = new dijit.form.ValidationTextBox({
 				name: 'realm_'+o+'_search_field',
 				required: true
-			}).domNode);
+			});
+			this.container.main.center['realm_'+o]['realm_'+o+'_search'].containerNode.appendChild(this.container.main.center['realm_'+o]['realm_'+o+'_search'].searchbox.domNode);
 
 			this.container.main.center['realm_'+o]['realm_'+o+'_search'].containerNode.appendChild(new dijit.form.Button({
 				label: '<img src="'+$c.icons.getIcon('search',16)+'" />&nbsp;'+$c.getLocalizedMessage('10042'),
 				disabled: false,
-				onClick: function() { myself.realmSearch(o); }
+				onClick: function() { myself.realmSearch(o, myself.container.main.center['realm_'+o]['realm_'+o+'_search'].searchbox.get('value')); }
 			}).domNode);
 		};
 		
@@ -420,8 +417,79 @@ $c.App.load("usersmanager",
 
 		};
 
-		this.realmSearch = function(realm) {
-			console.log(realm);
+		this.realmSearch = function(realm, pattern) {
+			
+			$c.Kernel.newCall(myself.realmSearchCallback,{
+				application: "usersmanager",
+				method: "search",
+				content: {
+					realm: realm,
+					pattern: pattern
+				}
+			});
+
+		};
+
+		this.realmSearchCallback = function(success, result) {
+			if (success) {
+				console.log(result);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+			
+		};
+
+		this.newUser = function() {
+			myself.local_user_form();
+			myself.updateSaveButton.set({
+				label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0007'),
+				onClick: function() { myself.newUserPass(); },
+				disabled: false
+			});
+		};
+
+		this.newUserPass = function() {
+			if (!myself.localUserForm.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				return;
+			}
+			$c.Dialog.password('Password',myself.getLocalizedMessage('0010'),myself.addUser);
+		};
+
+		this.addUser = function(pass) {
+			var values = myself.localUserForm.get('value');
+			values.userPass = pass;
+			if (values.birthday) {
+				values.birthday = dojo.date.locale.format(values.birthday, {datePattern: "yyyy-MM-dd", selector: "date"});
+			}
+			
+			$c.Kernel.newCall(myself.addUserCallback,{
+				application: "usersmanager",
+				method: "addUser",
+				content: values
+			});
+		};
+
+		this.addUserCallback = function(success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0011'));
+				myself.lStoreObservable.put({
+					id: result.userName,
+					name: result.userName,
+					enabled: result.enabled,
+					role: result.userRole,
+					userName: result.userName,
+					completeName: result.completeName,
+					userRole: result.userRole,
+					leaf: true
+				});
+				myself.container.main.center.local.local_tree.set('paths', [ [ 'localrootnode', ''+result.userRole, result.userName ] ] );
+				myself.openUser(result.userName);
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
 		};
 
 		this.disableUser = function(user) {
@@ -468,19 +536,26 @@ $c.App.load("usersmanager",
 			}
 		};
 
-		this.deleteUser = function(user) {
+		this.removeUser = function(user, name) {
+
+			$c.Dialog.warning(myself.getLocalizedMessage('0003'), myself.getLocalizedMutableMessage('0012',[user, name]), myself.deleteUser);
+		};
+
+		this.deleteUser = function() {
 			$c.Kernel.newCall(myself.deleteUserCallback,{
 				application: "usersmanager",
 				method: "deleteUser",
 				content: {
-					userName: user
+					userName: myself.selectedUser
 				}
 			});
 		};
 
 		this.deleteUserCallback = function (success, result) {
 			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0013'));
 				myself.lStoreObservable.remove(myself.selectedUser);
+				myself.container.main.center.local.local_properties.destroyDescendants();
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
@@ -500,11 +575,51 @@ $c.App.load("usersmanager",
 		this.openUserCallback = function (success, result) {
 			if (success) {
 				myself.local_user_form(result);
+				myself.updateSaveButton.set({
+					label: '<img src="'+$c.icons.getIcon('save',16)+'" />&nbsp;'+myself.getLocalizedMessage('0005'),
+					onClick: function() { myself.editUser(); },
+					disabled: false
+				});
 			}
 			else {
 				$c.Error.modal(result.code, result.name);
 			}
 		};
+
+		this.editUser = function() {
+			var values = myself.localUserForm.get('value');
+			
+			if (values.birthday) {
+				values.birthday = dojo.date.locale.format(values.birthday, {datePattern: "yyyy-MM-dd", selector: "date"});
+			}
+
+			myself.updatedRole = values.userRole;
+			
+			$c.Kernel.newCall(myself.editUserCallback,{
+				application: "usersmanager",
+				method: "editUser",
+				content: values
+			});
+		};
+
+		this.editUserCallback = function (success, result) {
+			if (success) {
+				$c.Dialog.info(myself.getLocalizedMessage('0014'));
+				if (myself.updatedRole != myself.selectedRole) {
+					var user = myself.lStoreObservable.get(myself.selectedUser);
+						user.userRole = myself.updatedRole;
+						user.role = myself.updatedRole;
+					myself.lStoreObservable.put(user);
+					myself.container.main.center.local.local_tree.set('paths', [ [ 'localrootnode', ''+myself.updatedRole, myself.selectedUser ] ] );
+					myself.openUser(myself.selectedUser);
+					myself.selectedRole = myself.updatedRole;
+				}
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
+		
 
 	}
 	

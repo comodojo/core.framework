@@ -10,6 +10,7 @@
 
 $d.require("comodojo.Layout");
 $d.require("comodojo.Form");
+$d.require("dojox.form.BusyButton");
 
 $c.App.load("sendmail",
 
@@ -43,7 +44,7 @@ $c.App.load("sendmail",
 			}).build();
 
 			this.form = new $c.Form({
-				modules:['TextBox','Editor','Select','Button'],
+				modules:['TextBox','Editor','Select','Button','ValidationTextBox'],
 				formWidth: 'auto',
 				hierarchy:[{
 					name: "from",
@@ -54,9 +55,9 @@ $c.App.load("sendmail",
 				},{
 					name: "to",
 					value: "",
-					type: "TextBox",
+					type: "ValidationTextBox",
 					label: this.getLocalizedMessage('0002'),
-					required: false
+					required: true
 				},{
 					name: "cc",
 					value: "",
@@ -86,55 +87,67 @@ $c.App.load("sendmail",
 					}],
 					required: false
 				},{
-					name: "isHtmlMail",
+					name: "format",
 					value: "1",
 					type: "Select",
 					label: this.getLocalizedMessage('0013'),
 					options: [{
 						label: this.getLocalizedMessage('0014'),
-						id: 1
+						id: 'HTML'
 					}, {
 						label: this.getLocalizedMessage('0015'),
-						id: 0
+						id: 'PLAIN'
 					}],
 					required: false
 				},{
 					name: "subject",
 					value: "",
-					type: "TextBox",
+					type: "ValidationTextBox",
 					label: this.getLocalizedMessage('0010'),
-					required: false
+					required: true
 				},{
 					name: "message",
 					value: "",
 					type: "Editor",
 					label: this.getLocalizedMessage('0011'),
-					required: false
+					required: true
 				}],
 				attachNode: myself.container.main.center.containerNode
 			}).build();
 
-			this.container.main.bottom.containerNode.appendChild(new dijit.form.Button({
+			this.sendButton = new dojox.form.BusyButton({
 				label: '<img src="'+$c.icons.getIcon('apply',16)+'" />&nbsp;'+myself.getLocalizedMessage('0006'),
 				style: 'float: right;',
+				busyLabel: myself.getLocalizedMessage('0000'),
 				onClick: function() {
 					myself.send();
 				}
-			}).domNode);
+			});
+
+			this.container.main.bottom.containerNode.appendChild(this.sendButton.domNode);
 
 		};
 
 		this.send = function() {
+
+			if (!myself.form.validate()) {
+				$c.Error.minimal($c.getLocalizedMessage('10028'));
+				myself.sendButton.cancel();
+				return;
+			}
+
 			$c.kernel.newCall(myself.sendCallback,{
 				server: "sendmail",
 				selector: "send",
-				content: this.form.get('value')
+				content: myself.form.get('value')
 			});
+
 		};
 
 		this.sendCallback = function(success, result) {
 			if (success) {
 				$c.Dialog.info(myself.getLocalizedMessage('0012'));
+				myself.sendButton.cancel();
 			}
 			else {
 				$c.Error.modal(result.code, result.name);

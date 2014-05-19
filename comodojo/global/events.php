@@ -234,7 +234,7 @@ class events {
 		
 		comodojo_load_resource('database');
 		
-		//$ua_store = Array();
+		$consolidated = 0;
 		
 		try {
 			$db = new database();
@@ -259,6 +259,7 @@ class events {
 					->and_where('OS','IS',NULL)
 					->values($this->get_details($ua['userAgent']))
 					->update();
+				$consolidated += $new_result["affectedRows"];
 			}
 			
 		} catch (Exception $e) {
@@ -267,7 +268,7 @@ class events {
 			else return -1;
 		}
 
-		return $result['resultLength'];
+		return $consolidated;
 		
 	}
 	

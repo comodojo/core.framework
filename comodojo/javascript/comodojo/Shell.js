@@ -701,12 +701,12 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					myself._pendingResults += ('<div><h3>Response from <span style="color:blue;">'+source+'</span></h3>'+result_content+"</div>");
 				}
 				catch (e) {
-					myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box error">'+e+'</p></div>');
+					myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box 	bg-danger">'+e+'</p></div>');
 				}
 
 			}
 			else {
-				myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box error">('+data.result.code+') '+data.result.name+'</p></div>');
+				myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box bg-danger">('+data.result.code+') '+data.result.name+'</p></div>');
 			}
 			
 			if (myself._pendingRequests == 0) {
@@ -719,7 +719,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		connection_exex_command_error: function(source, data) {
 
 			myself._pendingRequests--;
-			myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box error">'+data+'</p></div>');
+			myself._pendingResults += ('<div><h3>Error from <span style="color:red;">'+source+'</span></h3><p class="box bg-danger">'+data+'</p></div>');
 
 			if (myself._pendingRequests == 0) {
 				myself.resultOnScreen(myself._pendingResults);
@@ -785,7 +785,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 		
 		parseError: function(code) {
 
-			this.resultOnScreen('<p class="box error">'+code+'</p>');
+			this.resultOnScreen('<p class="box bg-danger">'+code+'</p>');
 
 		},
 		
@@ -1242,8 +1242,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 						return myself.visualization._object._list('auto','<ul>{0}</ul>','<li><span style="display:none;">{0}</span>{1}</li>',obj);
 					}
 					else {
-						var table = '<table>{0}{1}</table>';
-					    var thead = '<thead><tr><th>Option</th><th>Value</th></tr></thead>';
+						var table = '<table class="table">{0}{1}</table>';
+					    var thead = '';//'<thead><tr><th>Option</th><th>Value</th></tr></thead>';
 					    var tbody = '<tbody>{0}</tbody>';
 
 					    var th = '<th>{0}</th>';
@@ -1255,7 +1255,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				},
 				
 				table: function(obj) {
-					var table = '<table>{0}{1}</table>';
+					var table = '<table class="table table-hover>{0}{1}</table>';
 				    var thead = '<thead><tr><th>Option</th><th>Value</th></tr></thead>';
 				    var tbody = '<tbody>{0}</tbody>';
 
@@ -1267,7 +1267,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 				},
 				
 				compact_table: function(obj) {
-					var table = '<table>{0}{1}</table>';
+					var table = '<table class="table-condensed">{0}{1}</table>';
 				    var thead = '';
 				    var tbody = '<tbody>{0}</tbody>';
 
@@ -1392,16 +1392,16 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					return '<strong>'+str+'</strong>';
 				},
 				success: function(str) {
-					return '<p class="box success">'+str+'</p>';
+					return '<p class="box bg-success">'+str+'</p>';
 				},
 				failure: function(str) {
-					return '<p class="box error">'+str+'</p>';
+					return '<p class="box bg-danger">'+str+'</p>';
 				},
 				info: function(str) {
-					return '<p class="box info">'+str+'</p>';
+					return '<p class="box bg-primary">'+str+'</p>';
 				},
 				warning: function(str) {
-					return '<p class="box warning">'+str+'</p>';
+					return '<p class="box bg-warning">'+str+'</p>';
 				}
 				
 			}

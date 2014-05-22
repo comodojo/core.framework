@@ -568,6 +568,10 @@ $c.App.load("controlpanel",
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="searchbase"></div>',
 					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("lda_15")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="searchfields"></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("lda_6")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listuser"></div>',
@@ -605,13 +609,14 @@ $c.App.load("controlpanel",
 					this.base.set('value', value[4]);
 					this.dn.set('value', value[5]);
 					this.searchbase.set('value', value[6]);
-					this.listuser.set('value', value[7]);
-					this.listpass.set('value', value[8]);
-					this.version.set('value', parseInt(value[9], 10));
-					this.ssl.set('value', parseInt(value[10], 10));
-					this.tls.set('value', parseInt(value[11], 10));
-					this.autoadd.set('value', parseInt(value[12], 10));
-					this.enabled.set('value', parseInt(value[13], 10));
+					this.searchfields.set('value', value[7]);
+					this.listuser.set('value', value[8]);
+					this.listpass.set('value', value[9]);
+					this.version.set('value', parseInt(value[10], 10));
+					this.ssl.set('value', parseInt(value[11], 10));
+					this.tls.set('value', parseInt(value[12], 10));
+					this.autoadd.set('value', parseInt(value[13], 10));
+					this.enabled.set('value', parseInt(value[14], 10));
 				},
 				_getValueAttr: function(value){
 					return [
@@ -622,6 +627,7 @@ $c.App.load("controlpanel",
 						this.base.get('value'),
 						this.dn.get('value'),
 						this.searchbase.get('value'),
+						this.searchfields.get('value'),
 						this.listuser.get('value'),
 						this.listpass.get('value'),
 						parseInt(this.version.get('value')),
@@ -673,6 +679,7 @@ $c.App.load("controlpanel",
 								values.base,
 								values.dn,
 								values.searchbase,
+								values.searchfields,
 								values.listuser,
 								values.listpass,
 								values.version,
@@ -691,13 +698,14 @@ $c.App.load("controlpanel",
 								base: values[4],
 								dn: values[5],
 								searchbase: values[6],
-								listuser: values[7],
-								listpass: values[8],
-								version: values[9],
-								ssl: values[10],
-								tls: values[11],
-								autoadd: values[12],
-								enabled: values[13]
+								searchfields: values[7],
+								listuser: values[8],
+								listpass: values[9],
+								version: values[10],
+								ssl: values[11],
+								tls: values[12],
+								autoadd: values[13],
+								enabled: values[14]
 							});
 							return values;
 						}
@@ -711,13 +719,14 @@ $c.App.load("controlpanel",
 							base: value[4],
 							dn: value[5],
 							searchbase: value[6],
-							listuser: value[7],
-							listpass: value[8],
-							version: value[9],
-							ssl: value[10],
-							tls: value[11],
-							autoadd: value[12],
-							enabled: value[13]
+							searchfields: value[7],
+							listuser: value[8],
+							listpass: value[9],
+							version: value[10],
+							ssl: value[11],
+							tls: value[12],
+							autoadd: value[13],
+							enabled: value[14]
 						});
 					}
 				}
@@ -776,6 +785,14 @@ $c.App.load("controlpanel",
 						'<label>'+this.getLocalizedMessage("ext_5")+'</label>',
 					'</td><td>',
 						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="sharedKey"></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_9")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listuser"></div>',
+					'</td></tr><tr style="background: #F5F5F5;"><td style="width: 50%;">',
+						'<label>'+this.getLocalizedMessage("ext_10")+'</label>',
+					'</td><td>',
+						'<div data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="listpass"></div>',
 					'</td></tr><tr style="background: #FFF;"><td style="width: 50%;">',
 						'<label>'+this.getLocalizedMessage("ext_7")+'</label>',
 					'</td><td>',
@@ -793,8 +810,10 @@ $c.App.load("controlpanel",
 					this.port.set('value', parseInt(value[3], 10));
 					this.transport.set('value', value[4]);
 					this.sharedKey.set('value', value[5]);
-					this.autoadd.set('value', parseInt(value[6], 10));
-					this.enabled.set('value', parseInt(value[7], 10));
+					this.listuser.set('value', value[6]);
+					this.listpass.set('value', value[7]);
+					this.autoadd.set('value', parseInt(value[8], 10));
+					this.enabled.set('value', parseInt(value[9], 10));
 				},
 				_getValueAttr: function(value){
 					return [
@@ -804,6 +823,8 @@ $c.App.load("controlpanel",
 						this.port.get('value'),
 						this.transport.get('value'),
 						this.sharedKey.get('value'),
+						this.listuser.get('value'),
+						this.listpass.get('value'),
 						parseInt(this.autoadd.get('value')),
 						parseInt(this.enabled.get('value'))
 					];
@@ -849,6 +870,8 @@ $c.App.load("controlpanel",
 								parseInt(values.port, 10),
 								values.transport,
 								values.sharedKey,
+								values.listuser
+								values.listpass,
 								values.autoadd,
 								values.enabled
 							];
@@ -861,8 +884,10 @@ $c.App.load("controlpanel",
 								port: parseInt(values[3], 10),
 								transport: values[4],
 								sharedKey: values[5],
-								autoadd: values[6],
-								enabled: values[7]
+								listuser: values[6],
+								listpass: values[7],
+								autoadd: values[8],
+								enabled: values[9]
 							});
 							return values;
 						}
@@ -875,8 +900,10 @@ $c.App.load("controlpanel",
 							port: parseInt(value[3], 10),
 							transport: value[4],
 							sharedKey: value[5],
-							autoadd: value[6],
-							enabled: value[7]
+							listuser: value[6],
+							listpass: value[7],
+							autoadd: value[8],
+							enabled: value[9]
 						});
 					}
 				}

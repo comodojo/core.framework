@@ -35,7 +35,7 @@ class ldap {
 
 	private $pass = null;
 
-	private $fields = Array(); //Array("displayName","givenName","mail","description");
+	private $fields = Array();
 
 /********************** PRIVATE VARS *********************/
 
@@ -230,13 +230,14 @@ class ldap {
 	/**
 	 * List the directory
 	 */
-	public function search($what="*") {
+	public function search($what="*", $clean=false) {
 			
 		comodojo_debug('Starting LDAP directory search','INFO','ldap');
 		
 		try {
 			$this->setupConnection($this->user, $this->pass);
-			$result = $this->search_helper($what);
+			ldap_set_option($this->ldaph, LDAP_OPT_SIZELIMIT, 0);
+			$result = $this->search_helper($what, filter_var($clean, FILTER_VALIDATE_BOOLEAN));
 		} catch (Exception $e) {
 			$this->unsetConnection();
 			throw $e;
@@ -318,7 +319,7 @@ class ldap {
 	/**
 	 * 
 	 */
-	private function search_helper($what) {
+	private function search_helper($what, $clean) {
 
 		//$base = !$this->searchbase ? $this->dn : $this->searchbase;
 
@@ -344,9 +345,66 @@ class ldap {
 			throw new Exception(ldap_error($this->ldaph), 1412);
 		}
 		
-		return $to_return;
+		if ($clean) {
+			return $this->search_cleaner($to_return);
+		}
+		else {
+			return $to_return;
+		}
 		
 	}
+
+	private function search_cleaner($results) {
+
+		$entry = Array();
+
+		unset($results['count']);
+
+		foreach ($results as $key => $result) {
+
+			unset($result["count"]);
+
+			$valid = true;
+			foreach ($this->fields as $field) {
+				if (!array_key_exists(strtolower($field), $result)) $valid = false;
+			}
+
+			if (!$valid) {
+				unset($result[$key]);
+				continue;
+			}
+			else {
+				$entry[$key] = Array();
+			}
+
+			foreach ($result as $subkey => $value) {
+				
+				if (is_int($subkey) OR $subkey=="count") {
+					continue;
+				}
+				else {
+					if (is_scalar($value)) {
+						$entry[$key][$subkey] = $value;
+					}
+					if (is_array($value)) {
+						if ($value["count"] == 1) {
+							$entry[$key][$subkey] = $value[0];
+						}
+						else {
+							unset($value["count"]);
+							$entry[$key][$subkey] = $value;
+						}
+					}
+				}
+
+			}
+
+		}
+
+		return $entry;
+
+	}
+
 	
 /********************* PRIVATE METHODS *******************/
 	

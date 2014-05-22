@@ -1159,6 +1159,21 @@ class users_management {
 
 	private function search_local($pattern) {
 
+		comodojo_load_resource('database');
+		
+		try {
+			$db = new database();
+			$result = $db->table('users')
+				->where("userName","LIKE","%".$pattern."%")
+				->or_where("completeName","LIKE","%".$pattern."%")
+				->get();
+		}
+		catch (Exception $e){
+			throw $e;
+		}
+		
+		return $result;
+
 	}
 
 	private function search_ldap($pattern, $server) {
@@ -1174,7 +1189,9 @@ class users_management {
 				->ssl($server["ssl"])
 				->tls($server["tls"])
 				->account($server["listuser"], $server["listpass"])
-				->search($pattern);
+				->account($server["listuser"], $server["listpass"])
+				->fields(explode(",", $server["searchfields"]))
+				->search($pattern,true);
 		}
 		catch (Exception $e){
 			comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');
@@ -1186,6 +1203,20 @@ class users_management {
 	}
 
 	private function search_rpc($pattern, $server) {
+
+		comodojo_load_resource('rpc_client');
+		
+		$id = strtoupper($transport) == 'JSON' ? true : false;
+
+		try {
+			$rpc = new rpc_client($server["server"], $server["transport"], $server["sharedkey"], $server["port"], 'POST');
+			$result = $rpc->send('authbridge.search', Array($server["listuser"], $server["listpass"], $pattern), $id);
+		} catch (Exception $e) {
+			throw $e;
+			
+		}
+
+		return $result;
 
 	}
 
@@ -1218,6 +1249,7 @@ class users_management {
 					"base"		=> $ldap["base"],
 					"dn"		=> $ldap["dn"],
 					"searchbase"=> $ldap["searchbase"],
+					"searchfields"=> $ldap["searchfields"],
 					"version"	=> $ldap["version"],
 					"ssl"		=> $ldap["ssl"],
 					"tls"		=> $ldap["tls"],

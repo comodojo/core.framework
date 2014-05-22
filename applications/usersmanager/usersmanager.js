@@ -44,6 +44,8 @@ $c.App.load("usersmanager",
 		this.selectedRole = false;
 		this.updatedRole = false;
 
+		this.selectedRealm = false;
+
 		this.localUserForm = false;
 
 		this.init = function(){
@@ -307,10 +309,10 @@ $c.App.load("usersmanager",
 					params: {
 						title: '',
 						structure: [
-							{ name: 'User Name', width: '20%'},
-							{ name: 'Display Name', width: '30%'},
-							{ name: 'email', width: '20%'},
-							{ name: 'Description', width: '30%'}
+							{ name: $c.getLocalizedMessage('10009'), field: "userName", width: '20%'},
+							{ name: $c.getLocalizedMessage('10037'), field: "completeName", width: '30%'},
+							{ name: $c.getLocalizedMessage('10035'), field: "email", width: '20%'},
+							{ name: $c.getLocalizedMessage('10048'), field: "description", width: '30%'}
 						],
 						//sortInitialOrder: { colId: '2', descending: true },
 						style: 'padding: 0px; margin: 0px !important;',
@@ -419,6 +421,8 @@ $c.App.load("usersmanager",
 
 		this.realmSearch = function(realm, pattern) {
 			
+			myself.selectedRealm = realm;
+
 			$c.Kernel.newCall(myself.realmSearchCallback,{
 				application: "usersmanager",
 				method: "search",
@@ -432,7 +436,11 @@ $c.App.load("usersmanager",
 
 		this.realmSearchCallback = function(success, result) {
 			if (success) {
-				console.log(result);
+				
+				myself.realmStores[myself.selectedRealm].setData(result);
+				myself.container.main.center['realm_'+myself.selectedRealm]['realm_'+myself.selectedRealm+'_grid'].model.clearCache();
+				myself.container.main.center['realm_'+myself.selectedRealm]['realm_'+myself.selectedRealm+'_grid'].body.refresh();
+				
 			}
 			else {
 				$c.Error.modal(result.code, result.name);

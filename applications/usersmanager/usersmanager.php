@@ -183,7 +183,7 @@ class usersmanager extends application {
 	public function Search($params) {
 
 		comodojo_load_resource('users_management');
-		
+
 		try {
 
 			$users = new users_management();
@@ -192,8 +192,10 @@ class usersmanager extends application {
 		} catch (Exception $e) {
 			throw $e;
 		}
+		comodojo_debug($result);
+		$return = $this->abstract_results($result, $params['realm']);
 
-		return $result;
+		return $return;
 
 	}
 
@@ -230,7 +232,7 @@ class usersmanager extends application {
 		foreach ($ldaps as $ldap) {
 			$servers[$ldap["name"]] = Array(
 				"server"	=> $ldap["server"],
-				//"port"		=> $ldap["port"],
+				"searchfields"	=> $ldap["searchfields"],
 				//"dn"		=> $ldap["dn"],
 				//"version"	=> $ldap["version"],
 				//"ssl"		=> $ldap["ssl"],
@@ -246,6 +248,52 @@ class usersmanager extends application {
 			//}
 		}
 		return $servers;
+
+	}
+
+	private final function abstract_results($result, $realm) {
+
+		$servers = $this->get_auth_servers();
+
+		switch ($servers[$realm]["type"]) {
+
+			case "local":
+			case "rpc":
+				foreach ($result as $r) {
+					$r["realm"] = strtolower($realm);
+				}
+				$return = $result;
+				break;
+
+			case "ldap":
+				$return = Array();
+				$fields = Array();
+				foreach (explode(",", $servers[$realm]["searchfields"]) as $field) {
+					array_push($fields, strtolower($field));
+				}
+				foreach ($result as $r) {
+					if (empty($fields)) {
+						array_push($return, Array(
+							"userName"		=> isset($r["name"]) ? $r["name"] : (isset($r["uid"]) ? $r["uid"] : NULL),
+							"completeName"	=> isset($r["displayName"]) ? $r["displayName"] : NULL,
+							"email"			=> isset($r["mail"]) ? $r["mail"] : NULL,
+							"description"	=> isset($r["description"]) ? $r["description"] : NULL
+						));
+					}
+					else {
+						array_push($return, Array(
+							"userName"		=> isset($r[$fields[0]]) ? $r[$fields[0]] : NULL,
+							"completeName"	=> isset($r[$fields[1]]) ? $r[$fields[1]] : NULL,
+							"email"			=> isset($r[$fields[2]]) ? $r[$fields[2]] : NULL,
+							"description"	=> isset($r[$fields[3]]) ? $r[$fields[3]] : NULL
+						));
+					}
+				}
+				break;
+
+		}
+
+		return $return;
 
 	}
 	

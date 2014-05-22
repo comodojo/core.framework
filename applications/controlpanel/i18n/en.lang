@@ -103,6 +103,7 @@ $lang = Array(
 	'lda_12'=>	'empty',
 	'lda_13'=>	'Use SSL',
 	'lda_14'=>	'Use TLS',
+	'lda_15'=>	'Search fields',
 	//LOCAL_RPC.PHP
 	'loc_0'	=>	'Local RPC',
 	'loc_1'	=>	'Enable local RPC server',
@@ -130,6 +131,8 @@ $lang = Array(
 	'ext_6'=>	'Enabled',
 	'ext_7'=>	'Create new users on login',
 	'ext_8'=>	'empty',
+	'ext_9'=>	'User (search only)',
+	'ext_10'=>	'Password (search only)',
 	//METTA.PHP
 	'met_0'	=>	'Meta tags',
 	//BOOOTSTRAP.PHP

@@ -68,7 +68,9 @@ class kernel extends comodojo_basic {
 		
 		if (isset($attributes['contentEncoded']) AND @$attributes['contentEncoded'] == true) {
 			$this->encoded_content = true;
-			foreach (json2array(stripslashes($attributes['content'])) as $param => $value) $attributes[$param] = $value;
+			$encoded_content = json2array(stripslashes($attributes['content']));
+			$attributes['content'] = Array();
+			foreach ($encoded_content as $param => $value) $attributes['content'][$param] = $value;
 		}
 		
 		if (isset($attributes['transport'])) $this->transport = strtoupper($attributes['transport']);

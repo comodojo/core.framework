@@ -20,6 +20,7 @@ class usersmanager extends application {
 		$this->add_application_method('getUser', 'get_user', Array("userName"), 'DESCRIPTION',false);
 		$this->add_application_method('editUser', 'update_user', Array("userName"), 'DESCRIPTION',false);
 		$this->add_application_method('addUser', 'add_user', Array("userName","userPass","email"), 'DESCRIPTION',false);
+		$this->add_application_method('addUsers', 'add_users', Array("content"), 'DESCRIPTION',false);
 		$this->add_application_method('search', 'Search', Array("realm","pattern"), 'DESCRIPTION',false);
 	}
 
@@ -180,6 +181,65 @@ class usersmanager extends application {
 
 	}
 
+	public function add_users($params) {
+		
+		if (!is_array($params["content"])) throw new Exception("Malformed multi user query");
+		
+		comodojo_load_resource('users_management');
+
+		$return = Array();
+
+		$users = new users_management();
+
+		foreach ($params["content"] as $param) {
+
+			if (!isset($param["userName"]) OR !isset($param["userPass"]) OR !isset($param["email"])) {
+
+				array_push($return,Array(
+					"userName"	=>	"undefined",
+					"status"	=>	"Malformed user format"
+				));
+				continue;
+
+			}
+
+			try {
+				
+				$attributes = Array("enabled" => true);
+
+				if (isset($param["userRole"])) $attributes["userRole"] = $param["userRole"];
+				if (isset($param["authentication"])) $attributes["authentication"] = $param["authentication"];
+				if (isset($param["completeName"])) $attributes["completeName"] = $param["completeName"];
+				if (isset($param["birthday"])) $attributes["birthday"] = $param["birthday"];
+				if (isset($param["gender"])) $attributes["gender"] = $param["gender"];
+				if (isset($param["url"])) $attributes["url"] = $param["url"];
+				if (isset($param["gravatar"])) $attributes["gravatar"] = $param["gravatar"];
+
+				$result = $users->add_user($param['userName'], $param['userPass'], $param['email'], $attributes, false);
+
+				array_push($return,Array(
+					"userName"		=>	$param['userName'],
+					"status"		=>	true,
+					"completeName"	=>	isset($param["completeName"]) ? $param["completeName"] : $param['userName'],
+					"userRole"		=>	isset($param["userRole"]) ? $param["userRole"] : COMODOJO_REGISTRATION_DEFAULT_ROLE,
+					"enabled"		=>	true
+				));
+
+			} catch (Exception $e) {
+				
+				array_push($return,Array(
+					"userName"	=>	$param['userName'],
+					"status"	=>	$e->getMessage()
+				));
+
+			}
+			
+		}
+
+		return $return;
+
+	}
+
 	public function Search($params) {
 
 		comodojo_load_resource('users_management');
@@ -192,7 +252,7 @@ class usersmanager extends application {
 		} catch (Exception $e) {
 			throw $e;
 		}
-		comodojo_debug($result);
+		
 		$return = $this->abstract_results($result, $params['realm']);
 
 		return $return;
@@ -296,7 +356,7 @@ class usersmanager extends application {
 		return $return;
 
 	}
-	
+
 }
 
 ?>

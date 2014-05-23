@@ -26,9 +26,9 @@ $lang = Array(
 	'0012'	=>	'<p>You are about to delete user:</p><p style="font-weight:bold;"> {0} ({1})</p><p>Continue?</p>',
 	'0013'	=>	'User deleted',
 	'0014'	=>	'User updated',
-	'0015'	=>	'',
-	'0016'	=>	'',
-	'0017'	=>	'',
+	'0015'	=>	'Add users',
+	'0016'	=>	'Select one or more users first',
+	'0017'	=>	'Users added status',
 	'0018'	=>	'',
 	'0019'	=>	''
 );

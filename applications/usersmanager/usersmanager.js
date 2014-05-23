@@ -23,6 +23,9 @@ $d.require('comodojo.Form');
 $d.require("gridx.modules.SingleSort");
 $d.require("gridx.modules.Pagination");
 $d.require("gridx.modules.pagination.PaginationBar");
+$d.require("gridx.modules.RowHeader");
+$d.require("gridx.modules.select.Row");
+$d.require("gridx.modules.IndirectSelect");
 
 $c.App.load("usersmanager",
 
@@ -92,8 +95,8 @@ $c.App.load("usersmanager",
 				}
 				for (n in result.realms) {
 					myself.availableRealmsOptions.push({
-						label: result.realms[n].server+' ('+result.realms[n].type+')',
-						id: result.realms[n].server
+						label: n+' ('+result.realms[n].type+')',
+						id: n
 					});
 				}
 				myself.availableRealms = result.realms;
@@ -320,7 +323,10 @@ $c.App.load("usersmanager",
 						modules: [
 							"gridx/modules/SingleSort",
 							"gridx/modules/Pagination",
-							"gridx/modules/pagination/PaginationBar"
+							"gridx/modules/pagination/PaginationBar",
+							'gridx/modules/RowHeader',
+							'gridx/modules/select/Row',
+							'gridx/modules/IndirectSelect'
 						]
 					}
 				},{
@@ -350,6 +356,15 @@ $c.App.load("usersmanager",
 				disabled: false,
 				onClick: function() { myself.realmSearch(o, myself.container.main.center['realm_'+o]['realm_'+o+'_search'].searchbox.get('value')); }
 			}).domNode);
+
+			this.container.main.center['realm_'+o]['realm_'+o+'_actions'].containerNode.appendChild( new dijit.form.Button({
+				label: '<img src="'+$c.icons.getIcon('add',16)+'" />&nbsp;'+this.getLocalizedMessage('0015'),
+				disabled: false,
+				onClick: function() {
+					myself.addUserFromRealm(o);
+				}
+			}).domNode);
+
 		};
 		
 		this.local_user_form = function(values) {
@@ -628,6 +643,75 @@ $c.App.load("usersmanager",
 			}
 		};
 		
+		this.addUserFromRealm = function (realm) {
+			
+			var selection = myself.container.main.center['realm_'+realm]['realm_'+realm+'_grid'].select.row.getSelected();
+
+			if (selection.length == 0) {
+				$c.Error.minimal(myself.getLocalizedMessage('0016'));
+				return;
+			}
+
+			$c.Loader.start();
+
+			var to_add=[], i=0, userData=false;
+
+			for (i in selection) {
+				userData = myself.container.main.center['realm_'+realm]['realm_'+realm+'_grid'].row(selection[i]).rawData();
+				
+				to_add.push({
+					userName: userData.userName,
+					completeName: userData.completeName,
+					email: userData.email,
+					authentication: realm,
+					userPass: $c.random(10)
+				});
+			}
+
+			$c.Kernel.newCall(myself.addUserFromRealmCallback,{
+				application: "usersmanager",
+				method: "addUsers",
+				encodeContent: true,
+				content: to_add
+			});
+
+		};
+
+		this.addUserFromRealmCallback = function (success, result) {
+
+			$c.Loader.stop();
+
+			if (success) {
+				
+				var table = '<table class="ym-table bordertable narrow"><thead><tr><th>'+$c.getLocalizedMessage('10009')+'</th><th>'+$c.getLocalizedMessage('10048')+'</th></tr></thead><tbody>';
+				var elems = '';
+
+				for (var i=0; i<result.length; i++) {
+					if (result[i].status == true) {
+						elems += '<tr><td>'+result[i].userName+'</td><td><span style="color: green">'+myself.getLocalizedMessage('0018')+'</span></td></tr>';
+						myself.lStoreObservable.put({
+							id: result[i].userName,
+							name: result[i].userName,
+							enabled: result[i].enabled,
+							role: result[i].userRole,
+							userName: result[i].userName,
+							completeName: result[i].completeName,
+							userRole: result[i].userRole,
+							leaf: true
+						});
+					}
+					else {
+						elems += '<tr><td>'+result[i].userName+'</td><td><span style="color: red">'+result[i].status+'</span></td></tr>';
+					}
+				}
+
+				$c.Dialog.info(table+elems+'</tbody></table>',myself.getLocalizedMessage('0017'));
+					
+			}
+			else {
+				$c.Error.modal(result.code, result.name);
+			}
+		};
 
 	}
 	

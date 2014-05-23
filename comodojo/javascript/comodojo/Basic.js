@@ -250,7 +250,25 @@ var loadComponent = function(componentName, params) {
 };
 lang.setObject("comodojo.loadComponent", loadComponent);
 
+var random = function(length) {
 
+	if (!length) {
+		length = 128;
+	}
+	else {
+		length = parseInt(length, 10);
+	}
+
+	var charsPool = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+	var rand = '';
+
+	for (var i = length; i > 0; --i) rand += charsPool[Math.round(Math.random() * (charsPool.length - 1))];
+
+	return rand;
+
+}
+lang.setObject("comodojo.random", random);
 
 return comodojo;
 

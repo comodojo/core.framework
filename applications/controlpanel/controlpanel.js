@@ -870,7 +870,7 @@ $c.App.load("controlpanel",
 								parseInt(values.port, 10),
 								values.transport,
 								values.sharedKey,
-								values.listuser
+								values.listuser,
 								values.listpass,
 								values.autoadd,
 								values.enabled

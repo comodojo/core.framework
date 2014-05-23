@@ -26,9 +26,9 @@ $lang = Array(
 	'0012'	=>	'<p>Si sta per eliminare l\'utente:</p><p style="font-weight:bold;"> {0} ({1})</p><p>Procedere?</p>',
 	'0013'	=>	'Utente eliminato',
 	'0014'	=>	'Utente aggiornato',
-	'0015'	=>	'',
-	'0016'	=>	'',
-	'0017'	=>	'',
+	'0015'	=>	'Aggiungi utenti',
+	'0016'	=>	'Selezionare uno o più utenti',
+	'0017'	=>	'Stato utenti aggiunti',
 	'0018'	=>	'',
 	'0019'	=>	''
 );

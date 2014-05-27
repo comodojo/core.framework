@@ -798,7 +798,8 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 					position: "relative",
 					top: "0px",
 					padding: "0",
-					border: "0px solid white"
+					border: "0px solid white",
+					clear: "both"
 				},
 				tabindex: 1
 			});
@@ -831,7 +832,7 @@ function(dom,declare,Textarea,domConstruct,win,domGeom,on,keys,domStyle,request,
 
 			var valid_application, methods_loaded;
 
-			if (exploded_command instanceof Array &&  exploded_command.length == 2) {
+			if (exploded_command instanceof Array && exploded_command.length == 2) {
 
 				//check if application is valid or not
 				this.shell_commands_store.query({id: new RegExp(exploded_command[0], "i"), type: 'application'}).forEach(function(value) {

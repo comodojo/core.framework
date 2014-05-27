@@ -1164,8 +1164,9 @@ class users_management {
 		try {
 			$db = new database();
 			$result = $db->table('users')
-				->where("userName","LIKE","%".$pattern."%")
-				->or_where("completeName","LIKE","%".$pattern."%")
+				->keys("userName","completeName","email","url")
+				->where("enabled","=",1)
+				->and_where( Array("userName","LIKE","%".$pattern."%"), 'OR', Array("completeName","LIKE","%".$pattern."%") )
 				->get();
 		}
 		catch (Exception $e){
@@ -1188,10 +1189,9 @@ class users_management {
 				->version($server["version"])
 				->ssl($server["ssl"])
 				->tls($server["tls"])
-				->account($server["listuser"], $server["listpass"])
-				->account($server["listuser"], $server["listpass"])
-				->fields(explode(",", $server["searchfields"]))
-				->search($pattern,true);
+				->account($server["listuser"], $server["listpass"]);
+			if (!empty($server["searchfields"])) $result->fields(explode(",", $server["searchfields"]));
+			$result = $result->search($pattern,true);
 		}
 		catch (Exception $e){
 			comodojo_debug('There is a problem with ldap: '.$e->getMessage(),'WARNING','authentication');

@@ -1482,7 +1482,7 @@ class database {
 				throw $e;
 			}
 
-			$to_return = sprintf($clause_pattern, $_column, $_operator, $_value);
+			$to_return = sprintf($clause_pattern, $_column, $operator, $_value);
 
 		}
 		elseif (is_scalar($column) AND is_array($value)) {

@@ -877,7 +877,7 @@ $c.App.load("controlpanel",
 							];
 						},
 						fromEditor: function(values){
-							myself.ldapGrid.model.store.put({
+							myself.rpcGrid.model.store.put({
 								id: values[0],
 								name: values[1],
 								server: values[2],

@@ -275,38 +275,19 @@ class usersmanager extends application {
 		foreach ($rpcs as $rpc) {
 			$servers[$rpc["name"]] = Array(
 				"server"	=> $rpc["server"],
-				//"port"		=> $rpc["port"],
-				//"transport"	=> $rpc["transport"],
-				//"sharedkey"	=> $rpc["sharedkey"],
-				//"enabled"	=> $rpc["enabled"],
 				"type"		=> "rpc"
 			);
-			//if ($extensive) {
-			//	$servers[$rpc["port"]][] = $rpc["port"];
-			//	$servers[$rpc["transport"]][] = $rpc["transport"];
-			//	$servers[$rpc["sharedkey"]][] = $rpc["sharedkey"];
-			//	$servers[$rpc["enabled"]][] = $rpc["enabled"];
-			//}
 		}
 
 		foreach ($ldaps as $ldap) {
 			$servers[$ldap["name"]] = Array(
 				"server"	=> $ldap["server"],
 				"searchfields"	=> $ldap["searchfields"],
-				//"dn"		=> $ldap["dn"],
-				//"version"	=> $ldap["version"],
-				//"ssl"		=> $ldap["ssl"],
-				//"tls"		=> $ldap["tls"],
-				//"enabled"	=> $ldap["enabled"],
+				"base"		=> $ldap["base"],
 				"type"		=> "ldap"
 			);
-			//if ($extensive) {
-			//	$servers[$ldap["port"]][] = $ldap["port"];
-			//	$servers[$ldap["transport"]][] = $ldap["transport"];
-			//	$servers[$ldap["sharedkey"]][] = $ldap["sharedkey"];
-			//	$servers[$ldap["enabled"]][] = $ldap["enabled"];
-			//}
 		}
+		
 		return $servers;
 
 	}
@@ -328,16 +309,33 @@ class usersmanager extends application {
 			case "ldap":
 				$return = Array();
 				$fields = Array();
-				foreach (explode(",", $servers[$realm]["searchfields"]) as $field) {
-					array_push($fields, strtolower($field));
+
+				$base_pools = Array();
+				$base = explode(',', $servers[$realm]["base"]);
+				foreach ($base as $b) {
+					$be = explode('=', $b);
+					array_push($base_pools, $be[1]);
 				}
+				$suffix = '@'.implode('.', $base_pools);
+
+				if (!empty($servers[$realm]["searchfields"])) {
+					foreach (explode(",", $servers[$realm]["searchfields"]) as $field) {
+						array_push($fields, strtolower($field));
+					}
+				}
+
 				foreach ($result as $r) {
 					if (empty($fields)) {
+						$userName = isset($r["name"]) ? $r["name"] : (isset($r["uid"]) ? $r["uid"] : NULL);
+						$completeName = isset($r["displayName"]) ? $r["displayName"] : (isset($r["cn"]) ? $r["cn"] : NULL);
+						$email = isset($r["mail"]) ? $r["mail"] : $userName.$suffix;
+						$description = isset($r["description"]) ? $r["description"] : NULL;
+						if (is_null($userName)) continue;
 						array_push($return, Array(
-							"userName"		=> isset($r["name"]) ? $r["name"] : (isset($r["uid"]) ? $r["uid"] : NULL),
-							"completeName"	=> isset($r["displayName"]) ? $r["displayName"] : NULL,
-							"email"			=> isset($r["mail"]) ? $r["mail"] : NULL,
-							"description"	=> isset($r["description"]) ? $r["description"] : NULL
+							"userName"		=> $userName,
+							"completeName"	=> $completeName,
+							"email"			=> $email,
+							"description"	=> $description
 						));
 					}
 					else {

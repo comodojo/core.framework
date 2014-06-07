@@ -987,7 +987,7 @@ class database {
 					comodojo_debug('ERROR: '.$error,'ERROR','database');
 					throw new Exception($error,$error_no);
 				}
-				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->return_id ? db2_last_insert_id($this->dbHandler) : false, @db2_num_rows($data));
+				$result = $this->return_raw ? $response : $this->resource_to_array($response, $this->return_id ? db2_last_insert_id($this->dbHandler) : false, @db2_num_rows($response));
 			break;
 
 			case 'POSTGRESQL':

@@ -201,7 +201,7 @@ class users_management {
 
 			if ($useCache) {
 				$c = new cache();
-				$cache = $c->get_cache($request, 'JSON', false);
+				$cache = $c->get_cache($request, /*'JSON',*/ false);
 			}
 			else {
 				$cache = false;
@@ -239,7 +239,7 @@ class users_management {
 
 				}
 
-				if ($useCache) $c->set_cache(Array('cache_content'=>$to_return), $request, 'JSON', false);
+				if ($useCache) $c->set_cache(Array('cache_content'=>$to_return), $request, /*'JSON',*/ false);
 
 			}
 
@@ -274,7 +274,7 @@ class users_management {
 		
 		try {
 			$c = new cache();
-			$cache = $c->get_cache($request, 'JSON', false);
+			$cache = $c->get_cache($request, /*'JSON',*/ false);
 			if ($cache !== false) {
 				$to_return = $cache[2]['cache_content'];
 			}
@@ -288,7 +288,7 @@ class users_management {
 
 				if ($result['resultLength'] == 1) {
 					$to_return = !$userImageDimensions ? Array("userName"=>$result['result'][0]['userName'],"completeName"=>$result['result'][0]['completeName']) : Array("userName"=>$result['result'][0]['userName'],"completeName"=>$result['result'][0]['completeName'],"userImage"=>get_user_avatar($result['result'][0]['userName'],$result['result'][0]['email'],$result['result'][0]['gravatar'],$userImageDimensions));
-					$c->set_cache(Array('cache_content'=>$to_return), $request, 'JSON', false);
+					$c->set_cache(Array('cache_content'=>$to_return), $request, /*'JSON',*/ false);
 				} 
 				else {
 					comodojo_debug('Unknown user','ERROR','users_management');

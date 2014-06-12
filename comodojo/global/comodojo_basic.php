@@ -402,14 +402,23 @@ class comodojo_basic {
 	}
 	
 	private final function basic_from_startup_cache() {
-		$cache_file = COMODOJO_BOOT_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.md5(COMODOJO_UNIQUE_IDENTIFIER);
-		if (COMODOJO_STARTUP_CACHE_ENABLED AND is_readable($cache_file)) {
-			$this->comodojo_basic_values = json2array(file_get_contents($cache_file));
-			comodojo_debug(' * Basic configuration retrieved from CACHE','INFO','comodojo_basic');
-			$this->comodojo_basic_values_from = 'CACHE';
-			return true;
+
+		if ( COMODOJO_STARTUP_CACHE_ENABLED ) {
+
+			$cache = $this->get_startup_cache();
+			if ($cache === false) {
+				return false;
+			}
+			else {
+				$this->comodojo_basic_values = $cache;
+				comodojo_debug(' * Basic configuration retrieved from CACHE','INFO','comodojo_basic');
+				$this->comodojo_basic_values_from = 'CACHE';
+				return true;
+			}
+			
 		}
 		else return false;
+
 	}
 	
 	private final function basic_from_database() {
@@ -438,52 +447,72 @@ class comodojo_basic {
 	private final function set_basic($setSession) {
 		
 		switch ($this->comodojo_basic_values_from) {
+			
 			case 'SESSION':
-			case 'CACHE':
+
 				foreach ($this->comodojo_basic_values as $K=>$V) {
 					define(strtoupper($K),$V);
 				}
-			break;
+
+				break;
+
+			case 'CACHE':
+				
+				foreach ($this->comodojo_basic_values as $V) {
+					define('COMODOJO_'.strtoupper($V['option']),$V['value']);
+				}
+
+				break;
 			
 			case 'DATABASE':
-				if (!COMODOJO_STARTUP_CACHE_ENABLED) {
-					foreach ($this->comodojo_basic_values as $V) {
-						define('COMODOJO_'.strtoupper($V['option']),$V['value']);
-					}
+
+				foreach ($this->comodojo_basic_values as $V) {
+					define('COMODOJO_'.strtoupper($V['option']),$V['value']);
 				}
-				else {
-					$to_cache = Array();
-					foreach ($this->comodojo_basic_values as $V) {
-						define('COMODOJO_'.strtoupper($V['option']),$V['value']);
-						$to_cache['COMODOJO_'.strtoupper($V['option'])] = $V['value'];
-					}
-					$this->set_startup_cache($to_cache);
-				}
-			break;
+
+				if (COMODOJO_STARTUP_CACHE_ENABLED) $this->set_startup_cache($this->comodojo_basic_values);
+				
+				break;
 			
 			default:
+				
 				die($this->error(9994,'Cannot load startup values, see error log for details'));
-			break;
+			
+				break;
+		
 		}
 		
 		if (/*COMODOJO_SESSION_ENABLED*/false and $setSession) $_SESSION[COMODOJO_SESSION_IDENTIFIER] = $this->comodojo_basic_values;
 		
 	}
 	
+	private final function get_startup_cache() {
+
+		$cache_file = COMODOJO_BOOT_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.md5(COMODOJO_UNIQUE_IDENTIFIER);
+
+		if ( !is_readable($cache_file) ) return false;
+
+		$content = file_get_contents($cache_file);
+
+		if ( $content === false ) return false;
+
+		return unserialize($content);
+
+	}
+
 	private final function set_startup_cache($content) {
 		
 		if(!is_array($content) OR !sizeof($content)) return false;
 		
 		$cache_file = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.md5(COMODOJO_UNIQUE_IDENTIFIER);
-		$fh = fopen($cache_file, 'w');
-		if (!$fh) return false;
-		if (!fwrite($fh, array2json($content))) {
-			fclose($fh);
+
+		$cache_content = serialize($content);
+
+		$cached = file_put_contents($cache_file, $cache_content);
+		if ($cached === false) {
 			unlink($cache_file);
 			return false;
 		}
-		
-		fclose($fh);
 		
 		return true;
 		

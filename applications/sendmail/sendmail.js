@@ -136,7 +136,7 @@ $c.App.load("sendmail",
 				return;
 			}
 
-			$c.kernel.newCall(myself.sendCallback,{
+			$c.Kernel.newCall(myself.sendCallback,{
 				server: "sendmail",
 				selector: "send",
 				content: myself.form.get('value')

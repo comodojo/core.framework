@@ -35,8 +35,8 @@ $c.App.load("info",
 					region: 'center',
 					params: {
 						structure: [
-							{ name: this.getLocalizedMessage('0050'), field: 'info', width: "60%", formatter: function(value) {return myself.getLocalizedMessage(value.info);}},
-							{ name: this.getLocalizedMessage('0051'), field: 'value', width: "40%"}
+							{ name: this.getLocalizedMessage('info_0050'), field: 'info', width: "60%", formatter: function(value) {return myself.getLocalizedMessage(value.info);}},
+							{ name: this.getLocalizedMessage('info_0051'), field: 'value', width: "40%"}
 						],
 						style: 'padding: 0px; margin: 0px !important;',
 						store: store
@@ -46,7 +46,7 @@ $c.App.load("info",
 					name: 'bottom',
 					region: 'bottom',
 					params: {
-						content: myself.getLocalizedMessage('0032')+': '+$c.frameworkVersion+', '+myself.getLocalizedMessage('0033')+': '+$d.version+'<br>'+myself.getLocalizedMessage('0030')+': '+$c.locale+', '+myself.getLocalizedMessage('0031')+': '+$c.timezone,
+						content: myself.getLocalizedMessage('info_0032')+': '+$c.frameworkVersion+', '+myself.getLocalizedMessage('info_0033')+': '+$d.version+'<br>'+myself.getLocalizedMessage('info_0030')+': '+$c.locale+', '+myself.getLocalizedMessage('info_0031')+': '+$c.timezone,
 						style: "height: 30px;"
 					}
 				}]

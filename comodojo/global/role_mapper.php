@@ -172,7 +172,7 @@ class role_mapper {
 		
 			$c = new cache();	
 			$request = md5(COMODOJO_UNIQUE_IDENTIFIER).'_BOOTSTRAP_ROLE_'.COMODOJO_USER_ROLE;
-			$cache = $c->get_cache($request, 'JSON', false);
+			$cache = $c->get_cache($request, /*'JSON',*/ false);
 
 			if ($cache !== false) {
 				comodojo_debug('Comodojo role mapping (bootstrap) will use startup cache','INFO','role_mapper');
@@ -300,7 +300,7 @@ class role_mapper {
 				'auto_start'			 =>$this->autoStart,
 				'applications_allowed'	 =>$this->applicationsAllowed,
 				'applications_properties'=>$this->applicationsProperties
-			), $request, 'JSON', false);
+			), $request, /*'JSON',*/ false);
 
 		}
 		

@@ -97,7 +97,7 @@ class services extends comodojo_basic {
 		
 		if ($this->cache == 'SERVER' OR $this->cache == 'BOTH') {			
 			$c = new cache();
-			$cache = $c->get_cache($request, false, false, $service_properties['ttl']);
+			$cache = $c->get_cache($request, /*false,*/ false, $service_properties['ttl']);
 			if ($cache !== false) {
 				comodojo_debug('Data for service: '.$service_properties['name'].' loaded from cache','INFO','services');
 				return $this->compose_return_data($cache[2],$cache[0]);
@@ -143,7 +143,9 @@ class services extends comodojo_basic {
 					throw new Exception('Internal Server Error', 500);
 				}
 
+				comodojo_load_resource("application");
 				require $this->app_exec;
+
 				if (!class_exists($service_properties['service_application'])) {
 					comodojo_debug('Wrong application class for service: '.$service_properties['name'],'ERROR','services');
 					throw new Exception('Internal Server Error', 500);
@@ -180,7 +182,7 @@ class services extends comodojo_basic {
 		
 		$to_return = $this->encode_return_data($result);
 		
-		if ($this->cache == 'SERVER' OR $this->cache == 'BOTH') $c->set_cache($to_return, $request, false, false);
+		if ($this->cache == 'SERVER' OR $this->cache == 'BOTH') $c->set_cache($to_return, $request, /*false,*/ false);
 		
 		return $this->compose_return_data($to_return, $service_properties['ttl']);
 		

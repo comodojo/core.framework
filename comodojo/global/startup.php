@@ -193,7 +193,12 @@ class comodojo_startup extends comodojo_basic {
 
 		if (COMODOJO_GMAPS_PRELOAD) {
 			$sensor = COMODOJO_GMAPS_SENSOR ? "true" : "false";
-			$apikey = empty(COMODOJO_GMAPS_APIKEY) ? "" : "&key=".COMODOJO_GMAPS_APIKEY;
+			if ( COMODOJO_GMAPS_APIKEY == NULL OR COMODOJO_GMAPS_APIKEY == "" ) {
+				$apikey = "";
+			}
+			else {
+				$apikey = "&key=".COMODOJO_GMAPS_APIKEY;
+			}
 			$myJsLoader .="
 			<script type=\"text/javascript\" src=\"http://maps.google.com/maps/api/js?sensor=".$sensor."&language=".$this->locale.$apikey."\" ></script>
 			";	

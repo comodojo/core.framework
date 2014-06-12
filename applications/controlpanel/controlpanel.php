@@ -181,7 +181,7 @@ class controlpanel extends application {
 		$request = "COMODOJO_CONTROLPANEL_GET_STATES";
 
 		$c = new cache();
-		$cache = $c->get_cache($request, 'JSON', false);
+		$cache = $c->get_cache($request, /*'JSON',*/ false);
 		if ($cache !== false) {
 			$to_return = Array($cache[2]['global_panels'],$cache[2]['global_options']);
 		}
@@ -219,7 +219,7 @@ class controlpanel extends application {
 			}
 			closedir($handler);
 			$to_return = Array($global_panels, $global_options);
-			$c->set_cache(Array('global_panels'=>$global_panels,'global_options'=>$global_options), $request, 'JSON', false);
+			$c->set_cache(Array('global_panels'=>$global_panels,'global_options'=>$global_options), $request, /*'JSON',*/ false);
 		}
 
 

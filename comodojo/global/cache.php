@@ -38,10 +38,10 @@ class cache {
 	 * 
 	 * @return	bool
 	 */
-	public final function set_cache($data, $request, $format='JSON', $userDependent=false) {
+	public final function set_cache($data, $request/*, $format='JSON'*/, $userDependent=false) {
 		
 		if (!COMODOJO_CACHE_ENABLED) {
-			comodojo_debug('Caching is currently disabled','INFO','cache');
+			comodojo_debug('Caching administratively disabled','INFO','cache');
 			return false;
 		}
 		
@@ -52,34 +52,38 @@ class cache {
 		
 		$cacheTag = $userDependent ? md5($request).'_'.COMODOJO_USER_NAME : md5($request);
 		
-		if (is_scalar($data)) {
-			$f_data = $data;
-		}
-		elseif (is_array($data)) {
-			switch (strtoupper($format)) {
-				case 'XML':
-					$f_data = array2xml($data);
-				break;
-				case 'YAML':
-					$f_data = array2yaml($data);
-				break;
-				default:
-					$f_data = array2json($data);
-				break;
-			}
-		}
-		else {
-			comodojo_debug('Cannot cache something different from array or scalar','ERROR','cache');
-			if ($this->fail_silently) {
-				return false;
-			}
-			else {
-				throw new Exception("Cannot cache something different from array or string", 1202);
-			}
-		}		
+		$cacheFile = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag;
 
-		$fh = fopen(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag, 'w');
-		if (!$fh) {
+		$f_data = serialize(Array("cache_content" => $data));
+
+		//if (is_scalar($data)) {
+		//	$f_data = $data;
+		//}
+		//elseif (is_array($data)) {
+		//	switch (strtoupper($format)) {
+		//		case 'XML':
+		//			$f_data = array2xml($data);
+		//		break;
+		//		case 'YAML':
+		//			$f_data = array2yaml($data);
+		//		break;
+		//		default:
+		//			$f_data = array2json($data);
+		//		break;
+		//	}
+		//}
+		//else {
+		//	comodojo_debug('Cannot cache something different from array or scalar','ERROR','cache');
+		//	if ($this->fail_silently) {
+		//		return false;
+		//	}
+		//	else {
+		//		throw new Exception("Cannot cache something different from array or string", 1202);
+		//	}
+		//}		
+
+		$cached = file_put_contents($cacheFile, $f_data);
+		if ($cached === false) {
 			comodojo_debug('Error writing to cache folder','ERROR','cache');
 			if ($this->fail_silently) {
 				return false;
@@ -88,18 +92,29 @@ class cache {
 				throw new Exception("Error writing to cache cache folder", 1201);
 			}
 		}
-		if (!fwrite($fh, $f_data)) {
-			fclose($fh);
-			comodojo_debug('Error writing to cache folder','ERROR','cache');
-			if ($this->fail_silently) {
-				return false;
-			}
-			else {
-				throw new Exception("Error writing to cache cache folder", 1201);
-			}
-		}
-		
-		fclose($fh);
+
+		//$fh = fopen(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag, 'w');
+		//if (!$fh) {
+		//	comodojo_debug('Error writing to cache folder','ERROR','cache');
+		//	if ($this->fail_silently) {
+		//		return false;
+		//	}
+		//	else {
+		//		throw new Exception("Error writing to cache cache folder", 1201);
+		//	}
+		//}
+		//if (!fwrite($fh, $f_data)) {
+		//	fclose($fh);
+		//	comodojo_debug('Error writing to cache folder','ERROR','cache');
+		//	if ($this->fail_silently) {
+		//		return false;
+		//	}
+		//	else {
+		//		throw new Exception("Error writing to cache cache folder", 1201);
+		//	}
+		//}
+		//
+		//fclose($fh);
 		
 		return true;
 		
@@ -117,27 +132,32 @@ class cache {
 	 * 
 	 * @return	array|string|bool		Data cached, in array or plaintext, or false if no cache saved.
 	 */
-	public final function get_cache($request, $decode=false, $userDependent=false, $ttl=COMODOJO_CACHE_TTL) {
+	public final function get_cache($request, /*$decode=false,*/ $userDependent=false, $ttl=COMODOJO_CACHE_TTL) {
 		
 		if (!COMODOJO_CACHE_ENABLED) {
-			comodojo_debug('Caching is currently disabled','INFO','cache');
+			comodojo_debug('Caching administratively disabled','INFO','cache');
 			return false;
 		}
 		
 		$currentTime = strtotime('now');
+
 		$last_time_limit = $currentTime-$ttl;
 		
 		$cacheTag = $userDependent ? md5($request).'_'.COMODOJO_USER_NAME : md5($request);
+
+		$cacheFile = COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag;
 		
-		if (is_readable(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag) AND @filemtime(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag) >= $last_time_limit) {
+		if (is_readable($cacheFile) AND @filemtime($cacheFile) >= $last_time_limit) {
 			
-			$cache_time = filemtime(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag);
+			$cache_time = filemtime($cacheFile);
 			
 			$maxAge = $cache_time + $ttl - $currentTime;
 			$bestBefore = gmdate("D, d M Y H:i:s", $cache_time + $ttl) . " GMT";
-			$data = file_get_contents(COMODOJO_SITE_PATH.COMODOJO_HOME_FOLDER.COMODOJO_CACHE_FOLDER.$cacheTag);
 			
-			if (!$data) {
+			$data = file_get_contents($cacheFile);
+			$u_data = unserialize($data);
+			
+			if ($u_data === false) {
 				comodojo_debug('Error reading from cache file '.$cacheTag,'ERROR','cache');
 				if ($this->fail_silently) {
 					return false;
@@ -147,31 +167,33 @@ class cache {
 				}
 			}
 			
-			if (!$decode) return Array($maxAge,$bestBefore,$data);
-			else {
-				switch(strtoupper($decode)) {
-					case 'JSON':
-						$decoded_data = json2array($data);
-					break;
-					case 'XML':
-						$decoded_data = xml2array($data);
-					break;
-					case 'YAML':
-						$decoded_data = yaml2array($data);
-					break;
-					default:
-						comodojo_debug('Unsupported cache decoding '.$decode,'ERROR','cache');
-						if ($this->fail_silently) {
-							return false;
-						}
-						else {
-							throw new Exception("Unsupported cache decoding ".$decode, 1204);
-						}
-					break;
-				}
-				return Array($maxAge,$bestBefore,$decoded_data);
-			}
-				
+			//if (!$decode) return Array($maxAge,$bestBefore,$data);
+			//else {
+			//	switch(strtoupper($decode)) {
+			//		case 'JSON':
+			//			$decoded_data = json2array($data);
+			//		break;
+			//		case 'XML':
+			//			$decoded_data = xml2array($data);
+			//		break;
+			//		case 'YAML':
+			//			$decoded_data = yaml2array($data);
+			//		break;
+			//		default:
+			//			comodojo_debug('Unsupported cache decoding '.$decode,'ERROR','cache');
+			//			if ($this->fail_silently) {
+			//				return false;
+			//			}
+			//			else {
+			//				throw new Exception("Unsupported cache decoding ".$decode, 1204);
+			//			}
+			//		break;
+			//	}
+			//	return Array($maxAge,$bestBefore,$decoded_data);
+			//}
+			
+			return Array($maxAge,$bestBefore,$u_data["cache_content"]);
+
 		}
 		
 		else return false;

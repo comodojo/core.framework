@@ -48,23 +48,6 @@ function _write_log_string($log) {
 }
 
 /**
- * Helper func to handle array log
- *
- */
-function _comodojo_debug_helper($value, $margin='') {
-	foreach ($value as $key => $value) {
-		if (is_array($value)) {
-			_write_log_string($margin.$key." = Array(");
-			_comodojo_debug_helper($value, $margin+='   ');
-			_write_log_string($margin.")");
-		}
-		else {
-			_write_log_string($margin.$key." = ".$value.",");
-		}
-	}
-}
-
-/**
  * Debug something to error_log
  * 
  * @param	string|object|array|integer	$message	Debug message
@@ -75,13 +58,10 @@ function comodojo_debug($message,$type='ERROR',$reference="UNKNOWN") {
 	if (COMODOJO_GLOBAL_DEBUG_ENABLED) {
 		if ( strtoupper(COMODOJO_GLOBAL_DEBUG_LEVEL) == 'ERROR' AND strtoupper($type) != 'ERROR') return;
 		elseif ( strtoupper(COMODOJO_GLOBAL_DEBUG_LEVEL) == 'WARNING' AND (strtoupper($type) != 'ERROR' OR strtoupper($type) != 'WARNING')) return;
-		elseif (is_array($message)) {
-			_write_log_string("(".$type.") ".$reference." | Array(");
-			_comodojo_debug_helper($message);
-			_write_log_string(")");
-		}
-		elseif (is_object($message)) {
-			comodojo_debug(stdObj2array($message),$type,$reference);
+		elseif ( is_array($message) OR is_object($message) ) {
+			_write_log_string("(".$type.") ".$reference." ------ Start of debug dump ------");
+			_write_log_string(var_export($message, true));
+			_write_log_string("(".$type.") ".$reference." ------ End of debug dump ------");
 		}
 		elseif(is_scalar($message)) {
 			_write_log_string("(".$type.") ".$reference." | ".$message);

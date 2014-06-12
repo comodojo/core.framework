@@ -121,14 +121,14 @@ class kernel extends comodojo_basic {
 				$request = 'COMODOJO_KERNEL-'.var_export($attributes,true);
 				if ($method[3]) {
 					$c = new cache();
-					$cache = $c->get_cache($request, 'JSON', true);
+					$cache = $c->get_cache($request, /*'JSON',*/ true);
 					if ($cache !== false) {
 						comodojo_debug('Data for request: '.$request.' loaded from cache','INFO','kernel');
 						$to_return = $cache[2]['cache_content'];
 					}
 					else {
 						$to_return = $this->app_run->$method[0]($attributes);
-						$c->set_cache(Array('cache_content'=>$to_return), $request, 'JSON', true);
+						$c->set_cache(Array('cache_content'=>$to_return), $request, /*'JSON',*/ true);
 					}
 				}
 				else {

@@ -46,7 +46,7 @@
 	"dependencies": {
 		"dojo": "1.9.1",
 		"dijit": "1.9.1",
-		"dojox": "1.9.1"
+		"dojox": "1.14.6"
 	},
 	"homepage": "http://oria.github.com/gridx",
 	"main": "./Grid",
